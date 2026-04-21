@@ -1,0 +1,197 @@
+<div class="professional-tool">
+  <style>
+    .professional-tool {
+      --bg: #f8fafc; --card: #ffffff; --border: #e2e8f0;
+      --text: #0f172a; --text-sec: #64748b; --accent: #2563eb;
+      --success: #10b981; --warning: #f59e0b; --danger: #ef4444;
+      --shadow: 0 4px 12px rgba(0,0,0,0.05); --radius: 12px;
+      font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+      max-width: 800px; margin: 0 auto; padding: 1.8rem;
+      background: var(--bg); border-radius: 16px; box-shadow: var(--shadow);
+      box-sizing: border-box; position: relative;
+    }
+    .professional-tool * { box-sizing: border-box; }
+    .p-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.2rem; flex-wrap: wrap; gap: 0.8rem; }
+    .p-header h3 { margin: 0; font-size: 1.45rem; color: var(--text); }
+    .p-select { padding: 0.5rem; border: 1px solid var(--border); border-radius: 8px; background: var(--card); color: var(--text); font-size: 0.9rem; }
+    .p-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; margin-bottom: 1.2rem; }
+    .p-field { display: flex; flex-direction: column; gap: 0.35rem; }
+    .p-label { font-size: 0.78rem; font-weight: 600; color: var(--text-sec); }
+    .p-input { padding: 0.8rem; border: 1px solid var(--border); border-radius: var(--radius); background: var(--card); color: var(--text); font-size: 0.95rem; outline: none; transition: all 0.2s; }
+    .p-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(37,99,235,0.12); }
+    .p-section { margin-bottom: 1.2rem; }
+    .p-section-title { font-size: 0.9rem; font-weight: 600; color: var(--text); margin-bottom: 0.8rem; display: flex; align-items: center; gap: 0.5rem; }
+    .p-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 1rem; margin-bottom: 1.2rem; }
+    .p-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem; text-align: center; box-shadow: 0 2px 6px rgba(0,0,0,0.03); }
+    .p-val { font-size: 1.35rem; font-weight: 700; color: var(--text); }
+    .p-lbl { font-size: 0.75rem; color: var(--text-sec); margin-top: 0.2rem; }
+    .p-note { font-size: 0.75rem; color: var(--warning); margin-top: -0.5rem; margin-bottom: 1rem; font-style: italic; }
+    .p-bar-wrap { height: 14px; background: var(--border); border-radius: 7px; overflow: hidden; display: flex; margin-bottom: 1.2rem; }
+    .p-bar { height: 100%; transition: width 0.6s cubic-bezier(0.4,0,0.2,1); }
+    .p-bar.net { background: var(--success); }
+    .p-bar.tax { background: var(--warning); }
+    .p-bar.ded { background: #64748b; }
+    .p-breakdown { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem; }
+    .p-row { display: flex; justify-content: space-between; padding: 0.6rem 0; border-bottom: 1px solid var(--border); font-size: 0.9rem; }
+    .p-row:last-child { border: none; font-weight: 700; color: var(--accent); padding-top: 0.8rem; }
+    .p-actions { display: flex; gap: 0.8rem; margin-top: 1.5rem; }
+    .p-btn { flex: 1; padding: 0.8rem; border: none; border-radius: var(--radius); font-weight: 600; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 0.5rem; }
+    .p-btn-primary { background: var(--accent); color: #fff; }
+    .p-btn-primary:hover { background: #1d4ed8; transform: translateY(-1px); }
+    .p-btn-secondary { background: var(--card); border: 1px solid var(--border); color: var(--text-sec); }
+    .p-btn-secondary:hover { background: #f1f5f9; }
+    .p-toast { position: absolute; bottom: 1rem; right: 1rem; background: var(--text); color: #fff; padding: 0.7rem 1rem; border-radius: 10px; font-size: 0.85rem; transform: translateY(120%); transition: transform 0.3s cubic-bezier(0.4,0,0.2,1); z-index: 10; pointer-events: none; }
+    .p-toast.show { transform: translateY(0); }
+    @media (max-width: 600px) {
+      .professional-tool { padding: 1.2rem; }
+      .p-grid { grid-template-columns: 1fr; }
+      .p-actions { flex-direction: column; }
+    }
+    @media print {
+      .p-btn, .p-toast, .p-note { display: none !important; }
+      .professional-tool { box-shadow: none; padding: 0; background: #fff; max-width: 100%; border-radius: 0; }
+      .p-input { border: none; padding: 0.2rem 0; background: transparent; font-weight: 500; }
+      .p-field label { display: none; }
+      .p-bar-wrap { border: 1px solid #ccc; }
+    }
+  </style>
+
+  <div class="p-header">
+    <h3>💰 Payroll Calculator</h3>
+    <label class="p-label">Pay Period
+      <select class="p-select" id="p-freq">
+        <option value="1">Hourly / Per Pay</option>
+        <option value="40">Weekly</option>
+        <option value="80" selected>Bi-Weekly</option>
+        <option value="173.33">Monthly</option>
+      </select>
+    </label>
+  </div>
+
+  <div class="p-grid">
+    <div class="p-field"><label class="p-label">Hourly Rate ($)</label><input class="p-input" type="number" id="p-rate" value="45" min="0"></div>
+    <div class="p-field"><label class="p-label">Hours Worked</label><input class="p-input" type="number" id="p-hours" value="80" min="0"></div>
+    <div class="p-field"><label class="p-label">Overtime Multiplier</label><input class="p-input" type="number" id="p-ot-mult" value="1.5" step="0.1" min="1"></div>
+    <div class="p-field"><label class="p-label">Bonus / Commission ($)</label><input class="p-input" type="number" id="p-bonus" value="500" min="0"></div>
+  </div>
+
+  <div class="p-section">
+    <div class="p-section-title">📉 Taxes & Deductions</div>
+    <div class="p-grid">
+      <div class="p-field"><label class="p-label">Tax Rate (%)</label><input class="p-input" type="number" id="p-tax" value="20" min="0" max="100"></div>
+      <div class="p-field"><label class="p-label">Other Deductions ($)</label><input class="p-input" type="number" id="p-ded" value="200" min="0"></div>
+      <div class="p-field"><label class="p-label">Employer Payroll Tax (%)</label><input class="p-input" type="number" id="p-emp-tax" value="7.65" min="0"></div>
+      <div class="p-field"><label class="p-label">Benefits / Overhead ($)</label><input class="p-input" type="number" id="p-overhead" value="150" min="0"></div>
+    </div>
+    <div class="p-note">⚠️ Overtime calculated for hours exceeding 40 per week. Adjust multiplier per local labor laws.</div>
+  </div>
+
+  <div class="p-cards">
+    <div class="p-card"><div class="p-val" id="p-gross">$0</div><div class="p-lbl">Gross Pay</div></div>
+    <div class="p-card"><div class="p-val" id="p-net" style="color:var(--success)">$0</div><div class="p-lbl">Net Pay</div></div>
+    <div class="p-card"><div class="p-val" id="p-total-tax" style="color:var(--warning)">$0</div><div class="p-lbl">Taxes & Deductions</div></div>
+    <div class="p-card"><div class="p-val" id="p-emp-cost" style="color:var(--danger)">$0</div><div class="p-lbl">Employer Cost</div></div>
+  </div>
+
+  <div class="p-bar-wrap">
+    <div class="p-bar net" id="p-bar-net"></div>
+    <div class="p-bar tax" id="p-bar-tax"></div>
+    <div class="p-bar ded" id="p-bar-ded"></div>
+  </div>
+
+  <div class="p-breakdown" id="p-breakdown"></div>
+
+  <div class="p-actions">
+    <button class="p-btn p-btn-secondary" id="p-copy">📋 Copy Summary</button>
+    <button class="p-btn p-btn-secondary" id="p-reset">🔄 Reset</button>
+    <button class="p-btn p-btn-primary" id="p-print">🖨️ Print / PDF</button>
+  </div>
+
+  <div class="p-toast" id="p-toast"></div>
+
+  <script>
+    (function(){
+      const els = {
+        rate: document.getElementById('p-rate'), hours: document.getElementById('p-hours'), otMult: document.getElementById('p-ot-mult'),
+        bonus: document.getElementById('p-bonus'), tax: document.getElementById('p-tax'), ded: document.getElementById('p-ded'),
+        empTax: document.getElementById('p-emp-tax'), overhead: document.getElementById('p-overhead'),
+        gross: document.getElementById('p-gross'), net: document.getElementById('p-net'), totalTax: document.getElementById('p-total-tax'),
+        empCost: document.getElementById('p-emp-cost'), barNet: document.getElementById('p-bar-net'), barTax: document.getElementById('p-bar-tax'),
+        barDed: document.getElementById('p-bar-ded'), breakdown: document.getElementById('p-breakdown'),
+        copy: document.getElementById('p-copy'), reset: document.getElementById('p-reset'), print: document.getElementById('p-print'),
+        toast: document.getElementById('p-toast')
+      };
+
+      const fmt = n => `$${n.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+      const toast = msg => { els.toast.textContent = msg; els.toast.classList.add('show'); setTimeout(()=>els.toast.classList.remove('show'), 2000); };
+
+      const calculate = () => {
+        const rate = parseFloat(els.rate.value) || 0;
+        const hours = parseFloat(els.hours.value) || 0;
+        const otMult = parseFloat(els.otMult.value) || 1.5;
+        const bonus = parseFloat(els.bonus.value) || 0;
+        const taxPct = parseFloat(els.tax.value) || 0;
+        const ded = parseFloat(els.ded.value) || 0;
+        const empTaxPct = parseFloat(els.empTax.value) || 0;
+        const overhead = parseFloat(els.overhead.value) || 0;
+
+        // Overtime logic (standard >40h threshold)
+        const regularHrs = Math.min(hours, 40);
+        const overtimeHrs = Math.max(0, hours - 40);
+        const basePay = regularHrs * rate;
+        const overtimePay = overtimeHrs * rate * otMult;
+        const gross = basePay + overtimePay + bonus;
+        const taxAmt = gross * (taxPct / 100);
+        const net = Math.max(0, gross - taxAmt - ded);
+        const empPayroll = gross * (empTaxPct / 100);
+        const totalEmpCost = gross + empPayroll + overhead;
+
+        // UI Updates
+        els.gross.textContent = fmt(gross);
+        els.net.textContent = fmt(net);
+        els.totalTax.textContent = fmt(taxAmt + ded);
+        els.empCost.textContent = fmt(totalEmpCost);
+
+        // Stacked Bar
+        const distBase = gross || 1;
+        els.barNet.style.width = `${(net / distBase) * 100}%`;
+        els.barTax.style.width = `${(taxAmt / distBase) * 100}%`;
+        els.barDed.style.width = `${(ded / distBase) * 100}%`;
+
+        // Breakdown Table
+        els.breakdown.innerHTML = `
+          <div class="p-row"><span>Base Pay (${regularHrs}h)</span><span>${fmt(basePay)}</span></div>
+          <div class="p-row"><span>Overtime Pay (${overtimeHrs}h × ${otMult}x)</span><span>${fmt(overtimePay)}</span></div>
+          <div class="p-row"><span>+ Bonus / Commission</span><span>+${fmt(bonus)}</span></div>
+          <div class="p-row" style="font-weight:600; color:var(--text); border-bottom:2px solid var(--border);"><span>Gross Pay</span><span>${fmt(gross)}</span></div>
+          <div class="p-row"><span>- Income Tax (${taxPct}%)</span><span>-${fmt(taxAmt)}</span></div>
+          <div class="p-row"><span>- Other Deductions</span><span>-${fmt(ded)}</span></div>
+          <div class="p-row"><span>💰 Take-Home (Net)</span><span>${fmt(net)}</span></div>
+          <div class="p-row" style="border-top:2px dashed var(--border); margin-top:0.5rem; padding-top:0.8rem;"><span>🏢 Employer Tax (${empTaxPct}%)</span><span>+${fmt(empPayroll)}</span></div>
+          <div class="p-row"><span>🏢 Benefits / Overhead</span><span>+${fmt(overhead)}</span></div>
+          <div class="p-row"><span>💼 Total Business Cost</span><span>${fmt(totalEmpCost)}</span></div>
+        `;
+      };
+
+      // Real-time calculation
+      [els.rate, els.hours, els.otMult, els.bonus, els.tax, els.ded, els.empTax, els.overhead].forEach(el => el.addEventListener('input', calculate));
+
+      els.copy.addEventListener('click', async () => {
+        const summary = els.breakdown.innerText.replace(/\s+/g, ' ').trim();
+        try { await navigator.clipboard.writeText(summary); toast('📋 Copied to clipboard'); } catch { toast('❌ Copy failed'); }
+      });
+
+      els.reset.addEventListener('click', () => {
+        els.rate.value = 45; els.hours.value = 80; els.otMult.value = 1.5;
+        els.bonus.value = 500; els.tax.value = 20; els.ded.value = 200;
+        els.empTax.value = 7.65; els.overhead.value = 150;
+        calculate(); toast('🔄 Values reset to default');
+      });
+
+      els.print.addEventListener('click', () => window.print());
+
+      // Init
+      calculate();
+    })();
+  </script>
+</div>

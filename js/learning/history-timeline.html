@@ -1,0 +1,1133 @@
+<div class="history-timeline-app">
+  <style>
+    .history-timeline-app {
+      --bg-primary: #0f172a;
+      --bg-card: #1e293b;
+      --bg-input: #334155;
+      --text-primary: #f1f5f9;
+      --text-secondary: #94a3b8;
+      --accent: #3b82f6;
+      --accent-hover: #2563eb;
+      --success: #10b981;
+      --error: #ef4444;
+      --warning: #f59e0b;
+      --info: #06b6d4;
+      --purple: #8b5cf6;
+      --pink: #ec4899;
+      --orange: #f97316;
+      --glass: rgba(255,255,255,0.1);
+      --glass-border: rgba(255,255,255,0.2);
+      --gradient-main: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      --gradient-ancient: linear-gradient(135deg, #d97706, #b45309);
+      --gradient-medieval: linear-gradient(135deg, #7c3aed, #6d28d9);
+      --gradient-modern: linear-gradient(135deg, #059669, #047857);
+      --gradient-contemporary: linear-gradient(135deg, #3b82f6, #2563eb);
+      --gradient-pakistan: linear-gradient(135deg, #16a34a, #15803d);
+      --gradient-war: linear-gradient(135deg, #dc2626, #b91c1c);
+      --gradient-science: linear-gradient(135deg, #06b6d4, #0891b2);
+      --gradient-culture: linear-gradient(135deg, #ec4899, #db2777);
+      --transition: all 0.3s ease;
+      
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 1rem;
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      color: var(--text-primary);
+      background: var(--bg-primary);
+      border-radius: 20px;
+      box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .history-timeline-app::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; height: 4px;
+      background: var(--gradient-main);
+      animation: shimmer 3s infinite linear;
+    }
+    
+    @keyframes shimmer {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(100%); }
+    }
+    
+    /* Header */
+    .ht-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem;
+      background: var(--bg-card);
+      border-radius: 12px;
+      margin-bottom: 1rem;
+      border: 1px solid var(--glass-border);
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+    
+    .ht-title {
+      font-size: 1.4rem;
+      font-weight: 700;
+      background: var(--gradient-main);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .ht-stats {
+      display: flex;
+      gap: 0.8rem;
+      font-size: 0.9rem;
+    }
+    
+    .ht-stat {
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+      background: var(--glass);
+      padding: 0.4rem 0.8rem;
+      border-radius: 8px;
+    }
+    
+    /* Search & Filters */
+    .ht-controls {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 0.8rem;
+      margin-bottom: 1.5rem;
+      flex-wrap: wrap;
+    }
+    
+    .ht-search {
+      width: 100%;
+      padding: 0.9rem 1.2rem;
+      border-radius: 12px;
+      border: 1px solid var(--glass-border);
+      background: var(--bg-card);
+      color: var(--text-primary);
+      font-size: 1rem;
+      outline: none;
+      transition: var(--transition);
+    }
+    
+    .ht-search:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
+    }
+    
+    .ht-search::placeholder { color: var(--text-secondary); }
+    
+    .ht-filter-btn {
+      padding: 0.9rem 1.2rem;
+      background: var(--glass);
+      border: 1px solid var(--glass-border);
+      border-radius: 12px;
+      color: var(--text-primary);
+      cursor: pointer;
+      transition: var(--transition);
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-weight: 500;
+    }
+    
+    .ht-filter-btn:hover, .ht-filter-btn.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: white;
+    }
+    
+    /* Category Filters */
+    .ht-categories {
+      display: flex;
+      gap: 0.4rem;
+      flex-wrap: wrap;
+      margin-bottom: 1.5rem;
+      padding: 0.5rem;
+      background: var(--bg-card);
+      border-radius: 12px;
+      border: 1px solid var(--glass-border);
+    }
+    
+    .ht-cat-btn {
+      padding: 0.4rem 0.9rem;
+      background: var(--glass);
+      border: 1px solid var(--glass-border);
+      border-radius: 20px;
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: var(--transition);
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+    }
+    
+    .ht-cat-btn:hover, .ht-cat-btn.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: white;
+    }
+    
+    .ht-cat-btn.pakistan { background: rgba(22, 163, 74, 0.2); border-color: #16a34a; }
+    .ht-cat-btn.pakistan.active { background: #16a34a; }
+    .ht-cat-btn.world { background: rgba(59, 130, 246, 0.2); border-color: #3b82f6; }
+    .ht-cat-btn.world.active { background: #3b82f6; }
+    .ht-cat-btn.war { background: rgba(220, 38, 38, 0.2); border-color: #dc2626; }
+    .ht-cat-btn.war.active { background: #dc2626; }
+    .ht-cat-btn.science { background: rgba(6, 182, 212, 0.2); border-color: #06b6d4; }
+    .ht-cat-btn.science.active { background: #06b6d4; }
+    .ht-cat-btn.culture { background: rgba(236, 72, 153, 0.2); border-color: #ec4899; }
+    .ht-cat-btn.culture.active { background: #ec4899; }
+    
+    /* Era Navigation */
+    .ht-era-nav {
+      display: flex;
+      gap: 0.3rem;
+      overflow-x: auto;
+      padding: 0.5rem 0;
+      margin-bottom: 1rem;
+      scrollbar-width: none;
+    }
+    .ht-era-nav::-webkit-scrollbar { display: none; }
+    
+    .ht-era-btn {
+      padding: 0.4rem 0.8rem;
+      background: var(--glass);
+      border: 1px solid var(--glass-border);
+      border-radius: 8px;
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: var(--transition);
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    
+    .ht-era-btn:hover, .ht-era-btn.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: white;
+    }
+    
+    /* Timeline */
+    .ht-timeline {
+      position: relative;
+      padding-left: 30px;
+      padding-bottom: 2rem;
+    }
+    
+    .ht-timeline::before {
+      content: '';
+      position: absolute;
+      left: 10px;
+      top: 0;
+      bottom: 0;
+      width: 3px;
+      background: linear-gradient(to bottom, var(--gradient-ancient), var(--gradient-medieval), var(--gradient-modern), var(--gradient-contemporary));
+      border-radius: 3px;
+    }
+    
+    .ht-event {
+      position: relative;
+      margin-bottom: 1.5rem;
+      padding: 1rem 1.2rem;
+      background: var(--bg-card);
+      border: 1px solid var(--glass-border);
+      border-radius: 12px;
+      cursor: pointer;
+      transition: var(--transition);
+      animation: slideIn 0.3s ease;
+    }
+    
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateX(-20px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+    
+    .ht-event::before {
+      content: '';
+      position: absolute;
+      left: -24px;
+      top: 18px;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      border: 3px solid var(--bg-primary);
+      transition: var(--transition);
+      z-index: 2;
+    }
+    
+    .ht-event:hover {
+      border-color: var(--accent);
+      transform: translateX(5px);
+      box-shadow: 0 10px 30px -10px rgba(0,0,0,0.3);
+    }
+    
+    .ht-event:hover::before {
+      transform: scale(1.3);
+      box-shadow: 0 0 20px var(--accent);
+    }
+    
+    .ht-event.ancient::before { background: #d97706; }
+    .ht-event.medieval::before { background: #7c3aed; }
+    .ht-event.modern::before { background: #059669; }
+    .ht-event.contemporary::before { background: #3b82f6; }
+    .ht-event.pakistan::before { background: #16a34a; box-shadow: 0 0 15px rgba(22, 163, 74, 0.5); }
+    .ht-event.war::before { background: #dc2626; }
+    .ht-event.science::before { background: #06b6d4; }
+    .ht-event.culture::before { background: #ec4899; }
+    
+    .ht-event-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 0.8rem;
+      margin-bottom: 0.5rem;
+      flex-wrap: wrap;
+    }
+    
+    .ht-year {
+      font-weight: 800;
+      font-size: 1.3rem;
+      background: var(--gradient-main);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      min-width: 70px;
+    }
+    
+    .ht-event.pakistan .ht-year {
+      background: var(--gradient-pakistan);
+      -webkit-background-clip: text;
+    }
+    
+    .ht-title {
+      font-weight: 600;
+      font-size: 1.1rem;
+      line-height: 1.3;
+      flex: 1;
+    }
+    
+    .ht-tags {
+      display: flex;
+      gap: 0.4rem;
+      flex-wrap: wrap;
+      margin-bottom: 0.6rem;
+    }
+    
+    .ht-tag {
+      padding: 0.2rem 0.6rem;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: 500;
+      text-transform: uppercase;
+    }
+    
+    .ht-tag.pakistan { background: rgba(22, 163, 74, 0.2); color: #16a34a; }
+    .ht-tag.world { background: rgba(59, 130, 246, 0.2); color: #3b82f6; }
+    .ht-tag.war { background: rgba(220, 38, 38, 0.2); color: #dc2626; }
+    .ht-tag.science { background: rgba(6, 182, 212, 0.2); color: #06b6d4; }
+    .ht-tag.culture { background: rgba(236, 72, 153, 0.2); color: #ec4899; }
+    
+    .ht-desc {
+      color: var(--text-secondary);
+      font-size: 0.95rem;
+      line-height: 1.5;
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.4s ease, padding 0.4s ease;
+    }
+    
+    .ht-event.open .ht-desc {
+      max-height: 300px;
+      padding-top: 0.5rem;
+    }
+    
+    .ht-event.open {
+      border-color: var(--accent);
+      background: rgba(59, 130, 246, 0.05);
+    }
+    
+    .ht-actions {
+      display: flex;
+      gap: 0.4rem;
+      margin-top: 0.8rem;
+      padding-top: 0.8rem;
+      border-top: 1px dashed var(--glass-border);
+      opacity: 0;
+      transform: translateY(-10px);
+      transition: var(--transition);
+    }
+    
+    .ht-event.open .ht-actions {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    
+    .ht-action-btn {
+      padding: 0.4rem 0.8rem;
+      background: var(--glass);
+      border: 1px solid var(--glass-border);
+      border-radius: 6px;
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: var(--transition);
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+    }
+    
+    .ht-action-btn:hover {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: white;
+    }
+    
+    .ht-action-btn.bookmarked {
+      background: var(--warning);
+      border-color: var(--warning);
+      color: white;
+    }
+    
+    /* Modal */
+    .ht-modal {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.8);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      padding: 1rem;
+      animation: fadeIn 0.2s ease;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    
+    .ht-modal.show { display: flex; }
+    
+    .ht-modal-content {
+      background: var(--bg-card);
+      border-radius: 16px;
+      padding: 1.5rem;
+      max-width: 600px;
+      width: 100%;
+      max-height: 90vh;
+      overflow-y: auto;
+      border: 1px solid var(--glass-border);
+      animation: slideUp 0.3s ease;
+    }
+    
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .ht-modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 1rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--glass-border);
+    }
+    
+    .ht-modal-close {
+      background: none;
+      border: none;
+      color: var(--text-secondary);
+      font-size: 1.5rem;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+    
+    .ht-modal-close:hover { color: var(--error); transform: rotate(90deg); }
+    
+    .ht-modal-year {
+      font-size: 2rem;
+      font-weight: 800;
+      background: var(--gradient-main);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    
+    .ht-modal-title {
+      font-size: 1.4rem;
+      font-weight: 700;
+      margin-bottom: 0.8rem;
+      line-height: 1.3;
+    }
+    
+    .ht-modal-desc {
+      color: var(--text-secondary);
+      line-height: 1.6;
+      margin-bottom: 1rem;
+    }
+    
+    .ht-modal-fact {
+      background: rgba(6, 182, 212, 0.15);
+      border-left: 4px solid var(--info);
+      padding: 0.8rem 1rem;
+      border-radius: 0 8px 8px 0;
+      font-size: 0.95rem;
+      margin: 1rem 0;
+    }
+    
+    .ht-modal-related {
+      margin-top: 1.5rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--glass-border);
+    }
+    
+    .ht-modal-related-title {
+      font-weight: 600;
+      margin-bottom: 0.8rem;
+      color: var(--text-secondary);
+    }
+    
+    .ht-related-item {
+      padding: 0.6rem 0.8rem;
+      background: var(--glass);
+      border-radius: 8px;
+      margin-bottom: 0.4rem;
+      cursor: pointer;
+      transition: var(--transition);
+      font-size: 0.9rem;
+    }
+    
+    .ht-related-item:hover {
+      background: var(--accent);
+      color: white;
+    }
+    
+    /* Stats Bar */
+    .ht-stats-bar {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+    }
+    
+    .ht-stat-card {
+      background: var(--bg-card);
+      padding: 0.8rem;
+      border-radius: 10px;
+      text-align: center;
+      border: 1px solid var(--glass-border);
+    }
+    
+    .ht-stat-value {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--accent);
+    }
+    
+    .ht-stat-label {
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+    }
+    
+    /* Empty State */
+    .ht-empty {
+      text-align: center;
+      padding: 3rem 1rem;
+      color: var(--text-secondary);
+    }
+    
+    .ht-empty-icon {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+      opacity: 0.5;
+    }
+    
+    /* Responsive */
+    @media (max-width: 600px) {
+      .history-timeline-app { padding: 0.5rem; border-radius: 16px; }
+      .ht-controls { grid-template-columns: 1fr; }
+      .ht-stats-bar { grid-template-columns: repeat(2, 1fr); }
+      .ht-year { font-size: 1.1rem; }
+      .ht-title { font-size: 1rem; }
+    }
+    
+    /* Scrollbar */
+    .ht-modal-content::-webkit-scrollbar, .ht-categories::-webkit-scrollbar { width: 6px; }
+    .ht-modal-content::-webkit-scrollbar-track, .ht-categories::-webkit-scrollbar-track { background: var(--bg-input); border-radius: 3px; }
+    .ht-modal-content::-webkit-scrollbar-thumb, .ht-categories::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 3px; }
+    
+    /* Loading */
+    .ht-loading {
+      text-align: center;
+      padding: 2rem;
+      color: var(--text-secondary);
+    }
+    
+    .ht-loading-spinner {
+      width: 40px;
+      height: 40px;
+      border: 3px solid var(--glass-border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 1rem;
+    }
+    
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+
+  <!-- Header -->
+  <div class="ht-header">
+    <div class="ht-title">🌍 World History Timeline</div>
+    <div class="ht-stats">
+      <div class="ht-stat">📚 <span id="ht-total">0</span> Events</div>
+      <div class="ht-stat">🔖 <span id="ht-bookmarks">0</span> Saved</div>
+    </div>
+  </div>
+
+  <!-- Stats Bar -->
+  <div class="ht-stats-bar">
+    <div class="ht-stat-card">
+      <div class="ht-stat-value" id="ht-pakistan-count">0</div>
+      <div class="ht-stat-label">🇵🇰 Pakistan</div>
+    </div>
+    <div class="ht-stat-card">
+      <div class="ht-stat-value" id="ht-world-count">0</div>
+      <div class="ht-stat-label">🌐 World</div>
+    </div>
+    <div class="ht-stat-card">
+      <div class="ht-stat-value" id="ht-war-count">0</div>
+      <div class="ht-stat-label">⚔️ Wars</div>
+    </div>
+    <div class="ht-stat-card">
+      <div class="ht-stat-value" id="ht-science-count">0</div>
+      <div class="ht-stat-label">🔬 Science</div>
+    </div>
+  </div>
+
+  <!-- Search & Filters -->
+  <div class="ht-controls">
+    <input type="text" class="ht-search" id="ht-search" placeholder="🔍 Search events, years, countries...">
+    <button class="ht-filter-btn" id="ht-filter-toggle">🔽 Filters</button>
+  </div>
+
+  <!-- Filter Panel -->
+  <div class="ht-categories" id="ht-filter-panel" style="display:none;">
+    <button class="ht-cat-btn active" data-filter="all">🎲 All</button>
+    <button class="ht-cat-btn pakistan" data-filter="pakistan">🇵🇰 Pakistan</button>
+    <button class="ht-cat-btn world" data-filter="world">🌐 World</button>
+    <button class="ht-cat-btn war" data-filter="war">⚔️ Wars</button>
+    <button class="ht-cat-btn science" data-filter="science">🔬 Science</button>
+    <button class="ht-cat-btn culture" data-filter="culture">🎨 Culture</button>
+  </div>
+
+  <!-- Era Navigation -->
+  <div class="ht-era-nav">
+    <button class="ht-era-btn active" data-era="all">🎲 All Eras</button>
+    <button class="ht-era-btn" data-era="ancient">🏛️ Ancient (-3000 to 500)</button>
+    <button class="ht-era-btn" data-era="medieval">🏰 Medieval (500-1500)</button>
+    <button class="ht-era-btn" data-era="modern">🔫 Modern (1500-1900)</button>
+    <button class="ht-era-btn" data-era="contemporary">🚀 Contemporary (1900+)</button>
+  </div>
+
+  <!-- Timeline -->
+  <div class="ht-timeline" id="ht-timeline"></div>
+
+  <!-- Empty State -->
+  <div class="ht-empty" id="ht-empty" style="display:none;">
+    <div class="ht-empty-icon">🔍</div>
+    <p>No events found matching your search.</p>
+    <p style="font-size:0.9rem;margin-top:0.5rem;">Try different keywords or clear filters.</p>
+  </div>
+
+  <!-- Modal -->
+  <div class="ht-modal" id="ht-modal">
+    <div class="ht-modal-content">
+      <div class="ht-modal-header">
+        <div>
+          <div class="ht-modal-year" id="m-year"></div>
+          <div class="ht-modal-title" id="m-title"></div>
+        </div>
+        <button class="ht-modal-close" id="m-close">&times;</button>
+      </div>
+      <div class="ht-tags" id="m-tags"></div>
+      <p class="ht-modal-desc" id="m-desc"></p>
+      <div class="ht-modal-fact" id="m-fact"></div>
+      
+      <div class="ht-modal-related" id="m-related" style="display:none;">
+        <div class="ht-modal-related-title">🔗 Related Events</div>
+        <div id="m-related-list"></div>
+      </div>
+      
+      <div style="display:flex;gap:0.5rem;margin-top:1rem;flex-wrap:wrap;">
+        <button class="ht-action-btn" id="m-bookmark">🔖 Bookmark</button>
+        <button class="ht-action-btn" id="m-share">📤 Share</button>
+        <button class="ht-action-btn" id="m-copy">📋 Copy Text</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function(){
+      // ====== EVENTS DATABASE (120+ Events) ======
+      const events = [
+        // 🇵🇰 PAKISTAN HISTORY
+        {id:1, year:'1947', title:'Independence of Pakistan', desc:'Pakistan gained independence from British rule on August 14, 1947. Muhammad Ali Jinnah became the first Governor-General.', fact:'The partition led to one of the largest migrations in human history, with over 10 million people displaced.', tags:['pakistan','independence'], era:'contemporary', cat:'pakistan'},
+        {id:2, year:'1956', title:'First Constitution of Pakistan', desc:'Pakistan adopted its first constitution, becoming the Islamic Republic of Pakistan.', fact:'The constitution established Pakistan as a federal parliamentary republic with Islam as the state religion.', tags:['pakistan','politics'], era:'contemporary', cat:'pakistan'},
+        {id:3, year:'1965', title:'Indo-Pak War', desc:'Second war between India and Pakistan primarily over Kashmir dispute.', fact:'The war ended with the Tashkent Declaration, brokered by the Soviet Union.', tags:['pakistan','war','kashmir'], era:'contemporary', cat:'war'},
+        {id:4, year:'1971', title:'Creation of Bangladesh', desc:'East Pakistan became independent as Bangladesh after the Liberation War.', fact:'This led to the biggest refugee crisis of the 20th century with 10 million refugees.', tags:['pakistan','war','bangladesh'], era:'contemporary', cat:'war'},
+        {id:5, year:'1973', title:'Current Constitution', desc:'Pakistan adopted its current constitution under Prime Minister Zulfikar Ali Bhutto.', fact:'The 1973 Constitution has been amended over 20 times but remains the supreme law.', tags:['pakistan','politics'], era:'contemporary', cat:'pakistan'},
+        {id:6, year:'1998', title:'Nuclear Tests (Chagai)', desc:'Pakistan conducted successful nuclear tests in Chagai, Balochistan, becoming a nuclear power.', fact:'The tests were conducted in response to India\'s Pokhran-II tests earlier that month.', tags:['pakistan','science','military'], era:'contemporary', cat:'science'},
+        {id:7, year:'2002', title:'First Female Speaker', desc:'Fahmida Mirza became the first female Speaker of Pakistan\'s National Assembly.', fact:'She served as Speaker for two consecutive terms, a record in Pakistan\'s parliamentary history.', tags:['pakistan','politics','women'], era:'contemporary', cat:'pakistan'},
+        {id:8, year:'2014', title:'APS Peshawar Attack', desc:'Terrorist attack on Army Public School Peshawar killed 149 people, mostly children.', fact:'This tragedy led to the formation of the National Action Plan against terrorism.', tags:['pakistan','tragedy'], era:'contemporary', cat:'pakistan'},
+        {id:9, year:'2018', title:'First Democratic Transition', desc:'Pakistan completed its first democratic transition of power between civilian governments.', fact:'This marked a significant milestone in Pakistan\'s democratic journey.', tags:['pakistan','democracy'], era:'contemporary', cat:'pakistan'},
+        {id:10, year:'2022', title:'Devastating Floods', desc:'Unprecedented monsoon floods affected 33 million people across Pakistan.', fact:'The floods caused over $30 billion in damages and highlighted climate change impacts.', tags:['pakistan','climate','disaster'], era:'contemporary', cat:'pakistan'},
+        
+        // 🏛️ ANCIENT HISTORY (-3000 BCE to 500 CE)
+        {id:11, year:'-3100', title:'Unification of Egypt', desc:'King Narmer unified Upper and Lower Egypt, establishing the First Dynasty.', fact:'The Narmer Palette, discovered in 1898, depicts this unification.', tags:['world','ancient','egypt'], era:'ancient', cat:'world'},
+        {id:12, year:'-2600', title:'Indus Valley Civilization', desc:'One of the world\'s earliest urban civilizations flourished in modern-day Pakistan and India.', fact:'Mohenjo-daro and Harappa had advanced drainage systems and urban planning.', tags:['pakistan','ancient','civilization'], era:'ancient', cat:'pakistan'},
+        {id:13, year:'-2560', title:'Great Pyramid Completed', desc:'The Great Pyramid of Giza was completed as a tomb for Pharaoh Khufu.', fact:'It remained the tallest man-made structure for over 3,800 years.', tags:['world','ancient','egypt'], era:'ancient', cat:'culture'},
+        {id:14, year:'-1200', title:'Trojan War (Legendary)', desc:'Legendary war between Greeks and Trojans, basis for Homer\'s Iliad.', fact:'Archaeological evidence suggests a real conflict at Hisarlik, Turkey around this time.', tags:['world','ancient','war'], era:'ancient', cat:'war'},
+        {id:15, year:'-500', title:'Buddha\'s Enlightenment', desc:'Siddhartha Gautama attained enlightenment and founded Buddhism.', fact:'Buddhism would later spread across Asia, becoming one of the world\'s major religions.', tags:['world','ancient','religion'], era:'ancient', cat:'culture'},
+        {id:16, year:'-326', title:'Alexander in Pakistan', desc:'Alexander the Great reached the Indus River, fighting King Porus at the Battle of Hydaspes.', fact:'Despite losing, Porus impressed Alexander so much he was reinstated as ruler.', tags:['pakistan','ancient','war'], era:'ancient', cat:'war'},
+        {id:17, year:'-260', title:'Ashoka\'s Conversion', desc:'Emperor Ashoka converted to Buddhism after the bloody Kalinga War.', fact:'Ashoka\'s edicts, carved on rocks and pillars, spread across the Indian subcontinent.', tags:['world','ancient','religion'], era:'ancient', cat:'culture'},
+        {id:18, year:'-44', title:'Assassination of Julius Caesar', desc:'Roman dictator Julius Caesar was assassinated by senators on the Ides of March.', fact:'His death led to the end of the Roman Republic and rise of the Roman Empire.', tags:['world','ancient','politics'], era:'ancient', cat:'world'},
+        
+        // 🏰 MEDIEVAL HISTORY (500-1500 CE)
+        {id:19, year:'622', title:'Hijra - Islamic Calendar Begins', desc:'Prophet Muhammad migrated from Mecca to Medina, marking year 1 of Islamic calendar.', fact:'The Hijra is considered the beginning of the Muslim community (Ummah).', tags:['world','medieval','religion'], era:'medieval', cat:'culture'},
+        {id:20, year:'711', title:'Arab Conquest of Sindh', desc:'Muhammad bin Qasim conquered Sindh, bringing Islam to the Indian subcontinent.', fact:'This established the first Muslim rule in South Asia, influencing culture for centuries.', tags:['pakistan','medieval','islam'], era:'medieval', cat:'pakistan'},
+        {id:21, year:'1000', title:'Ghaznavid Empire', desc:'Mahmud of Ghazni established an empire spanning parts of modern Afghanistan, Pakistan, and India.', fact:'Mahmud conducted 17 raids into India, notably plundering the Somnath temple.', tags:['pakistan','medieval','empire'], era:'medieval', cat:'pakistan'},
+        {id:22, year:'1206', title:'Delhi Sultanate Founded', desc:'Qutb-ud-din Aibak established the Delhi Sultanate, beginning Muslim rule in North India.', fact:'The Qutub Minar in Delhi was started during his reign.', tags:['world','medieval','empire'], era:'medieval', cat:'world'},
+        {id:23, year:'1219', title:'Mongol Invasion', desc:'Genghis Khan\'s Mongols invaded Central Asia, reaching the Indus River.', fact:'The Mongol invasions reshaped the political landscape of Asia for centuries.', tags:['world','medieval','war'], era:'medieval', cat:'war'},
+        {id:24, year:'1398', title:'Timur Invades India', desc:'Turkic conqueror Timur (Tamerlane) sacked Delhi, causing massive destruction.', fact:'Timur\'s invasion weakened the Delhi Sultanate, paving way for future powers.', tags:['world','medieval','war'], era:'medieval', cat:'war'},
+        {id:25, year:'1492', title:'Columbus Reaches Americas', desc:'Christopher Columbus landed in the Caribbean, opening European colonization of the Americas.', fact:'This event marked the beginning of the Columbian Exchange of goods, people, and ideas.', tags:['world','medieval','exploration'], era:'medieval', cat:'world'},
+        
+        // 🔫 MODERN HISTORY (1500-1900)
+        {id:26, year:'1526', title:'Battle of Panipat - Mughal Empire', desc:'Babur defeated Ibrahim Lodi, establishing the Mughal Empire in India.', fact:'The Mughals would rule much of the subcontinent for over 300 years.', tags:['pakistan','modern','empire'], era:'modern', cat:'pakistan'},
+        {id:27, year:'1600', title:'British East India Company', desc:'Company received royal charter, beginning British commercial presence in India.', fact:'What started as trade would evolve into colonial rule over the subcontinent.', tags:['pakistan','modern','colonial'], era:'modern', cat:'pakistan'},
+        {id:28, year:'1757', title:'Battle of Plassey', desc:'British East India Company defeated Nawab of Bengal, beginning political control in India.', fact:'This battle is considered the start of British colonial rule in India.', tags:['world','modern','colonial'], era:'modern', cat:'world'},
+        {id:29, year:'1857', title:'War of Independence (Sepoy Mutiny)', desc:'Major uprising against British rule in India, involving soldiers and civilians.', fact:'Though suppressed, it led to the end of Company rule and direct British Crown control.', tags:['pakistan','modern','war'], era:'modern', cat:'war'},
+        {id:30, year:'1876', title:'Quaid-e-Azam Born', desc:'Muhammad Ali Jinnah, founder of Pakistan, was born in Karachi.', fact:'Jinnah would later be honored as Quaid-e-Azam (Great Leader) for his role in creating Pakistan.', tags:['pakistan','modern','biography'], era:'modern', cat:'pakistan'},
+        {id:31, year:'1885', title:'Indian National Congress Founded', desc:'Political party established to seek greater Indian participation in government.', fact:'The INC would later lead the independence movement under Gandhi and Nehru.', tags:['world','modern','politics'], era:'modern', cat:'world'},
+        {id:32, year:'1906', title:'All-India Muslim League', desc:'Political party founded to protect Muslim interests in British India.', fact:'The League would later demand and achieve the creation of Pakistan.', tags:['pakistan','modern','politics'], era:'modern', cat:'pakistan'},
+        
+        // 🚀 CONTEMPORARY HISTORY (1900-Present)
+        {id:33, year:'1916', title:'Lucknow Pact', desc:'Congress and Muslim League agreed on constitutional reforms and separate electorates.', fact:'This temporary Hindu-Muslim unity was significant but short-lived.', tags:['pakistan','contemporary','politics'], era:'contemporary', cat:'pakistan'},
+        {id:34, year:'1930', title:'Allahabad Address', desc:'Allama Iqbal proposed the idea of a separate Muslim state in northwestern India.', fact:'Iqbal\'s vision laid the philosophical foundation for Pakistan.', tags:['pakistan','contemporary','politics'], era:'contemporary', cat:'pakistan'},
+        {id:35, year:'1940', title:'Lahore Resolution', desc:'Muslim League formally demanded independent states for Muslims in northwestern India.', fact:'March 23 is now celebrated as Pakistan Day (Yaum-e-Pakistan).', tags:['pakistan','contemporary','politics'], era:'contemporary', cat:'pakistan'},
+        {id:36, year:'1945', title:'End of World War II', desc:'Allied victory over Axis powers; atomic bombs dropped on Japan.', fact:'The war\'s end accelerated decolonization movements worldwide, including in South Asia.', tags:['world','contemporary','war'], era:'contemporary', cat:'war'},
+        {id:37, year:'1947', title:'Partition of India', desc:'British India divided into independent dominions of India and Pakistan.', fact:'Partition caused one of history\'s largest migrations and tragic communal violence.', tags:['pakistan','contemporary','independence'], era:'contemporary', cat:'pakistan'},
+        {id:38, year:'1948', title:'Death of Quaid-e-Azam', desc:'Muhammad Ali Jinnah, founder of Pakistan, passed away in Karachi.', fact:'Jinnah\'s death just a year after independence was a major blow to the new nation.', tags:['pakistan','contemporary','biography'], era:'contemporary', cat:'pakistan'},
+        {id:39, year:'1957', title:'Sputnik Launch', desc:'Soviet Union launched the first artificial satellite, beginning the Space Age.', fact:'Sputnik sparked the Space Race between USA and USSR.', tags:['world','contemporary','science'], era:'contemporary', cat:'science'},
+        {id:40, year:'1969', title:'Moon Landing', desc:'Apollo 11 mission landed Neil Armstrong and Buzz Aldrin on the Moon.', fact:'Armstrong\'s words: "That\'s one small step for man, one giant leap for mankind."', tags:['world','contemporary','science'], era:'contemporary', cat:'science'},
+        {id:41, year:'1971', title:'Internet Born (ARPANET)', desc:'First email sent; foundations of modern internet established.', fact:'The internet would revolutionize communication, commerce, and society globally.', tags:['world','contemporary','science'], era:'contemporary', cat:'science'},
+        {id:42, year:'1989', title:'Fall of Berlin Wall', desc:'Symbolic end of Cold War; wall dividing East and West Berlin demolished.', fact:'The fall led to German reunification and the collapse of Soviet influence in Eastern Europe.', tags:['world','contemporary','politics'], era:'contemporary', cat:'world'},
+        {id:43, year:'1991', title:'Dissolution of USSR', desc:'Soviet Union officially dissolved, ending the Cold War era.', fact:'15 independent nations emerged from the former Soviet Union.', tags:['world','contemporary','politics'], era:'contemporary', cat:'world'},
+        {id:44, year:'2001', title:'9/11 Terror Attacks', desc:'Terrorist attacks on USA changed global politics and security forever.', fact:'Led to the War on Terror, affecting Pakistan\'s foreign policy significantly.', tags:['world','contemporary','war'], era:'contemporary', cat:'war'},
+        {id:45, year:'2007', title:'iPhone Launch', desc:'Apple introduced the iPhone, revolutionizing mobile technology.', fact:'Smartphones would transform how humans communicate, work, and access information.', tags:['world','contemporary','science'], era:'contemporary', cat:'science'},
+        {id:46, year:'2015', title:'Paris Climate Agreement', desc:'196 countries agreed to limit global warming to well below 2°C.', fact:'Pakistan is particularly vulnerable to climate change impacts like floods and heatwaves.', tags:['world','contemporary','environment'], era:'contemporary', cat:'world'},
+        {id:47, year:'2020', title:'COVID-19 Pandemic', desc:'Global health crisis affected every country, changing daily life worldwide.', fact:'Pakistan implemented one of the world\'s largest social protection programs during lockdowns.', tags:['world','contemporary','health'], era:'contemporary', cat:'world'},
+        {id:48, year:'2022', title:'AI Revolution Accelerates', desc:'Large language models and generative AI transform technology and society.', fact:'AI is reshaping industries from healthcare to education globally.', tags:['world','contemporary','science'], era:'contemporary', cat:'science'},
+        
+        // 🌐 MORE WORLD EVENTS
+        {id:49, year:'-5000', title:'Agriculture Developed', desc:'Humans began farming, leading to settled civilizations.', fact:'The Neolithic Revolution changed human society forever.', tags:['world','ancient','culture'], era:'ancient', cat:'culture'},
+        {id:50, year:'-3000', title:'Writing Invented', desc:'Cuneiform in Mesopotamia and hieroglyphs in Egypt emerged.', fact:'Writing enabled record-keeping, literature, and the spread of knowledge.', tags:['world','ancient','culture'], era:'ancient', cat:'culture'},
+        {id:51, year:'-500', title:'Democracy in Athens', desc:'First known democratic system established in ancient Athens.', fact:'Athenian democracy was direct, with citizens voting on laws themselves.', tags:['world','ancient','politics'], era:'ancient', cat:'world'},
+        {id:52, year:'-27', title:'Roman Empire Founded', desc:'Augustus became first Roman Emperor, beginning the Imperial period.', fact:'The Roman Empire would last nearly 500 years in the West.', tags:['world','ancient','empire'], era:'ancient', cat:'world'},
+        {id:53, year:'476', title:'Fall of Western Rome', desc:'Last Western Roman Emperor deposed, marking end of ancient Rome.', fact:'This event is often used to mark the beginning of the Middle Ages.', tags:['world','medieval','empire'], era:'medieval', cat:'world'},
+        {id:54, year:'632', title:'Death of Prophet Muhammad', desc:'Founder of Islam passed away; Islamic expansion continued under Caliphs.', fact:'Within 100 years, Islamic rule stretched from Spain to India.', tags:['world','medieval','religion'], era:'medieval', cat:'culture'},
+        {id:55, year:'1066', title:'Norman Conquest of England', desc:'William the Conqueror defeated King Harold at Battle of Hastings.', fact:'The conquest transformed English language, culture, and governance.', tags:['world','medieval','war'], era:'medieval', cat:'war'},
+        {id:56, year:'1215', title:'Magna Carta Signed', desc:'English nobles forced King John to sign charter limiting royal power.', fact:'Magna Carta became a foundation for constitutional law and human rights.', tags:['world','medieval','politics'], era:'medieval', cat:'world'},
+        {id:57, year:'1347', title:'Black Death Pandemic', desc:'Bubonic plague killed an estimated 75-200 million people across Eurasia.', fact:'The pandemic killed 30-60% of Europe\'s population, transforming society.', tags:['world','medieval','health'], era:'medieval', cat:'world'},
+        {id:58, year:'1453', title:'Fall of Constantinople', desc:'Ottoman Turks captured Byzantine capital, ending the Roman Empire.', fact:'Greek scholars fleeing to Europe helped spark the Renaissance.', tags:['world','medieval','war'], era:'medieval', cat:'war'},
+        {id:59, year:'1492', title:'Reconquista Completed', desc:'Christian forces captured Granada, ending Muslim rule in Spain.', fact:'The same year, Columbus sailed west seeking a route to Asia.', tags:['world','medieval','war'], era:'medieval', cat:'war'},
+        {id:60, year:'1517', title:'Protestant Reformation Begins', desc:'Martin Luther posted 95 Theses, challenging Catholic Church practices.', fact:'The Reformation split Western Christianity and sparked religious wars.', tags:['world','modern','religion'], era:'modern', cat:'culture'},
+        {id:61, year:'1687', title:'Newton\'s Principia', desc:'Isaac Newton published laws of motion and universal gravitation.', fact:'Newton\'s work laid the foundation for classical physics for 200+ years.', tags:['world','modern','science'], era:'modern', cat:'science'},
+        {id:62, year:'1776', title:'American Declaration of Independence', desc:'Thirteen colonies declared independence from Britain.', fact:'The American Revolution inspired democratic movements worldwide.', tags:['world','modern','politics'], era:'modern', cat:'world'},
+        {id:63, year:'1789', title:'French Revolution Begins', desc:'Storming of the Bastille marked start of revolutionary change in France.', fact:'The revolution introduced concepts of liberty, equality, and fraternity.', tags:['world','modern','politics'], era:'modern', cat:'world'},
+        {id:64, year:'1804', title:'Napoleon Crowns Himself Emperor', desc:'Napoleon Bonaparte declared himself Emperor of the French.', fact:'Napoleon\'s conquests spread revolutionary ideas across Europe.', tags:['world','modern','war'], era:'modern', cat:'war'},
+        {id:65, year:'1859', title:'Darwin\'s Origin of Species', desc:'Charles Darwin published theory of evolution by natural selection.', fact:'Darwin\'s work revolutionized biology and our understanding of life.', tags:['world','modern','science'], era:'modern', cat:'science'},
+        {id:66, year:'1903', title:'Wright Brothers First Flight', desc:'First powered, controlled airplane flight at Kitty Hawk, North Carolina.', fact:'Aviation would transform warfare, travel, and global connectivity.', tags:['world','contemporary','science'], era:'contemporary', cat:'science'},
+        {id:67, year:'1914', title:'World War I Begins', desc:'Assassination of Archduke Franz Ferdinand triggered global conflict.', fact:'WWI introduced trench warfare, tanks, and chemical weapons.', tags:['world','contemporary','war'], era:'contemporary', cat:'war'},
+        {id:68, year:'1928', title:'Penicillin Discovered', desc:'Alexander Fleming discovered the first antibiotic, revolutionizing medicine.', fact:'Penicillin has saved hundreds of millions of lives since its discovery.', tags:['world','contemporary','science'], era:'contemporary', cat:'science'},
+        {id:69, year:'1939', title:'World War II Begins', desc:'Germany invaded Poland, triggering the deadliest conflict in history.', fact:'WWII resulted in 70-85 million deaths and reshaped the global order.', tags:['world','contemporary','war'], era:'contemporary', cat:'war'},
+        {id:70, year:'1945', title:'United Nations Founded', desc:'International organization established to promote peace and cooperation.', fact:'The UN now has 193 member states and addresses global challenges.', tags:['world','contemporary','politics'], era:'contemporary', cat:'world'},
+        {id:71, year:'1955', title:'Civil Rights Movement Gains Momentum', desc:'Rosa Parks\' arrest sparked Montgomery Bus Boycott in USA.', fact:'The movement led to landmark civil rights legislation in the 1960s.', tags:['world','contemporary','politics'], era:'contemporary', cat:'world'},
+        {id:72, year:'1963', title:'Martin Luther King Jr.\'s "I Have a Dream"', desc:'Iconic speech delivered during March on Washington for civil rights.', fact:'The speech is considered one of the greatest in American history.', tags:['world','contemporary','politics'], era:'contemporary', cat:'culture'},
+        {id:73, year:'1969', title:'First Internet Message Sent', desc:'ARPANET transmitted first message between UCLA and Stanford.', fact:'This humble beginning led to the global internet we use today.', tags:['world','contemporary','science'], era:'contemporary', cat:'science'},
+        {id:74, year:'1981', title:'First Space Shuttle Launch', desc:'Columbia became first reusable spacecraft to reach orbit.', fact:'The Shuttle program flew 135 missions over 30 years.', tags:['world','contemporary','science'], era:'contemporary', cat:'science'},
+        {id:75, year:'1990', title:'World Wide Web Invented', desc:'Tim Berners-Lee created the WWW at CERN, revolutionizing information access.', fact:'The web made the internet accessible to billions of people worldwide.', tags:['world','contemporary','science'], era:'contemporary', cat:'science'},
+        {id:76, year:'2001', title:'Wikipedia Launched', desc:'Free online encyclopedia created, changing how knowledge is shared.', fact:'Wikipedia now has over 60 million articles in 300+ languages.', tags:['world','contemporary','science'], era:'contemporary', cat:'science'},
+        {id:77, year:'2004', title:'Facebook Founded', desc:'Social media platform launched, transforming online communication.', fact:'Facebook (Meta) now has nearly 3 billion monthly active users.', tags:['world','contemporary','science'], era:'contemporary', cat:'science'},
+        {id:78, year:'2008', title:'Global Financial Crisis', desc:'Major economic downturn triggered by housing market collapse.', fact:'The crisis led to significant reforms in global financial regulation.', tags:['world','contemporary','economy'], era:'contemporary', cat:'world'},
+        {id:79, year:'2010', title:'Arab Spring Begins', desc:'Protests in Tunisia sparked democratic uprisings across Middle East.', fact:'The movements led to regime changes in several countries.', tags:['world','contemporary','politics'], era:'contemporary', cat:'world'},
+        {id:80, year:'2016', title:'First Detection of Gravitational Waves', desc:'LIGO confirmed Einstein\'s prediction of ripples in spacetime.', fact:'This opened a new window for observing the universe.', tags:['world','contemporary','science'], era:'contemporary', cat:'science'},
+        
+        // 🎨 CULTURE & INNOVATION
+        {id:81, year:'-400', title:'Socrates\' Philosophy', desc:'Greek philosopher developed method of questioning to seek truth.', fact:'Socrates\' ideas were preserved by his student Plato.', tags:['world','ancient','culture'], era:'ancient', cat:'culture'},
+        {id:82, year:'-200', title:'Great Wall Construction', desc:'Chinese states began building fortifications against northern invasions.', fact:'The Great Wall stretches over 13,000 miles across northern China.', tags:['world','ancient','culture'], era:'ancient', cat:'culture'},
+        {id:83, year:'800', title:'Charlemagne Crowned Emperor', desc:'Frankish king crowned Holy Roman Emperor by Pope Leo III.', fact:'Charlemagne\'s reign sparked the Carolingian Renaissance.', tags:['world','medieval','culture'], era:'medieval', cat:'culture'},
+        {id:84, year:'1000', title:'Vikings Reach North America', desc:'Leif Erikson and Norse explorers landed in Newfoundland.', fact:'This occurred nearly 500 years before Columbus\' voyage.', tags:['world','medieval','exploration'], era:'medieval', cat:'world'},
+        {id:85, year:'1440', title:'Gutenberg Printing Press', desc:'Johannes Gutenberg invented movable type printing in Europe.', fact:'The printing press enabled mass production of books and spread of ideas.', tags:['world','modern','science'], era:'modern', cat:'science'},
+        {id:86, year:'1543', title:'Heliocentric Theory Published', desc:'Copernicus proposed that Earth revolves around the Sun.', fact:'This challenged the geocentric view held for over 1,000 years.', tags:['world','modern','science'], era:'modern', cat:'science'},
+        {id:87, year:'1609', title:'Galileo\'s Telescope', desc:'Galileo Galilei used telescope to observe moons of Jupiter.', fact:'His observations supported the heliocentric model of the solar system.', tags:['world','modern','science'], era:'modern', cat:'science'},
+        {id:88, year:'1765', title:'Steam Engine Improved', desc:'James Watt\'s improvements made steam power practical for industry.', fact:'The steam engine powered the Industrial Revolution.', tags:['world','modern','science'], era:'modern', cat:'science'},
+        {id:89, year:'1837', title:'Telegraph Invented', desc:'Samuel Morse developed practical electrical telegraph system.', fact:'The telegraph enabled near-instant communication across long distances.', tags:['world','modern','science'], era:'modern', cat:'science'},
+        {id:90, year:'1876', title:'Telephone Patented', desc:'Alexander Graham Bell received patent for the telephone.', fact:'The telephone revolutionized personal and business communication.', tags:['world','modern','science'], era:'modern', cat:'science'},
+        {id:91, year:'1901', title:'First Nobel Prizes Awarded', desc:'Alfred Nobel\'s will established prizes for human achievement.', fact:'Nobel Prizes remain the most prestigious awards in multiple fields.', tags:['world','contemporary','culture'], era:'contemporary', cat:'culture'},
+        {id:92, year:'1923', title:'Disney Founded', desc:'Walt Disney founded the company that would define animation.', fact:'Disney\'s innovations transformed entertainment and storytelling.', tags:['world','contemporary','culture'], era:'contemporary', cat:'culture'},
+        {id:93, year:'1954', title:'First Nuclear Power Plant', desc:'Obninsk in USSR became first plant to generate electricity from nuclear fission.', fact:'Nuclear power now provides about 10% of global electricity.', tags:['world','contemporary','science'], era:'contemporary', cat:'science'},
+        {id:94, year:'1961', title:'First Human in Space', desc:'Yuri Gagarin orbited Earth aboard Vostok 1.', fact:'Gagarin\'s flight lasted 108 minutes and made him a global hero.', tags:['world','contemporary','science'], era:'contemporary', cat:'science'},
+        {id:95, year:'1975', title:'First Personal Computer', desc:'Altair 8800 sparked the microcomputer revolution.', fact:'The PC would eventually be in nearly every home and office.', tags:['world','contemporary','science'], era:'contemporary', cat:'science'},
+        {id:96, year:'1989', title:'World Wide Web Proposed', desc:'Tim Berners-Lee submitted proposal for information management system.', fact:'The WWW is now used by over 5 billion people worldwide.', tags:['world','contemporary','science'], era:'contemporary', cat:'science'},
+        {id:97, year:'1995', title:'Amazon Founded', desc:'Jeff Bezos started online bookstore that became e-commerce giant.', fact:'Amazon now dominates online retail and cloud computing.', tags:['world','contemporary','science'], era:'contemporary', cat:'science'},
+        {id:98, year:'2005', title:'YouTube Launched', desc:'Video-sharing platform founded, transforming media consumption.', fact:'YouTube now has over 2 billion logged-in monthly users.', tags:['world','contemporary','science'], era:'contemporary', cat:'science'},
+        {id:99, year:'2011', title:'Arab Spring Social Media', desc:'Twitter and Facebook played key role in organizing protests.', fact:'Social media\'s political impact became undeniable.', tags:['world','contemporary','science'], era:'contemporary', cat:'science'},
+        {id:100, year:'2020', title:'mRNA Vaccines Developed', desc:'First mRNA vaccines authorized for COVID-19, a scientific breakthrough.', fact:'mRNA technology could revolutionize treatment for many diseases.', tags:['world','contemporary','science'], era:'contemporary', cat:'science'},
+        
+        // 🇵🇰 MORE PAKISTAN EVENTS
+        {id:101, year:'1929', title:'Allama Iqbal\'s Allahabad Address', desc:'Poet-philosopher proposed separate Muslim state in northwestern India.', fact:'Iqbal is considered the spiritual father of Pakistan.', tags:['pakistan','modern','politics'], era:'modern', cat:'pakistan'},
+        {id:102, year:'1933', title:'Name "Pakistan" Coined', desc:'Choudhry Rahmat Ali proposed name for Muslim homeland.', fact:'"Pakistan" means "Land of the Pure" in Urdu and Persian.', tags:['pakistan','modern','politics'], era:'modern', cat:'pakistan'},
+        {id:103, year:'1949', title:'Objective Resolution', desc:'Constituent Assembly passed resolution defining Pakistan\'s Islamic character.', fact:'This resolution later became preamble to Pakistan\'s constitutions.', tags:['pakistan','contemporary','politics'], era:'contemporary', cat:'pakistan'},
+        {id:104, year:'1958', title:'First Martial Law', desc:'President Iskander Mirza abrogated constitution; Ayub Khan took power.', fact:'This began a pattern of military interventions in Pakistani politics.', tags:['pakistan','contemporary','politics'], era:'contemporary', cat:'pakistan'},
+        {id:105, year:'1962', title:'Mangla Dam Completed', desc:'One of world\'s largest earth-filled dams built on Jhelum River.', fact:'Mangla Dam provides irrigation and hydroelectric power to Pakistan.', tags:['pakistan','contemporary','science'], era:'contemporary', cat:'science'},
+        {id:106, year:'1974', title:'Second Islamic Summit in Lahore', desc:'38 Muslim leaders gathered; Pakistan recognized Bangladesh.', fact:'The summit strengthened Pakistan\'s leadership in the Muslim world.', tags:['pakistan','contemporary','politics'], era:'contemporary', cat:'pakistan'},
+        {id:107, year:'1977', title:'Operation Fair Play', desc:'Military coup led by General Zia-ul-Haq overthrew elected government.', fact:'Zia\'s rule lasted 11 years and profoundly shaped modern Pakistan.', tags:['pakistan','contemporary','politics'], era:'contemporary', cat:'pakistan'},
+        {id:108, year:'1988', title:'Benazir Bhutto Elected PM', desc:'First woman to lead a Muslim-majority nation became Pakistan\'s PM.', fact:'Bhutto\'s election was a milestone for women\'s political participation.', tags:['pakistan','contemporary','politics'], era:'contemporary', cat:'pakistan'},
+        {id:109, year:'1999', title:'Kargil Conflict', desc:'Military confrontation between India and Pakistan in Kashmir region.', fact:'The conflict ended with Pakistan withdrawing forces under international pressure.', tags:['pakistan','contemporary','war'], era:'contemporary', cat:'war'},
+        {id:110, year:'2008', title:'Democratic Transition', desc:'First time in Pakistan\'s history an elected government completed its term.', fact:'This marked progress in Pakistan\'s democratic development.', tags:['pakistan','contemporary','politics'], era:'contemporary', cat:'pakistan'},
+        {id:111, year:'2010', title:'18th Constitutional Amendment', desc:'Major reforms devolved powers from federal to provincial governments.', fact:'The amendment strengthened Pakistan\'s federal parliamentary system.', tags:['pakistan','contemporary','politics'], era:'contemporary', cat:'pakistan'},
+        {id:112, year:'2013', title:'First Peaceful Power Transfer', desc:'One elected government handed power to another after elections.', fact:'This was a significant milestone for Pakistani democracy.', tags:['pakistan','contemporary','politics'], era:'contemporary', cat:'pakistan'},
+        {id:113, year:'2015', title:'China-Pakistan Economic Corridor', desc:'$62 billion infrastructure project announced under Belt and Road Initiative.', fact:'CPEC aims to transform Pakistan\'s economy through infrastructure development.', tags:['pakistan','contemporary','economy'], era:'contemporary', cat:'pakistan'},
+        {id:114, year:'2019', title:'Kartarpur Corridor Opened', desc:'Visa-free border crossing for Sikh pilgrims to Gurdwara Darbar Sahib.', fact:'The corridor symbolizes hope for peace between India and Pakistan.', tags:['pakistan','contemporary','culture'], era:'contemporary', cat:'culture'},
+        {id:115, year:'2021', title:'Afghan Taliban Takeover', desc:'Taliban regained control of Afghanistan after US withdrawal.', fact:'The development has major implications for Pakistan\'s security and foreign policy.', tags:['pakistan','contemporary','politics'], era:'contemporary', cat:'pakistan'},
+        
+        // 🎲 BONUS MIXED EVENTS
+        {id:116, year:'-2500', title:'Wheel Invented', desc:'First wheels used for pottery, later adapted for transportation.', fact:'The wheel is considered one of humanity\'s most important inventions.', tags:['world','ancient','science'], era:'ancient', cat:'science'},
+        {id:117, year:'-1200', title:'Iron Age Begins', desc:'Iron smelting technology spread, replacing bronze tools and weapons.', fact:'Iron tools were stronger and cheaper, transforming agriculture and warfare.', tags:['world','ancient','science'], era:'ancient', cat:'science'},
+        {id:118, year:'100', title:'Paper Invented in China', desc:'Cai Lun improved papermaking process using mulberry bark and rags.', fact:'Paper enabled the spread of literacy and bureaucracy across civilizations.', tags:['world','ancient','science'], era:'ancient', cat:'science'},
+        {id:119, year:'600', title:'Zero Concept Developed', desc:'Indian mathematicians formalized the concept of zero as a number.', fact:'Zero revolutionized mathematics and enabled advanced calculations.', tags:['world','medieval','science'], era:'medieval', cat:'science'},
+        {id:120, year:'1200', title:'Compass for Navigation', desc:'Magnetic compass adopted for maritime navigation in Europe.', fact:'The compass enabled the Age of Exploration and global trade.', tags:['world','medieval','science'], era:'medieval', cat:'science'}
+      ];
+
+      // ====== STATE MANAGEMENT ======
+      const state = {
+        search: '',
+        category: 'all',
+        era: 'all',
+        bookmarks: JSON.parse(localStorage.getItem('ht-bookmarks') || '[]'),
+        currentModal: null,
+        filteredEvents: []
+      };
+
+      // ====== DOM ELEMENTS ======
+      const els = {
+        timeline: document.getElementById('ht-timeline'),
+        search: document.getElementById('ht-search'),
+        filterToggle: document.getElementById('ht-filter-toggle'),
+        filterPanel: document.getElementById('ht-filter-panel'),
+        catBtns: document.querySelectorAll('.ht-cat-btn'),
+        eraBtns: document.querySelectorAll('.ht-era-btn'),
+        empty: document.getElementById('ht-empty'),
+        total: document.getElementById('ht-total'),
+        bookmarks: document.getElementById('ht-bookmarks'),
+        pakistanCount: document.getElementById('ht-pakistan-count'),
+        worldCount: document.getElementById('ht-world-count'),
+        warCount: document.getElementById('ht-war-count'),
+        scienceCount: document.getElementById('ht-science-count'),
+        modal: document.getElementById('ht-modal'),
+        modalClose: document.getElementById('m-close'),
+        mYear: document.getElementById('m-year'),
+        mTitle: document.getElementById('m-title'),
+        mTags: document.getElementById('m-tags'),
+        mDesc: document.getElementById('m-desc'),
+        mFact: document.getElementById('m-fact'),
+        mRelated: document.getElementById('m-related'),
+        mRelatedList: document.getElementById('m-related-list'),
+        mBookmark: document.getElementById('m-bookmark'),
+        mShare: document.getElementById('m-share'),
+        mCopy: document.getElementById('m-copy')
+      };
+
+      // ====== CATEGORY CONFIG ======
+      const catConfig = {
+        pakistan: { icon: '🇵🇰', color: '#16a34a' },
+        world: { icon: '🌐', color: '#3b82f6' },
+        war: { icon: '⚔️', color: '#dc2626' },
+        science: { icon: '🔬', color: '#06b6d4' },
+        culture: { icon: '🎨', color: '#ec4899' }
+      };
+
+      // ====== UTILITIES ======
+      const getEra = (year) => {
+        const y = parseInt(year.replace('-', ''));
+        if(year.startsWith('-')) return y > 3000 ? 'ancient' : y > 500 ? 'ancient' : 'ancient';
+        if(y < 500) return 'ancient';
+        if(y < 1500) return 'medieval';
+        if(y < 1900) return 'modern';
+        return 'contemporary';
+      };
+
+      const filterEvents = () => {
+        let filtered = [...events];
+        
+        // Search filter
+        if(state.search) {
+          const s = state.search.toLowerCase();
+          filtered = filtered.filter(e => 
+            e.year.toLowerCase().includes(s) ||
+            e.title.toLowerCase().includes(s) ||
+            e.desc.toLowerCase().includes(s) ||
+            e.tags.some(t => t.includes(s))
+          );
+        }
+        
+        // Category filter
+        if(state.category !== 'all') {
+          filtered = filtered.filter(e => e.cat === state.category);
+        }
+        
+        // Era filter
+        if(state.era !== 'all') {
+          filtered = filtered.filter(e => e.era === state.era);
+        }
+        
+        // Sort by year (handle BCE)
+        filtered.sort((a, b) => {
+          const ay = parseInt(a.year.replace('-', '')) * (a.year.startsWith('-') ? -1 : 1);
+          const by = parseInt(b.year.replace('-', '')) * (b.year.startsWith('-') ? -1 : 1);
+          return by - ay; // Newest first
+        });
+        
+        return filtered;
+      };
+
+      const updateStats = () => {
+        els.total.textContent = events.length;
+        els.bookmarks.textContent = state.bookmarks.length;
+        els.pakistanCount.textContent = events.filter(e => e.cat === 'pakistan').length;
+        els.worldCount.textContent = events.filter(e => e.cat === 'world').length;
+        els.warCount.textContent = events.filter(e => e.cat === 'war').length;
+        els.scienceCount.textContent = events.filter(e => e.cat === 'science').length;
+      };
+
+      const createEventCard = (event) => {
+        const div = document.createElement('div');
+        div.className = `ht-event ${event.cat} ${event.era}`;
+        div.dataset.id = event.id;
+        
+        const tags = event.tags.map(t => {
+          const cfg = catConfig[t] || { icon: '', color: '' };
+          return `<span class="ht-tag ${t}">${cfg.icon} ${t}</span>`;
+        }).join('');
+        
+        const isBookmarked = state.bookmarks.includes(event.id);
+        
+        div.innerHTML = `
+          <div class="ht-event-header">
+            <span class="ht-year">${event.year}</span>
+            <span class="ht-title">${event.title}</span>
+          </div>
+          <div class="ht-tags">${tags}</div>
+          <div class="ht-desc">${event.desc}</div>
+          <div class="ht-actions">
+            <button class="ht-action-btn ${isBookmarked ? 'bookmarked' : ''}" data-action="bookmark">
+              ${isBookmarked ? '🔖 Saved' : '🔖 Bookmark'}
+            </button>
+            <button class="ht-action-btn" data-action="share">📤 Share</button>
+            <button class="ht-action-btn" data-action="details">📖 Details</button>
+          </div>
+        `;
+        
+        // Toggle expand
+        div.querySelector('.ht-event-header').onclick = (e) => {
+          if(!e.target.closest('button')) {
+            div.classList.toggle('open');
+          }
+        };
+        
+        // Action buttons
+        div.querySelectorAll('.ht-action-btn').forEach(btn => {
+          btn.onclick = (e) => {
+            e.stopPropagation();
+            handleAction(event, btn.dataset.action);
+          };
+        });
+        
+        return div;
+      };
+
+      const render = () => {
+        state.filteredEvents = filterEvents();
+        els.timeline.innerHTML = '';
+        
+        if(state.filteredEvents.length === 0) {
+          els.empty.style.display = 'block';
+          els.timeline.style.display = 'none';
+          return;
+        }
+        
+        els.empty.style.display = 'none';
+        els.timeline.style.display = 'block';
+        
+        state.filteredEvents.forEach(event => {
+          els.timeline.appendChild(createEventCard(event));
+        });
+        
+        updateStats();
+      };
+
+      const handleAction = (event, action) => {
+        switch(action) {
+          case 'bookmark':
+            toggleBookmark(event.id);
+            render();
+            break;
+          case 'share':
+            shareEvent(event);
+            break;
+          case 'details':
+            showModal(event);
+            break;
+        }
+      };
+
+      const toggleBookmark = (id) => {
+        const idx = state.bookmarks.indexOf(id);
+        if(idx > -1) {
+          state.bookmarks.splice(idx, 1);
+        } else {
+          state.bookmarks.push(id);
+        }
+        localStorage.setItem('ht-bookmarks', JSON.stringify(state.bookmarks));
+        updateStats();
+      };
+
+      const shareEvent = async (event) => {
+        const text = `📅 ${event.year}: ${event.title}\n\n${event.desc}\n\n💡 ${event.fact}`;
+        if(navigator.share) {
+          try {
+            await navigator.share({ title: 'History Timeline', text });
+          } catch(e) {}
+        } else {
+          await navigator.clipboard.writeText(text);
+          alert('✅ Event details copied to clipboard!');
+        }
+      };
+
+      const showModal = (event) => {
+        state.currentModal = event;
+        els.mYear.textContent = event.year;
+        els.mTitle.textContent = event.title;
+        els.mDesc.textContent = event.desc;
+        els.mFact.textContent = `💡 ${event.fact}`;
+        
+        // Tags
+        els.mTags.innerHTML = event.tags.map(t => {
+          const cfg = catConfig[t] || { icon: '', color: '' };
+          return `<span class="ht-tag ${t}">${cfg.icon} ${t}</span>`;
+        }).join('');
+        
+        // Related events
+        const related = events.filter(e => 
+          e.id !== event.id && 
+          (e.cat === event.cat || e.era === event.era)
+        ).slice(0, 4);
+        
+        if(related.length > 0) {
+          els.mRelated.style.display = 'block';
+          els.mRelatedList.innerHTML = related.map(r => 
+            `<div class="ht-related-item" data-id="${r.id}"><strong>${r.year}:</strong> ${r.title}</div>`
+          ).join('');
+          els.mRelatedList.querySelectorAll('.ht-related-item').forEach(item => {
+            item.onclick = () => {
+              const rel = events.find(e => e.id === parseInt(item.dataset.id));
+              if(rel) showModal(rel);
+            };
+          });
+        } else {
+          els.mRelated.style.display = 'none';
+        }
+        
+        // Bookmark button state
+        const isBookmarked = state.bookmarks.includes(event.id);
+        els.mBookmark.textContent = isBookmarked ? '🔖 Saved' : '🔖 Bookmark';
+        els.mBookmark.classList.toggle('bookmarked', isBookmarked);
+        
+        els.modal.classList.add('show');
+      };
+
+      const closeModal = () => {
+        els.modal.classList.remove('show');
+        state.currentModal = null;
+      };
+
+      // ====== EVENT LISTENERS ======
+      els.search.oninput = (e) => {
+        state.search = e.target.value;
+        render();
+      };
+      
+      els.filterToggle.onclick = () => {
+        els.filterPanel.style.display = els.filterPanel.style.display === 'none' ? 'flex' : 'none';
+      };
+      
+      els.catBtns.forEach(btn => {
+        btn.onclick = () => {
+          els.catBtns.forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          state.category = btn.dataset.filter;
+          render();
+        };
+      });
+      
+      els.eraBtns.forEach(btn => {
+        btn.onclick = () => {
+          els.eraBtns.forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          state.era = btn.dataset.era;
+          render();
+        };
+      });
+      
+      // Modal
+      els.modalClose.onclick = closeModal;
+      els.modal.onclick = (e) => { if(e.target === els.modal) closeModal(); };
+      
+      els.mBookmark.onclick = () => {
+        if(state.currentModal) {
+          toggleBookmark(state.currentModal.id);
+          els.mBookmark.textContent = state.bookmarks.includes(state.currentModal.id) ? '🔖 Saved' : '🔖 Bookmark';
+          els.mBookmark.classList.toggle('bookmarked', state.bookmarks.includes(state.currentModal.id));
+          updateStats();
+        }
+      };
+      
+      els.mShare.onclick = () => {
+        if(state.currentModal) shareEvent(state.currentModal);
+      };
+      
+      els.mCopy.onclick = async () => {
+        if(state.currentModal) {
+          const e = state.currentModal;
+          const text = `${e.year}: ${e.title}\n\n${e.desc}\n\n💡 ${e.fact}`;
+          await navigator.clipboard.writeText(text);
+          els.mCopy.textContent = '✅ Copied!';
+          setTimeout(() => els.mCopy.textContent = '📋 Copy Text', 2000);
+        }
+      };
+      
+      // Keyboard
+      document.addEventListener('keydown', (e) => {
+        if(e.key === 'Escape' && els.modal.classList.contains('show')) closeModal();
+      });
+      
+      // Initialize
+      updateStats();
+      render();
+    })();
+  </script>
+</div>

@@ -1,0 +1,841 @@
+<div class="science-facts-pro">
+  <style>
+    .science-facts-pro {
+      --sf-bg: #0f172a;
+      --sf-card: #1e293b;
+      --sf-input: #334155;
+      --sf-text: #f1f5f9;
+      --sf-secondary: #94a3b8;
+      --sf-accent: #3b82f6;
+      --sf-success: #10b981;
+      --sf-warning: #f59e0b;
+      --sf-error: #ef4444;
+      --sf-info: #06b6d4;
+      --sf-purple: #8b5cf6;
+      --sf-pink: #ec4899;
+      --sf-orange: #f97316;
+      --sf-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      --sf-transition: all 0.25s ease;
+      
+      max-width: 750px;
+      margin: 0 auto;
+      padding: 1rem;
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      color: var(--sf-text);
+      background: var(--sf-bg);
+      border-radius: 20px;
+      box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .science-facts-pro::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; height: 4px;
+      background: var(--sf-gradient);
+      animation: sf-shimmer 3s infinite linear;
+    }
+    @keyframes sf-shimmer { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
+    
+    /* Header */
+    .sf-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+      padding: 0.8rem;
+      background: var(--sf-card);
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.1);
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+    .sf-title { font-size: 1.3rem; font-weight: 700; background: var(--sf-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; display: flex; align-items: center; gap: 0.5rem; }
+    .sf-stats { display: flex; gap: 0.8rem; font-size: 0.9rem; }
+    .sf-stat { background: rgba(255,255,255,0.1); padding: 0.3rem 0.7rem; border-radius: 8px; display: flex; align-items: center; gap: 0.3rem; }
+    .sf-stat-val { font-weight: 700; color: var(--sf-accent); }
+    
+    /* Search */
+    .sf-search-box {
+      position: relative;
+      margin-bottom: 1rem;
+    }
+    .sf-search {
+      width: 100%;
+      padding: 0.8rem 1rem 0.8rem 2.5rem;
+      border-radius: 10px;
+      border: 1px solid rgba(255,255,255,0.15);
+      background: var(--sf-card);
+      color: var(--sf-text);
+      font-size: 1rem;
+      outline: none;
+      transition: var(--sf-transition);
+    }
+    .sf-search:focus { border-color: var(--sf-accent); box-shadow: 0 0 0 3px rgba(59,130,246,0.2); }
+    .sf-search-icon { position: absolute; left: 0.9rem; top: 50%; transform: translateY(-50%); color: var(--sf-secondary); pointer-events: none; }
+    
+    /* Category Tabs */
+    .sf-tabs {
+      display: flex;
+      gap: 0.4rem;
+      overflow-x: auto;
+      padding: 0.5rem 0;
+      margin-bottom: 1rem;
+      scrollbar-width: none;
+    }
+    .sf-tabs::-webkit-scrollbar { display: none; }
+    .sf-tab {
+      padding: 0.5rem 1rem;
+      background: var(--sf-card);
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 20px;
+      cursor: pointer;
+      transition: var(--sf-transition);
+      font-size: 0.85rem;
+      white-space: nowrap;
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+    }
+    .sf-tab:hover, .sf-tab.active { background: var(--sf-accent); border-color: var(--sf-accent); color: white; transform: translateY(-2px); }
+    .sf-tab.physics { border-color: #3b82f6; }
+    .sf-tab.biology { border-color: #10b981; }
+    .sf-tab.chemistry { border-color: #f59e0b; }
+    .sf-tab.space { border-color: #8b5cf6; }
+    .sf-tab.earth { border-color: #06b6d4; }
+    .sf-tab.tech { border-color: #ec4899; }
+    .sf-tab.medicine { border-color: #ef4444; }
+    .sf-tab.environment { border-color: #22c55e; }
+    .sf-tab.psychology { border-color: #a855f7; }
+    .sf-tab.math { border-color: #f97316; }
+    
+    /* Daily Fact Banner */
+    .sf-daily {
+      background: linear-gradient(135deg, rgba(59,130,246,0.2), rgba(139,92,246,0.2));
+      border: 1px solid rgba(59,130,246,0.3);
+      border-radius: 12px;
+      padding: 0.8rem 1rem;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      cursor: pointer;
+      transition: var(--sf-transition);
+    }
+    .sf-daily:hover { transform: translateX(5px); border-color: var(--sf-accent); }
+    .sf-daily-icon { font-size: 1.5rem; }
+    .sf-daily-text { flex: 1; font-size: 0.9rem; }
+    .sf-daily-badge { background: var(--sf-warning); color: #000; padding: 0.2rem 0.6rem; border-radius: 6px; font-size: 0.75rem; font-weight: 600; }
+    
+    /* Fact Card */
+    .sf-card {
+      background: var(--sf-card);
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 16px;
+      padding: 1.5rem;
+      margin-bottom: 1rem;
+      position: relative;
+      overflow: hidden;
+      animation: sf-slideIn 0.3s ease;
+    }
+    @keyframes sf-slideIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+    
+    .sf-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 0.8rem;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+    .sf-category {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.3rem 0.8rem;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+    .sf-category.physics { background: rgba(59,130,246,0.2); color: #3b82f6; }
+    .sf-category.biology { background: rgba(16,185,129,0.2); color: #10b981; }
+    .sf-category.chemistry { background: rgba(245,158,11,0.2); color: #f59e0b; }
+    .sf-category.space { background: rgba(139,92,246,0.2); color: #8b5cf6; }
+    .sf-category.earth { background: rgba(6,182,212,0.2); color: #06b6d4; }
+    .sf-category.tech { background: rgba(236,72,153,0.2); color: #ec4899; }
+    .sf-category.medicine { background: rgba(239,68,68,0.2); color: #ef4444; }
+    .sf-category.environment { background: rgba(34,197,94,0.2); color: #22c55e; }
+    .sf-category.psychology { background: rgba(168,85,247,0.2); color: #a855f7; }
+    .sf-category.math { background: rgba(249,115,22,0.2); color: #f97316; }
+    
+    .sf-difficulty {
+      padding: 0.2rem 0.6rem;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+    .sf-difficulty.easy { background: rgba(16,185,129,0.2); color: #10b981; }
+    .sf-difficulty.medium { background: rgba(245,158,11,0.2); color: #f59e0b; }
+    .sf-difficulty.hard { background: rgba(239,68,68,0.2); color: #ef4444; }
+    
+    .sf-fact-text {
+      font-size: 1.25rem;
+      line-height: 1.5;
+      margin-bottom: 1rem;
+      min-height: 60px;
+    }
+    
+    .sf-fact-extra {
+      background: rgba(6,182,212,0.15);
+      border-left: 3px solid var(--sf-info);
+      padding: 0.8rem 1rem;
+      border-radius: 0 8px 8px 0;
+      font-size: 0.9rem;
+      color: var(--sf-secondary);
+      margin: 0.8rem 0;
+      display: none;
+    }
+    .sf-fact-extra.show { display: block; animation: sf-fadeIn 0.3s ease; }
+    @keyframes sf-fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    
+    .sf-fact-tags {
+      display: flex;
+      gap: 0.4rem;
+      flex-wrap: wrap;
+      margin-bottom: 1rem;
+    }
+    .sf-tag {
+      padding: 0.2rem 0.6rem;
+      background: rgba(255,255,255,0.1);
+      border-radius: 6px;
+      font-size: 0.75rem;
+      color: var(--sf-secondary);
+    }
+    
+    /* Action Buttons */
+    .sf-actions {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .sf-btn {
+      padding: 0.7rem 1.2rem;
+      background: var(--sf-gradient);
+      border: none;
+      border-radius: 10px;
+      color: white;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--sf-transition);
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.9rem;
+    }
+    .sf-btn:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 10px 20px -5px rgba(0,0,0,0.4); }
+    .sf-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+    .sf-btn.sec { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.15); }
+    .sf-btn.sec:hover:not(:disabled) { background: rgba(255,255,255,0.15); transform: none; }
+    .sf-btn.bookmarked { background: var(--sf-warning); color: #000; }
+    
+    /* Quiz Mode */
+    .sf-quiz {
+      background: var(--sf-card);
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 16px;
+      padding: 1.5rem;
+      margin: 1rem 0;
+      display: none;
+    }
+    .sf-quiz.show { display: block; animation: sf-slideIn 0.4s ease; }
+    .sf-quiz-title { font-size: 1.2rem; font-weight: 600; margin-bottom: 1rem; color: var(--sf-accent); }
+    .sf-quiz-q { margin-bottom: 1rem; line-height: 1.5; font-size: 1.1rem; }
+    .sf-quiz-opts { display: flex; flex-direction: column; gap: 0.6rem; }
+    .sf-quiz-opt {
+      padding: 0.9rem;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: var(--sf-transition);
+      text-align: left;
+    }
+    .sf-quiz-opt:hover:not(:disabled) { background: rgba(59,130,246,0.15); border-color: var(--sf-accent); }
+    .sf-quiz-opt.correct { background: rgba(16,185,129,0.2); border-color: var(--sf-success); }
+    .sf-quiz-opt.wrong { background: rgba(239,68,68,0.2); border-color: var(--sf-error); }
+    .sf-quiz-opt:disabled { cursor: default; opacity: 0.8; }
+    .sf-quiz-result {
+      text-align: center;
+      padding: 1rem;
+      margin-top: 1rem;
+      border-radius: 10px;
+      font-weight: 600;
+    }
+    .sf-quiz-result.pass { background: rgba(16,185,129,0.15); color: var(--sf-success); }
+    .sf-quiz-result.fail { background: rgba(239,68,68,0.15); color: var(--sf-error); }
+    
+    /* Favorites Panel */
+    .sf-favorites {
+      margin-top: 1.5rem;
+      padding-top: 1rem;
+      border-top: 1px dashed rgba(255,255,255,0.1);
+    }
+    .sf-fav-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.8rem;
+    }
+    .sf-fav-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+    .sf-fav-item {
+      padding: 0.7rem;
+      background: rgba(255,255,255,0.05);
+      border-radius: 8px;
+      font-size: 0.9rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .sf-fav-item-text { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .sf-fav-remove {
+      background: none;
+      border: none;
+      color: var(--sf-error);
+      cursor: pointer;
+      font-size: 1.2rem;
+      padding: 0 0.3rem;
+    }
+    
+    /* Responsive */
+    @media (max-width: 600px) {
+      .science-facts-pro { padding: 0.8rem; border-radius: 16px; }
+      .sf-fact-text { font-size: 1.1rem; }
+      .sf-actions { gap: 0.4rem; }
+      .sf-btn { padding: 0.6rem 1rem; font-size: 0.85rem; }
+    }
+    
+    /* Scrollbar */
+    .sf-fav-list::-webkit-scrollbar, .sf-tabs::-webkit-scrollbar { width: 4px; }
+    .sf-fav-list::-webkit-scrollbar-track, .sf-tabs::-webkit-scrollbar-track { background: transparent; }
+    .sf-fav-list::-webkit-scrollbar-thumb, .sf-tabs::-webkit-scrollbar-thumb { background: var(--sf-accent); border-radius: 2px; }
+    
+    /* Confetti */
+    .sf-confetti { position: fixed; width: 8px; height: 8px; pointer-events: none; z-index: 999; animation: sf-fall 3s ease-out forwards; }
+    @keyframes sf-fall { 0% { transform: translateY(-100vh) rotate(0deg); opacity: 1; } 100% { transform: translateY(100vh) rotate(720deg); opacity: 0; } }
+  </style>
+
+  <!-- Header -->
+  <div class="sf-header">
+    <div class="sf-title">🔬 Science Facts Pro</div>
+    <div class="sf-stats">
+      <div class="sf-stat">📚 <span class="sf-stat-val" id="sf-total">0</span> Facts</div>
+      <div class="sf-stat">🔖 <span class="sf-stat-val" id="sf-fav-count">0</span> Saved</div>
+      <div class="sf-stat">🔥 <span class="sf-stat-val" id="sf-streak">0</span> Day Streak</div>
+    </div>
+  </div>
+
+  <!-- Search -->
+  <div class="sf-search-box">
+    <span class="sf-search-icon">🔍</span>
+    <input type="text" class="sf-search" id="sf-search" placeholder="Search facts, topics, keywords...">
+  </div>
+
+  <!-- Category Tabs -->
+  <div class="sf-tabs" id="sf-tabs">
+    <button class="sf-tab active" data-cat="all">🎲 All</button>
+    <button class="sf-tab physics" data-cat="physics">⚛️ Physics</button>
+    <button class="sf-tab biology" data-cat="biology">🧬 Biology</button>
+    <button class="sf-tab chemistry" data-cat="chemistry">🧪 Chemistry</button>
+    <button class="sf-tab space" data-cat="space">🚀 Space</button>
+    <button class="sf-tab earth" data-cat="earth">🌍 Earth</button>
+    <button class="sf-tab tech" data-cat="tech">💻 Tech</button>
+    <button class="sf-tab medicine" data-cat="medicine">🏥 Medicine</button>
+    <button class="sf-tab environment" data-cat="environment">🌱 Environment</button>
+    <button class="sf-tab psychology" data-cat="psychology">🧠 Psychology</button>
+    <button class="sf-tab math" data-cat="math">📐 Math</button>
+  </div>
+
+  <!-- Daily Fact Banner -->
+  <div class="sf-daily" id="sf-daily">
+    <span class="sf-daily-icon">🌟</span>
+    <span class="sf-daily-text" id="sf-daily-text">Loading today's fact...</span>
+    <span class="sf-daily-badge">Daily</span>
+  </div>
+
+  <!-- Fact Card -->
+  <div class="sf-card" id="sf-card">
+    <div class="sf-card-header">
+      <span class="sf-category" id="sf-category">⚛️ Physics</span>
+      <span class="sf-difficulty easy" id="sf-difficulty">Easy</span>
+    </div>
+    <div class="sf-fact-text" id="sf-fact">Loading amazing science fact...</div>
+    <div class="sf-fact-tags" id="sf-tags"></div>
+    <div class="sf-fact-extra" id="sf-extra"></div>
+    <div class="sf-actions">
+      <button class="sf-btn" id="sf-next">💡 Next Fact</button>
+      <button class="sf-btn sec" id="sf-bookmark">🔖 Save</button>
+      <button class="sf-btn sec" id="sf-share">📤 Share</button>
+      <button class="sf-btn sec" id="sf-speak">🔊 Read</button>
+      <button class="sf-btn sec" id="sf-details">📖 Details</button>
+    </div>
+  </div>
+
+  <!-- Quiz Mode -->
+  <div class="sf-quiz" id="sf-quiz">
+    <div class="sf-quiz-title">🧠 Quick Quiz</div>
+    <div id="sf-quiz-content"></div>
+  </div>
+
+  <!-- Favorites -->
+  <div class="sf-favorites" id="sf-favorites" style="display:none;">
+    <div class="sf-fav-header">
+      <strong>🔖 Your Saved Facts</strong>
+      <button class="sf-btn sec" id="sf-export-favs" style="padding:0.4rem 0.8rem;font-size:0.8rem;">📥 Export</button>
+    </div>
+    <div class="sf-fav-list" id="sf-fav-list"></div>
+  </div>
+
+  <script>
+    (function(){
+      // ====== FACTS DATABASE (150+ Facts) ======
+      const factsDB = {
+        physics: [
+          {t:"Light travels at ~300,000 km/s in a vacuum.", cat:"physics", diff:"easy", tags:["light","speed"], extra:"This speed is the cosmic speed limit—nothing with mass can reach it!", quiz:{q:"What is the approximate speed of light?", o:["30,000 km/s","300,000 km/s","3,000,000 km/s","3,000 km/s"], a:1}},
+          {t:"Gravity is the curvature of spacetime, not a force.", cat:"physics", diff:"medium", tags:["gravity","einstein"], extra:"Einstein's General Relativity revolutionized our understanding of gravity in 1915.", quiz:{q:"Who proposed that gravity is spacetime curvature?", o:["Newton","Einstein","Galileo","Hawking"], a:1}},
+          {t:"A neutron star is so dense that a teaspoon weighs 6 billion tons.", cat:"physics", diff:"hard", tags:["stars","density"], extra:"Neutron stars form when massive stars collapse in supernova explosions.", quiz:{q:"What astronomical object has teaspoon-weight of billions of tons?", o:["Black hole","Neutron star","White dwarf","Red giant"], a:1}},
+          {t:"Sound cannot travel in a vacuum because there's no medium.", cat:"physics", diff:"easy", tags:["sound","waves"], extra:"This is why space is silent—no air molecules to carry sound waves!", quiz:{q:"Why can't sound travel in space?", o:["Too cold","No medium","Too far","Magnetic fields"], a:1}},
+          {t:"Quantum entanglement allows particles to affect each other instantly across any distance.", cat:"physics", diff:"hard", tags:["quantum","entanglement"], extra:"Einstein called this 'spooky action at a distance'—it's now used in quantum computing!", quiz:{q:"What did Einstein call quantum entanglement?", o:["Magic","Spooky action","Impossible","Fake"], a:1}},
+          {t:"The Heisenberg Uncertainty Principle states you can't know both position and momentum exactly.", cat:"physics", diff:"hard", tags:["quantum","uncertainty"], extra:"This isn't a measurement limit—it's a fundamental property of nature!", quiz:{q:"What principle limits knowing position and momentum simultaneously?", o:["Uncertainty","Relativity","Conservation","Entropy"], a:0}},
+          {t:"Absolute zero (-273.15°C) is theoretically unreachable.", cat:"physics", diff:"medium", tags:["temperature","thermodynamics"], extra:"At absolute zero, all classical motion stops—but quantum effects persist!", quiz:{q:"What is absolute zero in Celsius?", o:["-100°C","-273.15°C","-450°C","0°C"], a:1}},
+          {t:"Electrons behave as both particles and waves.", cat:"physics", diff:"medium", tags:["quantum","electrons"], extra:"This wave-particle duality is fundamental to quantum mechanics.", quiz:{q:"What dual nature do electrons exhibit?", o:["Solid/liquid","Particle/wave","Hot/cold","Fast/slow"], a:1}}
+        ],
+        biology: [
+          {t:"Human DNA is 99.9% identical across all people.", cat:"biology", diff:"easy", tags:["dna","genetics"], extra:"That 0.1% difference accounts for all human diversity—appearance, disease risk, and more!", quiz:{q:"What percentage of DNA is identical in all humans?", o:["95%","99%","99.9%","100%"], a:2}},
+          {t:"Octopuses have three hearts and blue blood.", cat:"biology", diff:"easy", tags:["octopus","marine"], extra:"Two hearts pump blood to gills, one to the body. Blue blood comes from copper-based hemocyanin!", quiz:{q:"Why is octopus blood blue?", o:["Iron","Copper","Silver","Gold"], a:1}},
+          {t:"Bananas are berries, but strawberries aren't.", cat:"biology", diff:"medium", tags:["plants","classification"], extra:"Botanically, berries have seeds inside fleshy fruit—strawberries have seeds outside!", quiz:{q:"Which is technically a berry?", o:["Strawberry","Banana","Raspberry","Blackberry"], a:1}},
+          {t:"Your body replaces about 33 million cells every second.", cat:"biology", diff:"medium", tags:["cells","regeneration"], extra:"Most cells live days to years; red blood cells last ~120 days, brain cells your whole life!", quiz:{q:"Approximately how many cells does your body replace per second?", o:["330,000","3.3 million","33 million","330 million"], a:2}},
+          {t:"The human brain contains ~86 billion neurons.", cat:"biology", diff:"medium", tags:["brain","neurons"], extra:"Each neuron connects to thousands of others—creating ~100 trillion synaptic connections!", quiz:{q:"About how many neurons are in the human brain?", o:["8.6 billion","86 billion","860 billion","8.6 trillion"], a:1}},
+          {t:"Mitochondria have their own DNA, separate from the cell nucleus.", cat:"biology", diff:"hard", tags:["mitochondria","dna"], extra:"This supports the theory that mitochondria were once independent bacteria that merged with cells!", quiz:{q:"Which organelle has its own DNA?", o:["Ribosome","Mitochondria","Golgi","Lysosome"], a:1}},
+          {t:"Some jellyfish are biologically immortal.", cat:"biology", diff:"easy", tags:["jellyfish","immortality"], extra:"Turritopsis dohrnii can revert to its juvenile polyp stage after reaching adulthood!", quiz:{q:"Which animal can reverse its aging process?", o:["Octopus","Jellyfish","Shark","Turtle"], a:1}},
+          {t:"Your stomach lining regenerates every 3-4 days to avoid digesting itself.", cat:"biology", diff:"medium", tags:["digestion","regeneration"], extra:"Stomach acid is strong enough to dissolve metal—this rapid renewal is essential!", quiz:{q:"How often does your stomach lining regenerate?", o:["Every 3-4 days","Every week","Every month","Every year"], a:0}}
+        ],
+        chemistry: [
+          {t:"Water expands when it freezes—most substances contract.", cat:"chemistry", diff:"easy", tags:["water","ice"], extra:"This is why ice floats and lakes freeze top-down, protecting aquatic life!", quiz:{q:"What unusual property does water have when freezing?", o:["Contracts","Expands","Changes color","Becomes magnetic"], a:1}},
+          {t:"Helium is the only element that doesn't solidify at normal pressure.", cat:"chemistry", diff:"hard", tags:["helium","states"], extra:"Even at absolute zero, helium remains liquid unless pressure exceeds 25 atmospheres!", quiz:{q:"Which element won't solidify at normal pressure?", o:["Hydrogen","Helium","Neon","Nitrogen"], a:1}},
+          {t:"Gold is so malleable that 1 oz can be beaten into a 300 sq ft sheet.", cat:"chemistry", diff:"easy", tags:["gold","metals"], extra:"This property made gold ideal for ancient gilding and modern electronics!", quiz:{q:"What property allows gold to be hammered extremely thin?", o:["Density","Malleability","Conductivity","Hardness"], a:1}},
+          {t:"Venus's atmosphere is 96% CO₂, creating a runaway greenhouse effect.", cat:"chemistry", diff:"medium", tags:["venus","atmosphere"], extra:"Surface temperature reaches 465°C—hotter than Mercury despite being farther from the Sun!", quiz:{q:"What gas dominates Venus's atmosphere?", o:["Nitrogen","Oxygen","CO₂","Methane"], a:2}},
+          {t:"Diamonds and graphite are both pure carbon—just different atomic arrangements.", cat:"chemistry", diff:"easy", tags:["carbon","allotropes"], extra:"Diamond's tetrahedral structure makes it hardest; graphite's layers make it soft and conductive!", quiz:{q:"What element forms both diamonds and graphite?", o:["Silicon","Carbon","Boron","Nitrogen"], a:1}},
+          {t:"The pH scale is logarithmic—pH 5 is 10x more acidic than pH 6.", cat:"chemistry", diff:"medium", tags:["ph","acids"], extra:"This means small pH changes represent huge differences in hydrogen ion concentration!", quiz:{q:"If pH drops from 6 to 5, acidity increases by:", o:["2x","5x","10x","100x"], a:2}},
+          {t:"Catalysts speed up reactions without being consumed.", cat:"chemistry", diff:"easy", tags:["catalysts","reactions"], extra:"Enzymes in your body are biological catalysts—speeding up life-sustaining reactions!", quiz:{q:"What do catalysts do in chemical reactions?", o:["Get consumed","Speed up reactions","Slow reactions","Change products"], a:1}},
+          {t:"There are 118 confirmed elements; 94 occur naturally on Earth.", cat:"chemistry", diff:"medium", tags:["elements","periodic"], extra:"Elements beyond uranium (92) are synthetic and often highly unstable!", quiz:{q:"How many elements occur naturally on Earth?", o:["82","94","108","118"], a:1}}
+        ],
+        space: [
+          {t:"A day on Venus (243 Earth days) is longer than its year (225 Earth days).", cat:"space", diff:"medium", tags:["venus","rotation"], extra:"Venus rotates backwards (retrograde) due to a massive ancient collision!", quiz:{q:"Which planet has a day longer than its year?", o:["Mercury","Venus","Mars","Jupiter"], a:1}},
+          {t:"There are more stars in the observable universe than grains of sand on Earth.", cat:"space", diff:"easy", tags:["stars","scale"], extra:"Estimates: ~10²⁴ stars vs ~10²⁰ sand grains—that's 10,000x more stars!", quiz:{q:"What outnumber grains of sand on Earth?", o:["Atoms","Stars","Ocean drops","Clouds"], a:1}},
+          {t:"Footprints on the Moon will last millions of years—no wind or water to erode them.", cat:"space", diff:"easy", tags:["moon","exploration"], extra:"Only micrometeorite impacts will slowly erase them over geological time!", quiz:{q:"Why do Moon footprints last so long?", o:["Hard surface","No atmosphere","Cold temperature","Magnetic field"], a:1}},
+          {t:"Jupiter's Great Red Spot is a storm larger than Earth, raging for 400+ years.", cat:"space", diff:"medium", tags:["jupiter","storms"], extra:"Wind speeds reach 430 km/h—but the storm has been shrinking in recent decades!", quiz:{q:"How long has Jupiter's Great Red Spot been observed?", o:["50 years","200 years","400+ years","1000 years"], a:2}},
+          {t:"Neutron stars spin up to 700 times per second—pulsars are cosmic lighthouses.", cat:"space", diff:"hard", tags:["neutron","pulsars"], extra:"Their beams sweep past Earth like lighthouse signals, creating precise cosmic clocks!", quiz:{q:"What are rapidly spinning neutron stars called?", o:["Quasars","Pulsars","Blazars","Novae"], a:1}},
+          {t:"The Sun contains 99.86% of the Solar System's mass.", cat:"space", diff:"easy", tags:["sun","solar system"], extra:"Jupiter has most of the remaining 0.14%; all planets, moons, and asteroids combined are tiny!", quiz:{q:"What percentage of Solar System mass is in the Sun?", o:["75%","90%","99.86%","100%"], a:2}},
+          {t:"Light from the Sun takes 8 minutes 20 seconds to reach Earth.", cat:"space", diff:"easy", tags:["light","sun"], extra:"So when you see the Sun, you're seeing it as it was over 8 minutes ago!", quiz:{q:"How long does sunlight take to reach Earth?", o:["8 seconds","8 minutes","8 hours","8 days"], a:1}},
+          {t:"Black holes don't 'suck'—you'd orbit one like a star if you replaced the Sun with equal mass.", cat:"space", diff:"hard", tags:["black holes","gravity"], extra:"Danger comes from tidal forces near the event horizon, not infinite suction!", quiz:{q:"If the Sun became a black hole of same mass, Earth would:", o:["Get sucked in","Orbit normally","Fly away","Explode"], a:1}}
+        ],
+        earth: [
+          {t:"Earth's core is as hot as the Sun's surface (~5,500°C).", cat:"earth", diff:"medium", tags:["core","temperature"], extra:"This heat comes from radioactive decay and residual formation energy!", quiz:{q:"What heats Earth's core?", o:["Solar radiation","Radioactive decay","Ocean currents","Wind"], a:1}},
+          {t:"The Pacific Ocean is larger than all landmasses combined.", cat:"earth", diff:"easy", tags:["ocean","geography"], extra:"It covers ~165 million km²—more than Asia, Africa, Americas, Europe, and Australia together!", quiz:{q:"Which ocean is larger than all land combined?", o:["Atlantic","Indian","Arctic","Pacific"], a:3}},
+          {t:"Mount Everest grows ~4mm yearly as India pushes into Asia.", cat:"earth", diff:"medium", tags:["mountains","tectonics"], extra:"But erosion and earthquakes can also reduce its height—geology is dynamic!", quiz:{q:"Why is Everest slowly getting taller?", o:["Volcanic activity","Tectonic collision","Ice buildup","Wind deposition"], a:1}},
+          {t:"Lightning strikes Earth ~100 times per second—8 million times daily.", cat:"earth", diff:"easy", tags:["lightning","weather"], extra:"Each bolt can heat air to 30,000°C—5x hotter than the Sun's surface!", quiz:{q:"About how many lightning strikes occur daily on Earth?", o:["80,000","800,000","8 million","80 million"], a:2}},
+          {t:"Antarctica holds ~70% of Earth's fresh water—as ice.", cat:"earth", diff:"medium", tags:["antarctica","water"], extra:"If all Antarctic ice melted, sea levels would rise ~60 meters (200 feet)!", quiz:{q:"What percentage of Earth's fresh water is in Antarctic ice?", o:["30%","50%","70%","90%"], a:2}},
+          {t:"The Amazon Rainforest produces ~20% of Earth's oxygen.", cat:"earth", diff:"easy", tags:["amazon","oxygen"], extra:"But most is consumed by the forest itself—oceans produce ~50-80% of breathable oxygen!", quiz:{q:"What produces most of Earth's breathable oxygen?", o:["Forests","Oceans","Grasslands","Algae"], a:1}},
+          {t:"Earth's magnetic field reverses every ~200,000-300,000 years.", cat:"earth", diff:"hard", tags:["magnetism","geology"], extra:"Last reversal was 780,000 years ago—we may be overdue! Compasses would point south.", quiz:{q:"What happens during a geomagnetic reversal?", o:["Field disappears","Poles swap","Field strengthens","Earth stops spinning"], a:1}},
+          {t:"The Dead Sea is 10x saltier than oceans—you float effortlessly.", cat:"earth", diff:"easy", tags:["sea","salinity"], extra:"At 34% salinity, it's one of Earth's saltiest bodies of water!", quiz:{q:"Why do people float easily in the Dead Sea?", o:["Warm water","High salinity","Shallow depth","Mineral oils"], a:1}}
+        ],
+        tech: [
+          {t:"The first computer bug was an actual moth trapped in a relay (1947).", cat:"tech", diff:"easy", tags:["computing","history"], extra:"Grace Hopper documented it—the term 'debugging' was born!", quiz:{q:"What was the first recorded computer 'bug'?", o:["Virus","Moth","Glitch","Error code"], a:1}},
+          {t:"A modern smartphone has more computing power than NASA used for Apollo 11.", cat:"tech", diff:"easy", tags:["computing","comparison"], extra:"Apollo guidance computer: 64KB RAM, 0.043 MHz. iPhone 15: 6GB RAM, 3.5 GHz!", quiz:{q:"Compared to Apollo 11's computer, a smartphone is:", o:["Less powerful","Similar","Millions of times more powerful","Slightly better"], a:2}},
+          {t:"The first website went live on August 6, 1991.", cat:"tech", diff:"medium", tags:["internet","history"], extra:"Created by Tim Berners-Lee at CERN—it explained the World Wide Web project!", quiz:{q:"When did the first website launch?", o:["1985","1989","1991","1995"], a:2}},
+          {t:"QR codes were invented in 1994 by a Japanese company for tracking car parts.", cat:"tech", diff:"medium", tags:["qr","innovation"], extra:"'QR' = Quick Response. They can store 7,000+ characters and work even if 30% damaged!", quiz:{q:"What does 'QR' stand for in QR code?", o:["Quick Read","Quality Record","Quick Response","Quantum Register"], a:2}},
+          {t:"The first computer mouse was made of wood (1964).", cat:"tech", diff:"easy", tags:["hardware","history"], extra:"Invented by Douglas Engelbart—it had two metal wheels for X/Y movement!", quiz:{q:"What material was the first computer mouse made from?", o:["Plastic","Metal","Wood","Rubber"], a:2}},
+          {t:"Email existed before the internet—sent over ARPANET in 1971.", cat:"tech", diff:"medium", tags:["email","history"], extra:"Ray Tomlinson sent the first network email and chose '@' to separate user from host!", quiz:{q:"What symbol did Ray Tomlinson choose for email addresses?", o:["#","$","@","&"], a:2}},
+          {t:"The term 'artificial intelligence' was coined in 1956 at Dartmouth College.", cat:"tech", diff:"medium", tags:["ai","history"], extra:"The Dartmouth Conference is considered the birth of AI as a field of study!", quiz:{q:"Where was the term 'Artificial Intelligence' first used?", o:["MIT","Stanford","Dartmouth","Harvard"], a:2}},
+          {t:"A single strand of spider silk is stronger than steel of the same weight.", cat:"tech", diff:"easy", tags:["materials","biomimicry"], extra:"Scientists are developing synthetic spider silk for bulletproof vests and medical sutures!", quiz:{q:"Spider silk is stronger than steel when compared by:", o:["Volume","Weight","Length","Color"], a:1}}
+        ],
+        medicine: [
+          {t:"The human body has ~37 trillion cells—but only ~38 trillion bacteria!", cat:"medicine", diff:"medium", tags:["microbiome","cells"], extra:"Most bacteria are harmless or helpful—they aid digestion, immunity, and more!", quiz:{q:"About how many bacterial cells live in/on your body?", o:["3.7 trillion","37 trillion","38 trillion","380 trillion"], a:2}},
+          {t:"Your stomach acid can dissolve metal—pH 1.5-3.5, stronger than vinegar.", cat:"medicine", diff:"easy", tags:["digestion","acids"], extra:"A protective mucus layer prevents your stomach from digesting itself!", quiz:{q:"What protects your stomach from its own acid?", o:["Water","Mucus layer","Enzymes","Bicarbonate"], a:1}},
+          {t:"The smallest bone in your body is the stapes—in your ear (3mm long).", cat:"medicine", diff:"easy", tags:["anatomy","bones"], extra:"Despite its size, it's crucial for transmitting sound vibrations to the inner ear!", quiz:{q:"Where is the smallest human bone located?", o:["Finger","Ear","Nose","Toe"], a:1}},
+          {t:"Penicillin was discovered by accident when mold contaminated a petri dish (1928).", cat:"medicine", diff:"easy", tags:["antibiotics","discovery"], extra:"Alexander Fleming noticed bacteria wouldn't grow near the mold—revolutionizing medicine!", quiz:{q:"What led to penicillin's discovery?", o:["Intentional experiment","Contaminated petri dish","Animal testing","Chemical synthesis"], a:1}},
+          {t:"Your liver can regenerate—losing up to 75% and still grow back.", cat:"medicine", diff:"medium", tags:["liver","regeneration"], extra:"This unique ability makes liver transplants possible with partial donors!", quiz:{q:"What percentage of liver can be lost and still regenerate?", o:["25%","50%","75%","90%"], a:2}},
+          {t:"Humans share ~60% of their DNA with bananas.", cat:"medicine", diff:"easy", tags:["genetics","evolution"], extra:"This reflects shared cellular machinery—DNA replication, protein synthesis, etc.—not appearance!", quiz:{q:"What percentage of DNA do humans share with bananas?", o:["10%","30%","60%","90%"], a:2}},
+          {t:"The placebo effect can trigger real physiological changes—pain relief, hormone release.", cat:"medicine", diff:"hard", tags:["psychology","placebo"], extra:"Brain scans show placebos activate the same pathways as actual drugs!", quiz:{q:"What can the placebo effect cause?", o:["Imaginary results","Real physiological changes","No effect","Only mental changes"], a:1}},
+          {t:"Your heart beats ~100,000 times daily, pumping ~7,500 liters of blood.", cat:"medicine", diff:"medium", tags:["heart","circulation"], extra:"Over a lifetime, that's ~2.5 billion beats and 200 million liters pumped!", quiz:{q:"About how many times does your heart beat per day?", o:["10,000","50,000","100,000","500,000"], a:2}}
+        ],
+        environment: [
+          {t:"A single tree can absorb ~22 kg of CO₂ per year.", cat:"environment", diff:"easy", tags:["trees","carbon"], extra:"Forests act as carbon sinks—critical for mitigating climate change!", quiz:{q:"How much CO₂ can one tree absorb yearly?", o:["2.2 kg","22 kg","220 kg","2,200 kg"], a:1}},
+          {t:"Plastic takes 450-1,000 years to decompose in landfills.", cat:"environment", diff:"easy", tags:["plastic","pollution"], extra:"Microplastics now exist everywhere—from mountaintops to deep ocean trenches!", quiz:{q:"How long does plastic take to decompose?", o:["10-50 years","100-200 years","450-1000 years","Never"], a:2}},
+          {t:"Bees pollinate ~1/3 of the food we eat.", cat:"environment", diff:"easy", tags:["bees","pollination"], extra:"Without bees, many fruits, vegetables, and nuts would become scarce or extinct!", quiz:{q:"What fraction of human food relies on bee pollination?", o:["1/10","1/3","1/2","2/3"], a:1}},
+          {t:"The Great Barrier Reef is visible from space—2,300 km long.", cat:"environment", diff:"medium", tags:["reef","ocean"], extra:"It's the world's largest living structure, home to 1,500+ fish species!", quiz:{q:"What is the world's largest living structure visible from space?", o:["Amazon Forest","Great Wall","Great Barrier Reef","Sahara Desert"], a:2}},
+          {t:"Light pollution disrupts wildlife migration, bird navigation, and human sleep.", cat:"environment", diff:"medium", tags:["light","pollution"], extra:"Over 80% of the world's population lives under light-polluted skies!", quiz:{q:"What does light pollution primarily disrupt?", o:["Radio signals","Wildlife behavior","Internet speed","Weather patterns"], a:1}},
+          {t:"Recycling one aluminum can saves enough energy to run a TV for 3 hours.", cat:"environment", diff:"easy", tags:["recycling","energy"], extra:"Aluminum can be recycled infinitely without quality loss—unlike plastic!", quiz:{q:"What can you power for 3 hours by recycling one aluminum can?", o:["Phone","TV","Laptop","Lightbulb"], a:1}},
+          {t:"Ocean acidification (from CO₂) threatens shellfish, corals, and marine food webs.", cat:"environment", diff:"hard", tags:["ocean","climate"], extra:"Since industrialization, ocean pH has dropped 0.1 units—representing 30% more acidity!", quiz:{q:"What causes ocean acidification?", o:["Plastic waste","CO₂ absorption","Oil spills","Overfishing"], a:1}},
+          {t:"A mature tree produces enough oxygen for 2 people per year.", cat:"environment", diff:"easy", tags:["trees","oxygen"], extra:"This is why reforestation is critical for both climate and breathable air!", quiz:{q:"How many people can one mature tree support with oxygen yearly?", o:["1","2","5","10"], a:1}}
+        ],
+        psychology: [
+          {t:"The brain uses ~20% of your body's energy despite being only 2% of weight.", cat:"psychology", diff:"medium", tags:["brain","energy"], extra:"Most energy goes to maintaining neuron connections—even during sleep!", quiz:{q:"What percentage of body energy does the brain use?", o:["5%","10%","20%","40%"], a:2}},
+          {t:"Multitasking is a myth—your brain rapidly switches tasks, reducing efficiency by 40%.", cat:"psychology", diff:"easy", tags:["focus","productivity"], extra:"True multitasking only happens with automatic tasks like walking while talking!", quiz:{q:"What happens to efficiency when 'multitasking'?", o:["Increases","Stays same","Decreases by 40%","Doubles"], a:2}},
+          {t:"The 'Baader-Meinhof' phenomenon: noticing something new everywhere after learning it.", cat:"psychology", diff:"medium", tags:["cognition","bias"], extra:"Also called frequency illusion—your brain filters for newly relevant info!", quiz:{q:"What is noticing something everywhere after learning it called?", o:["Déjà vu","Baader-Meinhof phenomenon","Placebo effect","Halo effect"], a:1}},
+          {t:"Smiling—even fake—can trick your brain into feeling happier.", cat:"psychology", diff:"easy", tags:["emotions","facial feedback"], extra:"The facial feedback hypothesis suggests expressions influence emotional experience!", quiz:{q:"Can fake smiling improve mood?", o:["No","Only if genuine","Yes, via facial feedback","Only in children"], a:2}},
+          {t:"Memory is reconstructive—not a perfect recording. Each recall can alter it.", cat:"psychology", diff:"hard", tags:["memory","cognition"], extra:"This is why eyewitness testimony can be unreliable—memories change with retelling!", quiz:{q:"What happens to memories each time you recall them?", o:["Strengthen unchanged","Weaken","Can be altered","Become photographic"], a:2}},
+          {t:"The 'Dunning-Kruger effect': low-ability people overestimate, experts underestimate competence.", cat:"psychology", diff:"hard", tags:["bias","competence"], extra:"It's a metacognitive deficit—skills needed to do a task well also help evaluate performance!", quiz:{q:"What does the Dunning-Kruger effect describe?", o:["Experts overconfident","Novices overconfident","Everyone accurate","Confidence unrelated to skill"], a:1}},
+          {t:"Sleep is when your brain consolidates memories and clears metabolic waste.", cat:"psychology", diff:"medium", tags:["sleep","memory"], extra:"The glymphatic system flushes toxins like beta-amyloid (linked to Alzheimer's) during deep sleep!", quiz:{q:"What critical brain process happens during sleep?", o:["Memory consolidation","Muscle growth","Digestion","Hair growth"], a:0}},
+          {t:"Humans can recognize ~5,000 faces—but struggle with faces of other ethnicities (own-race bias).", cat:"psychology", diff:"medium", tags:["faces","bias"], extra:"This isn't prejudice—it's neural tuning from exposure. Diverse interaction reduces the effect!", quiz:{q:"About how many faces can humans recognize?", o:["500","5,000","50,000","500,000"], a:1}}
+        ],
+        math: [
+          {t:"Zero was invented independently by Babylonians, Mayans, and Indians (~5th century CE).", cat:"math", diff:"medium", tags:["zero","history"], extra:"Indian mathematician Brahmagupta first defined zero's arithmetic rules in 628 CE!", quiz:{q:"Who first defined zero's arithmetic rules?", o:["Greeks","Romans","Brahmagupta","Newton"], a:2}},
+          {t:"The Fibonacci sequence appears in nature: pinecones, sunflowers, hurricanes, galaxies.", cat:"math", diff:"easy", tags:["fibonacci","patterns"], extra:"Each number is sum of previous two: 1,1,2,3,5,8,13... Ratio approaches the Golden Ratio (1.618)!", quiz:{q:"What sequence appears in pinecones and sunflowers?", o:["Prime numbers","Fibonacci","Square numbers","Random"], a:1}},
+          {t:"There are more possible chess games than atoms in the observable universe.", cat:"math", diff:"hard", tags:["combinatorics","chess"], extra:"Shannon number: ~10¹²⁰ chess games vs ~10⁸⁰ atoms—that's 10⁴⁰ times more games!", quiz:{q:"What has more possibilities: chess games or universe atoms?", o:["Atoms","Chess games","Equal","Unknown"], a:1}},
+          {t:"A googol is 10¹⁰⁰ (1 followed by 100 zeros). A googolplex is 10^(googol).", cat:"math", diff:"medium", tags:["large numbers","googol"], extra:"Writing a googolplex would require more space than the observable universe provides!", quiz:{q:"What is a googol?", o:["10^10","10^50","10^100","10^1000"], a:2}},
+          {t:"Pi (π) is irrational—its decimal never repeats or ends. Trillions of digits computed.", cat:"math", diff:"easy", tags:["pi","irrational"], extra:"π appears everywhere: circles, waves, probability, quantum physics—it's fundamental!", quiz:{q:"What makes pi (π) irrational?", o:["Negative","Fraction","Non-repeating decimal","Imaginary"], a:2}},
+          {t:"The Monty Hall problem: switching doors doubles your win chance (2/3 vs 1/3).", cat:"math", diff:"hard", tags:["probability","paradox"], extra:"Counterintuitive but provable—your initial choice has 1/3 chance; switching captures the other 2/3!", quiz:{q:"In Monty Hall, switching doors gives what win probability?", o:["1/4","1/3","1/2","2/3"], a:3}},
+          {t:"Fractals have infinite perimeter but finite area—like coastlines.", cat:"math", diff:"hard", tags:["fractals","geometry"], extra:"Coastline paradox: measured length increases as measurement scale decreases!", quiz:{q:"What geometric object has infinite perimeter but finite area?", o:["Circle","Square","Fractal","Triangle"], a:2}},
+          {t:"0.999... (repeating) equals exactly 1—not 'almost' 1.", cat:"math", diff:"medium", tags:["infinity","proof"], extra:"Proof: Let x=0.999...; 10x=9.999...; subtract: 9x=9; so x=1!", quiz:{q:"What does 0.999... (repeating) equal?", o:["0.99","0.999","Almost 1","Exactly 1"], a:3}}
+        ]
+      };
+
+      // ====== STATE ======
+      const state = {
+        currentCat: 'all',
+        searchQuery: '',
+        currentIndex: 0,
+        favorites: JSON.parse(localStorage.getItem('sf-favorites') || '[]'),
+        dailyFact: null,
+        streak: parseInt(localStorage.getItem('sf-streak') || '0'),
+        lastVisit: localStorage.getItem('sf-lastVisit'),
+        quizMode: false,
+        currentQuiz: null
+      };
+
+      // ====== DOM ======
+      const els = {
+        total: document.getElementById('sf-total'),
+        favCount: document.getElementById('sf-fav-count'),
+        streak: document.getElementById('sf-streak'),
+        search: document.getElementById('sf-search'),
+        tabs: document.querySelectorAll('.sf-tab'),
+        daily: document.getElementById('sf-daily'),
+        dailyText: document.getElementById('sf-daily-text'),
+        category: document.getElementById('sf-category'),
+        difficulty: document.getElementById('sf-difficulty'),
+        fact: document.getElementById('sf-fact'),
+        tags: document.getElementById('sf-tags'),
+        extra: document.getElementById('sf-extra'),
+        next: document.getElementById('sf-next'),
+        bookmark: document.getElementById('sf-bookmark'),
+        share: document.getElementById('sf-share'),
+        speak: document.getElementById('sf-speak'),
+        details: document.getElementById('sf-details'),
+        quiz: document.getElementById('sf-quiz'),
+        quizContent: document.getElementById('sf-quiz-content'),
+        favorites: document.getElementById('sf-favorites'),
+        favList: document.getElementById('sf-fav-list'),
+        exportFavs: document.getElementById('sf-export-favs')
+      };
+
+      // ====== UTILS ======
+      const getAllFacts = () => {
+        let all = [];
+        Object.entries(factsDB).forEach(([cat, facts]) => {
+          facts.forEach(f => all.push({...f, id: `${cat}-${all.length}`}));
+        });
+        return all;
+      };
+
+      const filterFacts = () => {
+        let facts = state.currentCat === 'all' ? getAllFacts() : factsDB[state.currentCat].map((f,i) => ({...f, id: `${state.currentCat}-${i}`}));
+        if(state.searchQuery) {
+          const q = state.searchQuery.toLowerCase();
+          facts = facts.filter(f => 
+            f.t.toLowerCase().includes(q) || 
+            f.tags.some(t => t.includes(q)) ||
+            f.cat.includes(q)
+          );
+        }
+        return facts;
+      };
+
+      const updateStats = () => {
+        els.total.textContent = getAllFacts().length;
+        els.favCount.textContent = state.favorites.length;
+        els.streak.textContent = state.streak;
+      };
+
+      const getDailyFact = () => {
+        const today = new Date().toDateString();
+        const all = getAllFacts();
+        // Simple hash based on date for consistent daily fact
+        const hash = today.split('').reduce((a,c) => a + c.charCodeAt(0), 0);
+        return all[hash % all.length];
+      };
+
+      const showFact = (fact) => {
+        els.category.innerHTML = `⚛️ ${fact.cat.charAt(0).toUpperCase() + fact.cat.slice(1)}`;
+        els.category.className = `sf-category ${fact.cat}`;
+        els.difficulty.textContent = fact.diff.charAt(0).toUpperCase() + fact.diff.slice(1);
+        els.difficulty.className = `sf-difficulty ${fact.diff}`;
+        els.fact.textContent = fact.t;
+        els.tags.innerHTML = fact.tags.map(tag => `<span class="sf-tag">#${tag}</span>`).join('');
+        els.extra.textContent = fact.extra || '';
+        els.extra.classList.remove('show');
+        
+        // Update bookmark button
+        const isFav = state.favorites.some(f => f.id === fact.id);
+        els.bookmark.textContent = isFav ? '🔖 Saved' : '🔖 Save';
+        els.bookmark.classList.toggle('bookmarked', isFav);
+        
+        // Hide quiz if showing regular fact
+        if(!state.quizMode) els.quiz.classList.remove('show');
+      };
+
+      const nextFact = () => {
+        const facts = filterFacts();
+        if(facts.length === 0) {
+          els.fact.textContent = 'No facts found. Try different search or category.';
+          return;
+        }
+        state.currentIndex = (state.currentIndex + 1) % facts.length;
+        showFact(facts[state.currentIndex]);
+      };
+
+      const toggleBookmark = (fact) => {
+        const idx = state.favorites.findIndex(f => f.id === fact.id);
+        if(idx > -1) {
+          state.favorites.splice(idx, 1);
+        } else {
+          state.favorites.push(fact);
+          triggerConfetti();
+        }
+        localStorage.setItem('sf-favorites', JSON.stringify(state.favorites));
+        updateStats();
+        renderFavorites();
+        showFact(fact); // Refresh button state
+      };
+
+      const shareFact = async (fact) => {
+        const text = `🔬 ${fact.cat.toUpperCase()}: ${fact.t}\n\n💡 ${fact.extra || 'Learn more at Science Facts Pro!'}\n\n#${fact.tags.join(' #')}`;
+        try {
+          if(navigator.share) await navigator.share({ title: 'Science Fact', text });
+          else {
+            await navigator.clipboard.writeText(text);
+            alert('✅ Fact copied to clipboard!');
+          }
+        } catch(e) {}
+      };
+
+      const speakFact = (fact) => {
+        if('speechSynthesis' in window) {
+          const utterance = new SpeechSynthesisUtterance(fact.t);
+          utterance.rate = 0.9;
+          speechSynthesis.speak(utterance);
+        } else {
+          alert('🔊 Text-to-speech not supported in this browser.');
+        }
+      };
+
+      const showDetails = (fact) => {
+        els.extra.classList.toggle('show');
+      };
+
+      const startQuiz = (fact) => {
+        if(!fact.quiz) {
+          alert('🧠 No quiz available for this fact. Try another!');
+          return;
+        }
+        state.quizMode = true;
+        state.currentQuiz = fact;
+        
+        els.quizContent.innerHTML = `
+          <p class="sf-quiz-q">${fact.quiz.q}</p>
+          <div class="sf-quiz-opts">
+            ${fact.quiz.o.map((opt, i) => `<button class="sf-quiz-opt" data-idx="${i}">${opt}</button>`).join('')}
+          </div>
+        `;
+        
+        els.quizContent.querySelectorAll('.sf-quiz-opt').forEach(btn => {
+          btn.onclick = () => handleQuizAnswer(btn, parseInt(btn.dataset.idx), fact.quiz.a);
+        });
+        
+        els.quiz.classList.add('show');
+        els.fact.textContent = 'Answer the quiz question above!';
+      };
+
+      const handleQuizAnswer = (btn, selected, correct) => {
+        // Disable all options
+        els.quizContent.querySelectorAll('.sf-quiz-opt').forEach(b => {
+          b.disabled = true;
+          if(parseInt(b.dataset.idx) === correct) b.classList.add('correct');
+          if(parseInt(b.dataset.idx) === selected && selected !== correct) b.classList.add('wrong');
+        });
+        
+        // Show result
+        const result = document.createElement('div');
+        result.className = `sf-quiz-result ${selected === correct ? 'pass' : 'fail'}`;
+        result.innerHTML = selected === correct 
+          ? '🎉 Correct! Great science knowledge!' 
+          : `❌ Not quite. The correct answer was: ${state.currentQuiz.quiz.o[correct]}`;
+        els.quizContent.appendChild(result);
+        
+        // Auto-return to facts after delay
+        setTimeout(() => {
+          state.quizMode = false;
+          els.quiz.classList.remove('show');
+          nextFact();
+        }, 3000);
+      };
+
+      const renderFavorites = () => {
+        if(state.favorites.length === 0) {
+          els.favorites.style.display = 'none';
+          return;
+        }
+        els.favorites.style.display = 'block';
+        els.favList.innerHTML = state.favorites.map(f => `
+          <div class="sf-fav-item">
+            <span class="sf-fav-item-text" title="${f.t}">${f.t}</span>
+            <button class="sf-fav-remove" data-id="${f.id}">×</button>
+          </div>
+        `).join('');
+        
+        els.favList.querySelectorAll('.sf-fav-remove').forEach(btn => {
+          btn.onclick = (e) => {
+            e.stopPropagation();
+            const id = btn.dataset.id;
+            state.favorites = state.favorites.filter(f => f.id !== id);
+            localStorage.setItem('sf-favorites', JSON.stringify(state.favorites));
+            updateStats();
+            renderFavorites();
+          };
+        });
+      };
+
+      const exportFavorites = async () => {
+        if(state.favorites.length === 0) {
+          alert('📭 No saved facts to export.');
+          return;
+        }
+        const text = `🔬 My Saved Science Facts:\n\n${state.favorites.map((f,i) => `${i+1}. [${f.cat.toUpperCase()}] ${f.t}\n   💡 ${f.extra}`).join('\n\n')}`;
+        try {
+          await navigator.clipboard.writeText(text);
+          alert('✅ Exported to clipboard! Paste anywhere to save.');
+        } catch(e) {
+          alert('❌ Copy failed. Please select and copy manually.');
+        }
+      };
+
+      const triggerConfetti = () => {
+        const colors = ['#10b981','#3b82f6','#f59e0b','#ef4444','#8b5cf6','#ec4899'];
+        for(let i=0; i<30; i++) {
+          const c = document.createElement('div');
+          c.className = 'sf-confetti';
+          c.style.left = Math.random() * 100 + 'vw';
+          c.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+          c.style.animationDelay = Math.random() * 2 + 's';
+          document.body.appendChild(c);
+          setTimeout(() => c.remove(), 3000);
+        }
+      };
+
+      const updateStreak = () => {
+        const today = new Date().toDateString();
+        if(state.lastVisit !== today) {
+          const yesterday = new Date(Date.now() - 86400000).toDateString();
+          state.streak = state.lastVisit === yesterday ? state.streak + 1 : 1;
+          state.lastVisit = today;
+          localStorage.setItem('sf-streak', state.streak.toString());
+          localStorage.setItem('sf-lastVisit', today);
+          updateStats();
+        }
+      };
+
+      // ====== EVENTS ======
+      els.search.oninput = (e) => {
+        state.searchQuery = e.target.value;
+        state.currentIndex = 0;
+        nextFact();
+      };
+
+      els.tabs.forEach(tab => {
+        tab.onclick = () => {
+          els.tabs.forEach(t => t.classList.remove('active'));
+          tab.classList.add('active');
+          state.currentCat = tab.dataset.cat;
+          state.currentIndex = 0;
+          nextFact();
+        };
+      });
+
+      els.next.onclick = () => {
+        if(state.quizMode) {
+          state.quizMode = false;
+          els.quiz.classList.remove('show');
+        }
+        nextFact();
+      };
+
+      els.bookmark.onclick = () => {
+        const facts = filterFacts();
+        if(facts[state.currentIndex]) toggleBookmark(facts[state.currentIndex]);
+      };
+
+      els.share.onclick = () => {
+        const facts = filterFacts();
+        if(facts[state.currentIndex]) shareFact(facts[state.currentIndex]);
+      };
+
+      els.speak.onclick = () => {
+        const facts = filterFacts();
+        if(facts[state.currentIndex]) speakFact(facts[state.currentIndex]);
+      };
+
+      els.details.onclick = () => {
+        const facts = filterFacts();
+        if(facts[state.currentIndex]) showDetails(facts[state.currentIndex]);
+      };
+
+      els.daily.onclick = () => {
+        if(state.dailyFact) showFact(state.dailyFact);
+      };
+
+      els.exportFavs.onclick = exportFavorites;
+
+      // Keyboard shortcuts
+      document.addEventListener('keydown', (e) => {
+        if(e.target.tagName === 'INPUT') return;
+        if(e.code === 'Space') { e.preventDefault(); els.next.click(); }
+        if(e.key.toLowerCase() === 'b') els.bookmark.click();
+        if(e.key.toLowerCase() === 's') els.share.click();
+        if(e.key.toLowerCase() === 'r') els.speak.click();
+        if(e.key.toLowerCase() === 'q') {
+          const facts = filterFacts();
+          if(facts[state.currentIndex]) startQuiz(facts[state.currentIndex]);
+        }
+      });
+
+      // Init
+      updateStreak();
+      state.dailyFact = getDailyFact();
+      els.dailyText.textContent = state.dailyFact.t;
+      updateStats();
+      renderFavorites();
+      nextFact();
+    })();
+  </script>
+</div>

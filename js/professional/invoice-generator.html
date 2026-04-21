@@ -1,0 +1,282 @@
+<div class="professional-tool">
+  <style>
+    .professional-tool {
+      --bg: #f8fafc; --card: #ffffff; --border: #e2e8f0;
+      --text: #0f172a; --text-sec: #64748b; --accent: #2563eb;
+      --success: #10b981; --warning: #f59e0b; --danger: #ef4444;
+      --shadow: 0 4px 12px rgba(0,0,0,0.05); --radius: 12px;
+      font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+      max-width: 850px; margin: 0 auto; padding: 1.8rem;
+      background: var(--bg); border-radius: 16px; box-shadow: var(--shadow);
+      box-sizing: border-box; position: relative;
+    }
+    .professional-tool * { box-sizing: border-box; }
+    .inv-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.2rem; flex-wrap: wrap; gap: 1rem; }
+    .inv-title { margin: 0; font-size: 1.5rem; color: var(--text); }
+    .inv-badge { font-size: 0.75rem; padding: 0.25rem 0.6rem; border-radius: 20px; background: #eff6ff; color: var(--accent); font-weight: 600; }
+    .inv-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin-bottom: 1.2rem; }
+    .inv-field { display: flex; flex-direction: column; gap: 0.35rem; }
+    .inv-field label { font-size: 0.78rem; font-weight: 600; color: var(--text-sec); }
+    .inv-input, .inv-select, .inv-textarea {
+      padding: 0.75rem; border: 1px solid var(--border); border-radius: var(--radius);
+      background: var(--card); color: var(--text); font-size: 0.92rem; outline: none; transition: all 0.2s;
+    }
+    .inv-input:focus, .inv-select:focus, .inv-textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(37,99,235,0.12); }
+    .inv-textarea { resize: vertical; min-height: 60px; }
+    .inv-table-wrap { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); overflow-x: auto; margin-bottom: 1.2rem; }
+    .inv-table { width: 100%; border-collapse: collapse; min-width: 600px; }
+    .inv-table th { text-align: left; padding: 0.8rem 1rem; background: #f1f5f9; font-size: 0.78rem; font-weight: 600; color: var(--text-sec); border-bottom: 1px solid var(--border); }
+    .inv-table td { padding: 0.6rem 1rem; border-bottom: 1px solid var(--border); vertical-align: middle; }
+    .inv-table .item-desc { min-width: 180px; }
+    .inv-table .item-num { width: 70px; }
+    .inv-table .item-amount { width: 100px; text-align: right; font-weight: 600; color: var(--text); }
+    .inv-btn { padding: 0.6rem 1rem; border: none; border-radius: 8px; font-weight: 500; cursor: pointer; transition: all 0.2s; font-size: 0.85rem; display: inline-flex; align-items: center; gap: 0.4rem; }
+    .inv-btn-primary { background: var(--accent); color: #fff; }
+    .inv-btn-primary:hover { background: #1d4ed8; }
+    .inv-btn-secondary { background: var(--card); border: 1px solid var(--border); color: var(--text-sec); }
+    .inv-btn-secondary:hover { background: #f8fafc; border-color: var(--accent); color: var(--accent); }
+    .inv-btn-danger { background: rgba(239,68,68,0.1); color: var(--danger); }
+    .inv-btn-danger:hover { background: var(--danger); color: #fff; }
+    .inv-actions { display: flex; gap: 0.8rem; justify-content: flex-end; margin-top: 1rem; flex-wrap: wrap; }
+    .inv-summary { display: grid; grid-template-columns: 1fr 300px; gap: 2rem; margin-bottom: 1.2rem; }
+    .inv-totals { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem; }
+    .inv-total-row { display: flex; justify-content: space-between; padding: 0.4rem 0; font-size: 0.92rem; color: var(--text-sec); }
+    .inv-total-row.grand { font-size: 1.15rem; font-weight: 700; color: var(--text); border-top: 2px solid var(--border); padding-top: 0.8rem; margin-top: 0.4rem; }
+    .inv-toast {
+      position: absolute; bottom: 1.2rem; right: 1.2rem; background: var(--text); color: #fff;
+      padding: 0.7rem 1rem; border-radius: 10px; font-size: 0.85rem; transform: translateY(120%);
+      transition: transform 0.3s cubic-bezier(0.4,0,0.2,1); z-index: 10; pointer-events: none;
+    }
+    .inv-toast.show { transform: translateY(0); }
+    @media (max-width: 700px) {
+      .professional-tool { padding: 1.2rem; }
+      .inv-summary { grid-template-columns: 1fr; }
+      .inv-table-wrap { margin: 0 -0.5rem; border-radius: 0; border-left: none; border-right: none; }
+    }
+    @media print {
+      body { background: #fff !important; margin: 0 !important; }
+      .professional-tool { box-shadow: none; padding: 0; background: #fff; max-width: 100%; border-radius: 0; }
+      .inv-btn, .inv-actions, .inv-table .inv-btn-danger, .inv-input, .inv-select, .inv-textarea { display: none !important; }
+      .inv-table td, .inv-table th { padding: 0.5rem 0; border-bottom: 1px solid #eee; }
+      .inv-table td input { border: none; padding: 0; background: transparent; font-weight: 500; color: var(--text); }
+      .inv-table td input::placeholder { color: transparent; }
+      .inv-field label { display: none; }
+      .inv-field input, .inv-field select, .inv-field textarea { border: none; background: transparent; padding: 0; font-size: 1rem; color: var(--text); font-weight: 500; }
+      .inv-badge { border: 1px solid #ddd; }
+    }
+  </style>
+
+  <div class="inv-header">
+    <div>
+      <h3 class="inv-title">📄 Professional Invoice Generator</h3>
+      <span class="inv-badge">Draft</span>
+    </div>
+    <div style="display:flex; gap:0.8rem; align-items:center;">
+      <label style="font-size:0.82rem; color:var(--text-sec); font-weight:600;">Invoice #
+        <input class="inv-input" id="inv-num" value="INV-2024-001" style="width:140px; padding:0.5rem;">
+      </label>
+      <label style="font-size:0.82rem; color:var(--text-sec); font-weight:600;">Currency
+        <select class="inv-select" id="inv-currency" style="padding:0.5rem; width:80px;">
+          <option value="$">$ USD</option><option value="€">€ EUR</option><option value="£">£ GBP</option><option value="₹">₹ INR</option>
+        </select>
+      </label>
+    </div>
+  </div>
+
+  <div class="inv-grid">
+    <div class="inv-field">
+      <label>Issue Date</label>
+      <input type="date" class="inv-input" id="inv-date">
+    </div>
+    <div class="inv-field">
+      <label>Due Date</label>
+      <input type="date" class="inv-input" id="inv-due">
+    </div>
+  </div>
+
+  <div class="inv-grid">
+    <div class="inv-field">
+      <label>From (Your Details)</label>
+      <textarea class="inv-textarea" id="inv-from" placeholder="Company Name&#10;Address, City, Zip&#10;Email | Phone">AbOmniTech LLC&#10;123 Tech Blvd, Suite 400&#10;hello@abomnitech.com | +1 (555) 012-3456</textarea>
+    </div>
+    <div class="inv-field">
+      <label>To (Client Details)</label>
+      <textarea class="inv-textarea" id="inv-to" placeholder="Client Name&#10;Company, Address&#10;Billing Email">Client Corp Inc.&#10;456 Business Ave, Floor 2&#10;accounts@clientcorp.com</textarea>
+    </div>
+  </div>
+
+  <div class="inv-table-wrap">
+    <table class="inv-table">
+      <thead>
+        <tr>
+          <th class="item-desc">Description</th>
+          <th class="item-num">Qty</th>
+          <th class="item-num">Rate</th>
+          <th style="text-align:right; width:120px;">Amount</th>
+          <th style="width:40px;"></th>
+        </tr>
+      </thead>
+      <tbody id="inv-items-body"></tbody>
+    </table>
+  </div>
+  <button class="inv-btn inv-btn-secondary" id="inv-add">+ Add Line Item</button>
+
+  <div class="inv-summary" style="margin-top:1.5rem;">
+    <div>
+      <div class="inv-field"><label>Notes</label><textarea class="inv-textarea" id="inv-notes" placeholder="Thank you for your business!">Payment due within 14 days. Please reference invoice number when transferring.</textarea></div>
+      <div class="inv-field" style="margin-top:0.8rem;"><label>Terms & Conditions</label><textarea class="inv-textarea" id="inv-terms" placeholder="Late fees, refund policy, etc.">Late payments may incur a 2% monthly interest charge.</textarea></div>
+    </div>
+    <div class="inv-totals">
+      <div class="inv-total-row"><span>Subtotal</span><span id="inv-subtotal">0.00</span></div>
+      <div class="inv-total-row" style="align-items:center;">
+        <span>Tax (%)</span>
+        <input type="number" class="inv-input" id="inv-tax" value="10" min="0" max="100" style="width:60px; text-align:center; padding:0.4rem;">
+      </div>
+      <div class="inv-total-row" style="align-items:center;">
+        <span>Discount (%)</span>
+        <input type="number" class="inv-input" id="inv-disc" value="0" min="0" max="100" style="width:60px; text-align:center; padding:0.4rem;">
+      </div>
+      <div class="inv-total-row grand"><span>Total Due</span><span id="inv-total">0.00</span></div>
+    </div>
+  </div>
+
+  <div class="inv-actions">
+    <button class="inv-btn inv-btn-secondary" id="inv-clear">🗑️ Clear</button>
+    <button class="inv-btn inv-btn-secondary" id="inv-save">💾 Save Draft</button>
+    <button class="inv-btn inv-btn-primary" id="inv-print">🖨️ Print / PDF</button>
+  </div>
+
+  <div class="inv-toast" id="inv-toast"></div>
+
+  <script>
+    (function(){
+      // State & DOM
+      const state = {
+        items: [{ desc: 'Professional Services', qty: 1, rate: 500 }],
+        currency: '$', tax: 10, discount: 0
+      };
+      const els = {
+        num: document.getElementById('inv-num'), currency: document.getElementById('inv-currency'),
+        date: document.getElementById('inv-date'), due: document.getElementById('inv-due'),
+        from: document.getElementById('inv-from'), to: document.getElementById('inv-to'),
+        tbody: document.getElementById('inv-items-body'), addBtn: document.getElementById('inv-add'),
+        tax: document.getElementById('inv-tax'), disc: document.getElementById('inv-disc'),
+        sub: document.getElementById('inv-subtotal'), total: document.getElementById('inv-total'),
+        notes: document.getElementById('inv-notes'), terms: document.getElementById('inv-terms'),
+        printBtn: document.getElementById('inv-print'), saveBtn: document.getElementById('inv-save'),
+        clearBtn: document.getElementById('inv-clear'), toast: document.getElementById('inv-toast')
+      };
+
+      // Utils
+      const uid = () => Math.random().toString(36).substr(2, 9);
+      const toast = msg => { els.toast.textContent = msg; els.toast.classList.add('show'); setTimeout(()=>els.toast.classList.remove('show'), 2000); };
+      const fmt = n => `${state.currency}${n.toFixed(2)}`;
+      const calc = () => {
+        let sub = 0;
+        document.querySelectorAll('.inv-item').forEach(r => {
+          const q = parseFloat(r.querySelector('[data-q]').value) || 0;
+          const p = parseFloat(r.querySelector('[data-p]').value) || 0;
+          const amt = q * p;
+          r.querySelector('.item-amount').textContent = fmt(amt);
+          sub += amt;
+        });
+        const taxRate = parseFloat(els.tax.value) || 0;
+        const discRate = parseFloat(els.disc.value) || 0;
+        const taxAmt = sub * (taxRate / 100);
+        const discAmt = sub * (discRate / 100);
+        const total = sub + taxAmt - discAmt;
+        els.sub.textContent = fmt(sub);
+        els.total.textContent = fmt(Math.max(0, total));
+      };
+
+      // Render Items
+      const renderItems = () => {
+        els.tbody.innerHTML = state.items.map((it, i) => `
+          <tr class="inv-item">
+            <td class="item-desc"><input class="inv-input" value="${it.desc}" placeholder="Service description"></td>
+            <td class="item-num"><input class="inv-input" type="number" value="${it.qty}" min="1" data-q></td>
+            <td class="item-num"><input class="inv-input" type="number" value="${it.rate}" min="0" step="0.01" data-p></td>
+            <td class="item-amount">${fmt(it.qty * it.rate)}</td>
+            <td><button class="inv-btn inv-btn-danger" style="padding:0.4rem 0.6rem; font-size:0.75rem;">✕</button></td>
+          </tr>
+        `).join('');
+        attachItemEvents(); calc();
+      };
+
+      const attachItemEvents = () => {
+        els.tbody.querySelectorAll('input').forEach(i => i.addEventListener('input', calc));
+        els.tbody.querySelectorAll('.inv-btn-danger').forEach(b => b.addEventListener('click', e => {
+          const row = e.target.closest('.inv-item');
+          if(document.querySelectorAll('.inv-item').length > 1) row.remove(); else toast('⚠️ Minimum 1 item required');
+          calc();
+        }));
+      };
+
+      // Actions
+      els.addBtn.addEventListener('click', () => {
+        state.items.push({ desc: 'New Item', qty: 1, rate: 0 });
+        renderItems();
+      });
+
+      els.tax.addEventListener('input', calc);
+      els.disc.addEventListener('input', calc);
+      els.currency.addEventListener('change', e => { state.currency = e.target.value; calc(); });
+
+      // Dates init
+      const today = new Date();
+      const due = new Date(); due.setDate(today.getDate() + 14);
+      els.date.value = today.toISOString().split('T')[0];
+      els.due.value = due.toISOString().split('T')[0];
+
+      // Save / Load
+      const saveDraft = () => {
+        const draft = {
+          num: els.num.value, currency: state.currency, date: els.date.value, due: els.due.value,
+          from: els.from.value, to: els.to.value,
+          items: Array.from(els.tbody.querySelectorAll('.inv-item')).map(r => ({
+            desc: r.querySelector('[data-desc]').value,
+            qty: r.querySelector('[data-q]').value,
+            rate: r.querySelector('[data-p]').value
+          })),
+          tax: els.tax.value, disc: els.disc.value,
+          notes: els.notes.value, terms: els.terms.value,
+          savedAt: Date.now()
+        };
+        localStorage.setItem('invoice_draft', JSON.stringify(draft));
+        toast('💾 Draft saved locally');
+      };
+
+      const loadDraft = () => {
+        const d = JSON.parse(localStorage.getItem('invoice_draft') || '{}');
+        if(!d.num) return;
+        els.num.value = d.num || 'INV-NEW';
+        state.currency = d.currency || '$'; els.currency.value = state.currency;
+        els.date.value = d.date || today.toISOString().split('T')[0];
+        els.due.value = d.due || due.toISOString().split('T')[0];
+        els.from.value = d.from || ''; els.to.value = d.to || '';
+        state.items = d.items || [{ desc: 'New Item', qty: 1, rate: 0 }];
+        els.tax.value = d.tax || 10; els.disc.value = d.disc || 0;
+        els.notes.value = d.notes || ''; els.terms.value = d.terms || '';
+        renderItems();
+        toast('📂 Draft loaded');
+      };
+
+      els.saveBtn.addEventListener('click', saveDraft);
+      els.clearBtn.addEventListener('click', () => {
+        if(confirm('Clear all fields and start fresh?')) {
+          localStorage.removeItem('invoice_draft');
+          location.reload();
+        }
+      });
+
+      // Print
+      els.printBtn.addEventListener('click', () => {
+        window.print();
+      });
+
+      // Init
+      loadDraft(); // Auto-load if exists
+      if(!localStorage.getItem('invoice_draft')) renderItems();
+    })();
+  </script>
+</div>

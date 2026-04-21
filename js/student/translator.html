@@ -1,0 +1,1293 @@
+<div class="student-tool">
+  <style>
+    :root {
+      --glass-border: rgba(255,255,255,0.15);
+      --bg-card: #1e1e2e;
+      --bg-hover: #2a2a3c;
+      --text-primary: #e2e2e2;
+      --text-secondary: #a0a0b0;
+      --accent: #6366f1;
+      --accent-glow: rgba(99,102,241,0.3);
+      --gradient-main: linear-gradient(135deg, #8b5cf6, #6366f1);
+      --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      --success: #10b981;
+      --warning: #f59e0b;
+      --error: #ef4444;
+    }
+    .student-tool {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 1rem;
+      font-family: system-ui, -apple-system, sans-serif;
+      color: var(--text-primary);
+      background: linear-gradient(135deg, #0f0f1a 0%, #1a1a2e 100%);
+      min-height: 100vh;
+    }
+    /* Header */
+    .tr-header { 
+      display: flex; 
+      justify-content: space-between; 
+      align-items: center; 
+      margin-bottom: 1rem; 
+      padding: 0.8rem 1.2rem; 
+      background: var(--bg-card); 
+      border-radius: 12px; 
+      border: 1px solid var(--glass-border); 
+    }
+    .tr-header h2 { 
+      margin: 0; 
+      font-size: 1.4rem; 
+      background: var(--gradient-main); 
+      -webkit-background-clip: text; 
+      -webkit-text-fill-color: transparent; 
+      font-weight: 700; 
+    }
+    .tr-theme-toggle { 
+      background: var(--bg-hover); 
+      border: 1px solid var(--glass-border); 
+      border-radius: 8px; 
+      padding: 0.5rem 0.8rem; 
+      cursor: pointer; 
+      color: var(--text-secondary); 
+      transition: var(--transition); 
+      font-size: 1rem;
+    }
+    .tr-theme-toggle:hover { 
+      background: var(--accent); 
+      color: #fff; 
+      border-color: var(--accent); 
+    }
+    /* Main Layout */
+    .tr-container { 
+      display: grid; 
+      grid-template-columns: 1fr auto 1fr; 
+      gap: 1rem; 
+      align-items: start; 
+    }
+    @media(max-width: 900px){ 
+      .tr-container { grid-template-columns: 1fr; } 
+    }
+    .tr-box { 
+      background: var(--bg-card); 
+      border: 1px solid var(--glass-border); 
+      border-radius: 14px; 
+      padding: 1.2rem; 
+      display: flex; 
+      flex-direction: column; 
+      min-height: 250px; 
+    }
+    .tr-box-header { 
+      display: flex; 
+      justify-content: space-between; 
+      align-items: center; 
+      margin-bottom: 0.8rem; 
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+    .tr-lang-select { 
+      flex: 1; 
+      min-width: 120px;
+      padding: 0.6rem; 
+      border-radius: 8px; 
+      border: 1px solid var(--glass-border); 
+      background: var(--bg-hover); 
+      color: var(--text-primary); 
+      outline: none; 
+      font-size: 0.9rem; 
+    }
+    .tr-lang-select:focus { 
+      border-color: var(--accent); 
+      box-shadow: 0 0 0 3px var(--accent-glow); 
+    }
+    .tr-swap { 
+      background: var(--bg-hover); 
+      border: 1px solid var(--glass-border); 
+      border-radius: 50%; 
+      width: 36px; 
+      height: 36px; 
+      display: flex; 
+      align-items: center; 
+      justify-content: center; 
+      cursor: pointer; 
+      transition: var(--transition); 
+      color: var(--text-secondary); 
+      font-size: 1.1rem; 
+    }
+    .tr-swap:hover { 
+      background: var(--accent); 
+      color: #fff; 
+      border-color: var(--accent); 
+      transform: rotate(180deg); 
+    }
+    .tr-textarea { 
+      flex: 1; 
+      width: 100%; 
+      background: transparent; 
+      border: none; 
+      color: var(--text-primary); 
+      outline: none; 
+      resize: none; 
+      font-size: 1rem; 
+      line-height: 1.6; 
+      font-family: inherit; 
+      min-height: 150px; 
+    }
+    .tr-textarea::placeholder { 
+      color: var(--text-secondary); 
+      opacity: 0.7; 
+    }
+    .tr-dest[contenteditable="true"]:empty::before { 
+      content: attr(placeholder); 
+      color: var(--text-secondary); 
+      opacity: 0.7; 
+    }
+    .tr-footer { 
+      display: flex; 
+      justify-content: space-between; 
+      align-items: center; 
+      margin-top: 0.8rem; 
+      padding-top: 0.8rem; 
+      border-top: 1px solid var(--glass-border); 
+      font-size: 0.85rem; 
+      color: var(--text-secondary); 
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+    .tr-stats { 
+      display: flex; 
+      gap: 1rem; 
+    }
+    .tr-actions { 
+      display: flex; 
+      gap: 0.4rem; 
+    }
+    .tr-icon-btn { 
+      background: none; 
+      border: none; 
+      color: var(--text-secondary); 
+      cursor: pointer; 
+      padding: 0.3rem 0.5rem; 
+      border-radius: 6px; 
+      transition: var(--transition); 
+      font-size: 0.9rem; 
+      display: flex; 
+      align-items: center; 
+      gap: 0.3rem; 
+    }
+    .tr-icon-btn:hover { 
+      background: var(--accent); 
+      color: #fff; 
+    }
+    .tr-icon-btn.speak:hover { 
+      background: var(--success); 
+    }
+    .tr-icon-btn.mic:hover { 
+      background: var(--accent); 
+    }
+    .tr-icon-btn.fav.active { 
+      color: #f59e0b; 
+    }
+    /* Controls */
+    .tr-controls { 
+      display: flex; 
+      flex-direction: column; 
+      align-items: center; 
+      gap: 1rem; 
+      padding: 1rem; 
+    }
+    .tr-translate-btn { 
+      padding: 0.8rem 2rem; 
+      background: var(--gradient-main); 
+      border: none; 
+      border-radius: 10px; 
+      color: #fff; 
+      font-weight: 600; 
+      cursor: pointer; 
+      transition: var(--transition); 
+      font-size: 1rem; 
+      display: flex; 
+      align-items: center; 
+      gap: 0.5rem; 
+    }
+    .tr-translate-btn:hover { 
+      transform: translateY(-2px); 
+      box-shadow: 0 6px 20px var(--accent-glow); 
+    }
+    .tr-translate-btn:disabled { 
+      opacity: 0.6; 
+      cursor: not-allowed; 
+      transform: none !important; 
+    }
+    .tr-loading { 
+      display: flex; 
+      align-items: center; 
+      gap: 0.5rem; 
+      color: var(--text-secondary); 
+      font-size: 0.9rem; 
+    }
+    .tr-loading-spinner { 
+      width: 16px; 
+      height: 16px; 
+      border: 2px solid var(--glass-border); 
+      border-top-color: var(--accent); 
+      border-radius: 50%; 
+      animation: spin 0.8s linear infinite; 
+    }
+    @keyframes spin { 
+      to { transform: rotate(360deg); } 
+    }
+    .tr-confidence { 
+      font-size: 0.8rem; 
+      color: var(--text-secondary); 
+      margin-top: 0.3rem; 
+      text-align: center;
+    }
+    .tr-confidence.good { color: var(--success); }
+    .tr-confidence.medium { color: var(--warning); }
+    .tr-confidence.poor { color: var(--error); }
+    /* History Panel */
+    .tr-panel { 
+      margin-top: 1.5rem; 
+      background: var(--bg-card); 
+      border: 1px solid var(--glass-border); 
+      border-radius: 14px; 
+      overflow: hidden; 
+    }
+    .tr-panel-header { 
+      display: flex; 
+      justify-content: space-between; 
+      align-items: center; 
+      padding: 0.8rem 1.2rem; 
+      border-bottom: 1px solid var(--glass-border); 
+      cursor: pointer; 
+    }
+    .tr-panel-header h3 { 
+      margin: 0; 
+      font-size: 1rem; 
+      color: var(--text-primary); 
+    }
+    .tr-panel-toggle { 
+      background: none; 
+      border: none; 
+      color: var(--text-secondary); 
+      cursor: pointer; 
+      font-size: 1.2rem; 
+      transition: var(--transition); 
+    }
+    .tr-panel.collapsed .tr-panel-content { display: none; }
+    .tr-panel.collapsed .tr-panel-toggle { transform: rotate(-90deg); }
+    .tr-panel-content { 
+      padding: 0.8rem; 
+      max-height: 250px; 
+      overflow-y: auto; 
+    }
+    .tr-search { 
+      width: 100%; 
+      padding: 0.6rem; 
+      margin-bottom: 0.8rem; 
+      border-radius: 8px; 
+      border: 1px solid var(--glass-border); 
+      background: var(--bg-hover); 
+      color: var(--text-primary); 
+      outline: none; 
+      font-size: 0.9rem; 
+      box-sizing: border-box;
+    }
+    .tr-search:focus { 
+      border-color: var(--accent); 
+      box-shadow: 0 0 0 3px var(--accent-glow); 
+    }
+    .tr-history-item { 
+      padding: 0.7rem; 
+      border-radius: 8px; 
+      margin-bottom: 0.5rem; 
+      background: var(--bg-hover); 
+      border: 1px solid transparent; 
+      transition: var(--transition); 
+      cursor: pointer; 
+    }
+    .tr-history-item:hover { 
+      border-color: var(--accent); 
+    }
+    .tr-history-text { 
+      font-size: 0.9rem; 
+      color: var(--text-primary); 
+      margin-bottom: 0.3rem; 
+      white-space: nowrap; 
+      overflow: hidden; 
+      text-overflow: ellipsis; 
+    }
+    .tr-history-meta { 
+      font-size: 0.75rem; 
+      color: var(--text-secondary); 
+      display: flex; 
+      justify-content: space-between; 
+    }
+    .tr-history-actions { 
+      display: flex; 
+      gap: 0.3rem; 
+      margin-top: 0.4rem; 
+    }
+    .tr-history-btn { 
+      padding: 0.2rem 0.5rem; 
+      font-size: 0.75rem; 
+      border-radius: 4px; 
+      border: none; 
+      cursor: pointer; 
+      transition: var(--transition); 
+      background: var(--bg-card);
+      color: var(--text-primary);
+    }
+    .tr-history-btn:hover { 
+      background: var(--accent); 
+      color: #fff; 
+    }
+    .tr-history-btn.del { 
+      color: var(--error); 
+    }
+    .tr-history-btn.del:hover { 
+      background: var(--error); 
+      color: #fff; 
+    }
+    .tr-empty { 
+      text-align: center; 
+      padding: 1.5rem; 
+      color: var(--text-secondary); 
+      font-style: italic; 
+    }
+    .tr-panel-actions { 
+      display: flex; 
+      justify-content: space-between; 
+      padding: 0.8rem; 
+      border-top: 1px solid var(--glass-border); 
+    }
+    .tr-btn-sm { 
+      padding: 0.4rem 0.8rem; 
+      font-size: 0.8rem; 
+      border-radius: 6px; 
+      border: 1px solid var(--glass-border); 
+      background: var(--bg-hover); 
+      color: var(--text-primary); 
+      cursor: pointer; 
+      transition: var(--transition); 
+    }
+    .tr-btn-sm:hover { 
+      background: var(--accent); 
+      color: #fff; 
+      border-color: var(--accent); 
+    }
+    .tr-btn-sm.danger { 
+      color: var(--error); 
+      border-color: var(--error); 
+    }
+    .tr-btn-sm.danger:hover { 
+      background: var(--error); 
+      color: #fff; 
+    }
+    /* Export Modal */
+    .tr-modal { 
+      position: fixed; 
+      inset: 0; 
+      background: rgba(0,0,0,0.6); 
+      backdrop-filter: blur(4px); 
+      display: flex; 
+      align-items: center; 
+      justify-content: center; 
+      opacity: 0; 
+      pointer-events: none; 
+      transition: var(--transition); 
+      z-index: 1000; 
+    }
+    .tr-modal.open { 
+      opacity: 1; 
+      pointer-events: auto; 
+    }
+    .tr-modal-content { 
+      background: var(--bg-card); 
+      border: 1px solid var(--glass-border); 
+      border-radius: 16px; 
+      padding: 1.5rem; 
+      width: 90%; 
+      max-width: 400px; 
+      transform: translateY(20px); 
+      transition: var(--transition); 
+    }
+    .tr-modal.open .tr-modal-content { 
+      transform: translateY(0); 
+    }
+    .tr-modal h3 { 
+      margin: 0 0 1rem; 
+      color: var(--text-primary); 
+    }
+    .tr-modal-close { 
+      position: absolute; 
+      top: 1rem; 
+      right: 1rem; 
+      background: none; 
+      border: none; 
+      color: var(--text-secondary); 
+      font-size: 1.5rem; 
+      cursor: pointer; 
+      transition: var(--transition); 
+    }
+    .tr-modal-close:hover { 
+      color: var(--accent); 
+    }
+    .tr-modal-options { 
+      display: grid; 
+      gap: 0.6rem; 
+      margin-bottom: 1rem; 
+    }
+    .tr-modal-option { 
+      display: flex; 
+      align-items: center; 
+      gap: 0.6rem; 
+      padding: 0.6rem; 
+      border-radius: 8px; 
+      background: var(--bg-hover); 
+      cursor: pointer; 
+      transition: var(--transition); 
+    }
+    .tr-modal-option:hover { 
+      background: var(--accent); 
+      color: #fff; 
+    }
+    .tr-modal-option input { 
+      cursor: pointer; 
+    }
+    .tr-modal-btns { 
+      display: flex; 
+      justify-content: flex-end; 
+      gap: 0.8rem; 
+    }
+    .tr-modal-btn { 
+      padding: 0.6rem 1.2rem; 
+      border-radius: 8px; 
+      border: none; 
+      cursor: pointer; 
+      font-weight: 600; 
+      transition: var(--transition); 
+    }
+    .tr-modal-btn.cancel { 
+      background: var(--bg-hover); 
+      color: var(--text-primary); 
+    }
+    .tr-modal-btn.cancel:hover { 
+      background: var(--accent); 
+      color: #fff; 
+    }
+    .tr-modal-btn.export { 
+      background: var(--gradient-main); 
+      color: #fff; 
+    }
+    .tr-modal-btn.export:hover { 
+      box-shadow: 0 4px 12px var(--accent-glow); 
+    }
+    /* Toast */
+    .tr-toast { 
+      position: fixed; 
+      bottom: 20px; 
+      right: 20px; 
+      background: var(--bg-card); 
+      border: 1px solid var(--glass-border); 
+      padding: 0.9rem 1.4rem; 
+      border-radius: 10px; 
+      color: var(--text-primary); 
+      box-shadow: 0 8px 32px rgba(0,0,0,0.3); 
+      transform: translateY(100px); 
+      opacity: 0; 
+      transition: all 0.3s ease; 
+      z-index: 2000; 
+      font-size: 0.9rem; 
+      display: flex; 
+      align-items: center; 
+      gap: 0.6rem; 
+    }
+    .tr-toast.show { 
+      transform: translateY(0); 
+      opacity: 1; 
+    }
+    .tr-toast.success { border-left: 4px solid var(--success); }
+    .tr-toast.error { border-left: 4px solid var(--error); }
+    .tr-toast.info { border-left: 4px solid var(--accent); }
+    /* Offline Badge */
+    .tr-offline-badge { 
+      position: fixed; 
+      top: 1rem; 
+      right: 1rem; 
+      background: var(--warning); 
+      color: #000; 
+      padding: 0.4rem 0.8rem; 
+      border-radius: 20px; 
+      font-size: 0.8rem; 
+      font-weight: 500; 
+      display: none; 
+      align-items: center; 
+      gap: 0.4rem; 
+      z-index: 100; 
+    }
+    .tr-offline-badge.show { display: flex; }
+    /* Utilities */
+    .tr-hidden { display: none !important; }
+  </style>
+
+  <!-- Offline Badge -->
+  <div class="tr-offline-badge" id="tr-offline">📴 Offline</div>
+
+  <!-- Header -->
+  <div class="tr-header">
+    <h2>🌐 Translator Pro</h2>
+    <button class="tr-theme-toggle" id="tr-theme" title="Toggle Theme">🌙</button>
+  </div>
+
+  <!-- Main Translator -->
+  <div class="tr-container">
+    <!-- Source -->
+    <div class="tr-box">
+      <div class="tr-box-header">
+        <select class="tr-lang-select" id="tr-src-lang" title="Source Language"></select>
+        <div class="tr-actions">
+          <button class="tr-icon-btn mic" id="tr-mic-src" title="Voice Input">🎤</button>
+          <button class="tr-icon-btn" id="tr-clear-src" title="Clear">🗑️</button>
+        </div>
+      </div>
+      <textarea class="tr-textarea" id="tr-src" placeholder="Enter text to translate..."></textarea>
+      <div class="tr-footer">
+        <div class="tr-stats">
+          <span id="tr-src-chars">0</span> chars
+          <span id="tr-src-words">0</span> words
+        </div>
+        <div class="tr-actions">
+          <button class="tr-icon-btn speak" id="tr-speak-src" title="Listen">🔊</button>
+          <button class="tr-icon-btn" id="tr-copy-src" title="Copy">📋</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Controls -->
+    <div class="tr-controls">
+      <button class="tr-swap" id="tr-swap" title="Swap Languages">⇄</button>
+      <button class="tr-translate-btn" id="tr-translate">
+        <span>Translate</span>
+        <span class="tr-loading-spinner tr-hidden" id="tr-spinner"></span>
+      </button>
+      <div class="tr-loading tr-hidden" id="tr-loading-msg">
+        <span class="tr-loading-spinner"></span>
+        <span>Translating...</span>
+      </div>
+      <div class="tr-confidence" id="tr-confidence"></div>
+    </div>
+
+    <!-- Destination -->
+    <div class="tr-box">
+      <div class="tr-box-header">
+        <select class="tr-lang-select" id="tr-dest-lang" title="Target Language"></select>
+        <div class="tr-actions">
+          <button class="tr-icon-btn fav" id="tr-fav" title="Save to Favorites">⭐</button>
+          <button class="tr-icon-btn" id="tr-clear-dest" title="Clear">🗑️</button>
+        </div>
+      </div>
+      <div class="tr-textarea" id="tr-dest" contenteditable="true" placeholder="Translation will appear here..."></div>
+      <div class="tr-footer">
+        <div class="tr-stats">
+          <span id="tr-dest-chars">0</span> chars
+          <span id="tr-dest-words">0</span> words
+        </div>
+        <div class="tr-actions">
+          <button class="tr-icon-btn speak" id="tr-speak-dest" title="Listen">🔊</button>
+          <button class="tr-icon-btn" id="tr-copy-dest" title="Copy">📋</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- History Panel -->
+  <div class="tr-panel" id="tr-history-panel">
+    <div class="tr-panel-header" id="tr-history-toggle">
+      <h3>📜 History <span id="tr-history-count">(0)</span></h3>
+      <button class="tr-panel-toggle">▼</button>
+    </div>
+    <div class="tr-panel-content">
+      <input class="tr-search" id="tr-history-search" placeholder="🔍 Search history...">
+      <div id="tr-history-list"></div>
+    </div>
+    <div class="tr-panel-actions">
+      <button class="tr-btn-sm" id="tr-export">📤 Export</button>
+      <button class="tr-btn-sm danger" id="tr-clear-history">🗑️ Clear All</button>
+    </div>
+  </div>
+
+  <!-- Export Modal -->
+  <div class="tr-modal" id="tr-export-modal">
+    <div class="tr-modal-content">
+      <button class="tr-modal-close" id="tr-export-close">×</button>
+      <h3>📤 Export</h3>
+      <p style="color:var(--text-secondary);margin-bottom:1rem">Choose format:</p>
+      <div class="tr-modal-options">
+        <label class="tr-modal-option">
+          <input type="radio" name="tr-export-format" value="txt" checked>
+          <span>📄 Plain Text</span>
+        </label>
+        <label class="tr-modal-option">
+          <input type="radio" name="tr-export-format" value="json">
+          <span>💾 JSON Backup</span>
+        </label>
+      </div>
+      <div class="tr-modal-btns">
+        <button class="tr-modal-btn cancel" id="tr-export-cancel">Cancel</button>
+        <button class="tr-modal-btn export" id="tr-export-confirm">Download</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="tr-toast" id="tr-toast">
+    <span id="tr-toast-icon">✅</span>
+    <span id="tr-toast-msg">Done</span>
+  </div>
+
+  <script>
+    (function() {
+      'use strict';
+      
+      // ===== CONFIG =====
+      const CONFIG = {
+        STORAGE_KEY: 'translator_pro_fixed',
+        MAX_HISTORY: 30,
+        API_URL: 'https://api.mymemory.translated.net/get',
+        LANGUAGES: [
+          {code:'auto', name:'🔍 Auto'},
+          {code:'en', name:'🇬🇧 English'}, {code:'es', name:'🇪🇸 Spanish'}, 
+          {code:'fr', name:'🇫🇷 French'}, {code:'de', name:'🇩🇪 German'}, 
+          {code:'it', name:'🇮🇹 Italian'}, {code:'pt', name:'🇵🇹 Portuguese'},
+          {code:'ru', name:'🇷🇺 Russian'}, {code:'ja', name:'🇯🇵 Japanese'}, 
+          {code:'ko', name:'🇰🇷 Korean'}, {code:'zh', name:'🇨🇳 Chinese'}, 
+          {code:'ar', name:'🇸🇦 Arabic'}, {code:'hi', name:'🇮🇳 Hindi'},
+          {code:'tr', name:'🇹🇷 Turkish'}, {code:'nl', name:'🇳🇱 Dutch'}, 
+          {code:'pl', name:'🇵🇱 Polish'}, {code:'sv', name:'🇸🇪 Swedish'},
+          {code:'bn', name:'🇧🇩 Bengali'}, {code:'ur', name:'🇵🇰 Urdu'},
+          {code:'fa', name:'🇮🇷 Persian'}, {code:'th', name:'🇹🇭 Thai'},
+          {code:'vi', name:'🇻🇳 Vietnamese'}, {code:'id', name:'🇮🇩 Indonesian'},
+          {code:'ms', name:'🇲🇾 Malay'}, {code:'tl', name:'🇵🇭 Filipino'},
+          {code:'uk', name:'🇺🇦 Ukrainian'}, {code:'ro', name:'🇷🇴 Romanian'},
+          {code:'hu', name:'🇭🇺 Hungarian'}, {code:'cs', name:'🇨🇿 Czech'},
+          {code:'el', name:'🇬🇷 Greek'}, {code:'he', name:'🇮🇱 Hebrew'}
+        ],
+        OFFLINE: {
+          'hello': {es:'hola',fr:'bonjour',de:'hallo',it:'ciao',pt:'olá',ru:'привет',ja:'こんにちは',ko:'안녕하세요',zh:'你好',ar:'مرحبا',hi:'नमस्ते'},
+          'thank you': {es:'gracias',fr:'merci',de:'danke',it:'grazie',pt:'obrigado',ru:'спасибо',ja:'ありがとう',ko:'감사합니다',zh:'谢谢',ar:'شكرا',hi:'धन्यवाद'},
+          'yes': {es:'sí',fr:'oui',de:'ja',it:'sì',pt:'sim',ru:'да',ja:'はい',ko:'네',zh:'是',ar:'نعم',hi:'हाँ'},
+          'no': {es:'no',fr:'non',de:'nein',it:'no',pt:'não',ru:'нет',ja:'いいえ',ko:'아니오',zh:'不',ar:'لا',hi:'नहीं'},
+          'love': {es:'amor',fr:'amour',de:'liebe',it:'amore',pt:'amor',ru:'любовь',ja:'愛',ko:'사랑',zh:'爱',ar:'حب',hi:'प्यार'}
+        }
+      };
+
+      // ===== STATE =====
+      let state = {
+        srcLang: 'auto',
+        destLang: 'es',
+        history: [],
+        theme: 'dark',
+        isOnline: navigator.onLine
+      };
+
+      // ===== DOM ELEMENTS (with null checks) =====
+      const getEl = (id) => document.getElementById(id);
+      const els = {
+        srcLang: getEl('tr-src-lang'),
+        destLang: getEl('tr-dest-lang'),
+        src: getEl('tr-src'),
+        dest: getEl('tr-dest'),
+        srcChars: getEl('tr-src-chars'),
+        srcWords: getEl('tr-src-words'),
+        destChars: getEl('tr-dest-chars'),
+        destWords: getEl('tr-dest-words'),
+        swap: getEl('tr-swap'),
+        translate: getEl('tr-translate'),
+        spinner: getEl('tr-spinner'),
+        loadingMsg: getEl('tr-loading-msg'),
+        confidence: getEl('tr-confidence'),
+        micSrc: getEl('tr-mic-src'),
+        clearSrc: getEl('tr-clear-src'),
+        clearDest: getEl('tr-clear-dest'),
+        speakSrc: getEl('tr-speak-src'),
+        speakDest: getEl('tr-speak-dest'),
+        copySrc: getEl('tr-copy-src'),
+        copyDest: getEl('tr-copy-dest'),
+        fav: getEl('tr-fav'),
+        historyPanel: getEl('tr-history-panel'),
+        historyToggle: getEl('tr-history-toggle'),
+        historyList: getEl('tr-history-list'),
+        historyCount: getEl('tr-history-count'),
+        historySearch: getEl('tr-history-search'),
+        exportBtn: getEl('tr-export'),
+        exportModal: getEl('tr-export-modal'),
+        exportClose: getEl('tr-export-close'),
+        exportCancel: getEl('tr-export-cancel'),
+        exportConfirm: getEl('tr-export-confirm'),
+        clearHistory: getEl('tr-clear-history'),
+        themeToggle: getEl('tr-theme'),
+        offlineBadge: getEl('tr-offline'),
+        toast: getEl('tr-toast'),
+        toastIcon: getEl('tr-toast-icon'),
+        toastMsg: getEl('tr-toast-msg')
+      };
+
+      // ===== INIT =====
+      function init() {
+        loadFromStorage();
+        populateLanguages();
+        bindEvents();
+        updateStats();
+        renderHistory();
+        updateTheme();
+        updateOnlineStatus();
+        showToast('🌐 Translator Ready!', 'info');
+      }
+
+      // ===== UTILS =====
+      function showToast(msg, type) {
+        if (!els.toast) return;
+        els.toastIcon.textContent = type === 'success' ? '✅' : type === 'error' ? '❌' : 'ℹ️';
+        els.toastMsg.textContent = msg;
+        els.toast.className = 'tr-toast ' + type + ' show';
+        setTimeout(function() { 
+          if (els.toast) els.toast.classList.remove('show'); 
+        }, 2000);
+      }
+
+      function saveToStorage() {
+        try {
+          localStorage.setItem(CONFIG.STORAGE_KEY, JSON.stringify({
+            history: state.history,
+            theme: state.theme
+          }));
+        } catch(e) { console.warn('Save failed:', e); }
+      }
+
+      function loadFromStorage() {
+        try {
+          var saved = localStorage.getItem(CONFIG.STORAGE_KEY);
+          if (saved) {
+            var parsed = JSON.parse(saved);
+            if (parsed.history) state.history = parsed.history;
+            if (parsed.theme) state.theme = parsed.theme;
+          }
+        } catch(e) { console.warn('Load failed:', e); }
+      }
+
+      function updateTheme() {
+        document.documentElement.setAttribute('data-theme', state.theme);
+        if (els.themeToggle) {
+          els.themeToggle.textContent = state.theme === 'dark' ? '☀️' : '🌙';
+        }
+      }
+
+      function updateOnlineStatus() {
+        state.isOnline = navigator.onLine;
+        if (els.offlineBadge) {
+          els.offlineBadge.classList.toggle('show', !state.isOnline);
+        }
+      }
+
+      function getLangName(code) {
+        var lang = CONFIG.LANGUAGES.find(function(l) { return l.code === code; });
+        return lang ? lang.name : code;
+      }
+
+      function countText(text) {
+        var chars = text ? text.length : 0;
+        var words = text && text.trim() ? text.trim().split(/\s+/).filter(function(w){return w;}).length : 0;
+        return { chars: chars, words: words };
+      }
+
+      function updateStats() {
+        if (!els.src || !els.dest) return;
+        var srcStats = countText(els.src.value);
+        var destStats = countText(els.dest.textContent);
+        if (els.srcChars) els.srcChars.textContent = srcStats.chars;
+        if (els.srcWords) els.srcWords.textContent = srcStats.words;
+        if (els.destChars) els.destChars.textContent = destStats.chars;
+        if (els.destWords) els.destWords.textContent = destStats.words;
+      }
+
+      // ===== LANGUAGE POPULATION =====
+      function populateLanguages() {
+        if (!els.srcLang || !els.destLang) return;
+        
+        function createOptions(selectEl, excludeCode) {
+          selectEl.innerHTML = '';
+          CONFIG.LANGUAGES.forEach(function(lang) {
+            if (lang.code !== excludeCode) {
+              var opt = document.createElement('option');
+              opt.value = lang.code;
+              opt.textContent = lang.name;
+              selectEl.appendChild(opt);
+            }
+          });
+        }
+        
+        createOptions(els.srcLang, null);
+        createOptions(els.destLang, 'auto');
+        els.srcLang.value = state.srcLang;
+        els.destLang.value = state.destLang;
+      }
+
+      // ===== TRANSLATION =====
+      function doTranslate() {
+        var text = els.src ? els.src.value.trim() : '';
+        if (!text) { 
+          showToast('⚠️ Enter text first', 'error'); 
+          return; 
+        }
+        if (!els.translate || !els.spinner || !els.loadingMsg) return;
+
+        els.translate.disabled = true;
+        els.spinner.classList.remove('tr-hidden');
+        els.loadingMsg.classList.remove('tr-hidden');
+        if (els.dest) els.dest.textContent = '';
+        if (els.confidence) els.confidence.textContent = '';
+
+        var srcCode = els.srcLang ? els.srcLang.value : 'auto';
+        var destCode = els.destLang ? els.destLang.value : 'es';
+        var langPair = srcCode + '|' + destCode;
+
+        // Try API first if online
+        if (state.isOnline && CONFIG.API_URL) {
+          fetch(CONFIG.API_URL + '?q=' + encodeURIComponent(text) + '&langpair=' + langPair)
+            .then(function(res) { return res.json(); })
+            .then(function(data) {
+              if (data && data.responseData && data.responseData.translatedText) {
+                handleSuccess(data.responseData.translatedText, text, srcCode, destCode);
+              } else {
+                throw new Error('No translation');
+              }
+            })
+            .catch(function() {
+              // Fallback to offline
+              handleOffline(text, destCode, srcCode);
+            })
+            .finally(function() {
+              cleanupTranslate();
+            });
+        } else {
+          // Offline mode
+          handleOffline(text, destCode, srcCode);
+          cleanupTranslate();
+        }
+      }
+
+      function handleSuccess(translated, original, srcLang, destLang) {
+        if (els.dest) els.dest.textContent = translated;
+        if (els.confidence) {
+          var ratio = Math.min(1, translated.length / Math.max(1, original.length * 0.5));
+          var conf = ratio >= 0.8 ? 'High' : ratio >= 0.5 ? 'Medium' : 'Low';
+          var cls = ratio >= 0.8 ? 'good' : ratio >= 0.5 ? 'medium' : 'poor';
+          els.confidence.textContent = 'Confidence: ' + conf + ' (' + Math.round(ratio*100) + '%)';
+          els.confidence.className = 'tr-confidence ' + cls;
+        }
+        addToHistory(original, translated, srcLang, destLang);
+        updateStats();
+        showToast('✅ Translated', 'success');
+      }
+
+      function handleOffline(text, destCode, srcCode) {
+        var lower = text.toLowerCase().trim();
+        var translated = CONFIG.OFFLINE[lower] ? CONFIG.OFFLINE[lower][destCode] : null;
+        
+        if (translated) {
+          handleSuccess(translated, text, srcCode, destCode);
+        } else {
+          if (els.dest) els.dest.textContent = '[Offline] ' + text;
+          if (els.confidence) {
+            els.confidence.textContent = 'Offline mode - limited phrases';
+            els.confidence.className = 'tr-confidence poor';
+          }
+          showToast('📴 Offline - try common phrases', 'info');
+        }
+      }
+
+      function cleanupTranslate() {
+        if (els.translate) els.translate.disabled = false;
+        if (els.spinner) els.spinner.classList.add('tr-hidden');
+        if (els.loadingMsg) els.loadingMsg.classList.add('tr-hidden');
+      }
+
+      function addToHistory(src, dest, srcLang, destLang) {
+        var entry = {
+          id: Date.now().toString(36),
+          src: src,
+          dest: dest,
+          srcLang: srcLang,
+          destLang: destLang,
+          timestamp: new Date().toISOString()
+        };
+        state.history.unshift(entry);
+        if (state.history.length > CONFIG.MAX_HISTORY) {
+          state.history.pop();
+        }
+        saveToStorage();
+        renderHistory();
+      }
+
+      // ===== SPEECH FEATURES =====
+      function startVoiceInput() {
+        if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+          showToast('⚠️ Voice not supported', 'error');
+          return;
+        }
+        
+        var Recognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        var recognition = new Recognition();
+        
+        var lang = els.srcLang ? els.srcLang.value : 'en';
+        recognition.lang = lang === 'auto' ? 'en-US' : lang;
+        recognition.interimResults = false;
+        
+        if (els.micSrc) els.micSrc.style.color = 'var(--accent)';
+        showToast('🎤 Listening...', 'info');
+        
+        recognition.onresult = function(event) {
+          var transcript = event.results[0][0].transcript;
+          if (els.src) els.src.value = transcript;
+          updateStats();
+          showToast('✅ Voice captured', 'success');
+          doTranslate();
+        };
+        
+        recognition.onerror = function() {
+          showToast('❌ Voice failed', 'error');
+        };
+        
+        recognition.onend = function() {
+          if (els.micSrc) els.micSrc.style.color = '';
+        };
+        
+        recognition.start();
+      }
+
+      function speakText(text, lang) {
+        if (!text || !('speechSynthesis' in window)) {
+          showToast('⚠️ TTS not available', 'error');
+          return;
+        }
+        
+        var utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = lang === 'auto' ? 'en-US' : lang;
+        utterance.rate = 0.9;
+        speechSynthesis.speak(utterance);
+        showToast('🔊 Speaking...', 'info');
+      }
+
+      // ===== COPY =====
+      function copyText(text, btn) {
+        if (!text) { showToast('⚠️ Nothing to copy', 'error'); return; }
+        
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(text).then(function() {
+            showCopied(btn);
+          }).catch(function() {
+            fallbackCopy(text, btn);
+          });
+        } else {
+          fallbackCopy(text, btn);
+        }
+      }
+
+      function fallbackCopy(text, btn) {
+        var ta = document.createElement('textarea');
+        ta.value = text;
+        ta.style.position = 'fixed';
+        ta.style.opacity = '0';
+        document.body.appendChild(ta);
+        ta.select();
+        try {
+          document.execCommand('copy');
+          showCopied(btn);
+        } catch(e) {
+          showToast('❌ Copy failed', 'error');
+        }
+        document.body.removeChild(ta);
+      }
+
+      function showCopied(btn) {
+        if (!btn) return;
+        var original = btn.innerHTML;
+        btn.innerHTML = '✓';
+        setTimeout(function() { btn.innerHTML = original; }, 1500);
+        showToast('📋 Copied', 'success');
+      }
+
+      // ===== EXPORT =====
+      function doExport(format) {
+        if (state.history.length === 0) {
+          showToast('⚠️ No history to export', 'error');
+          return;
+        }
+        
+        var content = '', filename = '', type = '';
+        var ts = new Date().toISOString().slice(0,10);
+        
+        if (format === 'txt') {
+          content = 'Translator Export - ' + ts + '\n' + '='.repeat(40) + '\n\n';
+          state.history.forEach(function(h) {
+            content += '[' + new Date(h.timestamp).toLocaleString() + '] ' + 
+                      getLangName(h.srcLang) + ' → ' + getLangName(h.destLang) + '\n';
+            content += 'Source: ' + h.src + '\nTranslation: ' + h.dest + '\n\n';
+          });
+          filename = 'translations_' + ts + '.txt';
+          type = 'text/plain';
+        } else {
+          content = JSON.stringify({ exported: ts, history: state.history }, null, 2);
+          filename = 'translations_' + ts + '.json';
+          type = 'application/json';
+        }
+        
+        var blob = new Blob([content], { type: type });
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        showToast('📤 Exported', 'success');
+      }
+
+      // ===== RENDER HISTORY =====
+      function renderHistory() {
+        if (!els.historyList || !els.historyCount) return;
+        
+        els.historyCount.textContent = '(' + state.history.length + ')';
+        var search = els.historySearch ? els.historySearch.value.toLowerCase() : '';
+        
+        var filtered = state.history.filter(function(h) {
+          return !search || h.src.toLowerCase().indexOf(search) >= 0 || h.dest.toLowerCase().indexOf(search) >= 0;
+        });
+        
+        if (filtered.length === 0) {
+          els.historyList.innerHTML = '<div class="tr-empty">No history</div>';
+          return;
+        }
+        
+        els.historyList.innerHTML = filtered.map(function(h) {
+          return '<div class="tr-history-item" data-id="' + h.id + '">' +
+            '<div class="tr-history-text"><strong>' + getLangName(h.srcLang) + '</strong> → <strong>' + getLangName(h.destLang) + '</strong></div>' +
+            '<div class="tr-history-text" style="color:var(--text-secondary);font-size:0.85rem">' + 
+              (h.src.length > 50 ? h.src.substring(0,50) + '...' : h.src) + '</div>' +
+            '<div class="tr-history-meta">' +
+              '<span>' + new Date(h.timestamp).toLocaleDateString() + '</span>' +
+              '<span>' + (h.dest.length > 30 ? h.dest.substring(0,30) + '...' : h.dest) + '</span>' +
+            '</div>' +
+            '<div class="tr-history-actions">' +
+              '<button class="tr-history-btn" data-action="load">Load</button>' +
+              '<button class="tr-history-btn" data-action="copy">Copy</button>' +
+              '<button class="tr-history-btn del" data-action="delete">🗑️</button>' +
+            '</div></div>';
+        }).join('');
+        
+        // Bind item clicks
+        var items = els.historyList.querySelectorAll('.tr-history-item');
+        items.forEach(function(item) {
+          item.addEventListener('click', function(e) {
+            if (e.target.closest('button')) return;
+            var id = item.getAttribute('data-id');
+            var entry = state.history.find(function(h) { return h.id === id; });
+            if (entry && els.src && els.dest) {
+              els.src.value = entry.src;
+              els.dest.textContent = entry.dest;
+              if (els.srcLang) els.srcLang.value = entry.srcLang;
+              if (els.destLang) els.destLang.value = entry.destLang;
+              updateStats();
+              showToast('📜 Loaded', 'info');
+            }
+          });
+          
+          // Bind buttons
+          item.querySelectorAll('.tr-history-btn').forEach(function(btn) {
+            btn.addEventListener('click', function(e) {
+              e.stopPropagation();
+              var action = btn.getAttribute('data-action');
+              var id = item.getAttribute('data-id');
+              var entry = state.history.find(function(h) { return h.id === id; });
+              if (!entry) return;
+              
+              if (action === 'load' && els.src && els.dest) {
+                els.src.value = entry.src;
+                els.dest.textContent = entry.dest;
+                if (els.srcLang) els.srcLang.value = entry.srcLang;
+                if (els.destLang) els.destLang.value = entry.destLang;
+                updateStats();
+                showToast('📜 Loaded', 'info');
+              } else if (action === 'copy') {
+                copyText(entry.dest, btn);
+              } else if (action === 'delete') {
+                state.history = state.history.filter(function(h) { return h.id !== id; });
+                saveToStorage();
+                renderHistory();
+                showToast('🗑️ Deleted', 'info');
+              }
+            });
+          });
+        });
+      }
+
+      // ===== EVENT BINDINGS =====
+      function bindEvents() {
+        // Language changes
+        if (els.srcLang) els.srcLang.addEventListener('change', function(e) { 
+          state.srcLang = e.target.value; 
+          populateLanguages(); 
+        });
+        if (els.destLang) els.destLang.addEventListener('change', function(e) { 
+          state.destLang = e.target.value; 
+        });
+
+        // Text input
+        if (els.src) {
+          els.src.addEventListener('input', updateStats);
+          els.src.addEventListener('keydown', function(e) {
+            if (e.ctrlKey && e.key === 'Enter') {
+              e.preventDefault();
+              doTranslate();
+            }
+          });
+        }
+        if (els.dest) els.dest.addEventListener('input', updateStats);
+
+        // Translate
+        if (els.translate) els.translate.addEventListener('click', doTranslate);
+
+        // Swap
+        if (els.swap) els.swap.addEventListener('click', function() {
+          var temp = state.srcLang;
+          state.srcLang = state.destLang;
+          state.destLang = temp === 'auto' ? 'en' : temp;
+          
+          if (els.src && els.dest) {
+            var tempText = els.src.value;
+            els.src.value = els.dest.textContent;
+            els.dest.textContent = tempText;
+          }
+          
+          populateLanguages();
+          updateStats();
+          showToast('🔄 Swapped', 'info');
+        });
+
+        // Clear
+        if (els.clearSrc) els.clearSrc.addEventListener('click', function() {
+          if (els.src) { els.src.value = ''; updateStats(); }
+          showToast('🗑️ Cleared', 'info');
+        });
+        if (els.clearDest) els.clearDest.addEventListener('click', function() {
+          if (els.dest) { els.dest.textContent = ''; updateStats(); }
+          showToast('🗑️ Cleared', 'info');
+        });
+
+        // Copy
+        if (els.copySrc) els.copySrc.addEventListener('click', function() {
+          if (els.src) copyText(els.src.value, els.copySrc);
+        });
+        if (els.copyDest) els.copyDest.addEventListener('click', function() {
+          if (els.dest) copyText(els.dest.textContent, els.copyDest);
+        });
+
+        // Speak
+        if (els.speakSrc) els.speakSrc.addEventListener('click', function() {
+          if (els.src && els.srcLang) speakText(els.src.value, els.srcLang.value);
+        });
+        if (els.speakDest) els.speakDest.addEventListener('click', function() {
+          if (els.dest && els.destLang) speakText(els.dest.textContent, els.destLang.value);
+        });
+
+        // Voice
+        if (els.micSrc) els.micSrc.addEventListener('click', startVoiceInput);
+
+        // Favorite (simple toggle for demo)
+        if (els.fav) els.fav.addEventListener('click', function() {
+          els.fav.classList.toggle('active');
+          showToast(els.fav.classList.contains('active') ? '⭐ Saved' : '⭐ Removed', 'info');
+        });
+
+        // Panel toggle
+        if (els.historyToggle) els.historyToggle.addEventListener('click', function() {
+          if (els.historyPanel) els.historyPanel.classList.toggle('collapsed');
+        });
+
+        // Search
+        if (els.historySearch) els.historySearch.addEventListener('input', renderHistory);
+
+        // Export
+        if (els.exportBtn) els.exportBtn.addEventListener('click', function() {
+          if (els.exportModal) els.exportModal.classList.add('open');
+        });
+        if (els.exportClose) els.exportClose.addEventListener('click', closeModal);
+        if (els.exportCancel) els.exportCancel.addEventListener('click', closeModal);
+        if (els.exportConfirm) els.exportConfirm.addEventListener('click', function() {
+          var format = document.querySelector('input[name="tr-export-format"]:checked');
+          if (format) doExport(format.value);
+          closeModal();
+        });
+        if (els.exportModal) {
+          els.exportModal.addEventListener('click', function(e) {
+            if (e.target === els.exportModal) closeModal();
+          });
+        }
+
+        // Clear history
+        if (els.clearHistory) els.clearHistory.addEventListener('click', function() {
+          if (confirm('Clear all history?')) {
+            state.history = [];
+            saveToStorage();
+            renderHistory();
+            showToast('🗑️ Cleared', 'info');
+          }
+        });
+
+        // Theme
+        if (els.themeToggle) els.themeToggle.addEventListener('click', function() {
+          state.theme = state.theme === 'dark' ? 'light' : 'dark';
+          updateTheme();
+          saveToStorage();
+        });
+
+        // Online status
+        window.addEventListener('online', function() { 
+          updateOnlineStatus(); 
+          showToast('🌐 Online', 'success'); 
+        });
+        window.addEventListener('offline', function() { 
+          updateOnlineStatus(); 
+          showToast('📴 Offline', 'error'); 
+        });
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+          if (e.ctrlKey && e.key === 'Enter') {
+            e.preventDefault();
+            doTranslate();
+          }
+          if (e.key === 'Escape') {
+            if (els.src) els.src.blur();
+            if (els.dest) els.dest.blur();
+            closeModal();
+          }
+        });
+      }
+
+      function closeModal() {
+        if (els.exportModal) els.exportModal.classList.remove('open');
+      }
+
+      // ===== START =====
+      // Wait for DOM to be ready
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init);
+      } else {
+        init();
+      }
+    })();
+  </script>
+</div>

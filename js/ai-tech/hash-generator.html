@@ -1,0 +1,449 @@
+<div class="hash-pro-tool">
+  <style>
+    .hash-pro-tool {
+      --hpt-primary: #6366f1; --hpt-primary-hover: #4f46e5; --hpt-accent: #8b5cf6;
+      --hpt-bg: #0f0f1a; --hpt-card: #1a1a2e; --hpt-input: #1e1e3f;
+      --hpt-border: #334155; --hpt-text: #f1f5f9; --hpt-text-muted: #94a3b8;
+      --hpt-success: #10b981; --hpt-error: #ef4444; --hpt-warning: #f59e0b;
+      --hpt-radius: 12px; --hpt-shadow: 0 4px 20px rgba(0,0,0,0.4);
+      --hpt-transition: all 0.25s cubic-bezier(0.4,0,0.2,1);
+      --hpt-font-mono: 'Fira Code', 'JetBrains Mono', 'Courier New', monospace;
+      
+      max-width: 850px; margin: 1.5rem auto; padding: 1.2rem;
+      background: var(--hpt-card); border: 1px solid var(--hpt-border);
+      border-radius: var(--hpt-radius); box-shadow: var(--hpt-shadow);
+      font-family: system-ui, -apple-system, 'Segoe UI', sans-serif; color: var(--hpt-text);
+    }
+    .hpt-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; padding-bottom: 0.8rem; border-bottom: 1px solid var(--hpt-border); flex-wrap: wrap; gap: 0.5rem; }
+    .hpt-title { font-size: 1.3rem; font-weight: 700; display: flex; align-items: center; gap: 0.5rem; }
+    .hpt-title i { color: var(--hpt-primary); }
+    .hpt-badges { display: flex; gap: 0.4rem; flex-wrap: wrap; }
+    .hpt-badge { padding: 0.25rem 0.6rem; background: var(--hpt-input); border-radius: 6px; font-size: 0.7rem; color: var(--hpt-text-muted); }
+    
+    .hpt-input-area { margin-bottom: 1rem; position: relative; }
+    .hpt-tabs { display: flex; gap: 0.3rem; margin-bottom: 0.5rem; }
+    .hpt-tab { padding: 0.4rem 0.9rem; border-radius: 8px 8px 0 0; cursor: pointer; font-size: 0.8rem; background: var(--hpt-input); color: var(--hpt-text-muted); border: 1px solid var(--hpt-border); border-bottom: none; transition: var(--hpt-transition); }
+    .hpt-tab.active { background: var(--hpt-primary); color: white; border-color: transparent; }
+    .hpt-textarea { width: 100%; min-height: 100px; padding: 0.8rem; background: var(--hpt-input); border: 2px solid var(--hpt-border); border-radius: 10px; color: var(--hpt-text); font-family: var(--hpt-font-mono); font-size: 0.85rem; outline: none; resize: vertical; transition: var(--hpt-transition); }
+    .hpt-textarea:focus { border-color: var(--hpt-primary); box-shadow: 0 0 0 3px rgba(99,102,241,0.15); }
+    .hpt-file-drop { border: 2px dashed var(--hpt-border); border-radius: 10px; padding: 1.5rem; text-align: center; cursor: pointer; background: var(--hpt-input); transition: var(--hpt-transition); display: none; }
+    .hpt-file-drop.active { display: block; }
+    .hpt-file-drop:hover, .hpt-file-drop.dragover { border-color: var(--hpt-primary); background: rgba(99,102,241,0.1); }
+    .hpt-file-drop input { display: none; }
+    .hpt-file-info { font-size: 0.8rem; color: var(--hpt-text-muted); margin-top: 0.4rem; }
+    
+    .hpt-controls { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 0.8rem; margin-bottom: 1rem; }
+    .hpt-select, .hpt-input { width: 100%; padding: 0.6rem 0.9rem; background: var(--hpt-input); border: 1px solid var(--hpt-border); border-radius: 8px; color: var(--hpt-text); font-size: 0.85rem; outline: none; }
+    .hpt-select:focus, .hpt-input:focus { border-color: var(--hpt-primary); box-shadow: 0 0 0 2px rgba(99,102,241,0.2); }
+    .hpt-toggle-group { display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem; background: var(--hpt-input); border-radius: 8px; }
+    .hpt-toggle-label { font-size: 0.8rem; color: var(--hpt-text-muted); }
+    .hpt-btn { padding: 0.6rem 1rem; border-radius: 8px; border: 1px solid var(--hpt-border); background: var(--hpt-input); color: var(--hpt-text); font-size: 0.85rem; cursor: pointer; transition: var(--hpt-transition); display: flex; align-items: center; gap: 0.4rem; font-weight: 500; }
+    .hpt-btn:hover { background: var(--hpt-primary); border-color: transparent; color: white; transform: translateY(-1px); }
+    .hpt-btn.primary { background: linear-gradient(135deg, var(--hpt-primary), var(--hpt-accent)); border: none; color: white; font-weight: 600; }
+    .hpt-btn.primary:hover { box-shadow: 0 4px 15px rgba(99,102,241,0.4); }
+    .hpt-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+    
+    .hpt-output-box { background: #0a0a14; border: 1px solid var(--hpt-border); border-radius: 10px; padding: 1rem; margin-bottom: 1rem; position: relative; }
+    .hpt-output-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.6rem; }
+    .hpt-output-title { font-size: 0.85rem; font-weight: 600; display: flex; align-items: center; gap: 0.4rem; }
+    .hpt-output-stats { font-size: 0.75rem; color: var(--hpt-text-muted); }
+    .hpt-output { font-family: var(--hpt-font-mono); font-size: 0.85rem; line-height: 1.6; word-break: break-all; color: var(--hpt-text); min-height: 60px; white-space: pre-wrap; }
+    .hpt-output-placeholder { color: var(--hpt-text-muted); font-style: italic; }
+    
+    .hpt-actions { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1rem; }
+    .hpt-format-btns { display: flex; gap: 0.3rem; margin-bottom: 0.5rem; }
+    .hpt-format-btn { padding: 0.3rem 0.6rem; background: var(--hpt-input); border: 1px solid var(--hpt-border); border-radius: 6px; color: var(--hpt-text-muted); font-size: 0.75rem; cursor: pointer; transition: var(--hpt-transition); }
+    .hpt-format-btn:hover, .hpt-format-btn.active { background: var(--hpt-primary); color: white; border-color: transparent; }
+    
+    .hpt-verify { margin-bottom: 1rem; padding: 0.8rem; background: var(--hpt-input); border-radius: 10px; border: 1px solid var(--hpt-border); }
+    .hpt-verify-title { font-size: 0.85rem; font-weight: 600; margin-bottom: 0.5rem; }
+    .hpt-verify-row { display: flex; gap: 0.5rem; }
+    .hpt-verify-row input { flex: 1; }
+    .hpt-verify-result { margin-top: 0.5rem; font-size: 0.85rem; font-weight: 500; }
+    .hpt-verify-result.match { color: var(--hpt-success); }
+    .hpt-verify-result.mismatch { color: var(--hpt-error); }
+    
+    .hpt-status { display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0.8rem; background: var(--hpt-input); border-radius: 8px; font-size: 0.8rem; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.4rem; }
+    .hpt-status-msg { display: flex; align-items: center; gap: 0.4rem; }
+    .hpt-status-msg.success { color: var(--hpt-success); }
+    .hpt-status-msg.error { color: var(--hpt-error); }
+    .hpt-status-info { color: var(--hpt-text-muted); }
+    
+    .hpt-history { margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--hpt-border); }
+    .hpt-history-header { display: flex; justify-content: space-between; align-items: center; cursor: pointer; margin-bottom: 0.5rem; }
+    .hpt-history-title { font-size: 0.9rem; font-weight: 600; display: flex; align-items: center; gap: 0.4rem; }
+    .hpt-history-toggle { color: var(--hpt-text-muted); transition: var(--hpt-transition); }
+    .hpt-history-toggle.collapsed { transform: rotate(-90deg); }
+    .hpt-history-list { display: grid; gap: 0.4rem; max-height: 150px; overflow-y: auto; transition: var(--hpt-transition); }
+    .hpt-history-list.collapsed { display: none; }
+    .hpt-history-item { padding: 0.5rem 0.7rem; background: var(--hpt-input); border-radius: 8px; cursor: pointer; border-left: 3px solid var(--hpt-primary); transition: var(--hpt-transition); font-size: 0.8rem; display: flex; justify-content: space-between; align-items: center; }
+    .hpt-history-item:hover { background: #252545; }
+    .hpt-history-preview { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 220px; color: var(--hpt-text-muted); }
+    .hpt-history-lang { font-size: 0.7rem; padding: 0.15rem 0.5rem; background: var(--hpt-bg); border-radius: 4px; }
+    .hpt-history-del { padding: 0.2rem 0.4rem; background: transparent; border: none; color: var(--hpt-error); cursor: pointer; border-radius: 4px; font-size: 0.75rem; }
+    .hpt-history-del:hover { background: rgba(239,68,68,0.15); }
+    
+    .hpt-toast { position: fixed; bottom: 1.2rem; right: 1.2rem; padding: 0.7rem 1.1rem; background: var(--hpt-card); border-left: 4px solid var(--hpt-success); border-radius: 10px; box-shadow: var(--hpt-shadow); display: flex; align-items: center; gap: 0.5rem; z-index: 9999; transform: translateY(150%); transition: transform 0.35s cubic-bezier(0.68,-0.55,0.265,1.55); font-size: 0.9rem; }
+    .hpt-toast.show { transform: translateY(0); }
+    .hpt-toast.error { border-left-color: var(--hpt-error); }
+    
+    @media (max-width: 600px) {
+      .hash-pro-tool { padding: 1rem; }
+      .hpt-controls { grid-template-columns: 1fr; }
+      .hpt-actions { flex-direction: column; }
+      .hpt-btn { width: 100%; justify-content: center; }
+    }
+  </style>
+
+  <div class="hpt-header">
+    <div class="hpt-title"><i class="fas fa-fingerprint"></i> Hash Generator Pro</div>
+    <div class="hpt-badges"><span class="hpt-badge">Web Crypto API</span><span class="hpt-badge">File Support</span><span class="hpt-badge">Live Mode</span></div>
+  </div>
+
+  <div class="hpt-input-area">
+    <div class="hpt-tabs">
+      <button class="hpt-tab active" data-type="text">📝 Text</button>
+      <button class="hpt-tab" data-type="file">📁 File</button>
+    </div>
+    <textarea class="hpt-textarea" id="hpt-text" placeholder="Type or paste text here..."></textarea>
+    <div class="hpt-file-drop" id="hpt-drop">
+      <i class="fas fa-cloud-upload-alt" style="font-size:1.5rem;color:var(--hpt-primary);display:block;margin-bottom:0.5rem"></i>
+      <strong>Drop file here</strong> or click to browse
+      <div class="hpt-file-info">Max 10MB • Any file type</div>
+      <input type="file" id="hpt-file">
+    </div>
+  </div>
+
+  <div class="hpt-controls">
+    <div>
+      <label class="hpt-toggle-label">Algorithm</label>
+      <select class="hpt-select" id="hpt-algo">
+        <option value="SHA-256">SHA-256 (Recommended)</option>
+        <option value="SHA-512">SHA-512</option>
+        <option value="SHA-384">SHA-384</option>
+        <option value="SHA-1">SHA-1 (Legacy)</option>
+      </select>
+    </div>
+    <div>
+      <label class="hpt-toggle-label">HMAC Secret Key (Optional)</label>
+      <input type="text" class="hpt-input" id="hpt-key" placeholder="Leave empty for standard hash">
+    </div>
+    <div class="hpt-toggle-group">
+      <input type="checkbox" id="hpt-live">
+      <label for="hpt-live" class="hpt-toggle-label">⚡ Live Mode</label>
+    </div>
+    <div style="display:flex;gap:0.5rem;align-items:flex-end">
+      <button class="hpt-btn primary" id="hpt-generate">⚡ Generate</button>
+    </div>
+  </div>
+
+  <div class="hpt-output-box">
+    <div class="hpt-output-header">
+      <span class="hpt-output-title">🔐 Generated Hash</span>
+      <span class="hpt-output-stats" id="hpt-stats">0 chars | 0 bytes</span>
+    </div>
+    <div class="hpt-format-btns">
+      <button class="hpt-format-btn active" data-fmt="hex">HEX</button>
+      <button class="hpt-format-btn" data-fmt="base64">BASE64</button>
+      <button class="hpt-format-btn" data-fmt="upper">UPPER</button>
+    </div>
+    <div class="hpt-output hpt-output-placeholder" id="hpt-output">Hash will appear here after generation...</div>
+  </div>
+
+  <div class="hpt-actions">
+    <button class="hpt-btn" id="hpt-copy">📋 Copy</button>
+    <button class="hpt-btn" id="hpt-export">💾 Export .txt</button>
+    <button class="hpt-btn" id="hpt-clear">🗑️ Clear</button>
+  </div>
+
+  <div class="hpt-verify">
+    <div class="hpt-verify-title">🔍 Verify Hash Match</div>
+    <div class="hpt-verify-row">
+      <input type="text" class="hpt-input" id="hpt-verify1" placeholder="Generated hash...">
+      <span style="font-size:1.2rem;color:var(--hpt-text-muted)">⚖️</span>
+      <input type="text" class="hpt-input" id="hpt-verify2" placeholder="Hash to compare...">
+    </div>
+    <div class="hpt-verify-result" id="hpt-verify-res"></div>
+  </div>
+
+  <div class="hpt-status">
+    <span class="hpt-status-msg" id="hpt-status-msg">✅ Ready</span>
+    <span class="hpt-status-info" id="hpt-status-info">Web Crypto API Active • HTTPS/Localhost Required</span>
+  </div>
+
+  <div class="hpt-history">
+    <div class="hpt-history-header" id="hpt-history-toggle">
+      <div class="hpt-history-title"><i class="fas fa-history"></i> Hash History</div>
+      <span class="hpt-history-toggle">▼</span>
+    </div>
+    <div class="hpt-history-list" id="hpt-history-list"></div>
+  </div>
+
+  <div class="hpt-toast" id="hpt-toast"><i class="fas fa-check-circle"></i><span id="hpt-toast-msg"></span></div>
+
+  <script>
+    (function() {
+      'use strict';
+      const $ = id => document.getElementById(id);
+      const $$ = sel => document.querySelectorAll(sel);
+
+      const els = {
+        tabs: $$('.hpt-tab'), text: $('hpt-text'), drop: $('hpt-drop'), file: $('hpt-file'),
+        algo: $('hpt-algo'), key: $('hpt-key'), live: $('hpt-live'), generate: $('hpt-generate'),
+        output: $('hpt-output'), stats: $('hpt-stats'), fmtBtns: $$('.hpt-format-btn'),
+        copy: $('hpt-copy'), export: $('hpt-export'), clear: $('hpt-clear'),
+        v1: $('hpt-verify1'), v2: $('hpt-verify2'), vRes: $('hpt-verify-res'),
+        statusMsg: $('hpt-status-msg'), statusInfo: $('hpt-status-info'),
+        historyToggle: $('hpt-history-toggle'), historyList: $('hpt-history-list'),
+        toast: $('hpt-toast'), toastMsg: $('hpt-toast-msg')
+      };
+
+      const state = {
+        mode: 'text', // text or file
+        format: 'hex',
+        history: [],
+        historyCollapsed: false,
+        lastHash: '',
+        liveEnabled: false,
+        debounce: null
+      };
+
+      try { state.history = JSON.parse(localStorage.getItem('hpt_history') || '[]'); } catch { state.history = []; }
+
+      function toast(msg, type = 'success') {
+        els.toastMsg.textContent = msg;
+        els.toast.className = `hpt-toast ${type} show`;
+        setTimeout(() => els.toast.classList.remove('show'), 2500);
+      }
+
+      function setStatus(msg, type = 'info', extra = '') {
+        els.statusMsg.textContent = msg;
+        els.statusMsg.className = `hpt-status-msg ${type}`;
+        els.statusInfo.textContent = extra || `Web Crypto API • ${els.algo.value}`;
+      }
+
+      function updateStats(text) {
+        const chars = text.length;
+        const bytes = new Blob([text]).size;
+        els.stats.textContent = `${chars} chars | ${bytes} bytes`;
+      }
+
+      function toHex(buffer) {
+        return Array.from(new Uint8Array(buffer)).map(b => b.toString(16).padStart(2, '0')).join('');
+      }
+
+      function toBase64(buffer) {
+        const binary = String.fromCharCode(...new Uint8Array(buffer));
+        return btoa(binary);
+      }
+
+      async function computeHash(data, algo, secretKey) {
+        const encoder = new TextEncoder();
+        if (secretKey) {
+          const keyData = encoder.encode(secretKey);
+          const cryptoKey = await crypto.subtle.importKey('raw', keyData, { name: 'HMAC', hash: algo }, false, ['sign']);
+          return await crypto.subtle.sign('HMAC', cryptoKey, data);
+        }
+        return await crypto.subtle.digest(algo, data);
+      }
+
+      // Web Crypto API Check
+      if (!window.crypto || !window.crypto.subtle) {
+        setStatus('⚠️ Web Crypto API not available. Use HTTPS or localhost.', 'error');
+        els.generate.disabled = true;
+      }
+
+      // Mode Tabs
+      els.tabs.forEach(tab => {
+        tab.onclick = () => {
+          els.tabs.forEach(t => t.classList.remove('active'));
+          tab.classList.add('active');
+          state.mode = tab.dataset.type;
+          els.text.style.display = state.mode === 'text' ? 'block' : 'none';
+          els.drop.classList.toggle('active', state.mode === 'file');
+        };
+      });
+
+      // Live Mode Toggle
+      els.live.onchange = () => {
+        state.liveEnabled = els.live.checked;
+        setStatus(state.liveEnabled ? '⚡ Live mode enabled' : '⚡ Live mode disabled', 'success');
+        if (state.liveEnabled && els.text.value.trim()) generateHash();
+      };
+
+      // Input Events
+      els.text.oninput = () => {
+        clearTimeout(state.debounce);
+        if (state.liveEnabled) {
+          state.debounce = setTimeout(() => generateHash(), 300);
+        }
+      };
+
+      // File Handling
+      ;['dragenter','dragover','dragleave','drop'].forEach(evt => els.drop.addEventListener(evt, e => { e.preventDefault(); e.stopPropagation(); }));
+      ;['dragenter','dragover'].forEach(evt => els.drop.addEventListener(evt, () => els.drop.classList.add('dragover')));
+      ;['dragleave','drop'].forEach(evt => els.drop.addEventListener(evt, () => els.drop.classList.remove('dragover')));
+      els.drop.onclick = () => els.file.click();
+      els.file.onchange = (e) => handleFile(e.target.files[0]);
+      els.drop.ondrop = (e) => { const f = e.dataTransfer.files[0]; if(f) handleFile(f); };
+
+      function handleFile(file) {
+        if (!file) return;
+        if (file.size > 10 * 1024 * 1024) { toast('File too large (max 10MB)', 'error'); return; }
+        setStatus(`📁 ${file.name} loaded (${(file.size/1024).toFixed(1)} KB)`, 'success');
+        els.file.dataset.name = file.name;
+      }
+
+      // Main Generator
+      async function generateHash() {
+        const algo = els.algo.value;
+        const key = els.key.value.trim();
+        
+        try {
+          let dataBuffer;
+          if (state.mode === 'text') {
+            const txt = els.text.value;
+            if (!txt) { setStatus('⚠️ Please enter text', 'error'); return; }
+            dataBuffer = new TextEncoder().encode(txt);
+          } else {
+            const file = els.file.files[0];
+            if (!file) { setStatus('⚠️ Please select a file', 'error'); return; }
+            dataBuffer = await new Promise((res, rej) => {
+              const r = new FileReader();
+              r.onload = () => res(new Uint8Array(r.result).buffer);
+              r.onerror = () => rej(new Error('Failed to read file'));
+              r.readAsArrayBuffer(file);
+            });
+          }
+
+          const startTime = performance.now();
+          const hashBuffer = await computeHash(dataBuffer, algo, key);
+          const timeTaken = Math.round(performance.now() - startTime);
+          
+          renderOutput(hashBuffer, algo, timeTaken);
+          setStatus(`✅ Hash generated in ${timeTaken}ms`, 'success');
+          toast('✅ Hash generated successfully');
+          saveHistory(els.text.value.substring(0, 30) || els.file.files[0]?.name || 'file', algo, toHex(hashBuffer).substring(0, 20));
+          
+        } catch (err) {
+          setStatus(`❌ ${err.message}`, 'error');
+          toast('Hash error: ' + err.message, 'error');
+        }
+      }
+
+      function renderOutput(buffer, algo, time) {
+        state.lastHash = { buffer, algo, time };
+        applyFormat();
+        if (state.liveEnabled) {
+          els.v1.value = els.output.textContent;
+          verifyHashes();
+        }
+      }
+
+      function applyFormat() {
+        if (!state.lastHash.buffer) return;
+        let res = '';
+        switch(state.format) {
+          case 'hex': res = toHex(state.lastHash.buffer); break;
+          case 'base64': res = toBase64(state.lastHash.buffer); break;
+          case 'upper': res = toHex(state.lastHash.buffer).toUpperCase(); break;
+        }
+        els.output.textContent = res;
+        els.output.classList.remove('hpt-output-placeholder');
+        updateStats(res);
+      }
+
+      els.fmtBtns.forEach(btn => {
+        btn.onclick = () => {
+          els.fmtBtns.forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          state.format = btn.dataset.fmt;
+          applyFormat();
+        };
+      });
+
+      els.generate.onclick = () => {
+        els.live.checked = false;
+        state.liveEnabled = false;
+        generateHash();
+      };
+
+      // Copy & Export
+      els.copy.onclick = () => {
+        const txt = els.output.textContent;
+        if (!txt || els.output.classList.contains('hpt-output-placeholder')) { toast('Nothing to copy', 'error'); return; }
+        navigator.clipboard.writeText(txt).then(() => {
+          els.copy.innerHTML = '✅ Copied';
+          toast('📋 Copied to clipboard');
+          setTimeout(() => els.copy.innerHTML = '📋 Copy', 1500);
+        }).catch(() => {
+          const ta = document.createElement('textarea'); ta.value = txt; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
+          els.copy.innerHTML = '✅ Copied'; setTimeout(() => els.copy.innerHTML = '📋 Copy', 1500);
+        });
+      };
+
+      els.export.onclick = () => {
+        const txt = els.output.textContent;
+        if (!txt || els.output.classList.contains('hpt-output-placeholder')) { toast('Nothing to export', 'error'); return; }
+        const blob = new Blob([txt], { type: 'text/plain' });
+        const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+        a.download = `hash_${Date.now()}.txt`; a.click(); URL.revokeObjectURL(a.href);
+        toast('💾 Exported');
+      };
+
+      els.clear.onclick = () => {
+        els.text.value = ''; els.file.value = ''; els.key.value = '';
+        els.output.textContent = 'Hash will appear here after generation...';
+        els.output.classList.add('hpt-output-placeholder');
+        els.v1.value = ''; els.v2.value = ''; els.vRes.textContent = '';
+        updateStats('');
+        setStatus('✅ Ready');
+        els.text.focus();
+      };
+
+      // Verify Hashes
+      function verifyHashes() {
+        const h1 = els.v1.value.trim().toLowerCase().replace(/\s+/g, '');
+        const h2 = els.v2.value.trim().toLowerCase().replace(/\s+/g, '');
+        if (!h1 || !h2) { els.vRes.textContent = ''; return; }
+        if (h1 === h2) { els.vRes.textContent = '✅ Hashes MATCH'; els.vRes.className = 'hpt-verify-result match'; }
+        else { els.vRes.textContent = '❌ Hashes DO NOT MATCH'; els.vRes.className = 'hpt-verify-result mismatch'; }
+      }
+      els.v1.oninput = verifyHashes; els.v2.oninput = verifyHashes;
+
+      // History
+      function saveHistory(input, algo, preview) {
+        state.history.unshift({ input, algo, preview, time: new Date().toLocaleTimeString() });
+        if (state.history.length > 12) state.history.pop();
+        try { localStorage.setItem('hpt_history', JSON.stringify(state.history)); } catch {}
+        renderHistory();
+      }
+      function renderHistory() {
+        els.historyList.innerHTML = state.history.length ? state.history.map((h,i)=>`
+          <div class="hpt-history-item" onclick="window._hptLoad(${i})">
+            <div><span class="hpt-history-lang">${h.algo}</span><span class="hpt-history-preview" title="${h.input} → ${h.preview}">${h.input} → ${h.preview}...</span></div>
+            <div style="text-align:right"><span style="font-size:0.7rem;color:var(--hpt-text-muted)">${h.time}</span><br><button class="hpt-history-del" onclick="window._hptDel(${i});event.stopPropagation()">✕</button></div>
+          </div>`).join('') : '<span style="color:var(--hpt-text-muted);font-size:0.8rem;padding:0.5rem">No history yet</span>';
+      }
+      window._hptLoad = i => { const h=state.history[i]; els.algo.value=h.algo; toast('📜 Loaded from history'); };
+      window._hptDel = i => { state.history.splice(i,1); try{localStorage.setItem('hpt_history',JSON.stringify(state.history))}catch{} renderHistory(); toast('🗑️ Deleted'); };
+
+      els.historyToggle.onclick = () => {
+        state.historyCollapsed = !state.historyCollapsed;
+        els.historyList.classList.toggle('collapsed', state.historyCollapsed);
+        els.historyToggle.classList.toggle('collapsed', state.historyCollapsed);
+      };
+
+      // Keyboard Shortcuts
+      document.addEventListener('keydown', e => {
+        if ((e.ctrlKey||e.metaKey) && e.key==='Enter') { e.preventDefault(); generateHash(); }
+        if (e.key==='/' && document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'TEXTAREA') { e.preventDefault(); els.text.focus(); }
+      });
+
+      // Init
+      renderHistory();
+      setStatus('✅ Ready');
+      console.log('🔐 Hash Generator Pro Initialized');
+    })();
+  </script>
+</div>

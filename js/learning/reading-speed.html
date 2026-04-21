@@ -1,0 +1,555 @@
+<div class="rs-arena">
+  <style>
+    .rs-arena {
+      --rs-bg: #0f172a;
+      --rs-card: #1e293b;
+      --rs-input: #334155;
+      --rs-text: #f1f5f9;
+      --rs-secondary: #94a3b8;
+      --rs-accent: #3b82f6;
+      --rs-success: #10b981;
+      --rs-warning: #f59e0b;
+      --rs-error: #ef4444;
+      --rs-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      --rs-transition: all 0.25s ease;
+      
+      max-width: 750px;
+      margin: 0 auto;
+      padding: 1.2rem;
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      color: var(--rs-text);
+      background: var(--rs-bg);
+      border-radius: 20px;
+      box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .rs-arena::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; height: 4px;
+      background: var(--rs-gradient);
+      animation: rs-shimmer 3s infinite linear;
+    }
+    @keyframes rs-shimmer { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
+    
+    /* Header */
+    .rs-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+      padding: 0.8rem;
+      background: var(--rs-card);
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.1);
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+    .rs-title { font-size: 1.3rem; font-weight: 700; background: var(--rs-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; display: flex; align-items: center; gap: 0.5rem; }
+    .rs-stats-mini { display: flex; gap: 1rem; font-size: 0.9rem; }
+    .rs-stat { background: rgba(255,255,255,0.1); padding: 0.3rem 0.7rem; border-radius: 8px; display: flex; align-items: center; gap: 0.3rem; }
+    .rs-stat-val { font-weight: 700; color: var(--rs-accent); }
+    
+    /* Controls */
+    .rs-controls {
+      display: flex;
+      gap: 0.8rem;
+      margin-bottom: 1rem;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .rs-control-group { display: flex; flex-direction: column; gap: 0.3rem; flex: 1; min-width: 120px; }
+    .rs-control-label { font-size: 0.8rem; color: var(--rs-secondary); font-weight: 500; }
+    .rs-input, .rs-select {
+      padding: 0.6rem;
+      border-radius: 8px;
+      border: 1px solid rgba(255,255,255,0.15);
+      background: var(--rs-input);
+      color: var(--rs-text);
+      font-size: 0.95rem;
+      outline: none;
+      transition: var(--rs-transition);
+    }
+    .rs-input:focus, .rs-select:focus { border-color: var(--rs-accent); box-shadow: 0 0 0 2px rgba(59,130,246,0.2); }
+    .rs-range { width: 100%; height: 6px; background: var(--rs-input); border-radius: 3px; outline: none; -webkit-appearance: none; }
+    .rs-range::-webkit-slider-thumb { -webkit-appearance: none; width: 16px; height: 16px; background: var(--rs-accent); border-radius: 50%; cursor: pointer; }
+    
+    .rs-btn {
+      padding: 0.7rem 1.2rem;
+      background: var(--rs-gradient);
+      border: none;
+      border-radius: 8px;
+      color: white;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--rs-transition);
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .rs-btn:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 10px 20px -5px rgba(0,0,0,0.4); }
+    .rs-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+    .rs-btn.sec { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.15); }
+    .rs-btn.sec:hover:not(:disabled) { background: rgba(255,255,255,0.15); transform: none; }
+    
+    /* Progress */
+    .rs-progress { height: 6px; background: var(--rs-input); border-radius: 3px; margin-bottom: 1rem; overflow: hidden; position: relative; }
+    .rs-progress-fill { height: 100%; background: var(--rs-gradient); border-radius: 3px; transition: width 0.2s linear; width: 0%; }
+    
+    /* Display */
+    .rs-display {
+      background: var(--rs-card);
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 16px;
+      min-height: 220px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 1rem;
+      position: relative;
+      padding: 1.5rem;
+      text-align: center;
+    }
+    .rs-word { font-size: 2.5rem; font-weight: 700; transition: all 0.1s ease; }
+    .rs-word.highlight { color: var(--rs-accent); transform: scale(1.05); }
+    .rs-focus-dot {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 4px;
+      height: 4px;
+      background: var(--rs-accent);
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 5;
+    }
+    
+    /* Custom Text Area */
+    .rs-custom-text {
+      display: none;
+      margin-bottom: 1rem;
+    }
+    .rs-custom-text.show { display: block; animation: rs-fadeIn 0.3s ease; }
+    @keyframes rs-fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+    .rs-textarea {
+      width: 100%;
+      height: 120px;
+      padding: 0.8rem;
+      border-radius: 10px;
+      border: 1px solid rgba(255,255,255,0.15);
+      background: var(--rs-input);
+      color: var(--rs-text);
+      font-size: 1rem;
+      resize: vertical;
+      outline: none;
+      font-family: inherit;
+    }
+    .rs-textarea:focus { border-color: var(--rs-accent); }
+    
+    /* Quiz */
+    .rs-quiz {
+      background: var(--rs-card);
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 14px;
+      padding: 1.5rem;
+      margin-top: 1rem;
+      display: none;
+    }
+    .rs-quiz.show { display: block; animation: rs-slideUp 0.4s ease; }
+    @keyframes rs-slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    .rs-quiz-title { font-size: 1.2rem; font-weight: 600; margin-bottom: 0.8rem; color: var(--rs-accent); }
+    .rs-q-text { margin-bottom: 1rem; line-height: 1.5; }
+    .rs-options { display: flex; flex-direction: column; gap: 0.6rem; }
+    .rs-opt {
+      padding: 0.9rem;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: var(--rs-transition);
+      text-align: left;
+    }
+    .rs-opt:hover:not(:disabled) { background: rgba(59,130,246,0.15); border-color: var(--rs-accent); }
+    .rs-opt.correct { background: rgba(16,185,129,0.2); border-color: var(--rs-success); }
+    .rs-opt.wrong { background: rgba(239,68,68,0.2); border-color: var(--rs-error); }
+    .rs-opt:disabled { cursor: default; opacity: 0.8; }
+    
+    .rs-result-msg {
+      text-align: center;
+      padding: 1rem;
+      margin-top: 1rem;
+      border-radius: 10px;
+      font-weight: 600;
+    }
+    .rs-result-msg.pass { background: rgba(16,185,129,0.15); color: var(--rs-success); border: 1px solid var(--rs-success); }
+    .rs-result-msg.fail { background: rgba(239,68,68,0.15); color: var(--rs-error); border: 1px solid var(--rs-error); }
+    
+    /* Settings Modal */
+    .rs-modal {
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(15,23,42,0.95);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 50;
+      padding: 1rem;
+      animation: rs-fadeIn 0.2s ease;
+    }
+    .rs-modal.show { display: flex; }
+    .rs-modal-content {
+      background: var(--rs-card);
+      border-radius: 16px;
+      padding: 1.5rem;
+      width: 100%;
+      max-width: 350px;
+      border: 1px solid rgba(255,255,255,0.2);
+      box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+    }
+    .rs-modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+    .rs-modal-close { background: none; border: none; color: var(--rs-secondary); font-size: 1.5rem; cursor: pointer; }
+    .rs-modal-close:hover { color: var(--rs-error); }
+    
+    /* Responsive */
+    @media (max-width: 600px) {
+      .rs-arena { padding: 0.8rem; border-radius: 16px; }
+      .rs-word { font-size: 2rem; }
+      .rs-controls { gap: 0.5rem; }
+      .rs-btn { padding: 0.6rem 1rem; font-size: 0.9rem; }
+    }
+  </style>
+
+  <!-- Header -->
+  <div class="rs-header">
+    <div class="rs-title">📖 Speed Reader Pro</div>
+    <div class="rs-stats-mini">
+      <div class="rs-stat">📊 <span class="rs-stat-val" id="rs-wpm-display">250</span> WPM</div>
+      <div class="rs-stat">⏱️ <span class="rs-stat-val" id="rs-time">00:00</span></div>
+    </div>
+  </div>
+
+  <!-- Controls -->
+  <div class="rs-controls">
+    <div class="rs-control-group">
+      <label class="rs-control-label">Speed (WPM)</label>
+      <input type="range" class="rs-range" id="rs-wpm-range" min="100" max="800" value="250" step="25">
+      <input type="number" class="rs-input" id="rs-wpm-input" min="100" max="800" value="250">
+    </div>
+    <div class="rs-control-group">
+      <label class="rs-control-label">Chunk Size</label>
+      <select class="rs-select" id="rs-chunk">
+        <option value="1">1 Word</option>
+        <option value="2" selected>2 Words</option>
+        <option value="3">3 Words</option>
+      </select>
+    </div>
+    <button class="rs-btn" id="rs-play">▶ Start</button>
+    <button class="rs-btn sec" id="rs-reset">↻ Reset</button>
+    <button class="rs-btn sec" id="rs-custom-toggle">✍️ Custom Text</button>
+  </div>
+
+  <!-- Custom Text Area -->
+  <div class="rs-custom-text" id="rs-custom-box">
+    <textarea class="rs-textarea" id="rs-paste" placeholder="Paste your article, essay, or notes here..."></textarea>
+    <button class="rs-btn" id="rs-load-custom" style="margin-top:0.5rem;">📥 Load Text</button>
+  </div>
+
+  <!-- Progress -->
+  <div class="rs-progress"><div class="rs-progress-fill" id="rs-progress"></div></div>
+
+  <!-- Display -->
+  <div class="rs-display">
+    <div class="rs-focus-dot"></div>
+    <div class="rs-word" id="rs-display">Ready to train your reading speed?</div>
+  </div>
+
+  <!-- Quiz -->
+  <div class="rs-quiz" id="rs-quiz">
+    <div class="rs-quiz-title">📝 Comprehension Check</div>
+    <div id="rs-quiz-content"></div>
+  </div>
+
+  <!-- Settings Modal -->
+  <div class="rs-modal" id="rs-modal">
+    <div class="rs-modal-content">
+      <div class="rs-modal-header">
+        <h3 style="margin:0;">⚙️ Settings</h3>
+        <button class="rs-modal-close" id="rs-close-modal">&times;</button>
+      </div>
+      <p style="color:var(--rs-secondary);margin:0 0 1rem; font-size:0.9rem;">⌨️ Keyboard: Space=Play/Pause | ←/→=Adjust WPM | R=Reset</p>
+      <button class="rs-btn sec" id="rs-clear-cache" style="width:100%;justify-content:center;">🗑️ Clear Saved Data</button>
+    </div>
+  </div>
+
+  <script>
+    (function(){
+      // ====== DATA ======
+      const texts = {
+        science: {
+          content: "The human brain contains approximately 86 billion neurons, each connected to thousands of others through synapses. These neural networks process information at remarkable speeds, allowing us to think, move, and react to our environment. Sleep plays a crucial role in consolidating memories and clearing metabolic waste. Regular mental exercise, like reading and learning new skills, strengthens neural pathways and can delay cognitive decline.",
+          quiz: [
+            { q: "How many neurons does the human brain contain?", o: ["10 billion","86 billion","100 billion","150 billion"], a: 1 },
+            { q: "What primarily happens to memory during sleep?", o: ["It fades","It consolidates","It transfers to muscles","It randomizes"], a: 1 }
+          ]
+        },
+        history: {
+          content: "The invention of the printing press by Johannes Gutenberg around 1440 revolutionized the spread of knowledge. Before this, books were handwritten and extremely rare. The press enabled mass production of texts, making education accessible to common people. This sparked the Renaissance, Reformation, and Scientific Revolution, fundamentally reshaping European society and eventually the entire world.",
+          quiz: [
+            { q: "Who invented the printing press?", o: ["Leonardo da Vinci","Johannes Gutenberg","Isaac Newton","Galileo Galilei"], a: 1 },
+            { q: "What was the main impact of the printing press?", o: ["It made books more expensive","It restricted education","It democratized knowledge","It replaced oral traditions"], a: 2 }
+          ]
+        },
+        tech: {
+          content: "Artificial Intelligence has evolved from simple rule-based systems to complex machine learning models. Deep learning neural networks can now recognize images, translate languages, and generate human-like text. These advancements are transforming industries from healthcare diagnostics to autonomous vehicles. However, ethical considerations around data privacy, algorithmic bias, and job displacement remain critical challenges for developers and policymakers.",
+          quiz: [
+            { q: "What enables AI to recognize images and translate languages?", o: ["Rule-based scripts","Deep learning networks","Manual programming","Database queries"], a: 1 },
+            { q: "Which is mentioned as an AI challenge?", o: ["Algorithmic bias","Hardware costs","Slow processing","Lack of electricity"], a: 0 }
+          ]
+        }
+      };
+
+      // ====== STATE ======
+      const state = {
+        words: [],
+        chunks: [],
+        currentIndex: 0,
+        isPlaying: false,
+        wpm: 250,
+        chunkSize: 2,
+        timer: null,
+        startTime: 0,
+        elapsed: 0,
+        quizAnswered: 0,
+        quizCorrect: 0,
+        currentTextKey: 'science'
+      };
+
+      // ====== DOM ======
+      const els = {
+        display: document.getElementById('rs-display'),
+        progress: document.getElementById('rs-progress'),
+        play: document.getElementById('rs-play'),
+        reset: document.getElementById('rs-reset'),
+        wpmRange: document.getElementById('rs-wpm-range'),
+        wpmInput: document.getElementById('rs-wpm-input'),
+        chunk: document.getElementById('rs-chunk'),
+        timeDisplay: document.getElementById('rs-time'),
+        wpmDisplay: document.getElementById('rs-wpm-display'),
+        quiz: document.getElementById('rs-quiz'),
+        quizContent: document.getElementById('rs-quiz-content'),
+        customToggle: document.getElementById('rs-custom-toggle'),
+        customBox: document.getElementById('rs-custom-box'),
+        customTextarea: document.getElementById('rs-paste'),
+        loadCustom: document.getElementById('rs-load-custom'),
+        modal: document.getElementById('rs-modal'),
+        closeModal: document.getElementById('rs-close-modal'),
+        clearCache: document.getElementById('rs-clear-cache')
+      };
+
+      // ====== UTILS ======
+      const formatTime = (ms) => {
+        const s = Math.floor(ms / 1000);
+        const m = Math.floor(s / 60);
+        return `${String(m).padStart(2,'0')}:${String(s % 60).padStart(2,'0')}`;
+      };
+
+      const delayForWord = (chunk) => {
+        const base = 60000 / state.wpm;
+        const hasPunct = /[,;:.!?"]$/.test(chunk.trim());
+        const isQuestion = chunk.includes('?');
+        const isExclaim = chunk.includes('!');
+        if(hasPunct) return base * (isExclaim ? 1.5 : isQuestion ? 1.4 : 1.2);
+        return base;
+      };
+
+      const chunkify = (words, size) => {
+        const chunks = [];
+        for(let i=0; i<words.length; i+=size) {
+          chunks.push(words.slice(i, i+size).join(' '));
+        }
+        return chunks;
+      };
+
+      const updateUI = () => {
+        if(state.currentIndex < state.chunks.length) {
+          els.display.textContent = state.chunks[state.currentIndex];
+          els.display.classList.add('highlight');
+          setTimeout(() => els.display.classList.remove('highlight'), 50);
+        }
+        const pct = state.chunks.length ? (state.currentIndex / state.chunks.length) * 100 : 0;
+        els.progress.style.width = `${pct}%`;
+        els.wpmDisplay.textContent = state.wpm;
+      };
+
+      const tick = () => {
+        if(!state.isPlaying) return;
+        
+        state.elapsed = performance.now() - state.startTime;
+        els.timeDisplay.textContent = formatTime(state.elapsed);
+        
+        updateUI();
+        state.currentIndex++;
+        
+        if(state.currentIndex >= state.chunks.length) {
+          stopReading();
+          showQuiz();
+          return;
+        }
+        
+        const delay = delayForWord(state.chunks[state.currentIndex]);
+        state.timer = setTimeout(tick, delay);
+      };
+
+      const startReading = () => {
+        if(state.isPlaying) return;
+        if(state.currentIndex >= state.chunks.length) { resetTest(); }
+        
+        state.isPlaying = true;
+        els.play.innerHTML = '⏸ Pause';
+        state.startTime = performance.now() - state.elapsed;
+        tick();
+      };
+
+      const pauseReading = () => {
+        state.isPlaying = false;
+        clearTimeout(state.timer);
+        els.play.innerHTML = '▶ Resume';
+      };
+
+      const stopReading = () => {
+        state.isPlaying = false;
+        clearTimeout(state.timer);
+        els.play.innerHTML = '▶ Restart';
+        els.display.textContent = '✅ Reading Complete!';
+      };
+
+      const resetTest = () => {
+        stopReading();
+        state.currentIndex = 0;
+        state.elapsed = 0;
+        state.quizAnswered = 0;
+        state.quizCorrect = 0;
+        els.timeDisplay.textContent = '00:00';
+        els.quiz.classList.remove('show');
+        updateUI();
+        els.display.textContent = 'Ready? Press Start!';
+        els.play.innerHTML = '▶ Start';
+      };
+
+      const loadText = (key) => {
+        state.currentTextKey = key;
+        const raw = texts[key].content;
+        state.words = raw.split(/\s+/).filter(w => w.length > 0);
+        state.chunks = chunkify(state.words, state.chunkSize);
+        resetTest();
+      };
+
+      const showQuiz = () => {
+        const data = texts[state.currentTextKey];
+        if(!data || !data.quiz) return;
+        
+        els.quizContent.innerHTML = '';
+        state.quizAnswered = 0;
+        state.quizCorrect = 0;
+        
+        data.quiz.forEach((q, qIdx) => {
+          const qBlock = document.createElement('div');
+          qBlock.style.marginBottom = '1rem';
+          qBlock.innerHTML = `
+            <p style="margin:0 0 0.6rem;font-weight:500;">${qIdx+1}. ${q.q}</p>
+            <div class="rs-options" data-q="${qIdx}">
+              ${q.o.map((opt, i) => `<button class="rs-opt" data-idx="${i}">${opt}</button>`).join('')}
+            </div>
+          `;
+          els.quizContent.appendChild(qBlock);
+        });
+        
+        els.quizContent.querySelectorAll('.rs-options').forEach(group => {
+          group.querySelectorAll('.rs-opt').forEach(btn => {
+            btn.onclick = () => handleAnswer(group, parseInt(btn.dataset.idx), data.quiz[parseInt(group.dataset.q)].a);
+          });
+        });
+        
+        els.quiz.classList.add('show');
+      };
+
+      const handleAnswer = (group, selected, correct) => {
+        if(group.dataset.answered) return;
+        group.dataset.answered = 'true';
+        state.quizAnswered++;
+        
+        group.querySelectorAll('.rs-opt').forEach((btn, i) => {
+          btn.disabled = true;
+          if(i === correct) btn.classList.add('correct');
+          if(i === selected && i !== correct) btn.classList.add('wrong');
+        });
+        
+        if(selected === correct) state.quizCorrect++;
+        
+        if(state.quizAnswered === texts[state.currentTextKey].quiz.length) {
+          const pct = Math.round((state.quizCorrect / state.quizAnswered) * 100);
+          const msg = document.createElement('div');
+          msg.className = `rs-result-msg ${pct >= 60 ? 'pass' : 'fail'}`;
+          msg.innerHTML = `🎯 Score: ${state.quizCorrect}/${state.quizAnswered} (${pct}%)<br><span style="font-size:0.85rem;font-weight:400;">${pct >= 60 ? 'Great retention!' : 'Try reading at a slower pace next time.'}</span>`;
+          els.quizContent.appendChild(msg);
+        }
+      };
+
+      // ====== EVENTS ======
+      els.play.onclick = () => state.isPlaying ? pauseReading() : startReading();
+      els.reset.onclick = resetTest;
+      
+      els.wpmRange.oninput = (e) => {
+        state.wpm = parseInt(e.target.value);
+        els.wpmInput.value = state.wpm;
+      };
+      els.wpmInput.onchange = (e) => {
+        let v = parseInt(e.target.value);
+        if(v < 100) v = 100; if(v > 800) v = 800;
+        state.wpm = v;
+        els.wpmInput.value = v;
+        els.wpmRange.value = v;
+      };
+      
+      els.chunk.onchange = (e) => {
+        state.chunkSize = parseInt(e.target.value);
+        state.chunks = chunkify(state.words, state.chunkSize);
+        resetTest();
+      };
+      
+      els.customToggle.onclick = () => {
+        els.customBox.classList.toggle('show');
+        els.customToggle.textContent = els.customBox.classList.contains('show') ? '📖 Preset Texts' : '✍️ Custom Text';
+        if(!els.customBox.classList.contains('show')) loadText(state.currentTextKey);
+      };
+      
+      els.loadCustom.onclick = () => {
+        const raw = els.customTextarea.value.trim();
+        if(raw.length < 50) { alert('Please paste at least 50 characters of text.'); return; }
+        
+        state.words = raw.split(/\s+/).filter(w => w.length > 0);
+        state.chunks = chunkify(state.words, state.chunkSize);
+        state.currentTextKey = 'custom';
+        texts.custom = { content: raw, quiz: [] };
+        resetTest();
+        els.customBox.classList.remove('show');
+        els.customToggle.textContent = '✍️ Custom Text';
+      };
+      
+      // Keyboard
+      document.addEventListener('keydown', (e) => {
+        if(e.target.tagName === 'TEXTAREA' || e.target.tagName === 'INPUT') return;
+        if(e.code === 'Space') { e.preventDefault(); els.play.click(); }
+        if(e.code === 'ArrowLeft') { state.wpm = Math.max(100, state.wpm - 25); els.wpmRange.value = state.wpm; els.wpmInput.value = state.wpm; }
+        if(e.code === 'ArrowRight') { state.wpm = Math.min(800, state.wpm + 25); els.wpmRange.value = state.wpm; els.wpmInput.value = state.wpm; }
+        if(e.key.toLowerCase() === 'r') els.reset.click();
+      });
+      
+      // Init
+      loadText('science');
+    })();
+  </script>
+</div>

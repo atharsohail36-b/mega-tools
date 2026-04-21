@@ -1,0 +1,263 @@
+<div class="lifestyle-tool horoscope-z">
+  <style>
+    .horoscope-z {
+      --hz-bg: #0b1120; --hz-card: #161e31; --hz-border: #2a3654;
+      --hz-text: #e2e8f0; --hz-sec: #94a3b8; --hz-accent: #a78bfa;
+      --hz-glow: rgba(167, 139, 250, 0.15); --hz-radius: 16px;
+      font-family: system-ui, -apple-system, sans-serif;
+      max-width: 680px; margin: 0 auto; padding: 1.5rem;
+      background: var(--hz-bg); color: var(--hz-text); border-radius: var(--hz-radius);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.4); position: relative;
+    }
+    .hz-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem; }
+    .hz-header h2 { margin: 0; font-size: 1.4rem; background: linear-gradient(90deg, var(--hz-accent), #38bdf8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .hz-tabs { display: flex; gap: 0.4rem; background: var(--hz-card); padding: 0.3rem; border-radius: 10px; border: 1px solid var(--hz-border); }
+    .hz-tab { padding: 0.4rem 0.8rem; background: none; border: none; color: var(--hz-sec); border-radius: 8px; cursor: pointer; font-size: 0.85rem; transition: 0.2s; }
+    .hz-tab.active { background: var(--hz-accent); color: #0b1120; font-weight: 600; }
+    .hz-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.6rem; margin-bottom: 1.2rem; }
+    .hz-sign { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 0.8rem 0.4rem; background: var(--hz-card); border: 1px solid var(--hz-border); border-radius: 12px; cursor: pointer; transition: 0.25s; }
+    .hz-sign:hover, .hz-sign.active { border-color: var(--hz-accent); background: var(--hz-glow); transform: translateY(-3px); box-shadow: 0 6px 16px rgba(167,139,250,0.2); }
+    .hz-sign .emoji { font-size: 1.6rem; margin-bottom: 0.3rem; }
+    .hz-sign .label { font-size: 0.75rem; color: var(--hz-sec); font-weight: 500; }
+    .hz-view { background: var(--hz-card); border: 1px solid var(--hz-border); border-radius: 14px; padding: 1.2rem; margin-bottom: 1rem; animation: hzFade 0.4s ease; }
+    .hz-view.hidden { display: none; }
+    .hz-header-row { display: flex; align-items: center; gap: 0.8rem; margin-bottom: 0.8rem; flex-wrap: wrap; }
+    .hz-sign-icon { font-size: 2rem; }
+    .hz-sign-name { margin: 0; font-size: 1.2rem; font-weight: 600; }
+    .hz-date { margin-left: auto; font-size: 0.8rem; color: var(--hz-sec); background: var(--hz-bg); padding: 0.2rem 0.6rem; border-radius: 6px; }
+    .hz-main-msg { line-height: 1.5; color: var(--hz-sec); margin-bottom: 1rem; min-height: 3em; }
+    .hz-energy, .hz-compat-res { display: flex; align-items: center; gap: 0.6rem; margin: 0.6rem 0; font-size: 0.85rem; }
+    .hz-bar { flex: 1; height: 8px; background: var(--hz-bg); border-radius: 4px; overflow: hidden; }
+    .hz-fill { height: 100%; background: linear-gradient(90deg, #22c55e, #f59e0b, #ef4444); width: 0; transition: width 0.5s cubic-bezier(0.4,0,0.2,1); border-radius: 4px; }
+    .hz-tags { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.6rem; margin: 0.8rem 0; }
+    .hz-tag-box { background: var(--hz-bg); padding: 0.6rem; border-radius: 10px; font-size: 0.85rem; display: flex; flex-direction: column; gap: 0.2rem; }
+    .hz-tag-box span { font-weight: 600; color: var(--hz-accent); }
+    .hz-actions { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 0.5rem; }
+    .hz-btn { flex: 1; min-width: 100px; padding: 0.7rem; border-radius: 10px; border: 1px solid var(--hz-border); background: var(--hz-card); color: var(--hz-sec); cursor: pointer; font-weight: 500; transition: 0.2s; }
+    .hz-btn:hover { background: var(--hz-border); color: var(--hz-text); }
+    .hz-btn.primary { background: var(--hz-accent); color: #0b1120; font-weight: 600; border: none; }
+    .hz-btn.primary:hover { background: #8b5cf6; transform: translateY(-1px); }
+    .hz-compat-box { text-align: center; }
+    .hz-select-group { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; justify-content: center; margin-bottom: 1rem; }
+    .hz-select { padding: 0.6rem; background: var(--hz-bg); border: 1px solid var(--hz-border); color: var(--hz-text); border-radius: 8px; }
+    .hz-compat-score { font-size: 2.2rem; font-weight: 800; color: var(--hz-accent); margin: 0.5rem 0; }
+    .hz-compat-msg { color: var(--hz-sec); font-style: italic; margin-bottom: 0.5rem; }
+    .hz-toast { position: fixed; bottom: 20px; right: 20px; padding: 0.8rem 1.2rem; border-radius: 10px; background: var(--hz-card); border: 1px solid var(--hz-border); color: var(--hz-text); font-size: 0.9rem; opacity: 0; transform: translateY(20px); transition: 0.3s; pointer-events: none; z-index: 999; box-shadow: 0 8px 24px rgba(0,0,0,0.5); }
+    .hz-toast.show { opacity: 1; transform: translateY(0); }
+    .hz-toast.success { border-color: #22c55e; color: #22c55e; }
+    @keyframes hzFade { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
+    @media (max-width: 500px) {
+      .hz-grid { grid-template-columns: repeat(3, 1fr); }
+      .hz-tags { grid-template-columns: 1fr; }
+      .hz-header { flex-direction: column; align-items: flex-start; }
+    }
+  </style>
+
+  <div class="hz-header">
+    <h2>🌙 Cosmic Horoscope</h2>
+    <div class="hz-tabs">
+      <button class="hz-tab active" data-view="daily">📅 Daily</button>
+      <button class="hz-tab" data-view="weekly">📆 Weekly</button>
+      <button class="hz-tab" data-view="compat">❤️ Match</button>
+    </div>
+  </div>
+
+  <div class="hz-grid" id="hz-grid"></div>
+
+  <div class="hz-view" id="hz-view-daily">
+    <div class="hz-header-row">
+      <span class="hz-sign-icon" id="hz-icon">♈</span>
+      <h3 class="hz-sign-name" id="hz-name">Select a Sign</h3>
+      <span class="hz-date" id="hz-date">Today</span>
+    </div>
+    <p class="hz-main-msg" id="hz-msg">Tap a zodiac sign to reveal your cosmic insight.</p>
+    <div class="hz-energy">⚡ Energy <div class="hz-bar"><div class="hz-fill" id="hz-energy-bar"></div></div></div>
+    <div class="hz-tags">
+      <div class="hz-tag-box">💼 Career <span id="hz-career">-</span></div>
+      <div class="hz-tag-box">❤️ Love <span id="hz-love">-</span></div>
+      <div class="hz-tag-box">🍀 Lucky <span id="hz-lucky">-</span></div>
+      <div class="hz-tag-box">🎯 Power Color <span id="hz-color">-</span></div>
+    </div>
+  </div>
+
+  <div class="hz-view hidden" id="hz-view-compat">
+    <div class="hz-compat-box">
+      <div class="hz-select-group">
+        <select id="hz-s1" class="hz-select"></select>
+        <span>❤️</span>
+        <select id="hz-s2" class="hz-select"></select>
+        <button class="hz-btn primary" id="hz-calc">Check Match</button>
+      </div>
+      <div class="hz-compat-res" id="hz-res" style="display:none">
+        <div class="hz-compat-score" id="hz-score">0%</div>
+        <div class="hz-compat-msg" id="hz-cmsg">-</div>
+        <div class="hz-bar"><div class="hz-fill" id="hz-cbar"></div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="hz-actions">
+    <button class="hz-btn" id="hz-copy">📋 Copy</button>
+    <button class="hz-btn" id="hz-share">📤 Share</button>
+    <button class="hz-btn primary" id="hz-save">💾 Save Today</button>
+  </div>
+
+  <div class="hz-toast" id="hz-toast"></div>
+
+  <script>
+  (function(){
+    const SIGNS = [
+      {n:'Aries',e:'♈',el:'Fire'}, {n:'Taurus',e:'♉',el:'Earth'}, {n:'Gemini',e:'♊',el:'Air'},
+      {n:'Cancer',e:'♋',el:'Water'}, {n:'Leo',e:'♌',el:'Fire'}, {n:'Virgo',e:'♍',el:'Earth'},
+      {n:'Libra',e:'♎',el:'Air'}, {n:'Scorpio',e:'♏',el:'Water'}, {n:'Sagittarius',e:'♐',el:'Fire'},
+      {n:'Capricorn',e:'♑',el:'Earth'}, {n:'Aquarius',e:'♒',el:'Air'}, {n:'Pisces',e:'♓',el:'Water'}
+    ];
+    const POOLS = {
+      career: [
+        "Focus on execution, ideas will follow.", "A mentor or senior may offer a golden opportunity.",
+        "Delegate tasks to avoid burnout.", "Financial planning today prevents stress tomorrow.",
+        "Network actively, visibility brings growth.", "Stay patient, results are brewing."
+      ],
+      love: [
+        "Honesty deepens the bond today.", "Small gestures matter more than grand words.",
+        "Give space to let attraction grow.", "Unexpected conversation sparks connection.",
+        "Listen more, judge less.", "Romance blooms when you least expect it."
+      ],
+      lucky: [
+        "3, 7, 14", "8, 11, 22", "5, 9, 18", "1, 4, 12", "6, 13, 21", "2, 10, 19"
+      ],
+      colors: [
+        "Crimson Red", "Emerald Green", "Royal Blue", "Sunflower Yellow", "Pearl White", "Amethyst Purple"
+      ],
+      msgs: [
+        "The stars align for bold moves. Trust your instincts and act decisively.",
+        "A quiet day brings clarity. Reflect before reacting to external noise.",
+        "Opportunities hide in routine. Pay attention to subtle signs and messages.",
+        "Collaboration unlocks new paths. Share your vision with trusted allies.",
+        "Release old burdens. Your mind is ready for a fresh perspective.",
+        "Energy is high but scattered. Channel it into one priority project."
+      ],
+      compatMsgs: [
+        "🔥 Electric chemistry! Opposites attract powerfully.",
+        "🌊 Deep emotional sync. Built for long-term harmony.",
+        "🌱 Steady growth. Mutual respect builds a solid foundation.",
+        "✨ Creative spark! Inspiring each other daily.",
+        "🛡️ Protective bond. Loyalty is your superpower.",
+        "🌬️ Intellectual match. Conversations never run dry."
+      ]
+    };
+
+    const toast = (m, t='success') => {
+      const el = document.getElementById('hz-toast'); el.textContent = m; el.className = `hz-toast show ${t}`;
+      setTimeout(() => el.className = 'hz-toast', 2500);
+    };
+    const seed = (str) => { let h = 0; for(let i=0;i<str.length;i++) h = ((h << 5) - h) + str.charCodeAt(i); return Math.abs(h); };
+    const pick = (s, arr) => arr[s % arr.length];
+    const fmt = (d) => d.toLocaleDateString('en-IN', { weekday:'short', day:'numeric', month:'short' });
+
+    let currentSign = null, view = 'daily';
+    const els = {
+      grid: document.getElementById('hz-grid'), date: document.getElementById('hz-date'),
+      icon: document.getElementById('hz-icon'), name: document.getElementById('hz-name'),
+      msg: document.getElementById('hz-msg'), eBar: document.getElementById('hz-energy-bar'),
+      career: document.getElementById('hz-career'), love: document.getElementById('hz-love'),
+      lucky: document.getElementById('hz-lucky'), color: document.getElementById('hz-color'),
+      views: { daily: document.getElementById('hz-view-daily'), compat: document.getElementById('hz-view-compat') },
+      tabs: document.querySelectorAll('.hz-tab'),
+      copy: document.getElementById('hz-copy'), share: document.getElementById('hz-share'),
+      save: document.getElementById('hz-save'),
+      s1: document.getElementById('hz-s1'), s2: document.getElementById('hz-s2'),
+      calc: document.getElementById('hz-calc'), res: document.getElementById('hz-res'),
+      score: document.getElementById('hz-score'), cmsg: document.getElementById('hz-cmsg'),
+      cbar: document.getElementById('hz-cbar')
+    };
+
+    const renderGrid = () => {
+      SIGNS.forEach((s, i) => {
+        const d = document.createElement('div'); d.className = 'hz-sign';
+        d.innerHTML = `<span class="emoji">${s.e}</span><span class="label">${s.n}</span>`;
+        d.onclick = () => {
+          document.querySelectorAll('.hz-sign').forEach(x=>x.classList.remove('active'));
+          d.classList.add('active'); currentSign = i; renderReading();
+        };
+        els.grid.appendChild(d);
+      });
+    };
+
+    const renderReading = (isWeekly=false) => {
+      if(currentSign === null) return;
+      const s = SIGNS[currentSign];
+      const today = new Date();
+      const offset = isWeekly ? 7 : 0;
+      const dateStr = fmt(new Date(today.setDate(today.getDate()+offset)));
+      const hashStr = `${s.n}${today.toISOString().slice(0,10)}${offset}`;
+      const h = seed(hashStr);
+
+      els.icon.textContent = s.e; els.name.textContent = `${s.n} - ${isWeekly?'Next 7 Days':'Today'}`;
+      els.date.textContent = dateStr;
+      els.msg.textContent = pick(h, POOLS.msgs);
+      els.career.textContent = pick(h+1, POOLS.career);
+      els.love.textContent = pick(h+2, POOLS.love);
+      els.lucky.textContent = pick(h+3, POOLS.lucky);
+      els.color.textContent = pick(h+4, POOLS.colors);
+      els.eBar.style.width = `${60 + (h % 40)}%`;
+    };
+
+    const switchView = (v) => {
+      view = v;
+      els.tabs.forEach(t => t.classList.toggle('active', t.dataset.view === v));
+      Object.entries(els.views).forEach(([k,el]) => el.classList.toggle('hidden', k!==v));
+      if(v==='daily' || v==='weekly') renderReading(v==='weekly');
+    };
+
+    els.tabs.forEach(t => t.onclick = () => switchView(t.dataset.view));
+
+    els.copy.onclick = () => {
+      if(!currentSign) return toast('Select a sign first','warn');
+      const txt = `${els.icon.textContent} ${els.name.textContent}\n📅 ${els.date.textContent}\n💬 ${els.msg.textContent}\n💼 ${els.career.textContent}\n❤️ ${els.love.textContent}\n🍀 ${els.lucky.textContent} | 🎯 ${els.color.textContent}`;
+      navigator.clipboard.writeText(txt).then(() => toast('📋 Copied to clipboard!'));
+    };
+
+    els.share.onclick = () => {
+      if(!currentSign) return toast('Select a sign first','warn');
+      const txt = `🌙 Check your ${els.name.textContent.replace(' - Today','')} horoscope!`;
+      window.open(`https://wa.me/?text=${encodeURIComponent(txt)}`,'_blank');
+    };
+
+    els.save.onclick = () => {
+      if(!currentSign) return toast('Select a sign first','warn');
+      const data = { sign: SIGNS[currentSign].n, date: els.date.textContent, msg: els.msg.textContent };
+      localStorage.setItem('hz-saved', JSON.stringify(data));
+      toast('💾 Saved to local memory!','success');
+    };
+
+    // Compatibility
+    SIGNS.forEach(s => {
+      const o1 = document.createElement('option'); o1.value = s.n; o1.textContent = `${s.e} ${s.n}`;
+      const o2 = document.createElement('option'); o2.value = s.n; o2.textContent = `${s.e} ${s.n}`;
+      els.s1.appendChild(o1); els.s2.appendChild(o2);
+    });
+    els.s2.value = 'Taurus';
+
+    els.calc.onclick = () => {
+      const a = SIGNS.find(x=>x.n===els.s1.value), b = SIGNS.find(x=>x.n===els.s2.value);
+      const h = seed(`${a.n}${b.n}compat2026`);
+      let score = 50;
+      if(a.el === b.el) score = 80 + (h%20);
+      else if(['Fire','Air'].includes(a.el) && ['Fire','Air'].includes(b.el)) score = 70 + (h%25);
+      else if(['Earth','Water'].includes(a.el) && ['Earth','Water'].includes(b.el)) score = 75 + (h%20);
+      else score = 40 + (h%30);
+      
+      els.res.style.display = 'block';
+      els.score.textContent = score + '%';
+      els.cmsg.textContent = pick(h, POOLS.compatMsgs);
+      els.cbar.style.width = score + '%';
+      els.cbar.style.background = score>75?'var(--hz-accent)':score>50?'#f59e0b':'#ef4444';
+    };
+
+    renderGrid();
+    const saved = JSON.parse(localStorage.getItem('hz-saved')||'null');
+    if(saved) toast(`📖 Last saved: ${saved.sign} on ${saved.date}`);
+  })();
+  </script>
+</div>

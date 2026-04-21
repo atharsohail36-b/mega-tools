@@ -1,0 +1,341 @@
+<div class="emi-tool" lang="en">
+  <style>
+    :root {
+      --bg-main: #0b0e11; --bg-card: #161a21; --bg-input: #1e232c;
+      --border: rgba(255,255,255,0.08); --text: #f1f5f9; --text-sec: #94a3b8;
+      --accent: #38bdf8; --accent-glow: rgba(56,189,248,0.2);
+      --interest: #f59e0b; --success: #22c55e; --grad: linear-gradient(135deg, #38bdf8, #818cf8);
+      --radius: 14px; --trans: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .emi-tool { max-width: 720px; margin: 0 auto; padding: 1.5rem; font-family: system-ui, -apple-system, sans-serif; color: var(--text); }
+    .emi-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.8rem; }
+    .emi-header h3 { margin: 0; font-size: 1.3rem; font-weight: 700; background: var(--grad); -webkit-background-clip: text; color: transparent; }
+    .loan-presets { display: flex; gap: 0.4rem; flex-wrap: wrap; }
+    .preset-btn { padding: 0.4rem 0.7rem; background: var(--bg-input); border: 1px solid var(--border); border-radius: 8px; color: var(--text-sec); cursor: pointer; transition: var(--trans); font-size: 0.8rem; }
+    .preset-btn:hover, .preset-btn.active { background: var(--accent); color: #0b0e11; border-color: var(--accent); }
+
+    .emi-inputs { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 0.8rem; }
+    .input-wrap { position: relative; }
+    .emi-label { display: block; margin-bottom: 0.4rem; color: var(--text-sec); font-size: 0.85rem; font-weight: 500; }
+    .emi-input { width: 100%; padding: 0.85rem 1rem; border-radius: var(--radius); border: 1px solid var(--border); background: var(--bg-input); color: var(--text); font-size: 1rem; outline: none; transition: var(--trans); }
+    .emi-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow); }
+    .input-hint { position: absolute; right: 10px; top: 36px; font-size: 0.75rem; color: var(--text-sec); pointer-events: none; }
+    .error-msg { color: #ef4444; font-size: 0.75rem; margin-top: 4px; display: none; }
+    .error-msg.show { display: block; }
+
+    .range-sync { width: 100%; margin-top: 0.6rem; accent-color: var(--accent); cursor: pointer; }
+    .range-sync::-webkit-slider-thumb { transform: scale(1.2); transition: transform 0.1s; }
+    .range-sync::-webkit-slider-thumb:hover { transform: scale(1.4); }
+
+    .calc-btn { width: 100%; padding: 1rem; background: var(--grad); border: none; border-radius: var(--radius); color: #0b0e11; font-weight: 700; font-size: 1.05rem; cursor: pointer; transition: var(--trans); margin: 0.8rem 0 1.2rem; }
+    .calc-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 18px var(--accent-glow); }
+    .calc-btn:active { transform: scale(0.99); }
+
+    .results-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 0.9rem; margin-bottom: 1.2rem; }
+    .result-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem; text-align: center; transition: var(--trans); }
+    .result-card:hover { transform: translateY(-3px); border-color: var(--accent); }
+    .result-val { font-size: 1.4rem; font-weight: 800; color: var(--accent); margin: 0.3rem 0; }
+    .result-lbl { font-size: 0.75rem; color: var(--text-sec); text-transform: uppercase; letter-spacing: 0.5px; }
+    .result-sub { font-size: 0.75rem; margin-top: 4px; padding: 2px 6px; border-radius: 4px; display: inline-block; }
+    .sub-principal { background: rgba(56,189,248,0.15); color: var(--accent); }
+    .sub-interest { background: rgba(245,158,11,0.15); color: var(--interest); }
+
+    .chart-wrap { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.2rem; margin-bottom: 1.2rem; display: flex; align-items: center; justify-content: space-around; flex-wrap: wrap; gap: 1rem; }
+    .donut { width: 140px; height: 140px; border-radius: 50%; position: relative; transition: background 0.6s ease; }
+    .donut-hole { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); width: 80px; height: 80px; background: var(--bg-card); border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+    .donut-pct { font-size: 1.2rem; font-weight: 800; color: var(--text); }
+    .donut-lbl { font-size: 0.7rem; color: var(--text-sec); }
+    .chart-legend { display: flex; flex-direction: column; gap: 0.6rem; }
+    .legend-item { display: flex; align-items: center; gap: 8px; font-size: 0.9rem; }
+    .legend-dot { width: 14px; height: 14px; border-radius: 4px; }
+
+    .schedule-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.6rem; }
+    .schedule-toggle { display: flex; background: var(--bg-input); border-radius: 8px; padding: 3px; border: 1px solid var(--border); }
+    .toggle-btn { padding: 0.35rem 0.8rem; border: none; border-radius: 6px; background: transparent; color: var(--text-sec); cursor: pointer; font-size: 0.8rem; transition: var(--trans); }
+    .toggle-btn.active { background: var(--accent); color: #0b0e11; }
+
+    .table-wrap { overflow-x: auto; border-radius: var(--radius); border: 1px solid var(--border); max-height: 300px; overflow-y: auto; }
+    .emi-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; min-width: 500px; }
+    .emi-table th, .emi-table td { padding: 0.8rem 1rem; border-bottom: 1px solid var(--border); text-align: right; }
+    .emi-table th { background: var(--bg-input); color: var(--text-sec); font-weight: 500; position: sticky; top: 0; z-index: 1; }
+    .emi-table td:first-child, .emi-table th:first-child { text-align: left; }
+    .emi-table tr:hover { background: rgba(255,255,255,0.03); }
+    .int-val { color: var(--interest); font-weight: 500; }
+
+    .actions { display: flex; justify-content: flex-end; gap: 0.6rem; margin-top: 1rem; flex-wrap: wrap; }
+    .act-btn { padding: 0.5rem 0.9rem; background: var(--bg-input); border: 1px solid var(--border); border-radius: 8px; color: var(--text-sec); cursor: pointer; transition: var(--trans); font-size: 0.85rem; display: flex; align-items: center; gap: 6px; }
+    .act-btn:hover { background: rgba(255,255,255,0.05); color: var(--text); }
+
+    .history-panel { margin-top: 0.8rem; background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); max-height: 0; overflow: hidden; transition: max-height 0.3s ease, padding 0.3s ease; }
+    .history-panel.open { max-height: 160px; padding: 0.7rem; overflow-y: auto; }
+    .hist-item { display: flex; justify-content: space-between; padding: 0.5rem; border-radius: 8px; cursor: pointer; transition: var(--trans); font-size: 0.85rem; color: var(--text-sec); border-bottom: 1px solid var(--border); }
+    .hist-item:last-child { border-bottom: none; }
+    .hist-item:hover { background: rgba(255,255,255,0.05); color: var(--text); }
+    .empty-hist { text-align: center; color: var(--text-sec); padding: 0.8rem 0; font-size: 0.8rem; }
+
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+    .animate-in { animation: fadeIn 0.35s ease-out forwards; }
+
+    @media (max-width: 520px) {
+      .emi-tool { padding: 1rem 0.8rem; }
+      .emi-inputs { grid-template-columns: 1fr; }
+      .results-grid { grid-template-columns: 1fr 1fr; }
+      .chart-wrap { flex-direction: column; text-align: center; }
+    }
+  </style>
+
+  <div class="emi-header">
+    <h3>🏦 EMI & Loan Calculator</h3>
+    <div class="loan-presets">
+      <button class="preset-btn active" data-p="500000" data-r="8.5" data-y="5">Home</button>
+      <button class="preset-btn" data-p="300000" data-r="9.2" data-y="3">Car</button>
+      <button class="preset-btn" data-p="150000" data-r="12.0" data-y="2">Personal</button>
+      <button class="preset-btn" data-p="1000000" data-r="10.5" data-y="10">Education</button>
+    </div>
+  </div>
+
+  <div class="emi-inputs">
+    <div class="input-wrap">
+      <label class="emi-label" for="emi-p">Loan Amount (₹)</label>
+      <input class="emi-input" type="number" id="emi-p" value="500000" min="10000" step="1000">
+      <span class="input-hint">₹</span>
+      <input type="range" class="range-sync" id="emi-p-r" min="50000" max="20000000" step="10000" value="500000">
+    </div>
+    <div class="input-wrap">
+      <label class="emi-label" for="emi-r">Interest Rate (%)</label>
+      <input class="emi-input" type="number" id="emi-r" value="8.5" min="0.1" max="25" step="0.1">
+      <span class="input-hint">% p.a.</span>
+      <input type="range" class="range-sync" id="emi-r-r" min="1" max="20" step="0.1" value="8.5">
+    </div>
+    <div class="input-wrap">
+      <label class="emi-label" for="emi-n">Tenure (Years)</label>
+      <input class="emi-input" type="number" id="emi-n" value="5" min="1" max="30" step="1">
+      <span class="input-hint">Years</span>
+      <input type="range" class="range-sync" id="emi-n-r" min="1" max="30" step="1" value="5">
+    </div>
+    <div class="input-wrap">
+      <label class="emi-label" for="emi-dp">Down Payment (₹)</label>
+      <input class="emi-input" type="number" id="emi-dp" value="0" min="0" step="1000">
+      <span class="input-hint">Optional</span>
+    </div>
+  </div>
+
+  <button class="calc-btn" id="calc-btn">Calculate EMI</button>
+
+  <div class="results-grid" id="results">
+    <div class="result-card animate-in"><div class="result-lbl">Monthly EMI</div><div class="result-val" id="r-emi">₹0</div></div>
+    <div class="result-card animate-in" style="animation-delay:80ms"><div class="result-lbl">Total Interest</div><div class="result-val" id="r-int">₹0</div><div class="result-sub sub-interest" id="r-int-pct">0%</div></div>
+    <div class="result-card animate-in" style="animation-delay:160ms"><div class="result-lbl">Principal Amount</div><div class="result-val" id="r-prin">₹0</div><div class="result-sub sub-principal" id="r-prin-pct">0%</div></div>
+    <div class="result-card animate-in" style="animation-delay:240ms"><div class="result-lbl">Total Payment</div><div class="result-val" id="r-tot">₹0</div></div>
+  </div>
+
+  <div class="chart-wrap">
+    <div class="donut" id="donut">
+      <div class="donut-hole">
+        <div class="donut-pct" id="donut-pct">0%</div>
+        <div class="donut-lbl">Interest</div>
+      </div>
+    </div>
+    <div class="chart-legend">
+      <div class="legend-item"><div class="legend-dot" style="background:var(--accent)"></div> Principal Repaid</div>
+      <div class="legend-item"><div class="legend-dot" style="background:var(--interest)"></div> Total Interest</div>
+    </div>
+  </div>
+
+  <div class="schedule-header">
+    <span style="font-weight:600">Amortization Schedule</span>
+    <div class="schedule-toggle">
+      <button class="toggle-btn active" data-view="year">Yearly</button>
+      <button class="toggle-btn" data-view="month">Monthly</button>
+    </div>
+  </div>
+  <div class="table-wrap">
+    <table class="emi-table">
+      <thead><tr><th>Period</th><th>Principal</th><th>Interest</th><th>Balance</th></tr></thead>
+      <tbody id="sched-body"></tbody>
+    </table>
+  </div>
+
+  <div class="actions">
+    <button class="act-btn" id="clear-btn">🗑️ Reset</button>
+    <button class="act-btn" id="save-btn">💾 Save</button>
+    <button class="act-btn" id="copy-btn">📋 Copy</button>
+    <button class="act-btn" id="hist-btn">📜 History</button>
+  </div>
+
+  <div class="history-panel" id="history-panel">
+    <div class="empty-hist">No saved calculations</div>
+  </div>
+
+  <script>
+    (function(){
+      const $ = id => document.getElementById(id);
+      const fmt = n => '₹' + Math.round(n).toLocaleString('en-IN');
+      const pct = (val, tot) => ((val/tot)*100).toFixed(1) + '%';
+
+      const els = {
+        p: $('emi-p'), r: $('emi-r'), n: $('emi-n'), dp: $('emi-dp'),
+        pR: $('emi-p-r'), rR: $('emi-r-r'), nR: $('emi-n-r'),
+        calcBtn: $('calc-btn'), clearBtn: $('clear-btn'), saveBtn: $('save-btn'),
+        copyBtn: $('copy-btn'), histBtn: $('hist-btn'), histPanel: $('history-panel'),
+        rEmi: $('r-emi'), rInt: $('r-int'), rPrin: $('r-prin'), rTot: $('r-tot'),
+        rIntPct: $('r-int-pct'), rPrinPct: $('r-prin-pct'),
+        donut: $('donut'), donutPct: $('donut-pct'),
+        schedBody: $('sched-body')
+      };
+
+      let viewMode = 'year';
+      let history = JSON.parse(localStorage.getItem('emi_history') || '[]');
+
+      const syncInput = (inp, range) => {
+        inp.addEventListener('input', () => range.value = inp.value);
+        range.addEventListener('input', () => inp.value = range.value);
+      };
+      syncInput(els.p, els.pR); syncInput(els.r, els.rR); syncInput(els.n, els.nR);
+
+      const validate = () => {
+        const p = parseFloat(els.p.value), dp = parseFloat(els.dp.value)||0;
+        if(p <= dp) { els.p.classList.add('error'); return false; }
+        els.p.classList.remove('error');
+        return true;
+      };
+
+      const calculate = () => {
+        if(!validate()) return;
+        const P = parseFloat(els.p.value) - (parseFloat(els.dp.value)||0);
+        const R = parseFloat(els.r.value)/12/100;
+        const N = parseFloat(els.n.value)*12;
+        if(P<=0 || R<=0 || N<=0) return;
+
+        const emi = P * R * Math.pow(1+R, N) / (Math.pow(1+R, N)-1);
+        const total = emi * N;
+        const totalInt = total - P;
+
+        els.rEmi.textContent = fmt(emi);
+        els.rInt.textContent = fmt(totalInt);
+        els.rPrin.textContent = fmt(P);
+        els.rTot.textContent = fmt(total);
+        els.rIntPct.textContent = pct(totalInt, total);
+        els.rPrinPct.textContent = pct(P, total);
+
+        const intPct = (totalInt/total)*100;
+        els.donut.style.background = `conic-gradient(var(--accent) 0% ${100-intPct}%, var(--interest) 0% 100%)`;
+        els.donutPct.textContent = intPct.toFixed(1) + '%';
+
+        generateSchedule(P, R, N, emi);
+      };
+
+      const generateSchedule = (P, R, N, emi) => {
+        const tbody = els.schedBody;
+        tbody.innerHTML = '';
+        let bal = P, totalInt = 0;
+        const rows = viewMode === 'year' ? Math.min(N/12, 30) : Math.min(N, 24);
+        const step = viewMode === 'year' ? 12 : 1;
+        const lbl = viewMode === 'year' ? 'Year' : 'Month';
+
+        for(let i=1; i<=rows; i++) {
+          let yearInt = 0, yearPrin = 0;
+          for(let m=0; m<step; m++) {
+            if(bal <= 0) break;
+            const int = bal * R;
+            const prin = emi - int;
+            yearInt += int;
+            yearPrin += prin;
+            bal -= prin;
+            totalInt += int;
+          }
+          if(bal < 0.5) bal = 0;
+          const tr = document.createElement('tr');
+          tr.innerHTML = `<td>${lbl} ${i}</td><td>${fmt(yearPrin)}</td><td class="int-val">${fmt(yearInt)}</td><td>${fmt(bal)}</td>`;
+          tbody.appendChild(tr);
+          if(bal <= 0) break;
+        }
+      };
+
+      const renderHistory = () => {
+        els.histPanel.innerHTML = history.length ? history.map(h => 
+          `<div class="hist-item" data-data="${encodeURIComponent(JSON.stringify(h))}">
+            <span>₹${h.P} @ ${h.R}% for ${h.Y}y</span>
+            <span style="color:var(--accent); font-weight:600">EMI: ${h.EMI}</span>
+          </div>`
+        ).join('') : '<div class="empty-hist">No saved calculations</div>';
+      };
+
+      const saveCalc = () => {
+        const entry = {
+          P: els.p.value, R: els.r.value, Y: els.n.value,
+          EMI: els.rEmi.textContent, ts: new Date().toLocaleDateString()
+        };
+        history.unshift(entry);
+        if(history.length > 10) history.pop();
+        localStorage.setItem('emi_history', JSON.stringify(history));
+        renderHistory();
+        els.saveBtn.innerHTML = '✅ Saved!'; setTimeout(() => els.saveBtn.innerHTML = '💾 Save', 1500);
+      };
+
+      const copyResults = async () => {
+        const text = `🏦 EMI Summary\nLoan: ${fmt(parseFloat(els.p.value))}\nRate: ${els.r.value}%\nTenure: ${els.n.value} Years\nDown Payment: ${fmt(parseFloat(els.dp.value)||0)}\n\nMonthly EMI: ${els.rEmi.textContent}\nTotal Interest: ${els.rInt.textContent}\nTotal Payment: ${els.rTot.textContent}\nDate: ${new Date().toLocaleString()}`;
+        try {
+          await navigator.clipboard.writeText(text);
+          els.copyBtn.innerHTML = '✅ Copied!'; setTimeout(() => els.copyBtn.innerHTML = '📋 Copy', 1500);
+        } catch(e){}
+      };
+
+      // Events
+      document.querySelectorAll('.preset-btn').forEach(btn => btn.addEventListener('click', () => {
+        document.querySelectorAll('.preset-btn').forEach(b=>b.classList.remove('active'));
+        btn.classList.add('active');
+        els.p.value = btn.dataset.p; els.pR.value = btn.dataset.p;
+        els.r.value = btn.dataset.r; els.rR.value = btn.dataset.r;
+        els.n.value = btn.dataset.y; els.nR.value = btn.dataset.y;
+        els.dp.value = 0;
+        calculate();
+      }));
+
+      els.calcBtn.addEventListener('click', calculate);
+      els.clearBtn.addEventListener('click', () => {
+        els.p.value=500000; els.pR.value=500000; els.r.value=8.5; els.rR.value=8.5;
+        els.n.value=5; els.nR.value=5; els.dp.value=0; calculate();
+      });
+      els.saveBtn.addEventListener('click', saveCalc);
+      els.copyBtn.addEventListener('click', copyResults);
+      els.histBtn.addEventListener('click', () => {
+        els.histPanel.classList.toggle('open');
+        els.histBtn.innerHTML = els.histPanel.classList.contains('open') ? '🔽 Close' : '📜 History';
+      });
+
+      document.querySelectorAll('.toggle-btn').forEach(btn => btn.addEventListener('click', () => {
+        document.querySelectorAll('.toggle-btn').forEach(b=>b.classList.remove('active'));
+        btn.classList.add('active');
+        viewMode = btn.dataset.view;
+        calculate();
+      }));
+
+      // Auto-calculate (debounced)
+      let timeout;
+      document.querySelectorAll('.emi-input, .range-sync').forEach(el => el.addEventListener('input', () => {
+        clearTimeout(timeout);
+        timeout = setTimeout(calculate, 300);
+      }));
+
+      document.addEventListener('keydown', e => {
+        if(e.key === 'Enter' && document.activeElement.classList.contains('emi-input')) {
+          e.preventDefault(); calculate();
+        }
+      });
+
+      els.histPanel.addEventListener('click', e => {
+        const item = e.target.closest('.hist-item');
+        if(item) {
+          const d = JSON.parse(decodeURIComponent(item.dataset.data));
+          els.p.value=d.P; els.pR.value=d.P; els.r.value=d.R; els.rR.value=d.R;
+          els.n.value=d.Y; els.nR.value=d.Y; calculate();
+        }
+      });
+
+      // Init
+      renderHistory();
+      calculate();
+    })();
+  </script>
+</div>

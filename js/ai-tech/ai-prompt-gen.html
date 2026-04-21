@@ -1,0 +1,448 @@
+<div class="ai-prompt-pro">
+  <style>
+    .ai-prompt-pro {
+      --apg-primary: #6366f1; --apg-primary-hover: #4f46e5; --apg-accent: #8b5cf6;
+      --apg-bg: #0f0f1a; --apg-card: #1a1a2e; --apg-input: #1e1e3f;
+      --apg-border: #334155; --apg-text: #f1f5f9; --apg-text-muted: #94a3b8;
+      --apg-success: #10b981; --apg-error: #ef4444; --apg-warning: #f59e0b;
+      --apg-radius: 14px; --apg-shadow: 0 4px 20px rgba(0,0,0,0.4);
+      --apg-transition: all 0.3s cubic-bezier(0.4,0,0.2,1);
+      
+      max-width: 850px; margin: 2rem auto; padding: 1.5rem;
+      background: var(--apg-card); border: 1px solid var(--apg-border);
+      border-radius: var(--apg-radius); box-shadow: var(--apg-shadow);
+      font-family: system-ui, -apple-system, sans-serif; color: var(--apg-text);
+      position: relative; overflow: hidden;
+    }
+    
+    /* Header */
+    .apg-header { text-align: center; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid var(--apg-border); }
+    .apg-title { font-size: 1.8rem; font-weight: 800; background: linear-gradient(90deg, var(--apg-primary), var(--apg-accent)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 0.3rem; }
+    .apg-subtitle { color: var(--apg-text-muted); font-size: 0.95rem; }
+    
+    /* Presets */
+    .apg-presets { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1.2rem; }
+    .apg-preset {
+      padding: 0.4rem 0.9rem; background: var(--apg-input); border: 1px solid var(--apg-border);
+      border-radius: 20px; color: var(--apg-text-muted); font-size: 0.8rem; cursor: pointer;
+      transition: var(--apg-transition); white-space: nowrap;
+    }
+    .apg-preset:hover { background: var(--apg-primary); color: white; border-color: transparent; transform: translateY(-1px); }
+    
+    /* Form Grid */
+    .apg-form { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1.2rem; }
+    .apg-field { position: relative; }
+    .apg-label { display: block; font-size: 0.85rem; color: var(--apg-text-muted); margin-bottom: 0.4rem; font-weight: 500; }
+    .apg-input, .apg-select, .apg-textarea {
+      width: 100%; padding: 0.8rem 1rem; background: var(--apg-input); border: 2px solid var(--apg-border);
+      border-radius: 10px; color: var(--apg-text); font-size: 0.95rem; outline: none; transition: var(--apg-transition);
+      resize: vertical;
+    }
+    .apg-input:focus, .apg-select:focus, .apg-textarea:focus {
+      border-color: var(--apg-primary); box-shadow: 0 0 0 3px rgba(99,102,241,0.25);
+    }
+    .apg-textarea { min-height: 80px; font-family: inherit; }
+    
+    /* Generate Button */
+    .apg-btn-main {
+      width: 100%; padding: 1rem; background: linear-gradient(135deg, var(--apg-primary), var(--apg-accent));
+      border: none; border-radius: 12px; color: white; font-size: 1rem; font-weight: 600;
+      cursor: pointer; transition: var(--apg-transition); display: flex; align-items: center;
+      justify-content: center; gap: 0.5rem; position: relative; overflow: hidden;
+    }
+    .apg-btn-main:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(99,102,241,0.4); }
+    .apg-btn-main:active { transform: translateY(0); }
+    .apg-btn-main:disabled { opacity: 0.7; cursor: not-allowed; transform: none; }
+    .apg-spinner { width: 18px; height: 18px; border: 2px solid transparent; border-top-color: currentColor; border-radius: 50%; animation: apg-spin 0.8s linear infinite; display: none; }
+    .apg-btn-main.loading .apg-spinner { display: block; }
+    .apg-btn-main.loading span { opacity: 0; }
+    @keyframes apg-spin { to { transform: rotate(360deg); } }
+    
+    /* Output Area */
+    .apg-output-box { margin-top: 1.2rem; position: relative; background: #0a0a14; border: 1px solid var(--apg-border); border-radius: 12px; padding: 1.2rem; min-height: 140px; }
+    .apg-output { font-family: 'Courier New', monospace; font-size: 0.92rem; line-height: 1.7; color: var(--apg-text); white-space: pre-wrap; margin-bottom: 0.8rem; min-height: 100px; }
+    .apg-output-placeholder { color: var(--apg-text-muted); font-style: italic; }
+    .apg-output-actions { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem; padding-top: 0.8rem; border-top: 1px solid var(--apg-border); }
+    .apg-counter { font-size: 0.8rem; color: var(--apg-text-muted); }
+    .apg-actions { display: flex; gap: 0.5rem; }
+    .apg-btn-sm {
+      padding: 0.5rem 0.9rem; background: var(--apg-input); border: 1px solid var(--apg-border);
+      border-radius: 8px; color: var(--apg-text); font-size: 0.8rem; cursor: pointer;
+      transition: var(--apg-transition); display: flex; align-items: center; gap: 0.3rem;
+    }
+    .apg-btn-sm:hover { background: var(--apg-primary); color: white; border-color: transparent; }
+    
+    /* History */
+    .apg-history { margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--apg-border); }
+    .apg-history-title { display: flex; justify-content: space-between; align-items: center; cursor: pointer; font-size: 1rem; color: var(--apg-text-muted); margin-bottom: 0.5rem; }
+    .apg-history-title i { transition: var(--apg-transition); }
+    .apg-history-title.collapsed i { transform: rotate(-90deg); }
+    .apg-history-list { max-height: 200px; overflow-y: auto; display: grid; gap: 0.5rem; transition: var(--apg-transition); }
+    .apg-history-item {
+      padding: 0.7rem; background: var(--apg-input); border-radius: 8px; cursor: pointer;
+      border-left: 3px solid var(--apg-primary); font-size: 0.85rem; color: var(--apg-text-muted);
+      transition: var(--apg-transition); display: flex; justify-content: space-between; align-items: center;
+    }
+    .apg-history-item:hover { background: #252545; color: var(--apg-text); }
+    .apg-history-del { padding: 0.2rem 0.5rem; background: transparent; border: none; color: var(--apg-error); cursor: pointer; border-radius: 4px; font-size: 0.8rem; }
+    .apg-history-del:hover { background: rgba(239,68,68,0.2); }
+    
+    /* Toast */
+    .apg-toast {
+      position: fixed; bottom: 1.5rem; right: 1.5rem; padding: 0.8rem 1.2rem; background: var(--apg-card);
+      border-left: 4px solid var(--apg-success); border-radius: 10px; box-shadow: var(--apg-shadow);
+      display: flex; align-items: center; gap: 0.6rem; z-index: 9999; transform: translateY(150%);
+      transition: transform 0.4s cubic-bezier(0.68,-0.55,0.265,1.55); color: var(--apg-text); font-weight: 500;
+    }
+    .apg-toast.show { transform: translateY(0); }
+    .apg-toast.error { border-left-color: var(--apg-error); }
+    
+    /* Responsive */
+    @media (max-width: 600px) {
+      .ai-prompt-pro { padding: 1rem; }
+      .apg-form { grid-template-columns: 1fr; }
+      .apg-output-actions { flex-direction: column; align-items: flex-start; }
+    }
+  </style>
+
+  <!-- Header -->
+  <div class="apg-header">
+    <h2 class="apg-title">✨ AI Prompt Generator</h2>
+    <p class="apg-subtitle">Craft perfect, optimized prompts for any AI model in seconds</p>
+  </div>
+
+  <!-- Quick Presets -->
+  <div class="apg-presets">
+    <span class="apg-preset" data-preset="blog">📝 Blog Post</span>
+    <span class="apg-preset" data-preset="email">📧 Marketing Email</span>
+    <span class="apg-preset" data-preset="script">🎬 YouTube Script</span>
+    <span class="apg-preset" data-preset="social">📱 Social Media</span>
+    <span class="apg-preset" data-preset="code">💻 Code Explanation</span>
+    <span class="apg-preset" data-preset="essay">📚 Academic Essay</span>
+  </div>
+
+  <!-- Form -->
+  <div class="apg-form">
+    <div class="apg-field">
+      <label class="apg-label">Topic / Core Idea *</label>
+      <input type="text" class="apg-input" id="apg-topic" placeholder="e.g., Future of AI in Healthcare">
+    </div>
+    <div class="apg-field">
+      <label class="apg-label">Format</label>
+      <select class="apg-select" id="apg-format">
+        <option value="blog">Blog Post / Article</option>
+        <option value="email">Email / Newsletter</option>
+        <option value="script">Video / Podcast Script</option>
+        <option value="social">Social Media Post</option>
+        <option value="essay">Academic Essay</option>
+        <option value="code">Technical Documentation</option>
+        <option value="prompt">AI Image Generation Prompt</option>
+      </select>
+    </div>
+    <div class="apg-field">
+      <label class="apg-label">Tone</label>
+      <select class="apg-select" id="apg-tone">
+        <option value="professional">Professional & Formal</option>
+        <option value="casual">Casual & Conversational</option>
+        <option value="creative">Creative & Storytelling</option>
+        <option value="academic">Academic & Research</option>
+        <option value="persuasive">Persuasive & Marketing</option>
+        <option value="humorous">Humorous & Light</option>
+      </select>
+    </div>
+    <div class="apg-field">
+      <label class="apg-label">Target Audience</label>
+      <select class="apg-select" id="apg-audience">
+        <option value="general">General Public</option>
+        <option value="beginners">Beginners / Novices</option>
+        <option value="experts">Experts / Professionals</option>
+        <option value="students">Students / Academics</option>
+        <option value="business">Business / Decision Makers</option>
+      </select>
+    </div>
+    <div class="apg-field">
+      <label class="apg-label">Complexity Level</label>
+      <select class="apg-select" id="apg-complexity">
+        <option value="simple">Simple (Easy to understand)</option>
+        <option value="medium" selected>Medium (Balanced)</option>
+        <option value="advanced">Advanced (Deep & Technical)</option>
+      </select>
+    </div>
+    <div class="apg-field">
+      <label class="apg-label">AI Model Target</label>
+      <select class="apg-select" id="apg-model">
+        <option value="chatgpt">ChatGPT / GPT-4</option>
+        <option value="claude">Claude 3</option>
+        <option value="gemini">Google Gemini</option>
+        <option value="midjourney">Midjourney / DALL-E</option>
+        <option value="generic">Generic / Universal</option>
+      </select>
+    </div>
+    <div class="apg-field" style="grid-column: 1 / -1;">
+      <label class="apg-label">Key Points / Keywords (Optional)</label>
+      <textarea class="apg-textarea" id="apg-keywords" placeholder="Separate with commas or new lines..."></textarea>
+    </div>
+  </div>
+
+  <!-- Generate Button -->
+  <button class="apg-btn-main" id="apg-generate">
+    <div class="apg-spinner"></div>
+    <span>✨ Generate Optimized Prompt</span>
+  </button>
+
+  <!-- Output -->
+  <div class="apg-output-box">
+    <div class="apg-output apg-output-placeholder" id="apg-output">Your AI-ready prompt will appear here...</div>
+    <div class="apg-output-actions">
+      <span class="apg-counter" id="apg-counter">0 words | 0 chars</span>
+      <div class="apg-actions">
+        <button class="apg-btn-sm" id="apg-copy">📋 Copy</button>
+        <button class="apg-btn-sm" id="apg-clear">🗑️ Clear</button>
+        <button class="apg-btn-sm" id="apg-export">💾 Export .txt</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- History -->
+  <div class="apg-history">
+    <div class="apg-history-title" id="apg-history-toggle">
+      <span>📜 Recent Prompts <span style="font-size:0.75rem; color:var(--apg-text-muted)">(Auto-saved)</span></span>
+      <span>▼</span>
+    </div>
+    <div class="apg-history-list" id="apg-history-list"></div>
+  </div>
+
+  <!-- Toast -->
+  <div class="apg-toast" id="apg-toast"><span id="apg-toast-msg"></span></div>
+
+  <script>
+    (function() {
+      'use strict';
+      
+      // Cache DOM
+      const els = {
+        topic: document.getElementById('apg-topic'),
+        format: document.getElementById('apg-format'),
+        tone: document.getElementById('apg-tone'),
+        audience: document.getElementById('apg-audience'),
+        complexity: document.getElementById('apg-complexity'),
+        model: document.getElementById('apg-model'),
+        keywords: document.getElementById('apg-keywords'),
+        generateBtn: document.getElementById('apg-generate'),
+        output: document.getElementById('apg-output'),
+        counter: document.getElementById('apg-counter'),
+        copyBtn: document.getElementById('apg-copy'),
+        clearBtn: document.getElementById('apg-clear'),
+        exportBtn: document.getElementById('apg-export'),
+        presets: document.querySelectorAll('.apg-preset'),
+        historyToggle: document.getElementById('apg-history-toggle'),
+        historyList: document.getElementById('apg-history-list'),
+        toast: document.getElementById('apg-toast'),
+        toastMsg: document.getElementById('apg-toast-msg')
+      };
+
+      const HISTORY_KEY = 'apg_prompt_history_v2';
+      let historyCollapsed = false;
+
+      // Toast System
+      function showToast(msg, type = 'success') {
+        els.toastMsg.textContent = msg;
+        els.toast.className = `apg-toast ${type} show`;
+        setTimeout(() => els.toast.classList.remove('show'), 2500);
+      }
+
+      // Presets Auto-fill
+      const presets = {
+        blog: { topic: '', format: 'blog', tone: 'professional', audience: 'general' },
+        email: { topic: '', format: 'email', tone: 'persuasive', audience: 'business' },
+        script: { topic: '', format: 'script', tone: 'creative', audience: 'beginners' },
+        social: { topic: '', format: 'social', tone: 'casual', audience: 'general' },
+        code: { topic: '', format: 'code', tone: 'academic', audience: 'experts' },
+        essay: { topic: '', format: 'essay', tone: 'academic', audience: 'students' }
+      };
+
+      els.presets.forEach(p => {
+        p.addEventListener('click', () => {
+          const data = presets[p.dataset.preset];
+          els.format.value = data.format;
+          els.tone.value = data.tone;
+          els.audience.value = data.audience;
+          els.complexity.value = 'medium';
+          els.topic.focus();
+          showToast('Preset applied! Just add your topic.');
+        });
+      });
+
+      // Prompt Generation Engine
+      function generatePrompt() {
+        const topic = els.topic.value.trim();
+        if (!topic) { showToast('⚠️ Please enter a topic first!', 'error'); els.topic.focus(); return; }
+
+        els.generateBtn.classList.add('loading');
+        els.generateBtn.disabled = true;
+
+        // Simulate smooth processing delay
+        setTimeout(() => {
+          const format = els.format.value;
+          const tone = els.tone.value;
+          const audience = els.audience.value;
+          const complexity = els.complexity.value;
+          const model = els.model.value;
+          const keywords = els.keywords.value.trim();
+
+          let prompt = `ROLE & CONTEXT:\nYou are an expert ${format} creator specializing in ${topic}.\n\n`;
+          if (model === 'chatgpt') prompt += `[GPT MODE: Prioritize structured reasoning, step-by-step logic, and clear markdown formatting.]\n`;
+          else if (model === 'claude') prompt += `[CLAUDE MODE: Focus on depth, nuance, ethical considerations, and comprehensive analysis.]\n`;
+          else if (model === 'gemini') prompt += `[GEMINI MODE: Optimize for real-time data integration, multimodal awareness, and concise insights.]\n`;
+          else if (model === 'midjourney') prompt += `[IMAGE MODE: Focus on visual composition, lighting, style keywords, aspect ratio (--ar 16:9), and cinematic quality.]\n`;
+
+          prompt += `\nTASK:\nCreate a high-quality ${format} about "${topic}"\n`;
+          prompt += `FORMAT: ${els.format.options[els.format.selectedIndex].text}\n`;
+          prompt += `TONE: ${tone}\nTARGET AUDIENCE: ${audience}\nCOMPLEXITY: ${complexity}\n`;
+          if (keywords) prompt += `KEY ELEMENTS: ${keywords}\n`;
+
+          prompt += `\nREQUIREMENTS & CONSTRAINTS:\n`;
+          prompt += `• Maintain a strictly ${tone} tone tailored for ${audience}\n`;
+          prompt += `• Use logical structure with clear headings, subheadings, and bullet/numbered lists where appropriate\n`;
+          prompt += `• Include 2-3 concrete examples, data points, or case studies to support claims\n`;
+          prompt += `• Avoid fluff, repetition, or generic AI phrasing\n`;
+          
+          if (complexity === 'advanced') prompt += `• Use industry-specific terminology and provide nuanced arguments\n`;
+          else if (complexity === 'simple') prompt += `• Explain concepts clearly without jargon; use analogies if needed\n`;
+          else prompt += `• Balance depth with accessibility; define technical terms briefly\n`;
+
+          prompt += `• Ensure seamless transitions between sections\n`;
+          prompt += `• End with a strong conclusion, actionable takeaway, or compelling call-to-action\n`;
+          if (format !== 'prompt') prompt += `• Output only the final content without meta-commentary or introductory filler\n`;
+
+          // Update UI
+          els.output.textContent = prompt;
+          els.output.classList.remove('apg-output-placeholder');
+          updateCounter();
+          saveToHistory(topic, prompt);
+          
+          els.generateBtn.classList.remove('loading');
+          els.generateBtn.disabled = false;
+          showToast('✅ Prompt generated successfully!');
+          els.output.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }, 400);
+      }
+
+      // Word & Char Counter
+      function updateCounter() {
+        const text = els.output.textContent;
+        const words = text.trim() ? text.trim().split(/\s+/).length : 0;
+        const chars = text.length;
+        els.counter.textContent = `${words} words | ${chars} characters`;
+      }
+
+      // Clipboard
+      async function copyToClipboard() {
+        const text = els.output.textContent;
+        if (!text || els.output.classList.contains('apg-output-placeholder')) {
+          showToast('⚠️ Nothing to copy!', 'error'); return;
+        }
+        try {
+          await navigator.clipboard.writeText(text);
+          els.copyBtn.textContent = '✅ Copied!';
+          showToast('📋 Prompt copied to clipboard!');
+          setTimeout(() => els.copyBtn.textContent = '📋 Copy', 1500);
+        } catch {
+          // Fallback
+          const ta = document.createElement('textarea');
+          ta.value = text; document.body.appendChild(ta); ta.select();
+          document.execCommand('copy'); document.body.removeChild(ta);
+          els.copyBtn.textContent = '✅ Copied!';
+          setTimeout(() => els.copyBtn.textContent = '📋 Copy', 1500);
+        }
+      }
+
+      // Clear Output
+      function clearOutput() {
+        els.output.textContent = 'Your AI-ready prompt will appear here...';
+        els.output.classList.add('apg-output-placeholder');
+        updateCounter();
+        showToast('🗑️ Output cleared');
+      }
+
+      // Export .txt
+      function exportTxt() {
+        const text = els.output.textContent;
+        if (els.output.classList.contains('apg-output-placeholder')) {
+          showToast('⚠️ Generate a prompt first!', 'error'); return;
+        }
+        const blob = new Blob([text], { type: 'text/plain' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url; a.download = `prompt_${Date.now()}.txt`;
+        document.body.appendChild(a); a.click();
+        document.body.removeChild(a); URL.revokeObjectURL(url);
+        showToast('💾 Prompt downloaded!');
+      }
+
+      // History Management
+      function getHistory() { return JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]'); }
+      function saveToHistory(topic, prompt) {
+        const history = getHistory();
+        history.unshift({ topic, prompt, time: new Date().toLocaleString() });
+        if (history.length > 15) history.pop();
+        localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
+        renderHistory();
+      }
+      function loadFromHistory(prompt) {
+        els.output.textContent = prompt;
+        els.output.classList.remove('apg-output-placeholder');
+        updateCounter();
+        showToast('📜 Prompt loaded from history');
+        els.output.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+      function deleteHistoryItem(index) {
+        const history = getHistory();
+        history.splice(index, 1);
+        localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
+        renderHistory();
+        showToast('🗑️ Removed from history');
+      }
+      function renderHistory() {
+        const history = getHistory();
+        els.historyList.innerHTML = history.length ? history.map((item, i) => `
+          <div class="apg-history-item" onclick="window._apgLoad(${i})">
+            <div><strong>${item.topic.substring(0,35)}${item.topic.length>35?'...':''}</strong><br><small style="color:var(--apg-text-muted)">${item.time}</small></div>
+            <button class="apg-history-del" onclick="window._apgDel(${i})">✕</button>
+          </div>
+        `).join('') : '<div style="color:var(--apg-text-muted); font-size:0.85rem; padding:0.5rem;">No saved prompts yet</div>';
+      }
+      window._apgLoad = loadFromHistory;
+      window._apgDel = deleteHistoryItem;
+
+      // Event Listeners
+      els.generateBtn.addEventListener('click', generatePrompt);
+      els.copyBtn.addEventListener('click', copyToClipboard);
+      els.clearBtn.addEventListener('click', clearOutput);
+      els.exportBtn.addEventListener('click', exportTxt);
+      
+      // Ctrl/Cmd + Enter to generate
+      document.addEventListener('keydown', e => {
+        if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') generatePrompt();
+      });
+
+      // History Toggle
+      els.historyToggle.addEventListener('click', () => {
+        historyCollapsed = !historyCollapsed;
+        els.historyList.style.display = historyCollapsed ? 'none' : 'grid';
+        els.historyToggle.classList.toggle('collapsed', historyCollapsed);
+      });
+
+      // Auto-resize textarea
+      els.keywords.addEventListener('input', function() {
+        this.style.height = 'auto';
+        this.style.height = (this.scrollHeight) + 'px';
+      });
+
+      // Init
+      renderHistory();
+      updateCounter();
+      console.log('✅ AI Prompt Pro Initialized Successfully');
+    })();
+  </script>
+</div>

@@ -1,0 +1,309 @@
+<div class="gpa-tool" lang="en">
+  <style>
+    :root {
+      --bg-main: #0b0e11; --bg-card: #161a21; --bg-input: #1e232c;
+      --border: rgba(255,255,255,0.08); --text: #f1f5f9; --text-sec: #94a3b8;
+      --accent: #38bdf8; --accent-glow: rgba(56,189,248,0.2);
+      --success: #22c55e; --warning: #f59e0b; --danger: #ef4444;
+      --grad: linear-gradient(135deg, #38bdf8, #818cf8); --radius: 14px;
+      --trans: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .gpa-tool { max-width: 780px; margin: 0 auto; padding: 1.5rem; font-family: system-ui, -apple-system, sans-serif; color: var(--text); }
+    .gpa-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.8rem; }
+    .gpa-header h3 { margin: 0; font-size: 1.3rem; font-weight: 700; background: var(--grad); -webkit-background-clip: text; color: transparent; }
+    .controls { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+    .ctrl-btn { padding: 0.45rem 0.9rem; background: var(--bg-input); border: 1px solid var(--border); border-radius: 8px; color: var(--text-sec); cursor: pointer; transition: var(--trans); font-size: 0.85rem; }
+    .ctrl-btn:hover, .ctrl-btn.active { background: var(--accent); color: #0b0e11; border-color: var(--accent); }
+    .scale-select { padding: 0.45rem 0.6rem; background: var(--bg-input); border: 1px solid var(--border); border-radius: 8px; color: var(--text); outline: none; }
+
+    .sem-container { margin-bottom: 1rem; }
+    .sem-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; padding: 0.4rem 0.8rem; background: var(--bg-card); border-radius: 10px 10px 0 0; border: 1px solid var(--border); border-bottom: none; }
+    .sem-title { font-weight: 600; font-size: 0.95rem; }
+    .sem-gpa { font-weight: 700; color: var(--accent); }
+    .sem-actions { display: flex; gap: 0.4rem; }
+    .sem-btn { background: transparent; border: none; color: var(--text-sec); cursor: pointer; font-size: 0.85rem; transition: var(--trans); }
+    .sem-btn:hover { color: var(--danger); }
+
+    .course-row { display: grid; grid-template-columns: 2fr 80px 1fr auto; gap: 0.6rem; align-items: center; padding: 0.6rem 0.8rem; background: var(--bg-input); border-bottom: 1px solid var(--border); }
+    .course-row:last-child { border-radius: 0 0 10px 10px; border-bottom: none; }
+    .gpa-input, .gpa-select { width: 100%; padding: 0.65rem; border-radius: 8px; border: 1px solid var(--border); background: var(--bg-card); color: var(--text); outline: none; transition: var(--trans); }
+    .gpa-input:focus, .gpa-select:focus { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-glow); }
+    .del-btn { width: 32px; height: 32px; border-radius: 8px; background: rgba(239,68,68,0.1); border: none; color: var(--danger); cursor: pointer; font-size: 1.1rem; transition: var(--trans); display: flex; align-items: center; justify-content: center; }
+    .del-btn:hover { background: var(--danger); color: #fff; }
+
+    .add-sem-btn { width: 100%; padding: 0.9rem; background: var(--bg-card); border: 2px dashed var(--border); border-radius: var(--radius); color: var(--text-sec); cursor: pointer; transition: var(--trans); font-size: 0.95rem; margin: 0.5rem 0 1rem; }
+    .add-sem-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+    .result-panel { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.2rem; margin-bottom: 1rem; text-align: center; position: relative; overflow: hidden; }
+    .result-panel::before { content: ''; position: absolute; top: 0; left: 0; width: 4px; height: 100%; background: var(--grad); }
+    .res-main { font-size: 3rem; font-weight: 800; line-height: 1.1; margin: 0.3rem 0; }
+    .res-label { font-size: 0.9rem; color: var(--text-sec); margin-bottom: 0.3rem; }
+    .status-badge { display: inline-block; padding: 4px 10px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; margin-top: 0.5rem; }
+    .status-excellent { background: rgba(34,197,94,0.15); color: var(--success); }
+    .status-good { background: rgba(56,189,248,0.15); color: var(--accent); }
+    .status-average { background: rgba(245,158,11,0.15); color: var(--warning); }
+    .status-risk { background: rgba(239,68,68,0.15); color: var(--danger); }
+
+    .target-calc { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem; margin-bottom: 1rem; }
+    .target-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 0.8rem; margin-top: 0.5rem; }
+    .target-res { margin-top: 0.8rem; padding: 0.8rem; background: rgba(56,189,248,0.1); border-radius: 10px; display: none; text-align: center; }
+    .target-res.show { display: block; }
+    .target-val { font-size: 1.6rem; font-weight: 800; color: var(--accent); }
+
+    .actions { display: flex; justify-content: flex-end; gap: 0.6rem; margin-bottom: 1rem; flex-wrap: wrap; }
+    .act-btn { padding: 0.5rem 0.9rem; background: var(--bg-input); border: 1px solid var(--border); border-radius: 8px; color: var(--text-sec); cursor: pointer; transition: var(--trans); font-size: 0.85rem; display: flex; align-items: center; gap: 6px; }
+    .act-btn:hover { background: rgba(255,255,255,0.05); color: var(--text); }
+
+    .history-panel { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); max-height: 0; overflow: hidden; transition: max-height 0.3s ease, padding 0.3s ease; }
+    .history-panel.open { max-height: 160px; padding: 0.7rem; overflow-y: auto; }
+    .hist-item { display: flex; justify-content: space-between; padding: 0.5rem; border-radius: 8px; cursor: pointer; transition: var(--trans); font-size: 0.85rem; color: var(--text-sec); border-bottom: 1px solid var(--border); }
+    .hist-item:last-child { border-bottom: none; }
+    .hist-item:hover { background: rgba(255,255,255,0.05); color: var(--text); }
+    .empty-hist { text-align: center; color: var(--text-sec); padding: 0.8rem 0; font-size: 0.8rem; }
+
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+    .animate-in { animation: fadeIn 0.3s ease-out forwards; }
+
+    @media (max-width: 600px) {
+      .gpa-tool { padding: 1rem 0.6rem; }
+      .course-row { grid-template-columns: 1fr 1fr; }
+      .course-row input:nth-child(2) { grid-column: span 2; }
+      .sem-container { overflow-x: auto; }
+    }
+  </style>
+
+  <div class="gpa-header">
+    <h3>🎓 GPA & CGPA Calculator</h3>
+    <div class="controls">
+      <button class="ctrl-btn active" data-mode="gpa">GPA</button>
+      <button class="ctrl-btn" data-mode="cgpa">CGPA</button>
+      <select class="scale-select" id="gpa-scale">
+        <option value="4">4.0 Scale</option>
+        <option value="5">5.0 Scale</option>
+        <option value="10">10.0 Scale</option>
+      </select>
+    </div>
+  </div>
+
+  <div id="semesters"></div>
+  <button class="add-sem-btn" id="add-sem">+ Add Semester</button>
+
+  <div class="result-panel">
+    <div class="res-label" id="res-label">Semester GPA</div>
+    <div class="res-main" id="res-val">0.00</div>
+    <div id="res-status" class="status-badge status-average">No Data</div>
+  </div>
+
+  <div class="target-calc">
+    <h4 style="margin:0 0 0.5rem; font-size:1rem;">🎯 Target CGPA Planner</h4>
+    <div class="target-grid">
+      <input class="gpa-input" type="number" id="target-cgpa" placeholder="Desired CGPA" step="0.01">
+      <input class="gpa-input" type="number" id="target-credits" placeholder="Remaining Credits" step="1">
+      <button class="ctrl-btn" id="calc-target">Calculate Required GPA</button>
+    </div>
+    <div class="target-res" id="target-res">
+      <div style="font-size:0.85rem;color:var(--text-sec)">You need a GPA of</div>
+      <div class="target-val" id="req-gpa">0.00</div>
+      <div style="font-size:0.8rem;color:var(--text-sec);margin-top:0.2rem">in remaining courses</div>
+    </div>
+  </div>
+
+  <div class="actions">
+    <button class="act-btn" id="clear-btn">🗑️ Clear All</button>
+    <button class="act-btn" id="save-btn">💾 Save</button>
+    <button class="act-btn" id="copy-btn">📋 Copy</button>
+    <button class="act-btn" id="hist-btn">📜 History</button>
+  </div>
+
+  <div class="history-panel" id="history-panel">
+    <div class="empty-hist">No saved calculations</div>
+  </div>
+
+  <script>
+    (function(){
+      const $ = id => document.getElementById(id);
+      const fmt = n => n.toFixed(2);
+      
+      const scales = {
+        '4': {A:4,'A-':3.7,'B+':3.3,B:3,'B-':2.7,'C+':2.3,C:2,D:1,F:0},
+        '5': {A:5,B:4,C:3,D:2,F:0},
+        '10': {O:10,'A+':9,A:8,'B+':7,B:6,C:5,P:4,F:0}
+      };
+
+      let mode = 'gpa', scale = 4, semId = 0, history = JSON.parse(localStorage.getItem('gpa_history') || '[]');
+      const semEl = $('semesters');
+
+      const createSem = () => {
+        semId++;
+        const wrap = document.createElement('div'); wrap.className = 'sem-container animate-in';
+        wrap.dataset.id = semId;
+        wrap.innerHTML = `
+          <div class="sem-header">
+            <span class="sem-title">Semester ${semId}</span>
+            <span class="sem-gpa">GPA: 0.00</span>
+            <div class="sem-actions">
+              <button class="sem-btn add-course">+ Course</button>
+              <button class="sem-btn del-sem">🗑️</button>
+            </div>
+          </div>
+          <div class="courses-list"></div>
+        `;
+        semEl.appendChild(wrap);
+        addCourse(wrap); addCourse(wrap); addCourse(wrap);
+        return wrap;
+      };
+
+      const getGradeOptions = () => {
+        return Object.entries(scales[scale]).map(([g,v]) => `<option value="${v}">${g}</option>`).join('');
+      };
+
+      const addCourse = (semWrap) => {
+        const list = semWrap.querySelector('.courses-list');
+        const row = document.createElement('div'); row.className = 'course-row';
+        row.innerHTML = `
+          <input class="gpa-input" type="text" placeholder="Course Name">
+          <input class="gpa-input" type="number" placeholder="Credits" min="0.5" max="10" step="0.5" value="3">
+          <select class="gpa-select">${getGradeOptions()}</select>
+          <button class="del-btn" title="Remove Course">×</button>
+        `;
+        row.querySelector('.del-btn').addEventListener('click', () => {
+          if(list.children.length > 1) { row.remove(); calcAll(); }
+        });
+        list.appendChild(row);
+        row.querySelectorAll('input, select').forEach(el => el.addEventListener('input', calcAll));
+      };
+
+      const calcSem = (semWrap) => {
+        let pts = 0, cr = 0;
+        semWrap.querySelectorAll('.course-row').forEach(r => {
+          const c = parseFloat(r.querySelector('input[type=number]').value) || 0;
+          const g = parseFloat(r.querySelector('select').value) || 0;
+          pts += c * g; cr += c;
+        });
+        const gpa = cr > 0 ? pts / cr : 0;
+        semWrap.querySelector('.sem-gpa').textContent = `GPA: ${fmt(gpa)}`;
+        return { pts, cr, gpa };
+      };
+
+      const calcAll = () => {
+        let totalPts = 0, totalCr = 0;
+        document.querySelectorAll('.sem-container').forEach(s => {
+          const r = calcSem(s); totalPts += r.pts; totalCr += r.cr;
+        });
+        const overall = totalCr > 0 ? totalPts / totalCr : 0;
+        
+        // Animate result
+        const resEl = $('res-val');
+        let start = parseFloat(resEl.textContent) || 0;
+        const end = overall;
+        const duration = 400;
+        const startTime = performance.now();
+        const animate = (now) => {
+          const p = Math.min((now - startTime) / duration, 1);
+          resEl.textContent = fmt(start + (end - start) * p);
+          if (p < 1) requestAnimationFrame(animate);
+        };
+        requestAnimationFrame(animate);
+
+        // Status Badge
+        const maxGpa = parseFloat(scale);
+        const pct = (overall / maxGpa) * 100;
+        const badge = $('res-status');
+        badge.className = 'status-badge';
+        if(pct >= 90) { badge.classList.add('status-excellent'); badge.textContent = '🌟 Dean\'s List / Excellent'; }
+        else if(pct >= 75) { badge.classList.add('status-good'); badge.textContent = '✅ Good Standing'; }
+        else if(pct >= 50) { badge.classList.add('status-average'); badge.textContent = '⚠️ Average / Monitor'; }
+        else { badge.classList.add('status-risk'); badge.textContent = '🚨 Academic Probation Risk'; }
+
+        $('res-label').textContent = mode === 'gpa' ? 'Semester GPA' : 'Cumulative CGPA';
+        return { overall, totalCr, totalPts };
+      };
+
+      const calcTarget = () => {
+        const target = parseFloat($('target-cgpa').value) || 0;
+        const remCr = parseFloat($('target-credits').value) || 0;
+        if(target <= 0 || remCr <= 0) return;
+        const { overall, totalCr } = calcAll();
+        const needed = ((target * (totalCr + remCr)) - (totalCr * overall)) / remCr;
+        $('req-gpa').textContent = fmt(Math.max(0, Math.min(needed, parseFloat(scale))));
+        $('target-res').classList.add('show');
+      };
+
+      const renderHistory = () => {
+        $('history-panel').innerHTML = history.length ? history.map(h => 
+          `<div class="hist-item"><span>${h.mode.toUpperCase()} | Scale: ${h.scale}.0</span><span style="color:var(--accent); font-weight:600">${h.val}</span></div>`
+        ).join('') : '<div class="empty-hist">No saved calculations</div>';
+      };
+
+      const saveCalc = () => {
+        const { overall } = calcAll();
+        history.unshift({ mode, scale, val: fmt(overall), ts: new Date().toLocaleDateString() });
+        if(history.length > 10) history.pop();
+        localStorage.setItem('gpa_history', JSON.stringify(history));
+        renderHistory();
+        $('save-btn').innerHTML = '✅ Saved!'; setTimeout(() => $('save-btn').innerHTML = '💾 Save', 1500);
+      };
+
+      const copyResults = async () => {
+        const { overall, totalCr, totalPts } = calcAll();
+        const text = `🎓 GPA/CGPA Report\nMode: ${mode.toUpperCase()}\nScale: ${scale}.0\nResult: ${fmt(overall)}\nTotal Credits: ${totalCr}\nDate: ${new Date().toLocaleString()}`;
+        try {
+          await navigator.clipboard.writeText(text);
+          $('copy-btn').innerHTML = '✅ Copied!'; setTimeout(() => $('copy-btn').innerHTML = '📋 Copy', 1500);
+        } catch(e){}
+      };
+
+      // Init 1-3 semesters based on mode
+      const init = () => {
+        semEl.innerHTML = '';
+        semId = 0;
+        const count = mode === 'cgpa' ? 2 : 1;
+        for(let i=0; i<count; i++) createSem();
+        calcAll();
+      };
+
+      // Events
+      document.querySelectorAll('.ctrl-btn[data-mode]').forEach(btn => btn.addEventListener('click', () => {
+        document.querySelectorAll('.ctrl-btn[data-mode]').forEach(b=>b.classList.remove('active'));
+        btn.classList.add('active');
+        mode = btn.dataset.mode;
+        init();
+      }));
+
+      $('gpa-scale').addEventListener('change', () => {
+        scale = $('gpa-scale').value;
+        document.querySelectorAll('.gpa-select').forEach(s => s.innerHTML = getGradeOptions());
+        calcAll();
+      });
+
+      $('add-sem').addEventListener('click', createSem);
+      semEl.addEventListener('click', e => {
+        if(e.target.matches('.add-course')) addCourse(e.target.closest('.sem-container'));
+        if(e.target.matches('.del-sem')) {
+          const sem = e.target.closest('.sem-container');
+          if(document.querySelectorAll('.sem-container').length > 1) { sem.remove(); calcAll(); }
+        }
+      });
+
+      $('clear-btn').addEventListener('click', init);
+      $('save-btn').addEventListener('click', saveCalc);
+      $('copy-btn').addEventListener('click', copyResults);
+      $('hist-btn').addEventListener('click', () => {
+        $('history-panel').classList.toggle('open');
+        $('hist-btn').innerHTML = $('history-panel').classList.contains('open') ? '🔽 Close' : '📜 History';
+      });
+      $('calc-target').addEventListener('click', calcTarget);
+
+      // Auto-calc debounce
+      let timeout;
+      document.addEventListener('input', () => {
+        clearTimeout(timeout);
+        timeout = setTimeout(calcAll, 150);
+      });
+
+      // Init
+      renderHistory();
+      init();
+    })();
+  </script>
+</div>

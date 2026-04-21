@@ -1,0 +1,320 @@
+<div class="feedback-widget">
+  <style>
+    .feedback-widget {
+      --fw-bg: var(--bg-card, #111827);
+      --fw-border: var(--glass-border, #374151);
+      --fw-text: var(--text-primary, #f9fafb);
+      --fw-muted: var(--text-secondary, #9ca3af);
+      --fw-accent: #3b82f6;
+      --fw-success: #10b981;
+      --fw-danger: #ef4444;
+      --fw-radius: 12px;
+      --fw-transition: 0.25s ease;
+      
+      background: var(--fw-bg);
+      border: 1px solid var(--fw-border);
+      border-radius: var(--fw-radius);
+      padding: 1.5rem;
+      max-width: 600px;
+      margin: 2rem auto;
+      font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+      color: var(--fw-text);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+    }
+    .feedback-widget h3 { margin: 0 0 1.2rem; font-size: 1.35rem; display: flex; align-items: center; gap: 0.5rem; }
+    .fw-group { margin-bottom: 1rem; }
+    .fw-label { display: block; font-size: 0.9rem; font-weight: 500; margin-bottom: 0.4rem; }
+    .fw-input, .fw-select, .fw-text {
+      width: 100%; padding: 0.75rem; border-radius: 8px; border: 1px solid var(--fw-border);
+      background: rgba(255,255,255,0.05); color: var(--fw-text); font-size: 0.95rem;
+      outline: none; transition: var(--fw-transition);
+    }
+    .fw-input:focus, .fw-select:focus, .fw-text:focus { border-color: var(--fw-accent); box-shadow: 0 0 0 3px rgba(59,130,246,0.2); }
+    .fw-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    .fw-text { min-height: 110px; resize: vertical; font-family: inherit; }
+    .fw-counter { float: right; font-size: 0.8rem; color: var(--fw-muted); }
+    .fw-error { color: var(--fw-danger); font-size: 0.8rem; margin-top: 0.3rem; display: none; }
+    .fw-input.error, .fw-select.error, .fw-text.error { border-color: var(--fw-danger); }
+    
+    /* Stars */
+    .fw-stars { display: flex; gap: 0.25rem; font-size: 1.6rem; cursor: pointer; user-select: none; }
+    .fw-stars span { color: #4b5563; transition: var(--fw-transition); }
+    .fw-stars span.active { color: #f59e0b; text-shadow: 0 0 4px rgba(245,158,11,0.4); }
+    .fw-stars:hover span { color: #f59e0b; }
+    .fw-stars span:hover ~ span { color: #4b5563; }
+    
+    /* File Upload */
+    .fw-file { border: 2px dashed var(--fw-border); border-radius: 8px; padding: 1rem; text-align: center; cursor: pointer; transition: var(--fw-transition); position: relative; }
+    .fw-file:hover { border-color: var(--fw-accent); background: rgba(59,130,246,0.05); }
+    .fw-file input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+    .fw-file-name { margin-top: 0.5rem; font-size: 0.85rem; color: var(--fw-muted); }
+    .fw-file-name.success { color: var(--fw-success); }
+    
+    /* Submit & Loader */
+    .fw-submit {
+      width: 100%; padding: 0.85rem; background: var(--fw-accent); border: none; border-radius: 8px;
+      color: #fff; font-weight: 600; font-size: 1rem; cursor: pointer; position: relative; overflow: hidden;
+      transition: var(--fw-transition);
+    }
+    .fw-submit:hover { filter: brightness(1.1); transform: translateY(-1px); }
+    .fw-submit:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+    .fw-loader {
+      width: 18px; height: 18px; border: 2px solid rgba(255,255,255,0.3); border-top-color: #fff;
+      border-radius: 50%; display: none; animation: fw-spin 0.6s linear infinite; margin: 0 auto;
+    }
+    @keyframes fw-spin { to { transform: rotate(360deg); } }
+    
+    /* History */
+    .fw-history-sec { margin-top: 1.5rem; border-top: 1px solid var(--fw-border); padding-top: 1rem; }
+    .fw-toggle { background: none; border: none; color: var(--fw-muted); cursor: pointer; font-size: 0.9rem; display: flex; align-items: center; gap: 0.4rem; width: 100%; text-align: left; padding: 0.5rem 0; }
+    .fw-list { display: none; margin-top: 0.5rem; max-height: 240px; overflow-y: auto; }
+    .fw-item { background: rgba(255,255,255,0.03); border: 1px solid var(--fw-border); border-radius: 6px; padding: 0.6rem; margin-bottom: 0.5rem; font-size: 0.85rem; }
+    .fw-item-meta { display: flex; justify-content: space-between; color: var(--fw-muted); font-size: 0.75rem; margin-bottom: 0.2rem; }
+    .fw-actions { display: flex; gap: 0.5rem; margin-top: 0.5rem; }
+    .fw-btn-sm { padding: 0.4rem 0.7rem; font-size: 0.8rem; background: rgba(255,255,255,0.05); border: 1px solid var(--fw-border); border-radius: 6px; color: var(--fw-text); cursor: pointer; transition: var(--fw-transition); }
+    .fw-btn-sm:hover { background: var(--fw-accent); color: #fff; border-color: var(--fw-accent); }
+    .fw-btn-sm.danger:hover { background: var(--fw-danger); border-color: var(--fw-danger); }
+    
+    /* Toast */
+    .fw-toast { position: fixed; bottom: 24px; right: 24px; padding: 0.75rem 1rem; border-radius: 8px; font-weight: 500; transform: translateY(120%); opacity: 0; transition: 0.3s; z-index: 9999; box-shadow: 0 8px 20px rgba(0,0,0,0.25); pointer-events: none; }
+    .fw-toast.success { background: var(--fw-success); color: #fff; }
+    .fw-toast.error { background: var(--fw-danger); color: #fff; }
+    .fw-toast.show { transform: translateY(0); opacity: 1; }
+    
+    /* Light Mode */
+    :root.light-mode .feedback-widget { --fw-bg: #ffffff; --fw-border: #e5e7eb; --fw-text: #111827; --fw-muted: #6b7280; }
+    :root.light-mode .fw-input, :root.light-mode .fw-select, :root.light-mode .fw-text { background: #f9fafb; }
+    :root.light-mode .fw-stars span { color: #9ca3af; }
+    :root.light-mode .fw-stars span.active, :root.light-mode .fw-stars:hover span { color: #f59e0b; }
+    :root.light-mode .fw-btn-sm { background: #f3f4f6; color: #374151; }
+  </style>
+
+  <h3>💬 Share Your Feedback</h3>
+  <form id="fb-form" novalidate>
+    <div class="fw-grid">
+      <div class="fw-group">
+        <label class="fw-label" for="fb-name">Your Name *</label>
+        <input class="fw-input" id="fb-name" type="text" placeholder="John Doe" autocomplete="name" required>
+        <div class="fw-error" data-for="fb-name">Name is required</div>
+      </div>
+      <div class="fw-group">
+        <label class="fw-label" for="fb-email">Email (Optional)</label>
+        <input class="fw-input" id="fb-email" type="email" placeholder="john@example.com" autocomplete="email">
+        <div class="fw-error" data-for="fb-email">Invalid email format</div>
+      </div>
+    </div>
+
+    <div class="fw-group">
+      <label class="fw-label" for="fb-cat">Category *</label>
+      <select class="fw-select" id="fb-cat" required>
+        <option value="">Select a category...</option>
+        <option value="bug">🐛 Bug Report</option>
+        <option value="feature">✨ Feature Request</option>
+        <option value="ui">🎨 UI/UX Suggestion</option>
+        <option value="other">📦 Other</option>
+      </select>
+      <div class="fw-error" data-for="fb-cat">Please select a category</div>
+    </div>
+
+    <div class="fw-group">
+      <label class="fw-label">Rating *</label>
+      <div class="fw-stars" id="fb-stars" role="radiogroup" aria-label="Star rating">
+        <span data-v="1" role="radio" aria-checked="false">★</span>
+        <span data-v="2" role="radio" aria-checked="false">★</span>
+        <span data-v="3" role="radio" aria-checked="false">★</span>
+        <span data-v="4" role="radio" aria-checked="false">★</span>
+        <span data-v="5" role="radio" aria-checked="false">★</span>
+      </div>
+      <div class="fw-error" data-for="rating">Please select a rating</div>
+    </div>
+
+    <div class="fw-group">
+      <label class="fw-label" for="fb-msg">Message * <span class="fw-counter">0/500</span></label>
+      <textarea class="fw-text" id="fb-msg" maxlength="500" required placeholder="Tell us what you think..."></textarea>
+      <div class="fw-error" data-for="fb-msg">Message must be at least 10 characters</div>
+    </div>
+
+    <div class="fw-group">
+      <label class="fw-label">Attachment (Optional, max 2MB)</label>
+      <div class="fw-file" id="fb-drop">
+        <input type="file" id="fb-file" accept=".jpg,.png,.pdf,.txt,.md">
+        <span>📎 Click or drag file here</span>
+        <div class="fw-file-name" id="fb-fname"></div>
+      </div>
+    </div>
+
+    <button type="submit" class="fw-submit" id="fb-submit">
+      <span class="btn-text">🚀 Submit Feedback</span>
+      <span class="fw-loader"></span>
+    </button>
+  </form>
+
+  <div class="fw-history-sec">
+    <button class="fw-toggle" id="fb-toggle">📋 View Submission History (<span id="fb-count">0</span>)</button>
+    <div class="fw-list" id="fb-list"></div>
+    <div class="fw-actions" id="fb-actions" style="display:none">
+      <button class="fw-btn-sm" id="fb-export">📥 Export JSON</button>
+      <button class="fw-btn-sm" id="fb-clear">🗑️ Clear History</button>
+    </div>
+  </div>
+
+  <div class="fw-toast" id="fw-toast"></div>
+
+  <script>
+    (function() {
+      const STORAGE_KEY = 'fb_submissions';
+      const MAX_HISTORY = 50;
+      const els = {
+        form: document.getElementById('fb-form'),
+        name: document.getElementById('fb-name'),
+        email: document.getElementById('fb-email'),
+        cat: document.getElementById('fb-cat'),
+        stars: document.querySelectorAll('.fw-stars span'),
+        msg: document.getElementById('fb-msg'),
+        file: document.getElementById('fb-file'),
+        fname: document.getElementById('fb-fname'),
+        submitBtn: document.getElementById('fb-submit'),
+        loader: document.querySelector('.fw-loader'),
+        btnText: document.querySelector('.btn-text'),
+        list: document.getElementById('fb-list'),
+        count: document.getElementById('fb-count'),
+        toggle: document.getElementById('fb-toggle'),
+        actions: document.getElementById('fb-actions'),
+        exportBtn: document.getElementById('fb-export'),
+        clearBtn: document.getElementById('fb-clear'),
+        toast: document.getElementById('fw-toast')
+      };
+      
+      let rating = 0;
+      let submissions = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+      
+      // Init UI
+      const renderHistory = () => {
+        els.list.innerHTML = '';
+        if (submissions.length === 0) {
+          els.list.innerHTML = '<div style="text-align:center;color:var(--fw-muted);padding:1rem">No submissions yet</div>';
+          els.actions.style.display = 'none';
+          return;
+        }
+        els.actions.style.display = 'flex';
+        submissions.slice().reverse().forEach((item, i) => {
+          const d = document.createElement('div');
+          d.className = 'fw-item';
+          d.innerHTML = `
+            <div class="fw-item-meta"><span>${item.cat.toUpperCase()} • ${'★'.repeat(item.rating)}</span><span>${new Date(item.date).toLocaleDateString()}</span></div>
+            <div>${item.name || 'Anonymous'}</div>
+            <div style="color:var(--fw-muted);margin-top:0.2rem">${item.msg.substring(0, 60)}${item.msg.length > 60 ? '...' : ''}</div>
+          `;
+          els.list.appendChild(d);
+        });
+        els.count.textContent = submissions.length;
+      };
+      renderHistory();
+      
+      // Toast
+      const toast = (msg, type = 'success') => {
+        els.toast.textContent = msg;
+        els.toast.className = `fw-toast ${type} show`;
+        setTimeout(() => els.toast.classList.remove('show'), 2500);
+      };
+      
+      // Validation
+      const validate = () => {
+        let valid = true;
+        const checks = [
+          { el: els.name, min: 2, msg: 'Name is required' },
+          { el: els.cat, check: v => v !== '', msg: 'Select a category' },
+          { el: els.msg, min: 10, msg: 'Min 10 characters' },
+          { el: 'rating', check: () => rating > 0, msg: 'Select a rating' }
+        ];
+        checks.forEach(c => {
+          const err = document.querySelector(`[data-for="${typeof c.el === 'string' ? c.el : c.el.id}"]`);
+          let ok = typeof c.el === 'string' ? c.check() : (c.check ? c.check(c.el.value) : c.el.value.trim().length >= c.min);
+          if (!ok) { err.style.display = 'block'; if(c.el !== 'rating') c.el.classList.add('error'); valid = false; }
+          else { err.style.display = 'none'; if(c.el !== 'rating') c.el.classList.remove('error'); }
+        });
+        
+        // Email optional but validate if filled
+        if (els.email.value && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(els.email.value)) {
+          document.querySelector('[data-for="fb-email"]').style.display = 'block'; els.email.classList.add('error'); valid = false;
+        } else { document.querySelector('[data-for="fb-email"]').style.display = 'none'; els.email.classList.remove('error'); }
+        
+        return valid;
+      };
+      
+      // Events
+      els.stars.forEach(s => {
+        s.addEventListener('click', () => { rating = +s.dataset.v; els.stars.forEach(st => st.classList.toggle('active', +st.dataset.v <= rating)); document.querySelector('[data-for="rating"]').style.display = 'none'; });
+        s.addEventListener('mouseenter', () => { els.stars.forEach(st => st.style.opacity = +st.dataset.v <= +s.dataset.v ? '1' : '0.3'); });
+      });
+      document.getElementById('fb-stars').addEventListener('mouseleave', () => { els.stars.forEach(st => st.style.opacity = '1'); });
+      
+      els.msg.addEventListener('input', e => {
+        const len = e.target.value.length;
+        document.querySelector('.fw-counter').textContent = `${len}/500`;
+        if(len > 450) document.querySelector('.fw-counter').style.color = 'var(--fw-danger)';
+        else document.querySelector('.fw-counter').style.color = 'var(--fw-muted)';
+      });
+      
+      els.file.addEventListener('change', e => {
+        const f = e.target.files[0];
+        if (f) {
+          if (f.size > 2 * 1024 * 1024) { toast('⚠️ File too large (max 2MB)', 'error'); e.target.value = ''; els.fname.textContent = ''; return; }
+          els.fname.textContent = `✅ ${f.name}`; els.fname.className = 'fw-file-name success';
+        } else els.fname.textContent = '';
+      });
+      
+      els.toggle.onclick = () => { els.list.style.display = els.list.style.display === 'block' ? 'none' : 'block'; };
+      els.exportBtn.onclick = () => {
+        const blob = new Blob([JSON.stringify(submissions, null, 2)], { type: 'application/json' });
+        const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'feedback_backup.json'; a.click(); toast('📥 Exported');
+      };
+      els.clearBtn.onclick = () => {
+        if(confirm('Delete all feedback history?')) { submissions = []; localStorage.removeItem(STORAGE_KEY); renderHistory(); toast('🗑️ Cleared'); }
+      };
+      
+      // Submit
+      els.form.onsubmit = async (e) => {
+        e.preventDefault();
+        if (!validate()) return;
+        
+        els.submitBtn.disabled = true;
+        els.btnText.style.display = 'none'; els.loader.style.display = 'inline-block';
+        
+        const data = {
+          id: Date.now(),
+          name: els.name.value.trim(),
+          email: els.email.value.trim() || null,
+          cat: els.cat.value,
+          rating,
+          msg: els.msg.value.trim(),
+          file: els.fname.textContent || null,
+          date: new Date().toISOString()
+        };
+        
+        try {
+          // 🔄 REPLACE WITH REAL API CALL:
+          // await fetch('/api/feedback', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(data) });
+          
+          await new Promise(r => setTimeout(r, 800)); // Simulate network
+          submissions.push(data);
+          if (submissions.length > MAX_HISTORY) submissions = submissions.slice(-MAX_HISTORY);
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(submissions));
+          
+          renderHistory();
+          els.form.reset(); rating = 0;
+          els.stars.forEach(s => s.classList.remove('active'));
+          els.fname.textContent = '';
+          document.querySelector('.fw-counter').textContent = '0/500';
+          toast('✅ Feedback submitted successfully!');
+          window.dispatchEvent(new CustomEvent('feedback:submitted', { detail: data }));
+        } catch (err) {
+          toast('❌ Submission failed. Try again.', 'error');
+        } finally {
+          els.submitBtn.disabled = false;
+          els.btnText.style.display = 'inline'; els.loader.style.display = 'none';
+        }
+      };
+    })();
+  </script>
+</div>

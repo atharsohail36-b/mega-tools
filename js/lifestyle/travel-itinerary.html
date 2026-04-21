@@ -1,0 +1,238 @@
+<div class="lifestyle-tool travel-itinerary">
+  <style>
+    .travel-itinerary {
+      --ti-bg: #0b1120; --ti-card: #161e31; --ti-border: #2a3654;
+      --ti-text: #e2e8f0; --ti-sec: #94a3b8; --ti-accent: #f59e0b;
+      --ti-green: #22c55e; --ti-blue: #3b82f6; --ti-red: #ef4444;
+      --ti-radius: 16px; font-family: system-ui, -apple-system, sans-serif;
+      max-width: 720px; margin: 0 auto; padding: 1.5rem;
+      background: var(--ti-bg); color: var(--ti-text); border-radius: var(--ti-radius);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.4); position: relative;
+    }
+    .ti-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem; }
+    .ti-header h2 { margin: 0; font-size: 1.4rem; background: linear-gradient(90deg, var(--ti-accent), #38bdf8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .ti-actions { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+    .ti-btn-sm { padding: 0.4rem 0.8rem; background: var(--ti-card); border: 1px solid var(--ti-border); color: var(--ti-sec); border-radius: 8px; cursor: pointer; font-size: 0.8rem; transition: 0.2s; white-space: nowrap; }
+    .ti-btn-sm:hover { background: var(--ti-border); color: var(--ti-text); }
+    .ti-tabs { display: flex; gap: 0.5rem; margin-bottom: 1rem; overflow-x: auto; padding-bottom: 0.3rem; scrollbar-width: none; }
+    .ti-tabs::-webkit-scrollbar { display: none; }
+    .ti-tab { padding: 0.4rem 0.9rem; background: var(--ti-card); border: 1px solid var(--ti-border); border-radius: 10px; cursor: pointer; font-size: 0.85rem; transition: 0.2s; white-space: nowrap; display: flex; align-items: center; gap: 0.4rem; }
+    .ti-tab:hover { border-color: var(--ti-accent); }
+    .ti-tab.active { background: var(--ti-accent); color: #0b1120; border-color: var(--ti-accent); font-weight: 600; }
+    .ti-form { display: grid; grid-template-columns: 1.2fr 1.5fr 1fr auto; gap: 0.5rem; margin-bottom: 1rem; align-items: end; background: var(--ti-card); padding: 0.8rem; border-radius: 12px; border: 1px solid var(--ti-border); }
+    .ti-input, .ti-select { padding: 0.6rem; border-radius: 8px; border: 1px solid var(--ti-border); background: var(--ti-bg); color: var(--ti-text); outline: none; }
+    .ti-input:focus, .ti-select:focus { border-color: var(--ti-accent); }
+    .ti-btn { padding: 0.6rem 1rem; background: var(--ti-accent); color: #0b1120; font-weight: 600; border: none; border-radius: 8px; cursor: pointer; transition: 0.2s; }
+    .ti-btn:hover { background: #d97706; transform: translateY(-1px); }
+    .ti-timeline { position: relative; padding-left: 1.2rem; max-height: 400px; overflow-y: auto; }
+    .ti-timeline::before { content:''; position: absolute; left: 0.5rem; top: 0; bottom: 0; width: 2px; background: var(--ti-border); }
+    .ti-item { position: relative; margin-bottom: 0.8rem; padding: 0.8rem; background: var(--ti-card); border: 1px solid var(--ti-border); border-radius: 12px; transition: 0.2s; }
+    .ti-item:hover { border-color: var(--ti-accent); transform: translateX(2px); }
+    .ti-item::before { content:''; position: absolute; left: -1.4rem; top: 1rem; width: 12px; height: 12px; background: var(--ti-accent); border-radius: 50%; border: 2px solid var(--ti-bg); }
+    .ti-item.confirmed::before { background: var(--ti-green); }
+    .ti-item.planned::before { background: var(--ti-blue); }
+    .ti-item.booked::before { background: var(--ti-red); }
+    .ti-item-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.3rem; }
+    .ti-time { font-weight: 600; font-size: 1rem; color: var(--ti-accent); min-width: 60px; }
+    .ti-title { flex: 1; margin-left: 0.6rem; font-weight: 500; }
+    .ti-loc { font-size: 0.8rem; color: var(--ti-sec); margin-top: 0.2rem; }
+    .ti-meta { display: flex; gap: 0.5rem; margin-top: 0.4rem; flex-wrap: wrap; }
+    .ti-badge { padding: 0.15rem 0.5rem; border-radius: 6px; font-size: 0.7rem; font-weight: 500; }
+    .ti-badge.confirmed { background: rgba(34,197,94,0.15); color: var(--ti-green); }
+    .ti-badge.planned { background: rgba(59,130,246,0.15); color: var(--ti-blue); }
+    .ti-badge.booked { background: rgba(239,68,68,0.15); color: var(--ti-red); }
+    .ti-cost { color: var(--ti-sec); font-size: 0.85rem; }
+    .ti-notes { font-size: 0.8rem; color: var(--ti-sec); font-style: italic; margin-top: 0.3rem; }
+    .ti-row-acts { display: flex; gap: 0.3rem; position: absolute; right: 0.6rem; top: 0.6rem; }
+    .ti-act-btn { background: none; border: none; color: var(--ti-sec); cursor: pointer; padding: 0.3rem; border-radius: 6px; font-size: 0.9rem; transition: 0.2s; }
+    .ti-act-btn:hover { background: var(--ti-border); color: var(--ti-text); }
+    .ti-day-summary { background: var(--ti-card); border: 1px solid var(--ti-border); border-radius: 10px; padding: 0.8rem; margin-top: 1rem; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 0.5rem; font-size: 0.9rem; }
+    .ti-empty { text-align: center; color: var(--ti-sec); padding: 2rem 0; font-style: italic; }
+    .ti-toast { position: fixed; bottom: 20px; right: 20px; padding: 0.8rem 1.2rem; border-radius: 10px; background: var(--ti-card); border: 1px solid var(--ti-border); color: var(--ti-text); font-size: 0.9rem; opacity: 0; transform: translateY(20px); transition: 0.3s; pointer-events: none; z-index: 999; box-shadow: 0 8px 24px rgba(0,0,0,0.5); }
+    .ti-toast.show { opacity: 1; transform: translateY(0); }
+    .ti-toast.success { border-color: var(--ti-green); color: var(--ti-green); }
+    .ti-toast.warn { border-color: var(--ti-accent); color: var(--ti-accent); }
+    @media (max-width: 600px) {
+      .ti-form { grid-template-columns: 1fr; }
+      .ti-header { flex-direction: column; align-items: flex-start; }
+      .ti-tabs { flex-wrap: nowrap; }
+    }
+  </style>
+
+  <div class="ti-header">
+    <h2>🌍 Smart Travel Itinerary</h2>
+    <div class="ti-actions">
+      <button class="ti-btn-sm" id="ti-template">📦 Templates</button>
+      <button class="ti-btn-sm" id="ti-export">📤 Export</button>
+      <button class="ti-btn-sm" id="ti-copy">📋 Copy</button>
+      <button class="ti-btn-sm" id="ti-clear">🗑️ Clear</button>
+    </div>
+  </div>
+
+  <div class="ti-tabs" id="ti-tabs"></div>
+  <div style="text-align:right;margin-bottom:0.5rem;"><button class="ti-btn-sm" id="ti-add-day">+ Add Day</button></div>
+
+  <form class="ti-form" id="ti-form">
+    <input type="time" id="ti-time" class="ti-input" required>
+    <input type="text" id="ti-act" class="ti-input" placeholder="Activity Title" required>
+    <input type="text" id="ti-loc" class="ti-input" placeholder="Location">
+    <div style="display:flex;flex-direction:column;gap:0.3rem;">
+      <select id="ti-status" class="ti-select"><option value="planned">📋 Planned</option><option value="confirmed">✅ Confirmed</option><option value="booked">🎫 Booked</option></select>
+      <button type="submit" class="ti-btn">➕ Add</button>
+    </div>
+  </form>
+
+  <div class="ti-timeline" id="ti-timeline"></div>
+  <div class="ti-day-summary" id="ti-summary"></div>
+
+  <div class="ti-toast" id="ti-toast"></div>
+
+  <script>
+  (function(){
+    const KEY = 'ti-pro-v1';
+    const toast = (m, t='success') => {
+      const el = document.getElementById('ti-toast'); el.textContent = m; el.className = `ti-toast show ${t}`;
+      setTimeout(() => el.className = 'ti-toast', 2500);
+    };
+    const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+    const fmtCur = (n) => n > 0 ? `₹${Number(n).toLocaleString()}` : '';
+    const templates = {
+      city: [{day:1,dest:'City Exploration',acts:[{time:'09:00',act:'Breakfast at Local Cafe',loc:'Downtown',status:'confirmed',cost:15},{time:'10:30',act:'Museum & Historical Walk',loc:'City Center',status:'planned',cost:20},{time:'15:00',act:'Shopping & Street Food',loc:'Main Market',status:'planned',cost:30}]}],
+      beach: [{day:1,dest:'Beach Day',acts:[{time:'08:00',act:'Sunrise Walk & Yoga',loc:'Beachfront',status:'planned',cost:0},{time:'10:00',act:'Snorkeling & Boat Ride',loc:'Harbor',status:'booked',cost:45},{time:'14:00',act:'Lunch & Relaxation',loc:'Shack',status:'confirmed',cost:25}]}],
+      hike: [{day:1,dest:'Mountain Trek',acts:[{time:'06:00',act:'Gear Check & Breakfast',loc:'Base Camp',status:'confirmed',cost:10},{time:'07:30',act:'Start Ascent',loc:'Trailhead',status:'planned',cost:0},{time:'13:00',act:'Summit Lunch',loc:'Peak Camp',status:'planned',cost:20}]}]
+    };
+
+    let state = JSON.parse(localStorage.getItem(KEY) || '[]');
+    let activeDay = state.length > 0 ? state[0].id : null;
+
+    const save = () => localStorage.setItem(KEY, JSON.stringify(state));
+    const getDay = () => state.find(d => d.id === activeDay) || null;
+
+    const renderTabs = () => {
+      const tEl = document.getElementById('ti-tabs');
+      tEl.innerHTML = '';
+      if(state.length === 0) { tEl.innerHTML = '<span style="color:var(--ti-sec);font-size:0.85rem;">No days yet. Add one to start.</span>'; return; }
+      state.forEach(d => {
+        const btn = document.createElement('button');
+        btn.className = `ti-tab ${d.id === activeDay ? 'active' : ''}`;
+        btn.innerHTML = `<span>📅 Day ${d.day}</span><span style="opacity:0.7;font-size:0.75rem;">${d.dest || 'Untitled'}</span>`;
+        btn.onclick = () => { activeDay = d.id; render(); };
+        tEl.appendChild(btn);
+      });
+    };
+
+    const renderTimeline = () => {
+      const day = getDay();
+      const tEl = document.getElementById('ti-timeline');
+      const sEl = document.getElementById('ti-summary');
+      if(!day) { tEl.innerHTML = '<div class="ti-empty">Select or add a day to plan your itinerary.</div>'; sEl.innerHTML = ''; return; }
+
+      day.acts.sort((a,b) => a.time.localeCompare(b.time));
+      let totalCost = 0;
+      tEl.innerHTML = day.acts.map(a => {
+        totalCost += parseFloat(a.cost || 0);
+        return `<div class="ti-item ${a.status}" data-aid="${a.id}">
+          <div class="ti-item-head">
+            <span class="ti-time">${a.time}</span>
+            <span class="ti-title">${a.act}</span>
+          </div>
+          <div class="ti-loc">📍 ${a.loc || 'Location TBD'}</div>
+          <div class="ti-meta">
+            <span class="ti-badge ${a.status}">${a.status.toUpperCase()}</span>
+            ${a.cost ? `<span class="ti-cost">💰 ${fmtCur(a.cost)}</span>` : ''}
+            ${a.notes ? `<span style="color:var(--ti-sec);font-size:0.75rem;">📝 ${a.notes}</span>` : ''}
+          </div>
+          <div class="ti-row-acts">
+            <button class="ti-act-btn" data-act="edit" title="Edit">✏️</button>
+            <button class="ti-act-btn" data-act="del" title="Delete">🗑️</button>
+          </div>
+        </div>`;
+      }).join('');
+
+      if(day.acts.length === 0) tEl.innerHTML += '<div class="ti-empty" style="padding:1rem 0;">No activities added yet.</div>';
+      sEl.innerHTML = `<div><b>📅 ${day.dest || 'Day '+day.day}</b></div>
+        <div>🕒 ${day.acts.length} Activities • 💰 Total: <b style="color:var(--ti-accent)">${fmtCur(totalCost)}</b></div>`;
+    };
+
+    const render = () => { renderTabs(); renderTimeline(); };
+
+    document.getElementById('ti-add-day').onclick = () => {
+      const num = state.length + 1;
+      const newDay = { id: uid(), day: num, dest: '', acts: [] };
+      state.push(newDay); activeDay = newDay.id; save(); render(); toast('📅 New day added!');
+    };
+
+    document.getElementById('ti-form').onsubmit = (e) => {
+      e.preventDefault();
+      const day = getDay(); if(!day) return toast('Add a day first!', 'warn');
+      const act = {
+        id: uid(),
+        time: document.getElementById('ti-time').value,
+        act: document.getElementById('ti-act').value.trim(),
+        loc: document.getElementById('ti-loc').value.trim(),
+        status: document.getElementById('ti-status').value,
+        cost: 0, notes: ''
+      };
+      day.acts.push(act); save(); render();
+      document.getElementById('ti-time').value = ''; document.getElementById('ti-act').value = '';
+      document.getElementById('ti-loc').value = ''; toast('✅ Activity added!');
+    };
+
+    document.getElementById('ti-timeline').addEventListener('click', (e) => {
+      const btn = e.target.closest('.ti-act-btn'); if(!btn) return;
+      const day = getDay(); if(!day) return;
+      const aid = btn.closest('.ti-item').dataset.aid;
+      const actIdx = day.acts.findIndex(a => a.id === aid);
+      if(btn.dataset.act === 'del') {
+        day.acts.splice(actIdx, 1); save(); render(); toast('🗑️ Deleted', 'warn');
+      } else {
+        const a = day.acts[actIdx];
+        const newLoc = prompt('Edit Location:', a.loc || '') ?? a.loc;
+        const newStatus = prompt('Status (planned/confirmed/booked):', a.status) ?? a.status;
+        const newCost = prompt('Cost (₹):', a.cost || '0') ?? a.cost;
+        if(newLoc || newStatus || newCost) {
+          a.loc = newLoc; a.status = newStatus.toLowerCase(); a.cost = parseFloat(newCost) || 0;
+          save(); render(); toast('✏️ Updated');
+        }
+      }
+    });
+
+    document.getElementById('ti-template').onclick = () => {
+      const type = prompt('Choose: city, beach, hike', 'city')?.toLowerCase();
+      if(!templates[type]) return toast('Invalid template', 'warn');
+      state = JSON.parse(JSON.stringify(templates[type])); // Deep copy
+      activeDay = state[0].id; save(); render(); toast('📦 Template loaded!');
+    };
+
+    document.getElementById('ti-copy').onclick = () => {
+      if(!state.length) return toast('No itinerary to copy', 'warn');
+      let txt = `🌍 TRAVEL ITINERARY\n${new Date().toLocaleDateString()}\n\n`;
+      state.forEach(d => {
+        txt += `📅 DAY ${d.day}: ${d.dest || 'Untitled'}\n`;
+        d.acts.sort((a,b)=>a.time.localeCompare(b.time)).forEach(a => {
+          txt += `  ${a.time} • ${a.act} (${a.loc || 'TBD'}) [${a.status}] ${a.cost?`₹${a.cost}`:''}\n`;
+        });
+        txt += `\n`;
+      });
+      navigator.clipboard.writeText(txt).then(() => toast('📋 Copied to clipboard!'));
+    };
+
+    document.getElementById('ti-export').onclick = () => {
+      if(!state.length) return toast('No data to export', 'warn');
+      const blob = new Blob([JSON.stringify(state, null, 2)], {type:'application/json'});
+      const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+      a.download = `itinerary-${new Date().toISOString().slice(0,10)}.json`; a.click();
+      toast('📤 Exported successfully!');
+    };
+
+    document.getElementById('ti-clear').onclick = () => {
+      if(confirm('Clear entire itinerary? This cannot be undone.')) {
+        state = []; activeDay = null; localStorage.removeItem(KEY); render(); toast('🗑️ Cleared', 'warn');
+      }
+    };
+
+    // Init
+    render();
+  })();
+  </script>
+</div>

@@ -1,0 +1,211 @@
+<div class="lifestyle-tool moon-phase-pro">
+  <style>
+    .moon-phase-pro {
+      --mp-bg: #0b1120; --mp-card: #161e31; --mp-border: #2a3654;
+      --mp-text: #e2e8f0; --mp-sec: #94a3b8; --mp-accent: #a78bfa;
+      --mp-glow: rgba(167, 139, 250, 0.2); --mp-radius: 16px;
+      font-family: system-ui, -apple-system, sans-serif;
+      max-width: 680px; margin: 0 auto; padding: 1.5rem;
+      background: var(--mp-bg); color: var(--mp-text); border-radius: var(--mp-radius);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.4); position: relative;
+    }
+    .mp-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.2rem; flex-wrap: wrap; gap: 0.5rem; }
+    .mp-header h2 { margin: 0; font-size: 1.4rem; background: linear-gradient(90deg, var(--mp-accent), #38bdf8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .mp-main { display: flex; align-items: center; gap: 1.5rem; margin-bottom: 1.5rem; flex-wrap: wrap; justify-content: center; }
+    .mp-ring-wrap { position: relative; width: 120px; height: 120px; display: flex; align-items: center; justify-content: center; }
+    .mp-ring { position: absolute; inset: 0; border-radius: 50%; background: conic-gradient(var(--mp-accent) 0%, transparent 0%); mask: radial-gradient(circle, transparent 58%, black 60%); -webkit-mask: radial-gradient(circle, transparent 58%, black 60%); transition: background 0.6s cubic-bezier(0.4,0,0.2,1); }
+    .mp-emoji { font-size: 3.5rem; z-index: 2; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.4)); transition: transform 0.3s ease; }
+    .mp-emoji:hover { transform: scale(1.1); }
+    .mp-info-box { flex: 1; min-width: 200px; }
+    .mp-info-box h3 { margin: 0 0 0.3rem; font-size: 1.6rem; font-weight: 700; color: var(--mp-accent); }
+    .mp-illum-text, .mp-age { font-size: 0.95rem; color: var(--mp-sec); margin: 0.2rem 0; }
+    .mp-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 0.8rem; margin-bottom: 1.2rem; }
+    .mp-card { background: var(--mp-card); border: 1px solid var(--mp-border); padding: 0.8rem; border-radius: 10px; font-size: 0.9rem; text-align: center; transition: 0.2s; }
+    .mp-card:hover { border-color: var(--mp-accent); transform: translateY(-2px); }
+    .mp-card b { display: block; margin-bottom: 0.3rem; color: var(--mp-text); font-weight: 600; }
+    .mp-card span { color: var(--mp-sec); }
+    .mp-timeline { background: var(--mp-card); border: 1px solid var(--mp-border); border-radius: 12px; padding: 1rem; margin-bottom: 1rem; }
+    .mp-timeline h4 { margin: 0 0 0.8rem; font-size: 1rem; color: var(--mp-sec); }
+    .mp-phases-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 0.6rem; }
+    .mp-phase-item { background: var(--mp-bg); padding: 0.6rem; border-radius: 8px; text-align: center; font-size: 0.85rem; }
+    .mp-phase-item .icon { font-size: 1.5rem; margin-bottom: 0.2rem; display: block; }
+    .mp-phase-item .date { color: var(--mp-accent); font-weight: 500; }
+    .mp-calendar { display: grid; grid-template-columns: repeat(7, 1fr); gap: 0.4rem; margin-bottom: 1rem; }
+    .mp-cal-day { background: var(--mp-card); border-radius: 6px; padding: 0.4rem; text-align: center; font-size: 0.8rem; transition: 0.2s; }
+    .mp-cal-day.today { border: 2px solid var(--mp-accent); font-weight: bold; }
+    .mp-cal-day .emoji { font-size: 1.1rem; display: block; margin-top: 0.1rem; }
+    .mp-actions { display: flex; gap: 0.6rem; flex-wrap: wrap; }
+    .mp-btn { flex: 1; min-width: 110px; padding: 0.8rem; border-radius: 10px; border: 1px solid var(--mp-border); background: var(--mp-card); color: var(--mp-sec); cursor: pointer; font-weight: 500; transition: 0.2s; }
+    .mp-btn:hover { background: var(--mp-border); color: var(--mp-text); }
+    .mp-btn.primary { background: var(--mp-accent); color: #0b1120; font-weight: 600; border: none; }
+    .mp-btn.primary:hover { background: #8b5cf6; transform: translateY(-1px); }
+    .mp-toggle { text-align: center; cursor: pointer; color: var(--mp-accent); margin: 0.5rem 0; font-size: 0.9rem; user-select: none; }
+    .mp-toast { position: fixed; bottom: 20px; right: 20px; padding: 0.8rem 1.2rem; border-radius: 10px; background: var(--mp-card); border: 1px solid var(--mp-border); color: var(--mp-text); font-size: 0.9rem; opacity: 0; transform: translateY(20px); transition: 0.3s; pointer-events: none; z-index: 999; box-shadow: 0 8px 24px rgba(0,0,0,0.5); }
+    .mp-toast.show { opacity: 1; transform: translateY(0); }
+    .mp-toast.success { border-color: #22c55e; color: #22c55e; }
+    @media (max-width: 500px) {
+      .mp-main { flex-direction: column; text-align: center; }
+      .mp-grid { grid-template-columns: 1fr; }
+      .mp-header { flex-direction: column; align-items: flex-start; }
+    }
+  </style>
+
+  <div class="mp-header">
+    <h2>🌙 Moon Phase Tracker</h2>
+    <span style="font-size:0.8rem;color:var(--mp-sec);background:var(--mp-card);padding:0.3rem 0.6rem;border-radius:6px;border:1px solid var(--mp-border);">Offline • Deterministic</span>
+  </div>
+
+  <div class="mp-main">
+    <div class="mp-ring-wrap">
+      <div class="mp-ring" id="mp-ring"></div>
+      <div class="mp-emoji" id="mp-emoji">🌕</div>
+    </div>
+    <div class="mp-info-box">
+      <h3 id="mp-name">Full Moon</h3>
+      <div class="mp-illum-text">Illumination: <strong id="mp-percent">100%</strong></div>
+      <div class="mp-age">Moon Age: <strong id="mp-age">14.8</strong> days</div>
+    </div>
+  </div>
+
+  <div class="mp-grid">
+    <div class="mp-card"><b>🌌 Zodiac</b><span id="mp-zodiac">-</span></div>
+    <div class="mp-card"><b>📏 Distance</b><span id="mp-dist">-</span></div>
+    <div class="mp-card"><b>🌱 Best For</b><span id="mp-advice">-</span></div>
+    <div class="mp-card"><b>🔮 Energy</b><span id="mp-energy">-</span></div>
+  </div>
+
+  <div class="mp-timeline">
+    <h4>📅 Upcoming Phases</h4>
+    <div class="mp-phases-list" id="mp-phases-list"></div>
+  </div>
+
+  <div class="mp-toggle" id="mp-cal-toggle">📆 Show Lunar Calendar</div>
+  <div class="mp-calendar" id="mp-calendar" style="display:none;"></div>
+
+  <div class="mp-actions">
+    <button class="mp-btn primary" id="mp-share">📤 Share</button>
+    <button class="mp-btn" id="mp-save">💾 Save Today</button>
+  </div>
+
+  <div class="mp-toast" id="mp-toast"></div>
+
+  <script>
+  (function(){
+    const PHASES = ['🌑 New Moon','🌒 Waxing Crescent','🌓 First Quarter','🌔 Waxing Gibbous','🌕 Full Moon','🌖 Waning Gibbous','🌗 Last Quarter','🌘 Waning Crescent'];
+    const SIGNS = ['♈ Aries','♉ Taurus','♊ Gemini','♋ Cancer','♌ Leo','♍ Virgo','♎ Libra','♏ Scorpio','♐ Sagittarius','♑ Capricorn','♒ Aquarius','♓ Pisces'];
+    const ADVICES = ['📝 Plan & Set Intentions','🌱 Start Projects & Learn','🚀 Take Action & Network','🔮 Manifest & Review','✨ Celebrate & Connect','📉 Release & Declutter','🧘 Rest & Reflect','🌿 Detox & Heal'];
+    const ENERGIES = ['Low (Recharge)','Building (Focus)','Stable (Execute)','Rising (Expand)','Peak (Create)','High (Harvest)','Declining (Review)','Low (Restore)'];
+
+    const toast = (m, t='success') => {
+      const el = document.getElementById('mp-toast'); el.textContent = m; el.className = `mp-toast show ${t}`;
+      setTimeout(() => el.className = 'mp-toast', 2500);
+    };
+    const fmt = (d) => d.toLocaleDateString('en-IN', { weekday:'short', day:'numeric', month:'short' });
+
+    const getMoonData = (date = new Date()) => {
+      const synodic = 29.530588853;
+      const knownNew = new Date(Date.UTC(2000, 0, 6, 18, 14, 0));
+      const days = (date - knownNew) / 86400000;
+      const age = ((days % synodic) + synodic) % synodic;
+      const phase = age / synodic;
+      const illum = 0.5 * (1 - Math.cos(phase * 2 * Math.PI)) * 100;
+      return { age, phase, illum };
+    };
+
+    const getZodiac = (age) => {
+      const moonDeg = (age * 12.190749) % 360;
+      return SIGNS[Math.floor(moonDeg / 30)];
+    };
+
+    const getDistance = (age) => {
+      const min = 363000, max = 405000;
+      const pseudo = 0.5 + 0.5 * Math.cos((age / 27.55) * 2 * Math.PI); // Anomalistic cycle ~27.55 days
+      return `${Math.round(min + (max-min)*pseudo).toLocaleString()} km`;
+    };
+
+    const els = {
+      ring: document.getElementById('mp-ring'), emoji: document.getElementById('mp-emoji'),
+      name: document.getElementById('mp-name'), percent: document.getElementById('mp-percent'),
+      age: document.getElementById('mp-age'), zodiac: document.getElementById('mp-zodiac'),
+      dist: document.getElementById('mp-dist'), advice: document.getElementById('mp-advice'),
+      energy: document.getElementById('mp-energy'), phases: document.getElementById('mp-phases-list'),
+      calToggle: document.getElementById('mp-cal-toggle'), calendar: document.getElementById('mp-calendar'),
+      share: document.getElementById('mp-share'), save: document.getElementById('mp-save')
+    };
+
+    let showCal = false;
+
+    const render = (date = new Date()) => {
+      const { age, phase, illum } = getMoonData(date);
+      const idx = Math.min(7, Math.floor(phase * 8));
+      const pct = Math.round(illum);
+
+      els.emoji.textContent = PHASES[idx].split(' ')[0];
+      els.name.textContent = PHASES[idx];
+      els.percent.textContent = pct + '%';
+      els.age.textContent = age.toFixed(1);
+      els.ring.style.background = `conic-gradient(var(--mp-accent) ${pct}%, transparent ${pct}%)`;
+      
+      els.zodiac.textContent = getZodiac(age);
+      els.dist.textContent = getDistance(age);
+      els.advice.textContent = ADVICES[idx];
+      els.energy.textContent = ENERGIES[idx];
+
+      // Upcoming Phases
+      const syn = 29.530588853;
+      const phasesList = [
+        { name: 'New Moon', offset: (7 - age) % syn },
+        { name: 'First Quarter', offset: (14.77 - age + syn) % syn },
+        { name: 'Full Moon', offset: (22.1 - age + syn) % syn },
+        { name: 'Last Quarter', offset: (29.5 - age + syn) % syn }
+      ].sort((a,b) => a.offset - b.offset).slice(0, 4);
+
+      els.phases.innerHTML = phasesList.map(p => {
+        const d = new Date(date.getTime() + p.offset * 86400000);
+        return `<div class="mp-phase-item"><span class="icon">${PHASES.find(x=>x.includes(p.name)).split(' ')[0]}</span><div>${p.name}</div><div class="date">${fmt(d)}</div></div>`;
+      }).join('');
+    };
+
+    const renderCalendar = () => {
+      const now = new Date();
+      const year = now.getFullYear(), month = now.getMonth();
+      const daysInMonth = new Date(year, month+1, 0).getDate();
+      els.calendar.innerHTML = '';
+      for(let d=1; d<=daysInMonth; d++) {
+        const date = new Date(year, month, d);
+        const { phase } = getMoonData(date);
+        const idx = Math.min(7, Math.floor(phase * 8));
+        const isToday = d === now.getDate() ? ' today' : '';
+        els.calendar.innerHTML += `<div class="mp-cal-day${isToday}">${d}<span class="emoji">${PHASES[idx].split(' ')[0]}</span></div>`;
+      }
+    };
+
+    els.calToggle.onclick = () => {
+      showCal = !showCal;
+      els.calendar.style.display = showCal ? 'grid' : 'none';
+      els.calToggle.textContent = showCal ? '📆 Hide Lunar Calendar' : '📆 Show Lunar Calendar';
+      if(showCal) renderCalendar();
+    };
+
+    els.share.onclick = () => {
+      const txt = `🌙 ${els.name.textContent}\n💡 Illumination: ${els.percent.textContent}\n📅 ${new Date().toLocaleDateString()}\n🔮 Energy: ${els.energy.textContent}`;
+      if(navigator.share) {
+        navigator.share({ title: 'Moon Phase', text: txt });
+      } else {
+        navigator.clipboard.writeText(txt).then(() => toast('📋 Copied to clipboard!'));
+      }
+    };
+
+    els.save.onclick = () => {
+      const data = { name: els.name.textContent, date: fmt(new Date()), illum: els.percent.textContent, advice: els.advice.textContent };
+      localStorage.setItem('mp-saved', JSON.stringify(data));
+      toast('💾 Saved to local memory!','success');
+    };
+
+    // Init
+    render(new Date());
+    const saved = JSON.parse(localStorage.getItem('mp-saved')||'null');
+    if(saved) toast(`📖 Last saved: ${saved.name} (${saved.date})`);
+  })();
+  </script>
+</div>

@@ -1,0 +1,499 @@
+<div class="typing-arena">
+  <style>
+    .typing-arena {
+      --ta-bg: #0f172a;
+      --ta-card: #1e293b;
+      --ta-input: #334155;
+      --ta-text: #f1f5f9;
+      --ta-secondary: #94a3b8;
+      --ta-accent: #3b82f6;
+      --ta-success: #10b981;
+      --ta-error: #ef4444;
+      --ta-warning: #f59e0b;
+      --ta-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      --ta-transition: all 0.2s ease;
+      
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 1.2rem;
+      font-family: 'Segoe UI', system-ui, monospace;
+      color: var(--ta-text);
+      background: var(--ta-bg);
+      border-radius: 20px;
+      box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .typing-arena::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; height: 4px;
+      background: var(--ta-gradient);
+      animation: ta-shimmer 3s infinite linear;
+    }
+    @keyframes ta-shimmer { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
+    
+    /* Header */
+    .ta-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+      padding: 0.8rem;
+      background: var(--ta-card);
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.1);
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+    .ta-title { font-size: 1.3rem; font-weight: 700; background: var(--ta-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; display: flex; align-items: center; gap: 0.5rem; }
+    .ta-modes { display: flex; gap: 0.4rem; }
+    .ta-mode {
+      padding: 0.4rem 0.8rem;
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 6px;
+      color: var(--ta-text);
+      cursor: pointer;
+      transition: var(--ta-transition);
+      font-size: 0.85rem;
+      font-family: inherit;
+    }
+    .ta-mode:hover, .ta-mode.active { background: var(--ta-accent); border-color: var(--ta-accent); color: white; }
+    
+    /* Stats */
+    .ta-stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0.8rem;
+      margin-bottom: 1rem;
+    }
+    .ta-stat {
+      background: var(--ta-card);
+      padding: 0.8rem;
+      border-radius: 10px;
+      text-align: center;
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+    .ta-stat-label { font-size: 0.75rem; color: var(--ta-secondary); text-transform: uppercase; letter-spacing: 1px; }
+    .ta-stat-value { font-size: 1.4rem; font-weight: 700; color: var(--ta-accent); margin-top: 0.3rem; }
+    
+    /* Progress */
+    .ta-progress {
+      height: 6px;
+      background: var(--ta-input);
+      border-radius: 3px;
+      margin-bottom: 1.2rem;
+      overflow: hidden;
+    }
+    .ta-progress-fill {
+      height: 100%;
+      background: var(--ta-gradient);
+      border-radius: 3px;
+      transition: width 0.2s linear;
+      width: 0%;
+    }
+    
+    /* Text Display */
+    .ta-display {
+      background: var(--ta-card);
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 12px;
+      padding: 1.2rem;
+      margin-bottom: 1rem;
+      min-height: 120px;
+      font-size: 1.25rem;
+      line-height: 1.6;
+      position: relative;
+      cursor: text;
+      user-select: none;
+    }
+    .ta-display:focus { border-color: var(--ta-accent); box-shadow: 0 0 0 2px rgba(59,130,246,0.2); }
+    
+    .ta-char { transition: color 0.1s, background 0.1s; position: relative; }
+    .ta-char.correct { color: var(--ta-success); }
+    .ta-char.incorrect { color: var(--ta-error); background: rgba(239,68,68,0.15); border-radius: 2px; }
+    .ta-char.pending { color: var(--ta-secondary); }
+    .ta-char.current::after {
+      content: '';
+      position: absolute;
+      left: -1px; top: 0; bottom: 0;
+      width: 2px;
+      background: var(--ta-accent);
+      animation: ta-blink 1s infinite;
+    }
+    @keyframes ta-blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+    
+    /* Input Area */
+    .ta-input-wrap { position: relative; margin-bottom: 1rem; }
+    .ta-input {
+      width: 100%;
+      padding: 1rem;
+      border-radius: 10px;
+      border: 2px solid rgba(255,255,255,0.15);
+      background: var(--ta-input);
+      color: var(--ta-text);
+      font-size: 1.1rem;
+      font-family: inherit;
+      outline: none;
+      transition: var(--ta-transition);
+    }
+    .ta-input:focus { border-color: var(--ta-accent); box-shadow: 0 0 0 3px rgba(59,130,246,0.2); }
+    .ta-input:disabled { opacity: 0.5; cursor: not-allowed; }
+    
+    /* Controls */
+    .ta-controls {
+      display: flex;
+      gap: 0.8rem;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .ta-btn {
+      padding: 0.8rem 1.5rem;
+      background: var(--ta-gradient);
+      border: none;
+      border-radius: 10px;
+      color: white;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--ta-transition);
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.95rem;
+    }
+    .ta-btn:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 10px 20px -5px rgba(0,0,0,0.4); }
+    .ta-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+    .ta-btn.sec { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.15); }
+    .ta-btn.sec:hover:not(:disabled) { background: rgba(255,255,255,0.15); transform: none; }
+    
+    /* Results Modal */
+    .ta-overlay {
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(15,23,42,0.95);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 50;
+      padding: 1rem;
+      animation: ta-fadeIn 0.3s ease;
+    }
+    .ta-overlay.show { display: flex; }
+    @keyframes ta-fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    
+    .ta-modal {
+      background: var(--ta-card);
+      border-radius: 16px;
+      padding: 1.5rem;
+      width: 100%;
+      max-width: 450px;
+      border: 1px solid rgba(255,255,255,0.2);
+      box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+    }
+    .ta-modal-header { text-align: center; margin-bottom: 1.5rem; }
+    .ta-modal-title { font-size: 1.8rem; font-weight: 700; background: var(--ta-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin: 0.5rem 0; }
+    .ta-modal-subtitle { color: var(--ta-secondary); font-size: 0.9rem; }
+    
+    .ta-results-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.8rem; margin-bottom: 1.5rem; }
+    .ta-result-item { background: rgba(255,255,255,0.05); padding: 1rem; border-radius: 10px; text-align: center; }
+    .ta-result-value { font-size: 1.5rem; font-weight: 700; color: var(--ta-accent); }
+    .ta-result-label { font-size: 0.8rem; color: var(--ta-secondary); margin-top: 0.3rem; }
+    
+    .ta-modal-actions { display: flex; gap: 0.5rem; }
+    .ta-modal-actions .ta-btn { flex: 1; justify-content: center; }
+    
+    /* Responsive */
+    @media (max-width: 600px) {
+      .typing-arena { padding: 0.8rem; border-radius: 16px; }
+      .ta-stats { grid-template-columns: repeat(2, 1fr); }
+      .ta-display { font-size: 1.1rem; padding: 1rem; }
+      .ta-input { font-size: 1rem; }
+    }
+  </style>
+
+  <!-- Header -->
+  <div class="ta-header">
+    <div class="ta-title">⌨️ Typing Test Pro</div>
+    <div class="ta-modes">
+      <button class="ta-mode active" data-time="15">15s</button>
+      <button class="ta-mode" data-time="30">30s</button>
+      <button class="ta-mode" data-time="60">60s</button>
+      <button class="ta-mode" data-time="120">120s</button>
+    </div>
+  </div>
+
+  <!-- Stats -->
+  <div class="ta-stats">
+    <div class="ta-stat"><div class="ta-stat-label">WPM</div><div class="ta-stat-value" id="ta-wpm">0</div></div>
+    <div class="ta-stat"><div class="ta-stat-label">Accuracy</div><div class="ta-stat-value" id="ta-acc">100%</div></div>
+    <div class="ta-stat"><div class="ta-stat-label">Time</div><div class="ta-stat-value" id="ta-time">60s</div></div>
+    <div class="ta-stat"><div class="ta-stat-label">Errors</div><div class="ta-stat-value" id="ta-errors">0</div></div>
+  </div>
+
+  <!-- Progress -->
+  <div class="ta-progress"><div class="ta-progress-fill" id="ta-progress"></div></div>
+
+  <!-- Text Display -->
+  <div class="ta-display" id="ta-display" tabindex="0"></div>
+
+  <!-- Input -->
+  <div class="ta-input-wrap">
+    <input type="text" class="ta-input" id="ta-input" placeholder="Click here or press Tab to start typing..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+  </div>
+
+  <!-- Controls -->
+  <div class="ta-controls">
+    <button class="ta-btn" id="ta-start">▶ Start Test</button>
+    <button class="ta-btn sec" id="ta-reset">🔄 Reset</button>
+    <button class="ta-btn sec" id="ta-share">📤 Share</button>
+  </div>
+
+  <!-- Results Overlay -->
+  <div class="ta-overlay" id="ta-overlay">
+    <div class="ta-modal">
+      <div class="ta-modal-header">
+        <h2 class="ta-modal-title">🏆 Test Complete!</h2>
+        <p class="ta-modal-subtitle">Here's your performance breakdown</p>
+      </div>
+      <div class="ta-results-grid">
+        <div class="ta-result-item"><div class="ta-result-value" id="r-wpm">0</div><div class="ta-result-label">WPM</div></div>
+        <div class="ta-result-item"><div class="ta-result-value" id="r-acc">0%</div><div class="ta-result-label">Accuracy</div></div>
+        <div class="ta-result-item"><div class="ta-result-value" id="r-time">0s</div><div class="ta-result-label">Time</div></div>
+        <div class="ta-result-item"><div class="ta-result-value" id="r-errors">0</div><div class="ta-result-label">Errors</div></div>
+      </div>
+      <div style="text-align:center;margin-bottom:1rem;">
+        <div style="font-size:0.9rem;color:var(--ta-secondary);margin-bottom:0.3rem;">🥇 Personal Best</div>
+        <div style="font-size:1.4rem;font-weight:700;color:var(--ta-warning);" id="r-best">0 WPM</div>
+      </div>
+      <div class="ta-modal-actions">
+        <button class="ta-btn" id="ta-replay">🔁 Try Again</button>
+        <button class="ta-btn sec" id="ta-close">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function(){
+      // ====== DATA ======
+      const texts = [
+        "The quick brown fox jumps over the lazy dog. Practice makes perfect, and consistency is the key to mastering any skill. Keep your posture straight and type smoothly without rushing.",
+        "Technology continues to reshape our world at an unprecedented pace. Artificial intelligence, quantum computing, and renewable energy are driving innovations that will define the next century.",
+        "Reading daily expands your vocabulary, improves focus, and reduces stress. Even fifteen minutes of focused reading can significantly boost your mental agility and emotional intelligence.",
+        "Coding is not just about writing syntax; it's about solving problems logically. Debugging requires patience, pattern recognition, and a systematic approach to isolating errors efficiently.",
+        "Music therapy has been proven to reduce anxiety, improve sleep quality, and enhance cognitive performance. Classical compositions, in particular, stimulate neural pathways associated with memory."
+      ];
+
+      // ====== STATE ======
+      const state = {
+        targetText: '',
+        charsTyped: 0,
+        errors: 0,
+        startTime: 0,
+        timerInterval: null,
+        timeLeft: 60,
+        mode: 60,
+        isRunning: false,
+        isFinished: false,
+        highScore: parseInt(localStorage.getItem('tt-highscore') || '0')
+      };
+
+      // ====== DOM ======
+      const els = {
+        display: document.getElementById('ta-display'),
+        input: document.getElementById('ta-input'),
+        wpm: document.getElementById('ta-wpm'),
+        acc: document.getElementById('ta-acc'),
+        time: document.getElementById('ta-time'),
+        errors: document.getElementById('ta-errors'),
+        progress: document.getElementById('ta-progress'),
+        start: document.getElementById('ta-start'),
+        reset: document.getElementById('ta-reset'),
+        share: document.getElementById('ta-share'),
+        overlay: document.getElementById('ta-overlay'),
+        rWpm: document.getElementById('r-wpm'),
+        rAcc: document.getElementById('r-acc'),
+        rTime: document.getElementById('r-time'),
+        rErrors: document.getElementById('r-errors'),
+        rBest: document.getElementById('r-best'),
+        replay: document.getElementById('ta-replay'),
+        close: document.getElementById('ta-close'),
+        modes: document.querySelectorAll('.ta-mode')
+      };
+
+      // ====== UTILS ======
+      const shuffle = arr => [...arr].sort(() => Math.random() - 0.5);
+      const formatNum = n => n < 10 ? '0' + n : n;
+
+      const renderText = () => {
+        els.display.innerHTML = state.targetText.split('').map(c => `<span class="ta-char pending">${c}</span>`).join('');
+        els.display.querySelector('.ta-char').classList.add('current');
+      };
+
+      const updateStats = () => {
+        const elapsed = state.startTime ? (Date.now() - state.startTime) / 1000 : 0;
+        const minutes = elapsed / 60;
+        const wpm = minutes > 0 ? Math.round((state.charsTyped / 5) / minutes) : 0;
+        const accuracy = state.charsTyped + state.errors > 0 ? Math.round((state.charsTyped / (state.charsTyped + state.errors)) * 100) : 100;
+        
+        els.wpm.textContent = wpm;
+        els.acc.textContent = `${accuracy}%`;
+        els.time.textContent = `${formatNum(state.timeLeft)}s`;
+        els.errors.textContent = state.errors;
+        els.progress.style.width = `${(state.charsTyped / state.targetText.length) * 100}%`;
+        
+        return { wpm, accuracy, elapsed };
+      };
+
+      const startTimer = () => {
+        state.startTime = Date.now();
+        state.timerInterval = setInterval(() => {
+          state.timeLeft--;
+          updateStats();
+          if(state.timeLeft <= 0) finishTest();
+        }, 1000);
+      };
+
+      const startTest = () => {
+        if(state.isRunning || state.isFinished) return;
+        state.isRunning = true;
+        els.input.disabled = false;
+        els.input.focus();
+        els.start.innerHTML = '⏸ Running...';
+        els.start.disabled = true;
+        startTimer();
+      };
+
+      const finishTest = () => {
+        clearInterval(state.timerInterval);
+        state.isRunning = false;
+        state.isFinished = true;
+        els.input.disabled = true;
+        els.start.innerHTML = '▶ Start';
+        els.start.disabled = false;
+        
+        const stats = updateStats();
+        showResults(stats);
+      };
+
+      const showResults = (stats) => {
+        els.rWpm.textContent = stats.wpm;
+        els.rAcc.textContent = stats.accuracy + '%';
+        els.rTime.textContent = `${state.mode - state.timeLeft}s`;
+        els.rErrors.textContent = state.errors;
+        
+        if(stats.wpm > state.highScore) {
+          state.highScore = stats.wpm;
+          localStorage.setItem('tt-highscore', state.highScore.toString());
+        }
+        els.rBest.textContent = `${state.highScore} WPM`;
+        els.overlay.classList.add('show');
+      };
+
+      const resetTest = () => {
+        clearInterval(state.timerInterval);
+        state.targetText = shuffle(texts)[0];
+        state.charsTyped = 0;
+        state.errors = 0;
+        state.startTime = 0;
+        state.timeLeft = state.mode;
+        state.isRunning = false;
+        state.isFinished = false;
+        els.input.value = '';
+        els.input.disabled = true;
+        els.start.innerHTML = '▶ Start';
+        els.start.disabled = false;
+        els.overlay.classList.remove('show');
+        renderText();
+        updateStats();
+        els.input.focus();
+      };
+
+      const shareResults = async () => {
+        const stats = updateStats();
+        const text = `⌨️ Typing Test Results:\n📊 WPM: ${stats.wpm}\n🎯 Accuracy: ${stats.accuracy}%\n⏱️ Time: ${state.mode - state.timeLeft}s\n❌ Errors: ${state.errors}\n🥇 Best: ${state.highScore} WPM\n\nCan you beat my score?`;
+        try {
+          if(navigator.share) await navigator.share({ title: 'Typing Test Results', text });
+          else await navigator.clipboard.writeText(text);
+          els.share.textContent = '✅ Copied!';
+          setTimeout(() => els.share.textContent = '📤 Share', 2000);
+        } catch(e) {}
+      };
+
+      // ====== EVENTS ======
+      els.input.oninput = (e) => {
+        if(state.isFinished) return;
+        if(!state.isRunning && e.inputType !== 'insertText') return; // Start on first valid keystroke
+        if(!state.isRunning) startTest();
+        
+        const val = els.input.value;
+        const chars = els.display.querySelectorAll('.ta-char');
+        
+        // Update character states
+        state.charsTyped = 0;
+        state.errors = 0;
+        
+        chars.forEach((span, i) => {
+          span.classList.remove('correct', 'incorrect', 'pending', 'current');
+          if(i < val.length) {
+            const isCorrect = val[i] === state.targetText[i];
+            span.classList.add(isCorrect ? 'correct' : 'incorrect');
+            if(isCorrect) state.charsTyped++;
+            else state.errors++;
+          } else if(i === val.length) {
+            span.classList.add('pending', 'current');
+          } else {
+            span.classList.add('pending');
+          }
+        });
+        
+        updateStats();
+      };
+
+      // Prevent pasting
+      els.input.onpaste = (e) => {
+        e.preventDefault();
+        const text = (e.clipboardData || window.clipboardData).getData('text');
+        document.execCommand('insertText', false, text.replace(/[^a-zA-Z0-9\s.,!?'"()-]/g, ''));
+      };
+
+      els.start.onclick = () => {
+        if(!state.isRunning && !state.isFinished) startTest();
+      };
+
+      els.reset.onclick = resetTest;
+      els.share.onclick = shareResults;
+      els.replay.onclick = resetTest;
+      els.close.onclick = () => els.overlay.classList.remove('show');
+
+      // Mode selection
+      els.modes.forEach(btn => {
+        btn.onclick = () => {
+          els.modes.forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          state.mode = parseInt(btn.dataset.time);
+          state.timeLeft = state.mode;
+          resetTest();
+        };
+      });
+
+      // Keyboard shortcuts
+      document.addEventListener('keydown', (e) => {
+        if(e.target.tagName === 'INPUT' && e.key === 'Tab') {
+          e.preventDefault();
+          resetTest();
+        }
+        if(e.key === 'Escape' && els.overlay.classList.contains('show')) {
+          els.overlay.classList.remove('show');
+        }
+        if(e.key === 'Enter' && !state.isRunning && !state.isFinished) {
+          startTest();
+        }
+      });
+
+      // Init
+      resetTest();
+    })();
+  </script>
+</div>

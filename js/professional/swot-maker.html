@@ -1,0 +1,271 @@
+<div class="professional-tool">
+  <style>
+    .professional-tool {
+      --bg: #f8fafc; --card: #ffffff; --border: #e2e8f0;
+      --text: #0f172a; --text-sec: #64748b; --accent: #6366f1;
+      --success: #10b981; --warning: #f59e0b; --danger: #ef4444;
+      --s-color: #3b82f6; --w-color: #ef4444; --o-color: #10b981; --t-color: #f59e0b;
+      --shadow: 0 4px 12px rgba(0,0,0,0.05); --radius: 12px;
+      font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+      max-width: 900px; margin: 0 auto; padding: 1.8rem;
+      background: var(--bg); border-radius: 16px; box-shadow: var(--shadow);
+      box-sizing: border-box; position: relative;
+    }
+    .professional-tool * { box-sizing: border-box; }
+    .sw-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.2rem; flex-wrap: wrap; gap: 1rem; }
+    .sw-header h3 { margin: 0; font-size: 1.45rem; color: var(--text); }
+    .sw-controls { display: flex; gap: 0.6rem; align-items: center; }
+    .sw-select { padding: 0.5rem; border: 1px solid var(--border); border-radius: 8px; background: var(--card); color: var(--text); font-size: 0.85rem; }
+    .sw-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin-bottom: 1.2rem; }
+    .sw-box { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem; display: flex; flex-direction: column; min-height: 220px; transition: box-shadow 0.2s; }
+    .sw-box:hover { box-shadow: 0 6px 16px rgba(0,0,0,0.06); }
+    .sw-box.s { border-top: 3px solid var(--s-color); }
+    .sw-box.w { border-top: 3px solid var(--w-color); }
+    .sw-box.o { border-top: 3px solid var(--o-color); }
+    .sw-box.t { border-top: 3px solid var(--t-color); }
+    .sw-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.8rem; }
+    .sw-title { font-weight: 700; font-size: 1.05rem; display: flex; align-items: center; gap: 0.5rem; }
+    .sw-count { background: #f1f5f9; color: var(--text-sec); font-size: 0.75rem; padding: 0.15rem 0.5rem; border-radius: 12px; font-weight: 600; }
+    .sw-input-row { display: flex; gap: 0.5rem; margin-bottom: 0.8rem; }
+    .sw-input { flex: 1; padding: 0.6rem; border: 1px solid var(--border); border-radius: 8px; background: var(--card); color: var(--text); font-size: 0.88rem; outline: none; transition: all 0.2s; }
+    .sw-input:focus { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(99,102,241,0.15); }
+    .sw-add-btn { padding: 0 0.8rem; background: var(--accent); color: #fff; border: none; border-radius: 8px; cursor: pointer; font-weight: 500; transition: all 0.2s; }
+    .sw-add-btn:hover { background: #4f46e5; transform: translateY(-1px); }
+    .sw-list { list-style: none; padding: 0; margin: 0; flex: 1; display: flex; flex-direction: column; gap: 0.5rem; overflow-y: auto; max-height: 200px; }
+    .sw-item { display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem 0.6rem; background: #f8fafc; border: 1px solid transparent; border-radius: 8px; cursor: grab; transition: all 0.2s; }
+    .sw-item.dragging { opacity: 0.5; border: 1px dashed var(--accent); }
+    .sw-item.drag-over { border-top: 2px solid var(--accent); }
+    .sw-priority { font-size: 0.65rem; padding: 0.15rem 0.4rem; border-radius: 4px; font-weight: 700; cursor: pointer; user-select: none; min-width: 24px; text-align: center; }
+    .sw-priority.high { background: rgba(239,68,68,0.15); color: var(--danger); }
+    .sw-priority.med { background: rgba(245,158,11,0.15); color: var(--warning); }
+    .sw-priority.low { background: rgba(59,130,246,0.15); color: var(--s-color); }
+    .sw-text { flex: 1; font-size: 0.88rem; color: var(--text); border: none; background: transparent; outline: none; }
+    .sw-text:focus { background: #fff; border-radius: 4px; padding: 0.2rem; border: 1px solid var(--border); }
+    .sw-actions { display: flex; gap: 0.3rem; }
+    .sw-icon-btn { width: 24px; height: 24px; border: none; background: transparent; cursor: pointer; border-radius: 4px; display: flex; align-items: center; justify-content: center; color: var(--text-sec); transition: all 0.2s; }
+    .sw-icon-btn:hover { background: #e2e8f0; color: var(--text); }
+    .sw-icon-btn.del:hover { background: rgba(239,68,68,0.1); color: var(--danger); }
+    .sw-insights { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem; margin-bottom: 1.2rem; }
+    .sw-insights h4 { margin: 0 0 0.6rem; font-size: 1rem; color: var(--text); }
+    .sw-insight-tag { display: inline-block; padding: 0.4rem 0.8rem; background: #f1f5f9; border-radius: 8px; font-size: 0.82rem; color: var(--text-sec); margin: 0.2rem; }
+    .sw-actions { display: flex; gap: 0.8rem; flex-wrap: wrap; }
+    .sw-btn { flex: 1; padding: 0.8rem; border: none; border-radius: var(--radius); font-weight: 600; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 0.5rem; min-width: 120px; }
+    .sw-btn-primary { background: var(--accent); color: #fff; }
+    .sw-btn-primary:hover { background: #4f46e5; transform: translateY(-1px); }
+    .sw-btn-secondary { background: var(--card); border: 1px solid var(--border); color: var(--text-sec); }
+    .sw-btn-secondary:hover { background: #f1f5f9; border-color: var(--accent); color: var(--accent); }
+    .sw-toast { position: absolute; bottom: 1.2rem; right: 1.2rem; background: var(--text); color: #fff; padding: 0.7rem 1rem; border-radius: 10px; font-size: 0.85rem; transform: translateY(120%); transition: transform 0.3s cubic-bezier(0.4,0,0.2,1); z-index: 10; pointer-events: none; }
+    .sw-toast.show { transform: translateY(0); }
+    @media (max-width: 750px) { .sw-grid { grid-template-columns: 1fr; } .sw-actions { flex-direction: column; } }
+    @media print {
+      body { background: #fff !important; margin: 0 !important; }
+      .professional-tool { box-shadow: none; padding: 0; background: #fff; max-width: 100%; border-radius: 0; }
+      .sw-input, .sw-add-btn, .sw-actions, .sw-controls, .sw-icon-btn, .sw-toast { display: none !important; }
+      .sw-box { break-inside: avoid; border: 1px solid #ccc; page-break-inside: avoid; }
+      .sw-item { background: transparent; padding: 0.3rem 0; border: none; }
+      .sw-priority { border: 1px solid #999; background: transparent !important; }
+    }
+  </style>
+
+  <div class="sw-header">
+    <h3>🎯 SWOT Analysis Builder</h3>
+    <div class="sw-controls">
+      <label style="font-size:0.82rem;color:var(--text-sec);font-weight:600;">Template:</label>
+      <select class="sw-select" id="sw-tpl">
+        <option value="">Custom</option>
+        <option value="startup">Tech Startup</option>
+        <option value="retail">Retail Business</option>
+        <option value="personal">Personal Growth</option>
+        <option value="project">Project Launch</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="sw-grid" id="sw-grid">
+    <!-- Quadrants injected by JS -->
+  </div>
+
+  <div class="sw-insights">
+    <h4>📊 Strategic Insights</h4>
+    <div id="sw-insight-box">Add items to generate strategic recommendations...</div>
+  </div>
+
+  <div class="sw-actions">
+    <button class="sw-btn sw-btn-secondary" id="sw-copy">📋 Copy Markdown</button>
+    <button class="sw-btn sw-btn-secondary" id="sw-json">📦 Export JSON</button>
+    <button class="sw-btn sw-btn-primary" id="sw-print">🖨️ Print / PDF</button>
+  </div>
+
+  <div class="sw-toast" id="sw-toast"></div>
+
+  <script>
+    (function(){
+      // Templates
+      const templates = {
+        startup: { s:['Agile development process','Strong technical team','Innovative product'], w:['Limited marketing budget','No established brand','Small user base'], o:['Growing market demand','New funding rounds available','Partnership opportunities'], t:['Big tech competitors','Regulatory changes','Fast-changing tech trends'] },
+        retail: { s:['Prime store location','Loyal customer base','Efficient supply chain'], w:['High operational costs','Outdated POS system','Limited online presence'], o:['E-commerce expansion','Seasonal promotions','Local community events'], t:['Amazon & big box retailers','Economic downturns','Rising rent costs'] },
+        personal: { s:['Strong communication skills','Disciplined work ethic','Quick learner'], w:['Public speaking fear','Procrastination habits','Limited network'], o:['Online courses available','Mentorship programs','Industry networking events'], t:['AI automation of roles','High competition','Economic instability'] },
+        project: { s:['Clear scope & timeline','Experienced team','Strong stakeholder support'], w:['Budget constraints','Legacy system integration','Limited QA resources'], o:['New tool adoption','Cross-department synergy','Client feedback loop'], t:['Scope creep','Vendor delays','Compliance updates'] }
+      };
+
+      // State
+      let state = { s: [], w: [], o: [], t: [] };
+      const els = { grid: document.getElementById('sw-grid'), tpl: document.getElementById('sw-tpl'), copy: document.getElementById('sw-copy'), json: document.getElementById('sw-json'), print: document.getElementById('sw-print'), toast: document.getElementById('sw-toast'), insights: document.getElementById('sw-insight-box') };
+      const quadMeta = { s: { label: '💪 Strengths', color: 's', placeholder: 'Internal advantage...' }, w: { label: '⚠️ Weaknesses', color: 'w', placeholder: 'Internal limitation...' }, o: { label: '🌟 Opportunities', color: 'o', placeholder: 'External possibility...' }, t: { label: '🛡️ Threats', color: 't', placeholder: 'External risk...' } };
+
+      // Utils
+      const uid = () => Math.random().toString(36).substr(2, 9);
+      const toast = msg => { els.toast.textContent = msg; els.toast.classList.add('show'); setTimeout(()=>els.toast.classList.remove('show'), 2000); };
+      const save = () => localStorage.setItem('swot_data', JSON.stringify(state));
+      const load = () => { try { const d = JSON.parse(localStorage.getItem('swot_data')); if(d && d.s) state = d; } catch(e) {} };
+
+      // Render Quadrants
+      const renderGrid = () => {
+        els.grid.innerHTML = Object.keys(quadMeta).map(key => {
+          const meta = quadMeta[key];
+          const items = state[key].map((item, i) => `
+            <li class="sw-item" draggable="true" data-sec="${key}" data-idx="${i}">
+              <span class="sw-priority ${item.priority}" data-pri="${key}::${i}" title="Click to cycle priority">${item.priority.toUpperCase()}</span>
+              <input class="sw-text" value="${item.text}" data-edit="${key}::${i}" placeholder="${meta.placeholder}">
+              <div class="sw-actions">
+                <button class="sw-icon-btn" data-move="${key}::${i}:-1" title="Move Up">⬆️</button>
+                <button class="sw-icon-btn" data-move="${key}::${i}:1" title="Move Down">⬇️</button>
+                <button class="sw-icon-btn del" data-del="${key}::${i}" title="Delete">🗑️</button>
+              </div>
+            </li>
+          `).join('');
+          return `
+            <div class="sw-box ${meta.color}">
+              <div class="sw-head">
+                <div class="sw-title">${meta.label}</div>
+                <span class="sw-count">${state[key].length}</span>
+              </div>
+              <div class="sw-input-row">
+                <input class="sw-input" id="inp-${key}" placeholder="${meta.placeholder}">
+                <button class="sw-add-btn" data-add="${key}">+</button>
+              </div>
+              <ul class="sw-list" id="list-${key}">${items}</ul>
+            </div>`;
+        }).join('');
+        attachEvents();
+        updateInsights();
+      };
+
+      // Events
+      const attachEvents = () => {
+        // Add
+        document.querySelectorAll('[data-add]').forEach(btn => {
+          btn.onclick = () => {
+            const sec = btn.dataset.add, inp = document.getElementById(`inp-${sec}`);
+            const txt = inp.value.trim();
+            if(!txt) return toast('⚠️ Enter an item first');
+            state[sec].push({ id: uid(), text: txt, priority: 'med' });
+            inp.value = ''; inp.focus(); save(); renderGrid();
+          };
+        });
+
+        // Edit
+        document.querySelectorAll('[data-edit]').forEach(inp => {
+          inp.addEventListener('input', e => {
+            const [sec, idx] = e.target.dataset.edit.split('::');
+            state[sec][idx].text = e.target.value; save(); updateInsights();
+          });
+          inp.addEventListener('blur', renderGrid); // Re-render to ensure clean state
+        });
+
+        // Priority Cycle
+        document.querySelectorAll('[data-pri]').forEach(el => {
+          el.onclick = e => {
+            const [sec, idx] = e.target.dataset.pri.split('::');
+            const pri = state[sec][idx].priority;
+            state[sec][idx].priority = pri === 'low' ? 'med' : pri === 'med' ? 'high' : 'low';
+            save(); renderGrid();
+          };
+        });
+
+        // Move
+        document.querySelectorAll('[data-move]').forEach(btn => {
+          btn.onclick = e => {
+            const [sec, idx, dir] = btn.dataset.move.split(':');
+            const i = parseInt(idx), d = parseInt(dir);
+            if(i+d < 0 || i+d >= state[sec].length) return;
+            [state[sec][i], state[sec][i+d]] = [state[sec][i+d], state[sec][i]];
+            save(); renderGrid();
+          };
+        });
+
+        // Delete
+        document.querySelectorAll('[data-del]').forEach(btn => {
+          btn.onclick = e => {
+            const [sec, idx] = btn.dataset.del.split('::');
+            state[sec].splice(parseInt(idx), 1); save(); renderGrid();
+          };
+        });
+
+        // Drag & Drop
+        document.querySelectorAll('.sw-item').forEach(item => {
+          item.addEventListener('dragstart', e => { e.dataTransfer.setData('text/plain', JSON.stringify({sec: item.dataset.sec, idx: item.dataset.idx})); item.classList.add('dragging'); });
+          item.addEventListener('dragend', () => item.classList.remove('dragging'));
+          item.addEventListener('dragover', e => { e.preventDefault(); item.classList.add('drag-over'); });
+          item.addEventListener('dragleave', () => item.classList.remove('drag-over'));
+          item.addEventListener('drop', e => {
+            e.preventDefault(); item.classList.remove('drag-over');
+            const from = JSON.parse(e.dataTransfer.getData('text/plain'));
+            const toSec = item.dataset.sec, toIdx = parseInt(item.dataset.idx);
+            if(from.sec === toSec && from.idx !== toIdx) {
+              const moved = state[from.sec].splice(parseInt(from.idx), 1)[0];
+              state[toSec].splice(toIdx, 0, moved);
+              save(); renderGrid();
+            }
+          });
+        });
+      };
+
+      // Insights Generator
+      const updateInsights = () => {
+        const total = state.s.length + state.w.length + state.o.length + state.t.length;
+        if(total === 0) { els.insights.innerHTML = 'Add items to generate strategic recommendations...'; return; }
+        const tips = [];
+        if(state.s.length >= state.w.length) tips.push('✅ Leverage strengths to minimize weaknesses');
+        if(state.o.length > state.t.length) tips.push('🚀 Prioritize high-impact opportunities');
+        if(state.w.some(i=>i.priority==='high')) tips.push('⚠️ Address high-priority weaknesses before scaling');
+        if(state.t.some(i=>i.priority==='high')) tips.push('🛡️ Develop risk mitigation plans for top threats');
+        if(state.s.length > 0 && state.o.length > 0) tips.push('💡 Match strengths with opportunities for growth');
+        els.insights.innerHTML = tips.map(t => `<span class="sw-insight-tag">${t}</span>`).join('');
+      };
+
+      // Export
+      const exportMarkdown = () => {
+        let md = `# SWOT ANALYSIS\n\n`;
+        Object.keys(quadMeta).forEach(key => {
+          md += `### ${quadMeta[key].label}\n`;
+          state[key].forEach(i => md += `- [${i.priority.toUpperCase()}] ${i.text}\n`);
+          md += `\n`;
+        });
+        navigator.clipboard.writeText(md).then(() => toast('📋 Copied Markdown to clipboard')).catch(() => toast('❌ Copy failed'));
+      };
+
+      const exportJSON = () => {
+        const blob = new Blob([JSON.stringify(state, null, 2)], {type:'application/json'});
+        const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+        a.download = 'swot-analysis.json'; a.click(); URL.revokeObjectURL(a.href); toast('📦 Exported JSON');
+      };
+
+      // Init
+      load();
+      if(!state.s.length && !state.w.length && !state.o.length && !state.t.length) {
+        state.s.push({id:uid(), text:'Enter your first strength...', priority:'med'});
+      }
+      renderGrid();
+
+      els.tpl.addEventListener('change', e => {
+        const t = templates[e.target.value]; if(!t) return;
+        Object.keys(t).forEach(k => state[k] = t[k].map(txt => ({id:uid(), text:txt, priority:'med'})));
+        save(); renderGrid(); toast(`📂 Loaded "${e.target.value}" template`);
+      });
+      els.copy.addEventListener('click', exportMarkdown);
+      els.json.addEventListener('click', exportJSON);
+      els.print.addEventListener('click', () => window.print());
+    })();
+  </script>
+</div>

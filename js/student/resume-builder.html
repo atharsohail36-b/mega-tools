@@ -1,0 +1,1405 @@
+<div class="student-tool">
+  <style>
+    :root {
+      --glass-border: rgba(255,255,255,0.15);
+      --bg-card: #1e1e2e;
+      --bg-hover: #2a2a3c;
+      --text-primary: #e2e2e2;
+      --text-secondary: #a0a0b0;
+      --accent: #6366f1;
+      --accent-glow: rgba(99,102,241,0.3);
+      --gradient-main: linear-gradient(135deg, #8b5cf6, #6366f1);
+      --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      --primary-color: #6366f1;
+      --font-family: 'Segoe UI', system-ui, sans-serif;
+      --font-size-base: 14px;
+      --line-height: 1.6;
+      --spacing-sm: 0.5rem;
+      --spacing-md: 1rem;
+      --spacing-lg: 1.5rem;
+      --border-radius: 12px;
+      --shadow-sm: 0 2px 8px rgba(0,0,0,0.1);
+      --shadow-md: 0 4px 16px rgba(0,0,0,0.15);
+      --shadow-lg: 0 8px 32px rgba(0,0,0,0.2);
+    }
+    .student-tool {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 1rem;
+      font-family: var(--font-family);
+      font-size: var(--font-size-base);
+      line-height: var(--line-height);
+      color: var(--text-primary);
+      background: linear-gradient(135deg, #0f0f1a 0%, #1a1a2e 100%);
+      min-height: 100vh;
+    }
+    /* Header & Toolbar */
+    .rb-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.8rem; padding: 0.8rem 1.2rem; background: var(--bg-card); border-radius: var(--border-radius); border: 1px solid var(--glass-border); }
+    .rb-header h1 { margin: 0; font-size: 1.6rem; background: var(--gradient-main); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 700; }
+    .rb-stats { display: flex; gap: 1rem; align-items: center; }
+    .rb-progress-ring { width: 48px; height: 48px; position: relative; }
+    .rb-progress-ring svg { transform: rotate(-90deg); }
+    .rb-progress-ring circle { fill: none; stroke-width: 4; }
+    .rb-progress-ring .bg { stroke: var(--bg-hover); }
+    .rb-progress-ring .fill { stroke: var(--gradient-main); stroke-dasharray: 126; stroke-dashoffset: 126; transition: stroke-dashoffset 0.5s ease; }
+    .rb-progress-text { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: 700; }
+    .rb-completion-text { font-size: 0.85rem; color: var(--text-secondary); }
+    .rb-toolbar { display: flex; gap: 0.5rem; margin-bottom: 1rem; flex-wrap: wrap; align-items: center; padding: 0.8rem; background: var(--bg-card); border-radius: var(--border-radius); border: 1px solid var(--glass-border); }
+    .rb-select, .rb-input, .rb-textarea { padding: 0.7rem; border-radius: 8px; border: 1px solid var(--glass-border); background: var(--bg-hover); color: var(--text-primary); outline: none; transition: var(--transition); font-size: 0.9rem; }
+    .rb-select:focus, .rb-input:focus, .rb-textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow); }
+    .rb-textarea { min-height: 80px; resize: vertical; width: 100%; }
+    .rb-btn { padding: 0.7rem 1.2rem; background: var(--bg-hover); border: 1px solid var(--glass-border); border-radius: 8px; color: var(--text-primary); cursor: pointer; transition: var(--transition); font-size: 0.9rem; font-weight: 500; display: inline-flex; align-items: center; gap: 0.4rem; }
+    .rb-btn:hover { background: var(--accent); border-color: var(--accent); color: #fff; transform: translateY(-1px); }
+    .rb-btn.primary { background: var(--gradient-main); color: #fff; border: none; }
+    .rb-btn.primary:hover { box-shadow: 0 4px 12px var(--accent-glow); }
+    .rb-btn.danger { color: #ef4444; border-color: #ef4444; }
+    .rb-btn.danger:hover { background: #ef4444; color: #fff; }
+    .rb-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none !important; }
+    .rb-zoom { display: flex; align-items: center; gap: 0.4rem; font-size: 0.85rem; color: var(--text-secondary); }
+    .rb-zoom input { width: 60px; }
+    /* Main Layout */
+    .rb-container { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+    @media(max-width: 1100px){ .rb-container { grid-template-columns: 1fr; } }
+    .rb-editor { background: var(--bg-card); border: 1px solid var(--glass-border); border-radius: var(--border-radius); padding: 1.2rem; max-height: 85vh; overflow-y: auto; }
+    .rb-editor::-webkit-scrollbar { width: 6px; }
+    .rb-editor::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 3px; }
+    .rb-section { margin-bottom: 1.5rem; padding-bottom: 1.2rem; border-bottom: 1px solid var(--glass-border); }
+    .rb-section:last-child { border-bottom: none; margin-bottom: 0; }
+    .rb-section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.8rem; }
+    .rb-section-title { font-size: 1.05rem; font-weight: 600; color: var(--accent); display: flex; align-items: center; gap: 0.5rem; }
+    .rb-section-toggle { background: none; border: none; color: var(--text-secondary); cursor: pointer; font-size: 1.2rem; transition: var(--transition); }
+    .rb-section-toggle:hover { color: var(--accent); }
+    .rb-section.collapsed .rb-section-content { display: none; }
+    .rb-section.collapsed .rb-section-toggle { transform: rotate(-90deg); }
+    .rb-label { display: block; margin-bottom: 0.4rem; color: var(--text-secondary); font-size: 0.85rem; font-weight: 500; }
+    .rb-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; }
+    @media(max-width: 500px){ .rb-row { grid-template-columns: 1fr; } }
+    .rb-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.8rem; }
+    @media(max-width: 700px){ .rb-row-3 { grid-template-columns: 1fr; } }
+    /* Form Items */
+    .rb-item { background: var(--bg-hover); border-radius: 10px; padding: 0.9rem; margin-bottom: 0.7rem; position: relative; border: 1px solid transparent; transition: var(--transition); }
+    .rb-item:hover { border-color: var(--accent); }
+    .rb-item-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.6rem; }
+    .rb-item-title { font-weight: 600; font-size: 0.95rem; color: var(--text-primary); }
+    .rb-item-subtitle { font-size: 0.85rem; color: var(--text-secondary); }
+    .rb-item-actions { display: flex; gap: 0.3rem; }
+    .rb-icon-btn { width: 30px; height: 30px; border-radius: 6px; background: var(--bg-card); border: 1px solid var(--glass-border); color: var(--text-secondary); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: var(--transition); font-size: 0.9rem; }
+    .rb-icon-btn:hover { background: var(--accent); color: #fff; border-color: var(--accent); }
+    .rb-icon-btn.drag { cursor: grab; }
+    .rb-icon-btn.drag:active { cursor: grabbing; }
+    .rb-add-btn { width: 100%; padding: 0.7rem; background: transparent; border: 2px dashed var(--glass-border); border-radius: 8px; color: var(--text-secondary); cursor: pointer; transition: var(--transition); font-size: 0.9rem; margin-top: 0.5rem; display: flex; align-items: center; justify-content: center; gap: 0.4rem; }
+    .rb-add-btn:hover { border-color: var(--accent); color: var(--accent); background: rgba(99,102,241,0.1); }
+    .rb-counter { font-size: 0.75rem; color: var(--text-secondary); text-align: right; margin-top: 0.3rem; }
+    .rb-counter.warning { color: #f59e0b; }
+    .rb-counter.danger { color: #ef4444; }
+    /* Photo Upload */
+    .rb-photo-upload { display: flex; align-items: center; gap: 1rem; }
+    .rb-photo-preview { width: 80px; height: 80px; border-radius: 50%; background: var(--bg-hover); border: 2px dashed var(--glass-border); display: flex; align-items: center; justify-content: center; overflow: hidden; font-size: 2rem; }
+    .rb-photo-preview img { width: 100%; height: 100%; object-fit: cover; }
+    .rb-photo-input { display: none; }
+    .rb-photo-label { padding: 0.5rem 1rem; background: var(--bg-hover); border-radius: 8px; cursor: pointer; font-size: 0.9rem; transition: var(--transition); }
+    .rb-photo-label:hover { background: var(--accent); color: #fff; }
+    /* Skills */
+    .rb-skills-container { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.5rem; }
+    .rb-skill-tag { display: inline-flex; align-items: center; gap: 0.3rem; background: var(--accent); color: #fff; padding: 0.3rem 0.7rem; border-radius: 20px; font-size: 0.85rem; }
+    .rb-skill-tag .remove { cursor: pointer; opacity: 0.8; }
+    .rb-skill-tag .remove:hover { opacity: 1; }
+    .rb-skill-category { margin-bottom: 1rem; }
+    .rb-skill-category-title { font-size: 0.9rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 0.4rem; }
+    .rb-skill-bar { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem; }
+    .rb-skill-name { flex: 1; font-size: 0.9rem; }
+    .rb-skill-level { width: 100px; display: flex; gap: 0.2rem; }
+    .rb-skill-dot { width: 16px; height: 16px; border-radius: 50%; background: var(--bg-hover); border: 1px solid var(--glass-border); cursor: pointer; transition: var(--transition); }
+    .rb-skill-dot.active { background: var(--accent); border-color: var(--accent); }
+    /* ATS Panel */
+    .rb-ats-panel { background: linear-gradient(135deg, rgba(99,102,241,0.1), rgba(56,189,248,0.1)); border: 1px solid var(--glass-border); border-radius: 10px; padding: 1rem; margin-top: 1rem; }
+    .rb-ats-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.8rem; }
+    .rb-ats-score { font-size: 1.5rem; font-weight: 700; color: var(--accent); }
+    .rb-ats-score.good { color: #10b981; }
+    .rb-ats-score.medium { color: #f59e0b; }
+    .rb-ats-score.poor { color: #ef4444; }
+    .rb-ats-tips { font-size: 0.85rem; color: var(--text-secondary); }
+    .rb-ats-tips ul { margin: 0.4rem 0; padding-left: 1.2rem; }
+    .rb-ats-tips li { margin: 0.2rem 0; }
+    .rb-keywords { margin-top: 0.8rem; }
+    .rb-keywords-input { width: 100%; padding: 0.5rem; border-radius: 6px; border: 1px solid var(--glass-border); background: var(--bg-card); color: var(--text-primary); font-size: 0.85rem; }
+    .rb-keyword-list { display: flex; flex-wrap: wrap; gap: 0.3rem; margin-top: 0.5rem; }
+    .rb-keyword { background: var(--accent); color: #fff; padding: 0.25rem 0.6rem; border-radius: 4px; font-size: 0.75rem; display: flex; align-items: center; gap: 0.3rem; }
+    .rb-keyword-remove { cursor: pointer; opacity: 0.8; }
+    .rb-keyword-remove:hover { opacity: 1; }
+    /* Preview */
+    .rb-preview-wrapper { position: sticky; top: 1rem; }
+    .rb-preview-container { background: var(--bg-card); border: 1px solid var(--glass-border); border-radius: var(--border-radius); padding: 1.5rem; max-height: 85vh; overflow-y: auto; position: relative; }
+    .rb-preview-container::-webkit-scrollbar { width: 6px; }
+    .rb-preview-container::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 3px; }
+    .rb-preview { background: #fff; color: #111; padding: 2.5cm 2cm; min-height: 29.7cm; /* A4 height */ font-family: var(--font-family); font-size: var(--font-size-base); line-height: var(--line-height); transform-origin: top center; transition: transform 0.2s ease; }
+    .rb-preview.template-classic { --pv-accent: #1e40af; }
+    .rb-preview.template-modern { --pv-accent: #7c3aed; }
+    .rb-preview.template-minimal { --pv-accent: #059669; }
+    .rb-preview.template-creative { --pv-accent: #dc2626; }
+    .rb-preview.template-executive { --pv-accent: #0891b2; }
+    .rb-preview.template-tech { --pv-accent: #4f46e5; }
+    /* Preview Styles - Classic */
+    .rb-preview .pv-header { border-bottom: 3px solid var(--pv-accent); padding-bottom: 1rem; margin-bottom: 1.5rem; display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; }
+    .rb-preview .pv-photo { width: 100px; height: 100px; border-radius: 50%; background: #eee; overflow: hidden; flex-shrink: 0; }
+    .rb-preview .pv-photo img { width: 100%; height: 100%; object-fit: cover; }
+    .rb-preview .pv-info { flex: 1; }
+    .rb-preview .pv-name { font-size: 1.8rem; font-weight: 700; margin: 0; color: #000; line-height: 1.2; }
+    .rb-preview .pv-title { font-size: 1.15rem; color: var(--pv-accent); margin: 0.4rem 0 0.6rem; font-weight: 500; }
+    .rb-preview .pv-contact { font-size: 0.9rem; color: #444; line-height: 1.7; }
+    .rb-preview .pv-contact-item { display: inline-flex; align-items: center; gap: 0.4rem; margin-right: 1rem; }
+    .rb-preview .pv-contact-item::before { content: ''; display: inline-block; width: 1px; height: 12px; background: #ccc; margin-right: 1rem; }
+    .rb-preview .pv-contact-item:first-child::before { display: none; }
+    .rb-preview .pv-section { margin-bottom: 1.5rem; }
+    .rb-preview .pv-section-title { font-size: 1.1rem; font-weight: 700; color: var(--pv-accent); border-bottom: 2px solid var(--pv-accent); padding-bottom: 0.4rem; margin-bottom: 0.8rem; text-transform: uppercase; letter-spacing: 0.5px; }
+    .rb-preview .pv-summary { font-size: 0.95rem; color: #333; line-height: 1.7; }
+    .rb-preview .pv-item { margin-bottom: 1rem; }
+    .rb-preview .pv-item-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 0.3rem; }
+    .rb-preview .pv-item-title { font-weight: 600; font-size: 1rem; color: #000; }
+    .rb-preview .pv-item-subtitle { font-size: 0.95rem; color: #555; font-weight: 500; }
+    .rb-preview .pv-item-date { font-size: 0.9rem; color: #666; font-style: italic; }
+    .rb-preview .pv-item-desc { font-size: 0.95rem; color: #333; line-height: 1.6; margin-left: 0.5rem; }
+    .rb-preview .pv-item-desc ul { margin: 0.4rem 0; padding-left: 1.3rem; }
+    .rb-preview .pv-item-desc li { margin: 0.25rem 0; }
+    .rb-preview .pv-skills { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+    .rb-preview .pv-skill { background: rgba(99,102,241,0.12); color: var(--pv-accent); padding: 0.35rem 0.8rem; border-radius: 20px; font-size: 0.85rem; font-weight: 500; }
+    .rb-preview .pv-languages { display: flex; flex-wrap: wrap; gap: 0.8rem; }
+    .rb-preview .pv-language { font-size: 0.95rem; }
+    .rb-preview .pv-language-level { color: #666; font-size: 0.85rem; }
+    .rb-preview .pv-cover { margin-top: 2rem; padding-top: 1.5rem; border-top: 2px dashed #ddd; }
+    .rb-preview .pv-cover-title { font-size: 1.1rem; font-weight: 700; color: var(--pv-accent); margin-bottom: 0.8rem; }
+    .rb-preview .pv-cover-text { font-size: 0.95rem; color: #333; line-height: 1.8; white-space: pre-line; }
+    .rb-preview .pv-references { font-size: 0.9rem; color: #444; }
+    .rb-preview .pv-references-toggle { font-size: 0.85rem; color: var(--pv-accent); cursor: pointer; }
+    /* Modal */
+    .rb-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: var(--transition); z-index: 1000; }
+    .rb-modal.open { opacity: 1; pointer-events: auto; }
+    .rb-modal-content { background: var(--bg-card); border: 1px solid var(--glass-border); border-radius: 16px; padding: 1.5rem; width: 90%; max-width: 600px; max-height: 85vh; overflow-y: auto; transform: translateY(20px); transition: var(--transition); }
+    .rb-modal.open .rb-modal-content { transform: translateY(0); }
+    .rb-modal h3 { margin: 0 0 1rem; color: var(--text-primary); font-size: 1.3rem; }
+    .rb-modal-close { position: absolute; top: 1rem; right: 1rem; background: none; border: none; color: var(--text-secondary); font-size: 1.5rem; cursor: pointer; transition: var(--transition); }
+    .rb-modal-close:hover { color: var(--accent); }
+    .rb-modal-btns { display: flex; justify-content: flex-end; gap: 0.8rem; margin-top: 1.5rem; }
+    .rb-modal-btn { padding: 0.7rem 1.2rem; border-radius: 8px; border: none; cursor: pointer; font-weight: 600; transition: var(--transition); }
+    .rb-modal-btn.cancel { background: var(--bg-hover); color: var(--text-primary); }
+    .rb-modal-btn.cancel:hover { background: var(--accent); color: #fff; }
+    .rb-modal-btn.save { background: var(--gradient-main); color: #fff; }
+    .rb-modal-btn.save:hover { box-shadow: 0 4px 12px var(--accent-glow); }
+    /* Toast */
+    .rb-toast { position: fixed; bottom: 20px; right: 20px; background: var(--bg-card); border: 1px solid var(--glass-border); padding: 0.9rem 1.4rem; border-radius: 10px; color: var(--text-primary); box-shadow: var(--shadow-lg); transform: translateY(100px); opacity: 0; transition: all 0.3s ease; z-index: 2000; font-size: 0.9rem; display: flex; align-items: center; gap: 0.6rem; }
+    .rb-toast.show { transform: translateY(0); opacity: 1; }
+    .rb-toast.success { border-left: 4px solid #10b981; }
+    .rb-toast.error { border-left: 4px solid #ef4444; }
+    .rb-toast.info { border-left: 4px solid var(--accent); }
+    /* Tips Panel */
+    .rb-tips { background: var(--bg-hover); border-radius: 10px; padding: 0.9rem; margin-top: 1rem; font-size: 0.85rem; color: var(--text-secondary); }
+    .rb-tips-title { font-weight: 600; color: var(--text-primary); margin-bottom: 0.4rem; display: flex; align-items: center; gap: 0.4rem; }
+    .rb-tips ul { margin: 0.4rem 0; padding-left: 1.2rem; }
+    .rb-tips li { margin: 0.25rem 0; }
+    /* Cover Letter */
+    .rb-cover-section { margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid var(--glass-border); }
+    .rb-cover-toggle { display: flex; align-items: center; gap: 0.5rem; cursor: pointer; font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 0.8rem; }
+    .rb-cover-toggle input { cursor: pointer; }
+    .rb-cover-editor { display: none; }
+    .rb-cover-editor.show { display: block; }
+    /* Responsive */
+    @media(max-width: 600px) {
+      .rb-header { flex-direction: column; align-items: flex-start; }
+      .rb-preview { padding: 1.5cm 1.2cm; font-size: 13px; }
+      .rb-preview .pv-header { flex-direction: column; align-items: center; text-align: center; }
+      .rb-preview .pv-contact-item { display: block; margin: 0.3rem 0; }
+      .rb-preview .pv-contact-item::before { display: none !important; }
+    }
+    /* Print Styles */
+    @media print {
+      body * { visibility: hidden !important; }
+      .rb-preview, .rb-preview * { visibility: visible !important; }
+      .rb-preview { position: absolute; left: 0; top: 0; width: 100%; margin: 0; padding: 2.5cm 2cm; border: none; background: #fff; color: #000; transform: none !important; }
+      .rb-preview .pv-name { color: #000; }
+      .rb-preview .pv-title, .rb-preview .pv-section-title { color: var(--pv-accent) !important; }
+      .rb-preview .pv-contact, .rb-preview .pv-item-subtitle, .rb-preview .pv-item-desc, .rb-preview .pv-summary { color: #333 !important; }
+      .rb-preview .pv-skill { background: rgba(99,102,241,0.1) !important; color: var(--pv-accent) !important; }
+      @page { margin: 0; size: A4; }
+    }
+    /* Utilities */
+    .rb-hidden { display: none !important; }
+    .rb-flex { display: flex; }
+    .rb-items-center { align-items: center; }
+    .rb-justify-between { justify-content: space-between; }
+    .rb-gap-2 { gap: 0.5rem; }
+    .rb-mt-1 { margin-top: 0.5rem; }
+    .rb-mb-1 { margin-bottom: 0.5rem; }
+    .rb-text-center { text-align: center; }
+    .rb-text-right { text-align: right; }
+    .rb-font-bold { font-weight: 600; }
+    .rb-text-accent { color: var(--accent); }
+    .rb-bg-hover { background: var(--bg-hover); }
+    .rb-border { border: 1px solid var(--glass-border); }
+    .rb-rounded { border-radius: 8px; }
+    .rb-p-2 { padding: 0.8rem; }
+    .rb-cursor-pointer { cursor: pointer; }
+    .rb-transition { transition: var(--transition); }
+    .rb-hover-accent:hover { border-color: var(--accent); background: rgba(99,102,241,0.1); }
+  </style>
+
+  <!-- Header -->
+  <div class="rb-header">
+    <h1>📄 Resume Builder Pro</h1>
+    <div class="rb-stats">
+      <div class="rb-progress-ring" title="Completion">
+        <svg viewBox="0 0 48 48"><circle class="bg" cx="24" cy="24" r="20"/><circle class="fill" id="rb-progress" cx="24" cy="24" r="20"/></svg>
+        <span class="rb-progress-text" id="rb-progress-text">0%</span>
+      </div>
+      <div>
+        <div class="rb-completion-text" id="rb-completion">Start building</div>
+        <div style="font-size:0.75rem;color:var(--text-secondary);margin-top:2px" id="rb-section-progress">0/12 sections</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toolbar -->
+  <div class="rb-toolbar">
+    <select class="rb-select" id="rb-template" title="Template">
+      <option value="classic">📘 Classic</option>
+      <option value="modern">🎨 Modern</option>
+      <option value="minimal">✨ Minimal</option>
+      <option value="creative">🎭 Creative</option>
+      <option value="executive">👔 Executive</option>
+      <option value="tech">💻 Tech</option>
+    </select>
+    <input type="color" class="rb-input" id="rb-color" value="#6366f1" title="Accent Color" style="width:42px;padding:0.3rem;cursor:pointer;">
+    <select class="rb-select" id="rb-font" title="Font">
+      <option value="'Segoe UI',system-ui,sans-serif">Segoe UI</option>
+      <option value="Georgia,serif">Georgia</option>
+      <option value="'Courier New',monospace">Courier</option>
+      <option value="Arial,sans-serif">Arial</option>
+      <option value="'Times New Roman',serif">Times New Roman</option>
+    </select>
+    <select class="rb-select" id="rb-fontsize" title="Font Size">
+      <option value="13px">Small</option>
+      <option value="14px" selected>Normal</option>
+      <option value="15px">Large</option>
+    </select>
+    <div class="rb-zoom">
+      <span>🔍</span>
+      <input type="range" id="rb-zoom" min="50" max="200" value="100" style="width:80px;">
+      <span id="rb-zoom-val">100%</span>
+    </div>
+    <button class="rb-btn" id="rb-undo" title="Undo (Ctrl+Z)">↩️</button>
+    <button class="rb-btn" id="rb-redo" title="Redo (Ctrl+Y)">↪️</button>
+    <button class="rb-btn" id="rb-save" title="Save (Ctrl+S)">💾</button>
+    <button class="rb-btn" id="rb-load" title="Load">📂</button>
+    <button class="rb-btn" id="rb-export" title="Export (Ctrl+E)">📤</button>
+    <button class="rb-btn primary" id="rb-print" title="Print/PDF (Ctrl+P)">🖨️ PDF</button>
+  </div>
+
+  <!-- Main Content -->
+  <div class="rb-container">
+    <!-- Editor Panel -->
+    <div class="rb-editor" id="rb-editor">
+      
+      <!-- Personal Info -->
+      <div class="rb-section" data-section="personal">
+        <div class="rb-section-header">
+          <span class="rb-section-title">👤 Personal Information</span>
+          <button class="rb-section-toggle" title="Collapse">▼</button>
+        </div>
+        <div class="rb-section-content">
+          <div class="rb-photo-upload rb-mb-1">
+            <div class="rb-photo-preview" id="rb-photo-preview">👤</div>
+            <div>
+              <label class="rb-photo-label" for="rb-photo">📷 Upload Photo</label>
+              <input type="file" class="rb-photo-input" id="rb-photo" accept="image/*">
+              <div style="font-size:0.75rem;color:var(--text-secondary);margin-top:0.3rem">Optional • Square recommended</div>
+            </div>
+          </div>
+          <div class="rb-row">
+            <div>
+              <label class="rb-label">Full Name *</label>
+              <input class="rb-input" id="rb-name" placeholder="John Doe" maxlength="50">
+              <div class="rb-counter"><span id="rb-name-count">0</span>/50</div>
+            </div>
+            <div>
+              <label class="rb-label">Professional Title *</label>
+              <input class="rb-input" id="rb-title" placeholder="Software Engineer" maxlength="60">
+              <div class="rb-counter"><span id="rb-title-count">0</span>/60</div>
+            </div>
+          </div>
+          <div class="rb-row">
+            <div>
+              <label class="rb-label">Email *</label>
+              <input class="rb-input" id="rb-email" type="email" placeholder="john@email.com">
+            </div>
+            <div>
+              <label class="rb-label">Phone</label>
+              <input class="rb-input" id="rb-phone" placeholder="+1 234 567 890">
+            </div>
+          </div>
+          <label class="rb-label">Location</label>
+          <input class="rb-input" id="rb-location" placeholder="New York, USA" style="margin-bottom:0.8rem;">
+          <div class="rb-row">
+            <div>
+              <label class="rb-label">LinkedIn</label>
+              <input class="rb-input" id="rb-linkedin" placeholder="linkedin.com/in/john">
+            </div>
+            <div>
+              <label class="rb-label">GitHub/Portfolio</label>
+              <input class="rb-input" id="rb-portfolio" placeholder="github.com/john">
+            </div>
+          </div>
+          <label class="rb-label" style="margin-top:0.8rem">Website</label>
+          <input class="rb-input" id="rb-website" placeholder="johndoe.com">
+        </div>
+      </div>
+
+      <!-- Summary -->
+      <div class="rb-section" data-section="summary">
+        <div class="rb-section-header">
+          <span class="rb-section-title">📝 Professional Summary</span>
+          <button class="rb-section-toggle" title="Collapse">▼</button>
+        </div>
+        <div class="rb-section-content">
+          <textarea class="rb-textarea" id="rb-summary" placeholder="Write a compelling 3-4 line summary highlighting your key strengths, experience, and career goals..." maxlength="500"></textarea>
+          <div class="rb-counter"><span id="rb-summary-count">0</span>/500 characters</div>
+          <div class="rb-tips">
+            <div class="rb-tips-title">💡 Pro Tips</div>
+            <ul>
+              <li>Start with your current role/years of experience</li>
+              <li>Include 2-3 key achievements or skills</li>
+              <li>Mention your career objective</li>
+              <li>Keep it concise and impactful</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- Experience -->
+      <div class="rb-section" data-section="experience">
+        <div class="rb-section-header">
+          <span class="rb-section-title">💼 Work Experience</span>
+          <button class="rb-section-toggle" title="Collapse">▼</button>
+        </div>
+        <div class="rb-section-content">
+          <div id="rb-exp-list"></div>
+          <button class="rb-add-btn" id="rb-add-exp">➕ Add Experience</button>
+          <div class="rb-tips rb-mt-1">
+            <div class="rb-tips-title">📋 Format Guide</div>
+            <ul>
+              <li>Use bullet points for responsibilities</li>
+              <li>Start each point with action verbs</li>
+              <li>Quantify achievements when possible</li>
+              <li>List in reverse chronological order</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- Education -->
+      <div class="rb-section" data-section="education">
+        <div class="rb-section-header">
+          <span class="rb-section-title">🎓 Education</span>
+          <button class="rb-section-toggle" title="Collapse">▼</button>
+        </div>
+        <div class="rb-section-content">
+          <div id="rb-edu-list"></div>
+          <button class="rb-add-btn" id="rb-add-edu">➕ Add Education</button>
+        </div>
+      </div>
+
+      <!-- Projects -->
+      <div class="rb-section" data-section="projects">
+        <div class="rb-section-header">
+          <span class="rb-section-title">🚀 Projects</span>
+          <button class="rb-section-toggle" title="Collapse">▼</button>
+        </div>
+        <div class="rb-section-content">
+          <div id="rb-proj-list"></div>
+          <button class="rb-add-btn" id="rb-add-proj">➕ Add Project</button>
+        </div>
+      </div>
+
+      <!-- Skills -->
+      <div class="rb-section" data-section="skills">
+        <div class="rb-section-header">
+          <span class="rb-section-title">🛠️ Skills</span>
+          <button class="rb-section-toggle" title="Collapse">▼</button>
+        </div>
+        <div class="rb-section-content">
+          <div class="rb-skill-category">
+            <div class="rb-skill-category-title">Technical Skills</div>
+            <div class="rb-flex rb-gap-2">
+              <input class="rb-input" id="rb-skill-tech" placeholder="Add skill + Enter" style="flex:1">
+            </div>
+            <div class="rb-skills-container" id="rb-skills-tech"></div>
+          </div>
+          <div class="rb-skill-category">
+            <div class="rb-skill-category-title">Soft Skills</div>
+            <input class="rb-input" id="rb-skill-soft" placeholder="Add skill + Enter" style="margin-bottom:0.4rem">
+            <div class="rb-skills-container" id="rb-skills-soft"></div>
+          </div>
+          <div class="rb-skill-category">
+            <div class="rb-skill-category-title">Languages</div>
+            <div id="rb-languages-list"></div>
+            <button class="rb-add-btn" id="rb-add-lang" style="margin-top:0.5rem">➕ Add Language</button>
+          </div>
+          <div class="rb-tips rb-mt-1">
+            <div class="rb-tips-title">🎯 Skill Tips</div>
+            <ul>
+              <li>Group related skills together</li>
+              <li>Include proficiency level for languages</li>
+              <li>Prioritize skills relevant to target job</li>
+              <li>Use industry-standard terminology</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- Certifications -->
+      <div class="rb-section" data-section="certifications">
+        <div class="rb-section-header">
+          <span class="rb-section-title">🏆 Certifications</span>
+          <button class="rb-section-toggle" title="Collapse">▼</button>
+        </div>
+        <div class="rb-section-content">
+          <div id="rb-cert-list"></div>
+          <button class="rb-add-btn" id="rb-add-cert">➕ Add Certification</button>
+        </div>
+      </div>
+
+      <!-- ATS Panel -->
+      <div class="rb-ats-panel">
+        <div class="rb-ats-header">
+          <span>🎯 ATS Optimization</span>
+          <span class="rb-ats-score" id="rb-ats-score">--</span>
+        </div>
+        <div class="rb-ats-tips" id="rb-ats-tips">Add more details to improve your ATS score</div>
+        <div class="rb-keywords">
+          <div class="rb-label">Keywords (Enter + Add)</div>
+          <input class="rb-keywords-input" id="rb-keywords" placeholder="e.g., React, Project Management, Python...">
+          <div class="rb-keyword-list" id="rb-keyword-list"></div>
+        </div>
+      </div>
+
+      <!-- Cover Letter -->
+      <div class="rb-cover-section">
+        <label class="rb-cover-toggle">
+          <input type="checkbox" id="rb-cover-toggle"> 📬 Include Cover Letter
+        </label>
+        <div class="rb-cover-editor" id="rb-cover-editor">
+          <label class="rb-label">Cover Letter Content</label>
+          <textarea class="rb-textarea" id="rb-cover" placeholder="Dear Hiring Manager,
+
+I am writing to express my interest in the [Position] role at [Company]..." style="min-height:180px;" maxlength="1500"></textarea>
+          <div class="rb-counter"><span id="rb-cover-count">0</span>/1500 characters</div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Preview Panel -->
+    <div class="rb-preview-wrapper">
+      <div class="rb-preview-container">
+        <div class="rb-preview template-classic" id="rb-preview" style="font-family:'Segoe UI',system-ui,sans-serif;font-size:14px;">
+          <!-- Header -->
+          <div class="pv-header">
+            <div class="pv-photo" id="pv-photo" style="display:none"></div>
+            <div class="pv-info">
+              <h1 class="pv-name" id="pv-name">Your Name</h1>
+              <div class="pv-title" id="pv-title">Professional Title</div>
+              <div class="pv-contact" id="pv-contact">
+                <span class="pv-contact-item">📧 <span id="pv-email">email@example.com</span></span>
+                <span class="pv-contact-item">📱 <span id="pv-phone">+1 234 567 890</span></span>
+                <span class="pv-contact-item">📍 <span id="pv-location">City, Country</span></span>
+                <span class="pv-contact-item">🔗 <span id="pv-linkedin">linkedin.com/in/you</span></span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Summary -->
+          <div class="pv-section">
+            <div class="pv-section-title">Professional Summary</div>
+            <p class="pv-summary" id="pv-summary">Your compelling professional summary will appear here. Highlight your key strengths, experience, and career objectives in 3-4 impactful lines.</p>
+          </div>
+
+          <!-- Experience -->
+          <div class="pv-section">
+            <div class="pv-section-title">Work Experience</div>
+            <div id="pv-exp"></div>
+          </div>
+
+          <!-- Education -->
+          <div class="pv-section">
+            <div class="pv-section-title">Education</div>
+            <div id="pv-edu"></div>
+          </div>
+
+          <!-- Projects -->
+          <div class="pv-section">
+            <div class="pv-section-title">Projects</div>
+            <div id="pv-proj"></div>
+          </div>
+
+          <!-- Skills -->
+          <div class="pv-section">
+            <div class="pv-section-title">Skills</div>
+            <div class="pv-skills" id="pv-skills"></div>
+          </div>
+
+          <!-- Certifications -->
+          <div class="pv-section">
+            <div class="pv-section-title">Certifications</div>
+            <div id="pv-cert"></div>
+          </div>
+
+          <!-- Languages -->
+          <div class="pv-section" id="pv-languages-section">
+            <div class="pv-section-title">Languages</div>
+            <div class="pv-languages" id="pv-languages"></div>
+          </div>
+
+          <!-- Cover Letter -->
+          <div class="pv-cover" id="pv-cover-section" style="display:none;">
+            <div class="pv-cover-title">Cover Letter</div>
+            <div class="pv-cover-text" id="pv-cover"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Export Modal -->
+  <div class="rb-modal" id="rb-export-modal">
+    <div class="rb-modal-content">
+      <button class="rb-modal-close" id="rb-export-close">×</button>
+      <h3>📤 Export Resume</h3>
+      <p style="color:var(--text-secondary);margin-bottom:1.2rem">Choose your preferred format:</p>
+      <div style="display:grid;gap:0.8rem">
+        <button class="rb-btn" id="rb-export-pdf" style="justify-content:flex-start;font-size:1rem">🖨️ Print / Save as PDF</button>
+        <button class="rb-btn" id="rb-export-html" style="justify-content:flex-start;font-size:1rem">🌐 Export as HTML File</button>
+        <button class="rb-btn" id="rb-export-txt" style="justify-content:flex-start;font-size:1rem">📄 Export as Plain Text</button>
+        <button class="rb-btn" id="rb-export-json" style="justify-content:flex-start;font-size:1rem">💾 Backup as JSON</button>
+        <button class="rb-btn" id="rb-export-word" style="justify-content:flex-start;font-size:1rem">📝 Word-Compatible HTML</button>
+      </div>
+      <div class="rb-modal-btns">
+        <button class="rb-modal-btn cancel" id="rb-export-cancel">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Load Modal -->
+  <div class="rb-modal" id="rb-load-modal">
+    <div class="rb-modal-content">
+      <button class="rb-modal-close" id="rb-load-close">×</button>
+      <h3>📂 Load Resume</h3>
+      <p style="color:var(--text-secondary);margin-bottom:1rem">Select a saved resume or import from file:</p>
+      <div id="rb-saved-list" style="max-height:200px;overflow-y:auto;margin-bottom:1rem"></div>
+      <label class="rb-btn" style="justify-content:center;cursor:pointer;margin-bottom:1rem">
+        📥 Import from JSON
+        <input type="file" id="rb-import-file" accept=".json" style="display:none">
+      </label>
+      <div class="rb-modal-btns">
+        <button class="rb-modal-btn cancel" id="rb-load-cancel">Cancel</button>
+        <button class="rb-modal-btn save" id="rb-load-confirm">Load Selected</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Save Modal -->
+  <div class="rb-modal" id="rb-save-modal">
+    <div class="rb-modal-content">
+      <button class="rb-modal-close" id="rb-save-close">×</button>
+      <h3>💾 Save Resume</h3>
+      <label class="rb-label">Resume Name</label>
+      <input class="rb-input" id="rb-save-name" placeholder="My Resume" style="margin-bottom:1rem">
+      <div class="rb-modal-btns">
+        <button class="rb-modal-btn cancel" id="rb-save-cancel">Cancel</button>
+        <button class="rb-modal-btn save" id="rb-save-confirm">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="rb-toast" id="rb-toast">
+    <span id="rb-toast-icon">✅</span>
+    <span id="rb-toast-msg">Action completed</span>
+  </div>
+
+  <script>
+    (function() {
+      // ===== CONFIG =====
+      const CONFIG = {
+        STORAGE_KEY: 'resume_builder_ultimate_v1',
+        AUTOSAVE_INTERVAL: 30000,
+        MAX_HISTORY: 20,
+        ATS_WEIGHTS: { name: 10, title: 10, contact: 10, summary: 15, experience: 20, education: 10, skills: 15, keywords: 10 }
+      };
+
+      // ===== STATE =====
+      let state = {
+        personal: { name: '', title: '', email: '', phone: '', location: '', linkedin: '', portfolio: '', website: '', photo: null },
+        summary: '',
+        experience: [],
+        education: [],
+        projects: [],
+        skills: { technical: [], soft: [], languages: [] },
+        certifications: [],
+        keywords: [],
+        coverLetter: '',
+        settings: { template: 'classic', color: '#6366f1', font: "'Segoe UI',system-ui,sans-serif", fontSize: '14px', lineHeight: '1.6' },
+        meta: { lastSaved: null, version: 1 }
+      };
+
+      let history = [], historyIndex = -1, autoSaveTimer = null, selectedSaveName = null;
+
+      // ===== DOM ELEMENTS =====
+      const els = {
+        // Inputs
+        photo: document.getElementById('rb-photo'),
+        photoPreview: document.getElementById('rb-photo-preview'),
+        name: document.getElementById('rb-name'),
+        title: document.getElementById('rb-title'),
+        email: document.getElementById('rb-email'),
+        phone: document.getElementById('rb-phone'),
+        location: document.getElementById('rb-location'),
+        linkedin: document.getElementById('rb-linkedin'),
+        portfolio: document.getElementById('rb-portfolio'),
+        website: document.getElementById('rb-website'),
+        summary: document.getElementById('rb-summary'),
+        // Skills
+        skillTech: document.getElementById('rb-skill-tech'),
+        skillSoft: document.getElementById('rb-skill-soft'),
+        skillsTech: document.getElementById('rb-skills-tech'),
+        skillsSoft: document.getElementById('rb-skills-soft'),
+        languagesList: document.getElementById('rb-languages-list'),
+        addLang: document.getElementById('rb-add-lang'),
+        // Keywords
+        keywords: document.getElementById('rb-keywords'),
+        keywordList: document.getElementById('rb-keyword-list'),
+        // Cover
+        coverToggle: document.getElementById('rb-cover-toggle'),
+        coverEditor: document.getElementById('rb-cover-editor'),
+        cover: document.getElementById('rb-cover'),
+        // Preview
+        preview: document.getElementById('rb-preview'),
+        pvPhoto: document.getElementById('pv-photo'),
+        pvName: document.getElementById('pv-name'),
+        pvTitle: document.getElementById('pv-title'),
+        pvContact: document.getElementById('pv-contact'),
+        pvEmail: document.getElementById('pv-email'),
+        pvPhone: document.getElementById('pv-phone'),
+        pvLocation: document.getElementById('pv-location'),
+        pvLinkedin: document.getElementById('pv-linkedin'),
+        pvSummary: document.getElementById('pv-summary'),
+        pvExp: document.getElementById('pv-exp'),
+        pvEdu: document.getElementById('pv-edu'),
+        pvProj: document.getElementById('pv-proj'),
+        pvSkills: document.getElementById('pv-skills'),
+        pvCert: document.getElementById('pv-cert'),
+        pvLanguages: document.getElementById('pv-languages'),
+        pvLanguagesSection: document.getElementById('pv-languages-section'),
+        pvCoverSection: document.getElementById('pv-cover-section'),
+        pvCover: document.getElementById('pv-cover'),
+        // Controls
+        template: document.getElementById('rb-template'),
+        color: document.getElementById('rb-color'),
+        font: document.getElementById('rb-font'),
+        fontSize: document.getElementById('rb-fontsize'),
+        zoom: document.getElementById('rb-zoom'),
+        zoomVal: document.getElementById('rb-zoom-val'),
+        undo: document.getElementById('rb-undo'),
+        redo: document.getElementById('rb-redo'),
+        save: document.getElementById('rb-save'),
+        load: document.getElementById('rb-load'),
+        export: document.getElementById('rb-export'),
+        print: document.getElementById('rb-print'),
+        // Modals
+        exportModal: document.getElementById('rb-export-modal'),
+        exportClose: document.getElementById('rb-export-close'),
+        exportCancel: document.getElementById('rb-export-cancel'),
+        exportPdf: document.getElementById('rb-export-pdf'),
+        exportHtml: document.getElementById('rb-export-html'),
+        exportTxt: document.getElementById('rb-export-txt'),
+        exportJson: document.getElementById('rb-export-json'),
+        exportWord: document.getElementById('rb-export-word'),
+        loadModal: document.getElementById('rb-load-modal'),
+        loadClose: document.getElementById('rb-load-close'),
+        loadCancel: document.getElementById('rb-load-cancel'),
+        loadConfirm: document.getElementById('rb-load-confirm'),
+        savedList: document.getElementById('rb-saved-list'),
+        importFile: document.getElementById('rb-import-file'),
+        saveModal: document.getElementById('rb-save-modal'),
+        saveClose: document.getElementById('rb-save-close'),
+        saveCancel: document.getElementById('rb-save-cancel'),
+        saveConfirm: document.getElementById('rb-save-confirm'),
+        saveName: document.getElementById('rb-save-name'),
+        // Progress
+        progress: document.getElementById('rb-progress'),
+        progressText: document.getElementById('rb-progress-text'),
+        completion: document.getElementById('rb-completion'),
+        sectionProgress: document.getElementById('rb-section-progress'),
+        atsScore: document.getElementById('rb-ats-score'),
+        atsTips: document.getElementById('rb-ats-tips'),
+        // Counters
+        nameCount: document.getElementById('rb-name-count'),
+        titleCount: document.getElementById('rb-title-count'),
+        summaryCount: document.getElementById('rb-summary-count'),
+        coverCount: document.getElementById('rb-cover-count'),
+        // Toast
+        toast: document.getElementById('rb-toast'),
+        toastIcon: document.getElementById('rb-toast-icon'),
+        toastMsg: document.getElementById('rb-toast-msg')
+      };
+
+      // Section configs
+      const sections = {
+        exp: { list: document.getElementById('rb-exp-list'), preview: els.pvExp, key: 'experience', fields: ['company', 'role', 'location', 'start', 'end', 'current', 'desc'] },
+        edu: { list: document.getElementById('rb-edu-list'), preview: els.pvEdu, key: 'education', fields: ['institution', 'degree', 'field', 'start', 'end', 'gpa', 'desc'] },
+        proj: { list: document.getElementById('rb-proj-list'), preview: els.pvProj, key: 'projects', fields: ['name', 'link', 'tech', 'desc'] },
+        cert: { list: document.getElementById('rb-cert-list'), preview: els.pvCert, key: 'certifications', fields: ['name', 'issuer', 'date', 'credential'] }
+      };
+
+      // ===== INIT =====
+      const init = () => {
+        loadFromStorage();
+        bindInputs();
+        bindSectionButtons();
+        bindControls();
+        bindExport();
+        bindModals();
+        bindKeyboard();
+        setupAutoSave();
+        renderAll();
+        updateProgress();
+        calculateATS();
+        showToast('👋 Welcome! Start building your professional resume', 'info');
+      };
+
+      // ===== UTILS =====
+      const showToast = (msg, type = 'success') => {
+        els.toastIcon.textContent = type === 'success' ? '✅' : type === 'error' ? '❌' : 'ℹ️';
+        els.toastMsg.textContent = msg;
+        els.toast.className = `rb-toast ${type} show`;
+        setTimeout(() => els.toast.classList.remove('show'), 3000);
+      };
+
+      const saveToHistory = () => {
+        if (historyIndex < CONFIG.MAX_HISTORY - 1) history = history.slice(0, historyIndex + 1);
+        history.push(JSON.parse(JSON.stringify(state)));
+        if (history.length > CONFIG.MAX_HISTORY) history.shift();
+        else historyIndex++;
+        updateUndoRedo();
+      };
+
+      const updateUndoRedo = () => {
+        els.undo.disabled = historyIndex <= 0;
+        els.redo.disabled = historyIndex >= history.length - 1;
+      };
+
+      const undo = () => { if (historyIndex > 0) { historyIndex--; state = JSON.parse(JSON.stringify(history[historyIndex])); renderAll(); updateUndoRedo(); showToast('↩️ Undone'); } };
+      const redo = () => { if (historyIndex < history.length - 1) { historyIndex++; state = JSON.parse(JSON.stringify(history[historyIndex])); renderAll(); updateUndoRedo(); showToast('↪️ Redone'); } };
+
+      const saveToStorage = (name = null) => {
+        const key = name ? `${CONFIG.STORAGE_KEY}_${name.replace(/\s+/g, '_')}` : CONFIG.STORAGE_KEY;
+        state.meta.lastSaved = new Date().toISOString();
+        localStorage.setItem(key, JSON.stringify(state));
+        if (name) {
+          const saves = JSON.parse(localStorage.getItem(`${CONFIG.STORAGE_KEY}_list`) || '[]');
+          if (!saves.includes(name)) { saves.push(name); localStorage.setItem(`${CONFIG.STORAGE_KEY}_list`, JSON.stringify(saves)); }
+        }
+        showToast('💾 Saved successfully');
+      };
+
+      const loadFromStorage = (name = null) => {
+        try {
+          const key = name ? `${CONFIG.STORAGE_KEY}_${name.replace(/\s+/g, '_')}` : CONFIG.STORAGE_KEY;
+          const saved = localStorage.getItem(key);
+          if (saved) {
+            const parsed = JSON.parse(saved);
+            state = { ...state, ...parsed };
+            applySettings();
+            return true;
+          }
+        } catch (e) { console.error('Load error:', e); }
+        return false;
+      };
+
+      const applySettings = () => {
+        const s = state.settings;
+        els.preview.className = `rb-preview template-${s.template}`;
+        els.preview.style.setProperty('--pv-accent', s.color);
+        els.preview.style.fontFamily = s.font;
+        els.preview.style.fontSize = s.fontSize;
+        els.preview.style.lineHeight = s.lineHeight;
+        document.documentElement.style.setProperty('--primary-color', s.color);
+        document.documentElement.style.setProperty('--font-family', s.font);
+        document.documentElement.style.setProperty('--font-size-base', s.fontSize);
+        document.documentElement.style.setProperty('--line-height', s.lineHeight);
+        els.template.value = s.template;
+        els.color.value = s.color;
+        els.font.value = s.font;
+        els.fontSize.value = s.fontSize;
+      };
+
+      const setupAutoSave = () => {
+        autoSaveTimer = setInterval(() => {
+          if (JSON.stringify(state) !== JSON.stringify(history[historyIndex] || {})) {
+            saveToHistory();
+            saveToStorage();
+          }
+        }, CONFIG.AUTOSAVE_INTERVAL);
+      };
+
+      // ===== BINDINGS =====
+      const bindInputs = () => {
+        // Personal info with counters
+        const personalFields = ['name', 'title', 'email', 'phone', 'location', 'linkedin', 'portfolio', 'website'];
+        personalFields.forEach(field => {
+          const input = els[field];
+          if (!input) return;
+          input.addEventListener('input', (e) => {
+            state.personal[field] = e.target.value;
+            if (['name', 'title'].includes(field)) {
+              const countEl = els[`${field}Count`];
+              if (countEl) countEl.textContent = e.target.value.length;
+            }
+            renderPersonal();
+            updateProgress();
+            calculateATS();
+          });
+        });
+
+        // Photo upload
+        els.photo.addEventListener('change', (e) => {
+          const file = e.target.files[0];
+          if (file && file.type.startsWith('image/')) {
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+              state.personal.photo = ev.target.result;
+              renderPhoto();
+              showToast('📷 Photo uploaded');
+            };
+            reader.readAsDataURL(file);
+          }
+        });
+
+        // Summary with counter
+        els.summary.addEventListener('input', (e) => {
+          state.summary = e.target.value;
+          els.summaryCount.textContent = e.target.value.length;
+          els.pvSummary.textContent = e.target.value || 'Your compelling professional summary will appear here...';
+          updateProgress();
+          calculateATS();
+        });
+
+        // Skills
+        const addSkill = (type, inputEl, containerEl) => {
+          inputEl.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && inputEl.value.trim()) {
+              e.preventDefault();
+              const skill = inputEl.value.trim();
+              if (!state.skills[type].includes(skill)) {
+                state.skills[type].push(skill);
+                renderSkills();
+                updateProgress();
+                calculateATS();
+              }
+              inputEl.value = '';
+            }
+          });
+        };
+        addSkill('technical', els.skillTech, els.skillsTech);
+        addSkill('soft', els.skillSoft, els.skillsSoft);
+
+        // Languages
+        els.addLang.addEventListener('click', () => {
+          const id = Date.now().toString(36);
+          state.skills.languages.push({ id, name: '', level: 'Intermediate' });
+          renderLanguages();
+        });
+
+        // Keywords
+        els.keywords.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter' && els.keywords.value.trim()) {
+            e.preventDefault();
+            const kw = els.keywords.value.trim();
+            if (!state.keywords.includes(kw)) {
+              state.keywords.push(kw);
+              renderKeywords();
+              calculateATS();
+            }
+            els.keywords.value = '';
+          }
+        });
+
+        // Cover letter
+        els.coverToggle.addEventListener('change', (e) => {
+          els.coverEditor.classList.toggle('show', e.target.checked);
+          els.pvCoverSection.style.display = e.target.checked ? 'block' : 'none';
+        });
+        els.cover.addEventListener('input', (e) => {
+          state.coverLetter = e.target.value;
+          els.pvCover.textContent = e.target.value;
+          els.coverCount.textContent = e.target.value.length;
+        });
+      };
+
+      const bindSectionButtons = () => {
+        // Section collapse
+        document.querySelectorAll('.rb-section-toggle').forEach(btn => {
+          btn.addEventListener('click', () => {
+            btn.closest('.rb-section').classList.toggle('collapsed');
+          });
+        });
+
+        // Dynamic sections
+        Object.entries(sections).forEach(([key, sec]) => {
+          document.getElementById(`rb-add-${key}`).addEventListener('click', () => addItem(key));
+        });
+
+        // Language level dots
+        document.addEventListener('click', (e) => {
+          if (e.target.classList.contains('rb-skill-dot')) {
+            const level = parseInt(e.target.dataset.level);
+            const langId = e.target.closest('[data-lang-id]').dataset.langId;
+            const lang = state.skills.languages.find(l => l.id === langId);
+            if (lang) { lang.level = ['Beginner', 'Intermediate', 'Advanced', 'Fluent', 'Native'][level - 1]; renderLanguages(); }
+          }
+        });
+      };
+
+      const bindControls = () => {
+        // Template & styling
+        els.template.addEventListener('change', (e) => { state.settings.template = e.target.value; applySettings(); });
+        els.color.addEventListener('input', (e) => { state.settings.color = e.target.value; applySettings(); });
+        els.font.addEventListener('change', (e) => { state.settings.font = e.target.value; applySettings(); });
+        els.fontSize.addEventListener('change', (e) => { state.settings.fontSize = e.target.value; applySettings(); });
+        
+        // Zoom
+        els.zoom.addEventListener('input', (e) => {
+          const val = e.target.value;
+          els.preview.style.transform = `scale(${val/100})`;
+          els.zoomVal.textContent = `${val}%`;
+        });
+
+        // Undo/Redo
+        els.undo.addEventListener('click', undo);
+        els.redo.addEventListener('click', redo);
+
+        // Save/Load
+        els.save.addEventListener('click', () => { els.saveName.value = `Resume ${new Date().toLocaleDateString()}`; els.saveModal.classList.add('open'); });
+        els.saveConfirm.addEventListener('click', () => { saveToStorage(els.saveName.value.trim() || 'My_Resume'); els.saveModal.classList.remove('open'); });
+        els.load.addEventListener('click', () => { renderSavedList(); els.loadModal.classList.add('open'); });
+        els.loadConfirm.addEventListener('click', () => { if (selectedSaveName && loadFromStorage(selectedSaveName)) { renderAll(); els.loadModal.classList.remove('open'); showToast('📂 Loaded'); } });
+        els.importFile.addEventListener('change', (e) => {
+          const file = e.target.files[0];
+          if (file) {
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+              try {
+                const imported = JSON.parse(ev.target.result);
+                state = { ...state, ...imported };
+                applySettings();
+                renderAll();
+                els.loadModal.classList.remove('open');
+                showToast('📥 Imported successfully');
+              } catch { showToast('❌ Invalid file', 'error'); }
+            };
+            reader.readAsText(file);
+          }
+        });
+      };
+
+      const bindExport = () => {
+        els.export.addEventListener('click', () => els.exportModal.classList.add('open'));
+        els.exportClose.addEventListener('click', () => els.exportModal.classList.remove('open'));
+        els.exportCancel.addEventListener('click', () => els.exportModal.classList.remove('open'));
+        [els.exportClose, els.exportCancel].forEach(btn => btn.addEventListener('click', () => els.exportModal.classList.remove('open')));
+        els.exportModal.addEventListener('click', (e) => { if (e.target === els.exportModal) els.exportModal.classList.remove('open'); });
+
+        els.exportPdf.addEventListener('click', () => { els.exportModal.classList.remove('open'); setTimeout(() => window.print(), 100); });
+        
+        els.exportHtml.addEventListener('click', () => {
+          const html = generateExportHTML();
+          downloadFile(html, 'resume.html', 'text/html');
+          els.exportModal.classList.remove('open');
+          showToast('🌐 HTML exported');
+        });
+
+        els.exportTxt.addEventListener('click', () => {
+          const txt = generatePlainText();
+          downloadFile(txt, 'resume.txt', 'text/plain');
+          els.exportModal.classList.remove('open');
+          showToast('📄 Text exported');
+        });
+
+        els.exportJson.addEventListener('click', () => {
+          downloadFile(JSON.stringify(state, null, 2), 'resume_backup.json', 'application/json');
+          els.exportModal.classList.remove('open');
+          showToast('💾 JSON backup downloaded');
+        });
+
+        els.exportWord.addEventListener('click', () => {
+          const html = generateWordHTML();
+          downloadFile(html, 'resume.doc.html', 'text/html');
+          els.exportModal.classList.remove('open');
+          showToast('📝 Word-compatible HTML exported');
+        });
+
+        els.print.addEventListener('click', () => setTimeout(() => window.print(), 100));
+      };
+
+      const bindModals = () => {
+        [els.saveClose, els.saveCancel].forEach(btn => btn.addEventListener('click', () => els.saveModal.classList.remove('open')));
+        [els.loadClose, els.loadCancel].forEach(btn => btn.addEventListener('click', () => els.loadModal.classList.remove('open')));
+        [els.saveModal, els.loadModal].forEach(modal => modal.addEventListener('click', (e) => { if (e.target === modal) modal.classList.remove('open'); }));
+      };
+
+      const bindKeyboard = () => {
+        document.addEventListener('keydown', (e) => {
+          if (['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement.tagName) && !e.ctrlKey && !e.metaKey) return;
+          if ((e.ctrlKey || e.metaKey) && e.key === 'z') { e.preventDefault(); undo(); }
+          else if ((e.ctrlKey || e.metaKey) && e.key === 'y') { e.preventDefault(); redo(); }
+          else if ((e.ctrlKey || e.metaKey) && e.key === 's') { e.preventDefault(); saveToStorage(); }
+          else if ((e.ctrlKey || e.metaKey) && e.key === 'p') { e.preventDefault(); window.print(); }
+          else if ((e.ctrlKey || e.metaKey) && e.key === 'e') { e.preventDefault(); els.exportModal.classList.add('open'); }
+        });
+      };
+
+      // ===== RENDER FUNCTIONS =====
+      const renderAll = () => {
+        renderPersonal();
+        renderPhoto();
+        Object.keys(sections).forEach(key => renderSection(key));
+        renderSkills();
+        renderLanguages();
+        renderKeywords();
+        applySettings();
+        updateUndoRedo();
+      };
+
+      const renderPersonal = () => {
+        const p = state.personal;
+        els.pvName.textContent = p.name || 'Your Name';
+        els.pvTitle.textContent = p.title || 'Professional Title';
+        els.pvEmail.textContent = p.email || 'email@example.com';
+        els.pvPhone.textContent = p.phone || '+1 234 567 890';
+        els.pvLocation.textContent = p.location || 'City, Country';
+        els.pvLinkedin.textContent = p.linkedin || 'linkedin.com/in/you';
+      };
+
+      const renderPhoto = () => {
+        if (state.personal.photo) {
+          els.photoPreview.innerHTML = `<img src="${state.personal.photo}" alt="Photo">`;
+          els.pvPhoto.innerHTML = `<img src="${state.personal.photo}" alt="Photo">`;
+          els.pvPhoto.style.display = 'block';
+        } else {
+          els.photoPreview.innerHTML = '👤';
+          els.pvPhoto.style.display = 'none';
+        }
+      };
+
+      const renderSection = (key) => {
+        const sec = sections[key];
+        const items = state[sec.key];
+        sec.list.innerHTML = '';
+        
+        items.forEach((item, idx) => {
+          const div = document.createElement('div');
+          div.className = 'rb-item';
+          div.dataset.id = item.id;
+          
+          let fields = '';
+          sec.fields.forEach(field => {
+            if (field === 'desc') {
+              fields += `<textarea class="rb-textarea" data-field="${field}" placeholder="Description / Achievements" style="min-height:60px;margin-top:0.5rem">${item[field]||''}</textarea>`;
+            } else if (field === 'current') {
+              fields += `<label class="rb-flex rb-items-center rb-gap-2 rb-mt-1"><input type="checkbox" data-field="${field}" ${item[field]?'checked':''}> Current</label>`;
+            } else if (['start', 'end', 'date'].includes(field)) {
+              fields += `<input class="rb-input" type="month" data-field="${field}" value="${item[field]||''}" style="margin-bottom:0.5rem">`;
+            } else {
+              const placeholder = { company:'Company', role:'Job Title', institution:'School', degree:'Degree', name:'Project Name' }[field] || field;
+              fields += `<input class="rb-input" data-field="${field}" placeholder="${placeholder}" value="${item[field]||''}" style="margin-bottom:0.5rem">`;
+            }
+          });
+
+          div.innerHTML = `
+            <div class="rb-item-header">
+              <div>
+                <div class="rb-item-title">${item[sec.fields[0]] || 'Untitled'}</div>
+                <div class="rb-item-subtitle">${item[sec.fields[1]] || ''}</div>
+              </div>
+              <div class="rb-item-actions">
+                <button class="rb-icon-btn drag" data-action="drag" title="Drag to reorder">⋮⋮</button>
+                <button class="rb-icon-btn" data-action="up" data-idx="${idx}" title="Move Up">↑</button>
+                <button class="rb-icon-btn" data-action="down" data-idx="${idx}" title="Move Down">↓</button>
+                <button class="rb-icon-btn" data-action="duplicate" data-id="${item.id}" title="Duplicate">📋</button>
+                <button class="rb-icon-btn danger" data-action="delete" data-id="${item.id}" title="Delete">✕</button>
+              </div>
+            </div>
+            ${fields}
+          `;
+          sec.list.appendChild(div);
+
+          // Bind inputs
+          div.querySelectorAll('[data-field]').forEach(input => {
+            input.addEventListener('input', (e) => {
+              const field = e.target.dataset.field;
+              const value = e.target.type === 'checkbox' ? e.target.checked : e.target.value;
+              item[field] = value;
+              renderSectionPreview(key);
+              calculateATS();
+            });
+          });
+
+          // Bind actions
+          div.querySelectorAll('.rb-icon-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+              e.stopPropagation();
+              const action = btn.dataset.action;
+              const id = btn.dataset.id;
+              const idx = parseInt(btn.dataset.idx);
+              if (action === 'delete') {
+                state[sec.key] = state[sec.key].filter(i => i.id !== id);
+                renderSection(key);
+                renderSectionPreview(key);
+                updateProgress();
+                calculateATS();
+              } else if (action === 'duplicate') {
+                const dup = JSON.parse(JSON.stringify(item));
+                dup.id = Date.now().toString(36);
+                state[sec.key].splice(idx + 1, 0, dup);
+                renderSection(key);
+                renderSectionPreview(key);
+              } else if (action === 'up' && idx > 0) {
+                [items[idx], items[idx-1]] = [items[idx-1], items[idx]];
+                renderSection(key);
+                renderSectionPreview(key);
+              } else if (action === 'down' && idx < items.length-1) {
+                [items[idx], items[idx+1]] = [items[idx+1], items[idx]];
+                renderSection(key);
+                renderSectionPreview(key);
+              }
+            });
+          });
+        });
+
+        renderSectionPreview(key);
+      };
+
+      const renderSectionPreview = (key) => {
+        const sec = sections[key];
+        const items = state[sec.key];
+        sec.preview.innerHTML = items.map(item => {
+          if (key === 'exp') {
+            return `<div class="pv-item"><div class="pv-item-header"><div><div class="pv-item-title">${escapeHtml(item.role)}</div><div class="pv-item-subtitle">${escapeHtml(item.company)}${item.location?` • ${escapeHtml(item.location)}`:''}</div></div><div class="pv-item-date">${formatDateRange(item.start, item.end, item.current)}</div></div><div class="pv-item-desc">${formatDesc(item.desc)}</div></div>`;
+          } else if (key === 'edu') {
+            return `<div class="pv-item"><div class="pv-item-header"><div><div class="pv-item-title">${escapeHtml(item.degree)}${item.field?` in ${escapeHtml(item.field)}`:''}</div><div class="pv-item-subtitle">${escapeHtml(item.institution)}${item.gpa?` • GPA: ${escapeHtml(item.gpa)}`:''}</div></div><div class="pv-item-date">${formatDateRange(item.start, item.end)}</div></div>${item.desc?`<div class="pv-item-desc">${formatDesc(item.desc)}</div>`:''}</div>`;
+          } else if (key === 'proj') {
+            return `<div class="pv-item"><div class="pv-item-title">${item.link?`<a href="${escapeHtml(item.link)}" target="_blank" style="color:var(--pv-accent);text-decoration:none">${escapeHtml(item.name)}</a>`:escapeHtml(item.name)}</div><div class="pv-item-subtitle">${escapeHtml(item.tech)}</div><div class="pv-item-desc">${formatDesc(item.desc)}</div></div>`;
+          } else if (key === 'cert') {
+            return `<div class="pv-item"><div class="pv-item-title">${escapeHtml(item.name)}</div><div class="pv-item-subtitle">${escapeHtml(item.issuer)}${item.date?` • ${escapeHtml(item.date)}`:''}${item.credential?` • Credential: ${escapeHtml(item.credential)}`:''}</div></div>`;
+          }
+          return '';
+        }).join('') || '<p style="color:#666;font-style:italic">No items added yet.</p>';
+      };
+
+      const renderSkills = () => {
+        const renderContainer = (skills, containerEl, type) => {
+          containerEl.innerHTML = skills.map(s => `<span class="rb-skill-tag">${escapeHtml(s)} <span class="remove" data-skill="${escapeHtml(s)}" data-type="${type}">×</span></span>`).join('');
+          containerEl.querySelectorAll('.remove').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+              const skill = e.target.dataset.skill;
+              const type = e.target.dataset.type;
+              state.skills[type] = state.skills[type].filter(x => x !== skill);
+              renderSkills();
+              updateProgress();
+              calculateATS();
+            });
+          });
+        };
+        renderContainer(state.skills.technical, els.skillsTech, 'technical');
+        renderContainer(state.skills.soft, els.skillsSoft, 'soft');
+        
+        // Preview
+        const allSkills = [...state.skills.technical, ...state.skills.soft];
+        els.pvSkills.innerHTML = allSkills.map(s => `<span class="pv-skill">${escapeHtml(s)}</span>`).join('') || '<span style="color:#666;font-style:italic">Add your skills above</span>';
+      };
+
+      const renderLanguages = () => {
+        els.languagesList.innerHTML = state.skills.languages.map(lang => `
+          <div class="rb-item" data-lang-id="${lang.id}" style="padding:0.6rem">
+            <div class="rb-flex rb-justify-between rb-items-center">
+              <input class="rb-input" placeholder="Language" value="${escapeHtml(lang.name)}" data-field="name" style="flex:1;margin-right:0.5rem">
+              <div class="rb-skill-level" data-lang-id="${lang.id}">
+                ${[1,2,3,4,5].map(l => `<div class="rb-skill-dot ${l<=getLevelNum(lang.level)?'active':''}" data-level="${l}" title="${['Beginner','Intermediate','Advanced','Fluent','Native'][l-1]}"></div>`).join('')}
+              </div>
+              <button class="rb-icon-btn danger" data-action="remove-lang" data-id="${lang.id}" style="margin-left:0.5rem">✕</button>
+            </div>
+          </div>
+        `).join('');
+        
+        // Bind
+        els.languagesList.querySelectorAll('[data-field="name"]').forEach(input => {
+          input.addEventListener('input', (e) => {
+            const id = e.target.closest('[data-lang-id]').dataset.langId;
+            const lang = state.skills.languages.find(l => l.id === id);
+            if (lang) { lang.name = e.target.value; renderLanguagesPreview(); }
+          });
+        });
+        els.languagesList.querySelectorAll('[data-action="remove-lang"]').forEach(btn => {
+          btn.addEventListener('click', (e) => {
+            const id = e.target.dataset.id;
+            state.skills.languages = state.skills.languages.filter(l => l.id !== id);
+            renderLanguages();
+            renderLanguagesPreview();
+            updateProgress();
+          });
+        });
+        renderLanguagesPreview();
+      };
+
+      const renderLanguagesPreview = () => {
+        els.pvLanguages.innerHTML = state.skills.languages.filter(l=>l.name).map(l => 
+          `<div class="pv-language">${escapeHtml(l.name)} <span class="pv-language-level">(${escapeHtml(l.level)})</span></div>`
+        ).join('') || '<span style="color:#666;font-style:italic">Add languages above</span>';
+        els.pvLanguagesSection.style.display = state.skills.languages.some(l=>l.name) ? 'block' : 'none';
+      };
+
+      const renderKeywords = () => {
+        els.keywordList.innerHTML = state.keywords.map(kw => 
+          `<span class="rb-keyword">${escapeHtml(kw)} <span class="rb-keyword-remove" data-kw="${escapeHtml(kw)}">×</span></span>`
+        ).join('');
+        els.keywordList.querySelectorAll('.rb-keyword-remove').forEach(btn => {
+          btn.addEventListener('click', (e) => {
+            state.keywords = state.keywords.filter(k => k !== e.target.dataset.kw);
+            renderKeywords();
+            calculateATS();
+          });
+        });
+      };
+
+      const renderSavedList = () => {
+        const saves = JSON.parse(localStorage.getItem(`${CONFIG.STORAGE_KEY}_list`) || '[]');
+        if (saves.length === 0) {
+          els.savedList.innerHTML = '<div style="color:var(--text-secondary);padding:0.5rem">No saved resumes</div>';
+          return;
+        }
+        els.savedList.innerHTML = saves.map(name => 
+          `<div class="rb-item rb-cursor-pointer rb-hover-accent" data-name="${escapeHtml(name)}" style="padding:0.6rem">${escapeHtml(name)}</div>`
+        ).join('');
+        els.savedList.querySelectorAll('[data-name]').forEach(item => {
+          item.addEventListener('click', () => {
+            els.savedList.querySelectorAll('[data-name]').forEach(i => i.style.borderColor = '');
+            item.style.borderColor = 'var(--accent)';
+            selectedSaveName = item.dataset.name;
+          });
+        });
+      };
+
+      // ===== PROGRESS & ATS =====
+      const updateProgress = () => {
+        const checks = [
+          !!state.personal.name, !!state.personal.title, !!state.personal.email,
+          !!state.summary, state.experience.length > 0, state.education.length > 0,
+          state.skills.technical.length + state.skills.soft.length > 0,
+          !!state.personal.phone || !!state.personal.location,
+          state.projects.length > 0 || state.certifications.length > 0 || state.keywords.length > 0
+        ];
+        const completed = checks.filter(c => c).length;
+        const pct = Math.round((completed / checks.length) * 100);
+        
+        els.progress.style.strokeDashoffset = 126 - (pct * 1.26);
+        els.progressText.textContent = `${pct}%`;
+        els.completion.textContent = pct >= 90 ? '🎉 Resume ready!' : pct >= 70 ? '✅ Almost there!' : pct >= 40 ? '📝 Good progress' : '🚀 Start building';
+        els.sectionProgress.textContent = `${completed}/${checks.length} sections`;
+      };
+
+      const calculateATS = () => {
+        let score = 0, total = 0, tips = [];
+        const w = CONFIG.ATS_WEIGHTS;
+        
+        // Name & Title
+        if (state.personal.name && state.personal.name.length >= 2) { score += w.name; tips.push('✅ Name added'); } else tips.push('⚠️ Add your full name');
+        if (state.personal.title && state.personal.title.length >= 3) { score += w.title; tips.push('✅ Professional title added'); } else tips.push('⚠️ Add a professional title');
+        
+        // Contact
+        const contactFields = ['email', 'phone', 'location', 'linkedin'].filter(f => state.personal[f]);
+        score += Math.round((contactFields.length / 4) * w.contact);
+        if (contactFields.length < 2) tips.push('⚠️ Add more contact details (email, phone, LinkedIn)');
+        
+        // Summary
+        if (state.summary && state.summary.length >= 50) { score += w.summary; tips.push('✅ Strong summary'); } 
+        else if (state.summary) { score += Math.round(w.summary * 0.5); tips.push('💡 Expand your summary (50+ chars)'); }
+        else tips.push('⚠️ Add a professional summary');
+        
+        // Experience
+        if (state.experience.length > 0) {
+          const hasDesc = state.experience.some(e => e.desc && e.desc.length >= 30);
+          score += hasDesc ? w.experience : Math.round(w.experience * 0.6);
+          if (!hasDesc) tips.push('💡 Add detailed achievements to experience');
+        } else tips.push('⚠️ Add work experience');
+        
+        // Education
+        if (state.education.length > 0) score += w.education; else tips.push('⚠️ Add education details');
+        
+        // Skills
+        const skillCount = state.skills.technical.length + state.skills.soft.length;
+        if (skillCount >= 5) score += w.skills;
+        else if (skillCount >= 2) score += Math.round(w.skills * 0.7);
+        else tips.push('💡 Add 5+ relevant skills');
+        
+        // Keywords
+        if (state.keywords.length >= 3) score += w.keywords;
+        else if (state.keywords.length > 0) score += Math.round(w.keywords * 0.5);
+        else tips.push('💡 Add ATS keywords from job descriptions');
+        
+        score = Math.min(100, Math.max(0, score));
+        els.atsScore.textContent = `${score}/100`;
+        els.atsScore.className = `rb-ats-score ${score>=80?'good':score>=50?'medium':'poor'}`;
+        els.atsTips.innerHTML = `<strong>Tips:</strong><ul>${tips.slice(0,4).map(t=>`<li>${t}</li>`).join('')}</ul>`;
+      };
+
+      const getLevelNum = (level) => ({'Beginner':1,'Intermediate':2,'Advanced':3,'Fluent':4,'Native':5}[level]||2);
+
+      // ===== HELPERS =====
+      const escapeHtml = (str) => { if (!str) return ''; const div = document.createElement('div'); div.textContent = str; return div.innerHTML; };
+      const formatDateRange = (start, end, current) => {
+        if (!start) return '';
+        const fmt = (d) => d ? new Date(d + '-01').toLocaleDateString('en-US', {month:'short',year:'numeric'}) : '';
+        return current ? `${fmt(start)} - Present` : `${fmt(start)} - ${fmt(end) || 'Present'}`;
+      };
+      const formatDesc = (text) => {
+        if (!text) return '';
+        const lines = text.split('\n').map(l=>l.trim()).filter(l=>l);
+        if (lines.length === 1) return escapeHtml(text);
+        return `<ul>${lines.map(l=>`<li>${escapeHtml(l)}</li>`).join('')}</ul>`;
+      };
+      const addItem = (key) => {
+        const id = Date.now().toString(36) + Math.random().toString(36).slice(2,6);
+        const template = { id };
+        sections[key].fields.forEach(f => template[f] = f==='current'?false:'');
+        state[sections[key].key].push(template);
+        renderSection(key);
+        updateProgress();
+        calculateATS();
+        showToast('➕ Item added');
+      };
+      const generateExportHTML = () => `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>${escapeHtml(state.personal.name)||'Resume'}</title><style>body{font-family:${state.settings.font};max-width:800px;margin:0 auto;padding:2.5cm 2cm;color:#111;line-height:1.6}h1{margin:0 0 0.3rem;color:#000;border-bottom:3px solid ${state.settings.color};padding-bottom:0.5rem}.title{color:${state.settings.color};margin:0.4rem 0 0.6rem}.contact{color:#444;font-size:0.9rem;line-height:1.7}.contact span{margin-right:1rem}.section{margin:1.5rem 0}.section-title{color:${state.settings.color};font-size:1.1rem;font-weight:700;border-bottom:2px solid ${state.settings.color};padding-bottom:0.4rem;margin-bottom:0.8rem;text-transform:uppercase;letter-spacing:0.5px}.summary{color:#333}.item{margin-bottom:1rem}.item-header{display:flex;justify-content:space-between;margin-bottom:0.3rem}.item-title{font-weight:600}.item-subtitle{color:#555}.item-date{color:#666;font-style:italic}.item-desc{color:#333;margin-left:0.5rem}.item-desc ul{margin:0.4rem 0;padding-left:1.3rem}.item-desc li{margin:0.25rem 0}.skills{display:flex;flex-wrap:wrap;gap:0.5rem}.skill{background:rgba(99,102,241,0.12);color:${state.settings.color};padding:0.35rem 0.8rem;border-radius:20px;font-size:0.85rem}@media print{body{padding:2.5cm 2cm}@page{margin:0;size:A4}}</style></head><body>${els.preview.innerHTML}</body></html>`;
+      const generateWordHTML = () => `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>${escapeHtml(state.personal.name)||'Resume'}</title><style>body{font-family:'Times New Roman',serif;font-size:12pt;color:#000}h1{font-size:18pt;border-bottom:2px solid #000}.section-title{font-size:13pt;font-weight:bold;color:#000;border-bottom:1px solid #000}.item-title{font-weight:bold}.item-subtitle{font-style:italic}</style></head><body>${els.preview.innerHTML.replace(/var\(--pv-accent\)/g, '#000')}</body></html>`;
+      const generatePlainText = () => {
+        const p = state.personal;
+        return `${p.name}\n${p.title}\n${p.email}${p.phone?` | ${p.phone}`:''}${p.location?` | ${p.location}`:''}\n\nSUMMARY\n${state.summary}\n\nEXPERIENCE\n${state.experience.map(e=>`${e.role} at ${e.company} (${formatDateRange(e.start,e.end,e.current)})\n${e.desc}`).join('\n\n')}\n\nEDUCATION\n${state.education.map(e=>`${e.degree} - ${e.institution} (${formatDateRange(e.start,e.end)})`).join('\n')}\n\nSKILLS\n${[...state.skills.technical,...state.skills.soft].join(', ')}\n\nKEYWORDS\n${state.keywords.join(', ')}`;
+      };
+      const downloadFile = (content, filename, type) => {
+        const blob = new Blob([content], {type});
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a'); a.href = url; a.download = filename;
+        document.body.appendChild(a); a.click(); document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      };
+
+      // ===== START =====
+      init();
+    })();
+  </script>
+</div>

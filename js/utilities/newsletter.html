@@ -1,0 +1,362 @@
+<div class="newsletter-widget">
+  <style>
+    .newsletter-widget {
+      --nw-bg: var(--bg-card, #111827);
+      --nw-border: var(--glass-border, #374151);
+      --nw-text: var(--text-primary, #f9fafb);
+      --nw-muted: var(--text-secondary, #9ca3af);
+      --nw-accent: #3b82f6;
+      --nw-success: #10b981;
+      --nw-danger: #ef4444;
+      --nw-radius: 16px;
+      --nw-transition: 0.25s ease;
+      
+      background: var(--nw-bg);
+      border: 1px solid var(--nw-border);
+      border-radius: var(--nw-radius);
+      padding: 1.5rem;
+      max-width: 520px;
+      margin: 2rem auto;
+      font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+      color: var(--nw-text);
+      box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+    }
+    .newsletter-widget h3 { margin: 0 0 0.5rem; font-size: 1.4rem; display: flex; align-items: center; gap: 0.5rem; justify-content: center; }
+    .nw-desc { text-align: center; color: var(--nw-muted); margin: 0.5rem 0 1.2rem; font-size: 0.95rem; }
+    
+    /* Features */
+    .nw-features { display: flex; gap: 0.5rem; justify-content: center; flex-wrap: wrap; margin-bottom: 1.2rem; }
+    .nw-tag { padding: 0.35rem 0.7rem; background: rgba(255,255,255,0.05); border: 1px solid var(--nw-border); border-radius: 20px; font-size: 0.8rem; display: flex; align-items: center; gap: 0.3rem; }
+    
+    /* Form */
+    .nw-form { display: flex; flex-direction: column; gap: 0.9rem; }
+    .nw-input {
+      width: 100%; padding: 0.85rem; border-radius: 10px; border: 1px solid var(--nw-border);
+      background: rgba(255,255,255,0.05); color: var(--nw-text); font-size: 0.95rem;
+      outline: none; transition: var(--nw-transition);
+    }
+    .nw-input:focus { border-color: var(--nw-accent); box-shadow: 0 0 0 3px rgba(59,130,246,0.2); }
+    .nw-input.error { border-color: var(--nw-danger); }
+    .nw-error { color: var(--nw-danger); font-size: 0.8rem; display: none; margin-top: -0.4rem; }
+    
+    /* Preferences */
+    .nw-prefs { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; margin: 0.5rem 0; }
+    .nw-pref { display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem; border-radius: 8px; cursor: pointer; transition: var(--nw-transition); }
+    .nw-pref:hover { background: rgba(255,255,255,0.03); }
+    .nw-pref input { accent-color: var(--nw-accent); width: 16px; height: 16px; }
+    .nw-pref label { font-size: 0.9rem; cursor: pointer; }
+    
+    /* Frequency */
+    .nw-freq { display: flex; gap: 0.5rem; margin: 0.5rem 0; }
+    .nw-freq-btn {
+      flex: 1; padding: 0.6rem; border: 1px solid var(--nw-border); border-radius: 8px;
+      background: rgba(255,255,255,0.03); color: var(--nw-text); font-size: 0.85rem;
+      cursor: pointer; transition: var(--nw-transition); text-align: center;
+    }
+    .nw-freq-btn.active { background: var(--nw-accent); color: #fff; border-color: var(--nw-accent); }
+    
+    /* Honeypot */
+    .nw-hp { position: absolute; left: -9999px; opacity: 0; }
+    
+    /* Submit */
+    .nw-submit {
+      width: 100%; padding: 0.9rem; background: var(--nw-accent); border: none; border-radius: 10px;
+      color: #fff; font-weight: 600; font-size: 1rem; cursor: pointer; position: relative; overflow: hidden;
+      transition: var(--nw-transition); margin-top: 0.3rem;
+    }
+    .nw-submit:hover { filter: brightness(1.1); transform: translateY(-1px); }
+    .nw-submit:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+    .nw-loader {
+      width: 18px; height: 18px; border: 2px solid rgba(255,255,255,0.3); border-top-color: #fff;
+      border-radius: 50%; display: none; animation: nw-spin 0.6s linear infinite; margin: 0 auto;
+    }
+    @keyframes nw-spin { to { transform: rotate(360deg); } }
+    
+    /* Success State */
+    .nw-success { display: none; text-align: center; padding: 1rem; }
+    .nw-success.show { display: block; animation: nw-fadeIn 0.3s; }
+    @keyframes nw-fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    .nw-check { width: 64px; height: 64px; margin: 0 auto 1rem; background: var(--nw-success); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; color: #fff; }
+    
+    /* Manage Section */
+    .nw-manage { margin-top: 1.5rem; border-top: 1px solid var(--nw-border); padding-top: 1rem; text-align: center; }
+    .nw-manage-btn { background: none; border: none; color: var(--nw-muted); cursor: pointer; font-size: 0.9rem; text-decoration: underline; }
+    .nw-manage-panel { display: none; margin-top: 1rem; text-align: left; }
+    .nw-manage-panel.show { display: block; }
+    .nw-sub-item { background: rgba(255,255,255,0.03); border: 1px solid var(--nw-border); border-radius: 8px; padding: 0.8rem; margin-bottom: 0.5rem; display: flex; justify-content: space-between; align-items: center; }
+    .nw-unsub { color: var(--nw-danger); background: none; border: none; cursor: pointer; font-size: 0.85rem; }
+    
+    /* Toast */
+    .nw-toast { position: fixed; bottom: 24px; right: 24px; padding: 0.75rem 1rem; border-radius: 8px; font-weight: 500; transform: translateY(120%); opacity: 0; transition: 0.3s; z-index: 9999; box-shadow: 0 8px 20px rgba(0,0,0,0.25); pointer-events: none; }
+    .nw-toast.success { background: var(--nw-success); color: #fff; }
+    .nw-toast.error { background: var(--nw-danger); color: #fff; }
+    .nw-toast.show { transform: translateY(0); opacity: 1; }
+    
+    /* Light Mode */
+    :root.light-mode .newsletter-widget { --nw-bg: #ffffff; --nw-border: #e5e7eb; --nw-text: #111827; --nw-muted: #6b7280; }
+    :root.light-mode .nw-input { background: #f9fafb; }
+    :root.light-mode .nw-tag, :root.light-mode .nw-pref:hover { background: #f3f4f6; }
+    :root.light-mode .nw-freq-btn { background: #f9fafb; color: #374151; }
+  </style>
+
+  <!-- Main Form -->
+  <div id="nw-form-wrap">
+    <h3>📧 Join Our Newsletter</h3>
+    <p class="nw-desc">Get weekly tool updates, exclusive tips & hidden features delivered to your inbox.</p>
+    
+    <div class="nw-features">
+      <span class="nw-tag">🚀 No Spam</span>
+      <span class="nw-tag">🔒 Private</span>
+      <span class="nw-tag">✉️ Weekly Digest</span>
+    </div>
+    
+    <form class="nw-form" id="nw-form" novalidate>
+      <!-- Honeypot Anti-Spam -->
+      <input type="text" class="nw-hp" name="website" tabindex="-1" autocomplete="off">
+      
+      <input type="email" class="nw-input" id="nw-email" placeholder="your@email.com" required autocomplete="email">
+      <div class="nw-error" id="nw-email-err">Please enter a valid email address</div>
+      
+      <div>
+        <label style="font-size:0.9rem;font-weight:500;display:block;margin-bottom:0.4rem">🎯 Topics You Like</label>
+        <div class="nw-prefs">
+          <label class="nw-pref"><input type="checkbox" name="topic" value="tools" checked> 🛠️ Tools</label>
+          <label class="nw-pref"><input type="checkbox" name="topic" value="tips" checked> 💡 Tips</label>
+          <label class="nw-pref"><input type="checkbox" name="topic" value="finance"> 💰 Finance</label>
+          <label class="nw-pref"><input type="checkbox" name="topic" value="updates"> 🔄 Updates</label>
+        </div>
+      </div>
+      
+      <div>
+        <label style="font-size:0.9rem;font-weight:500;display:block;margin-bottom:0.4rem">📅 Frequency</label>
+        <div class="nw-freq">
+          <div class="nw-freq-btn active" data-val="weekly">Weekly</div>
+          <div class="nw-freq-btn" data-val="biweekly">Bi-Weekly</div>
+          <div class="nw-freq-btn" data-val="monthly">Monthly</div>
+        </div>
+      </div>
+      
+      <button type="submit" class="nw-submit" id="nw-submit">
+        <span class="btn-text">✨ Subscribe Now</span>
+        <span class="nw-loader"></span>
+      </button>
+    </form>
+  </div>
+  
+  <!-- Success State -->
+  <div class="nw-success" id="nw-success">
+    <div class="nw-check">✓</div>
+    <h4 style="margin:0 0 0.5rem">🎉 You're In!</h4>
+    <p style="color:var(--nw-muted);margin:0 0 1rem">Check your inbox for a confirmation email.</p>
+    <button class="nw-manage-btn" id="nw-manage-link">Manage Preferences</button>
+  </div>
+  
+  <!-- Manage Panel -->
+  <div class="nw-manage">
+    <button class="nw-manage-btn" id="nw-toggle-manage">Already subscribed? Manage here</button>
+    <div class="nw-manage-panel" id="nw-manage-panel">
+      <div id="nw-subs-list"></div>
+      <button class="nw-submit" style="background:var(--nw-border);color:var(--nw-text);margin-top:0.5rem" id="nw-export">📥 Export My Data</button>
+    </div>
+  </div>
+  
+  <div class="nw-toast" id="nw-toast"></div>
+
+  <script>
+    (function() {
+      const KEY = 'nw_subscribers';
+      const RATE_LIMIT_MS = 60000; // 1 min between submissions
+      let lastSubmit = 0;
+      
+      const els = {
+        formWrap: document.getElementById('nw-form-wrap'),
+        form: document.getElementById('nw-form'),
+        email: document.getElementById('nw-email'),
+        emailErr: document.getElementById('nw-email-err'),
+        topics: document.querySelectorAll('input[name="topic"]'),
+        freqBtns: document.querySelectorAll('.nw-freq-btn'),
+        submitBtn: document.getElementById('nw-submit'),
+        loader: document.querySelector('.nw-loader'),
+        btnText: document.querySelector('.btn-text'),
+        success: document.getElementById('nw-success'),
+        manageLink: document.getElementById('nw-manage-link'),
+        toggleManage: document.getElementById('nw-toggle-manage'),
+        managePanel: document.getElementById('nw-manage-panel'),
+        subsList: document.getElementById('nw-subs-list'),
+        exportBtn: document.getElementById('nw-export'),
+        toast: document.getElementById('nw-toast')
+      };
+      
+      let frequency = 'weekly';
+      let subscribers = JSON.parse(localStorage.getItem(KEY) || '[]');
+      
+      // Toast
+      const toast = (msg, type = 'success') => {
+        els.toast.textContent = msg;
+        els.toast.className = `nw-toast ${type} show`;
+        setTimeout(() => els.toast.classList.remove('show'), 2500);
+      };
+      
+      // Validation
+      const validateEmail = (e) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e);
+      
+      // Render Manage List
+      const renderSubs = () => {
+        const current = localStorage.getItem('nw_current_email');
+        if (!current) {
+          els.subsList.innerHTML = '<div style="color:var(--nw-muted);text-align:center;padding:1rem">No active subscription found</div>';
+          return;
+        }
+        const sub = subscribers.find(s => s.email === current);
+        if (!sub) {
+          els.subsList.innerHTML = '<div style="color:var(--nw-muted);text-align:center;padding:1rem">Subscription not found</div>';
+          return;
+        }
+        els.subsList.innerHTML = `
+          <div class="nw-sub-item">
+            <div>
+              <div style="font-weight:500">${sub.email}</div>
+              <div style="font-size:0.8rem;color:var(--nw-muted)">${sub.topics.join(', ')} • ${sub.frequency}</div>
+            </div>
+            <button class="nw-unsub" data-email="${sub.email}">Unsubscribe</button>
+          </div>
+        `;
+        els.subsList.querySelector('.nw-unsub').onclick = () => unsubscribe(sub.email);
+      };
+      
+      // Unsubscribe
+      const unsubscribe = (email) => {
+        if (!confirm(`Unsubscribe ${email} from all newsletters?`)) return;
+        subscribers = subscribers.filter(s => s.email !== email);
+        localStorage.setItem(KEY, JSON.stringify(subscribers));
+        localStorage.removeItem('nw_current_email');
+        renderSubs();
+        toast('✅ Unsubscribed successfully');
+        window.dispatchEvent(new CustomEvent('newsletter:unsubscribed', { detail: { email } }));
+      };
+      
+      // Frequency Selection
+      els.freqBtns.forEach(btn => {
+        btn.onclick = () => {
+          els.freqBtns.forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          frequency = btn.dataset.val;
+        };
+      });
+      
+      // Email Input Validation
+      els.email.addEventListener('blur', () => {
+        if (els.email.value && !validateEmail(els.email.value)) {
+          els.email.classList.add('error');
+          els.emailErr.style.display = 'block';
+        } else {
+          els.email.classList.remove('error');
+          els.emailErr.style.display = 'none';
+        }
+      });
+      
+      // Manage Toggle
+      els.toggleManage.onclick = () => {
+        els.managePanel.classList.toggle('show');
+        if (els.managePanel.classList.contains('show')) renderSubs();
+      };
+      els.manageLink.onclick = () => {
+        els.managePanel.classList.add('show');
+        els.formWrap.scrollIntoView({ behavior: 'smooth' });
+        renderSubs();
+      };
+      
+      // Export Data
+      els.exportBtn.onclick = () => {
+        const email = localStorage.getItem('nw_current_email');
+        if (!email) return toast('⚠️ No subscription found', 'error');
+        const data = subscribers.find(s => s.email === email);
+        if (!data) return toast('⚠️ Data not found', 'error');
+        const blob = new Blob([JSON.stringify({ email: data.email, subscribed: data.date, topics: data.topics, frequency: data.frequency }, null, 2)], { type: 'application/json' });
+        const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'my-newsletter-data.json'; a.click();
+        toast('📥 Data exported');
+      };
+      
+      // Submit Handler
+      els.form.onsubmit = async (e) => {
+        e.preventDefault();
+        
+        // Anti-spam: Honeypot
+        if (e.target.website.value) return;
+        
+        // Rate Limit
+        if (Date.now() - lastSubmit < RATE_LIMIT_MS) {
+          toast('⏱️ Please wait before subscribing again', 'error');
+          return;
+        }
+        
+        const email = els.email.value.trim().toLowerCase();
+        if (!validateEmail(email)) {
+          els.email.classList.add('error');
+          els.emailErr.style.display = 'block';
+          els.email.focus();
+          return;
+        }
+        
+        // Get selected topics
+        const topics = Array.from(els.topics).filter(t => t.checked).map(t => t.value);
+        if (topics.length === 0) {
+          toast('⚠️ Please select at least one topic', 'error');
+          return;
+        }
+        
+        // Disable UI
+        els.submitBtn.disabled = true;
+        els.btnText.style.display = 'none';
+        els.loader.style.display = 'inline-block';
+        
+        const payload = {
+          email,
+          topics,
+          frequency,
+          date: new Date().toISOString(),
+          confirmed: false, // Double opt-in simulation
+          source: window.location.href
+        };
+        
+        try {
+          // 🔄 REPLACE WITH REAL API:
+          // await fetch('/api/newsletter/subscribe', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) });
+          
+          await new Promise(r => setTimeout(r, 1000)); // Simulate network
+          
+          // Save locally
+          subscribers = subscribers.filter(s => s.email !== email); // Remove duplicate
+          subscribers.push(payload);
+          localStorage.setItem(KEY, JSON.stringify(subscribers));
+          localStorage.setItem('nw_current_email', email);
+          
+          lastSubmit = Date.now();
+          
+          // Show success
+          els.formWrap.style.display = 'none';
+          els.success.classList.add('show');
+          toast('✅ Subscription confirmed! Check your email');
+          
+          // Dispatch event for analytics/CRM
+          window.dispatchEvent(new CustomEvent('newsletter:subscribed', { detail: payload }));
+          
+        } catch (err) {
+          console.error('Subscription error:', err);
+          toast('❌ Something went wrong. Try again.', 'error');
+        } finally {
+          els.submitBtn.disabled = false;
+          els.btnText.style.display = 'inline';
+          els.loader.style.display = 'none';
+        }
+      };
+      
+      // Init: Check if already subscribed
+      const currentEmail = localStorage.getItem('nw_current_email');
+      if (currentEmail && subscribers.some(s => s.email === currentEmail)) {
+        els.formWrap.style.display = 'none';
+        els.success.classList.add('show');
+      }
+    })();
+  </script>
+</div>

@@ -1,0 +1,1000 @@
+<div class="learning-tool">
+  <style>
+    .learning-tool {
+      --bg-primary: #0f172a;
+      --bg-card: #1e293b;
+      --bg-input: #334155;
+      --text-primary: #f1f5f9;
+      --text-secondary: #94a3b8;
+      --accent: #3b82f6;
+      --accent-hover: #2563eb;
+      --success: #10b981;
+      --error: #ef4444;
+      --warning: #f59e0b;
+      --glass: rgba(255,255,255,0.1);
+      --glass-border: rgba(255,255,255,0.2);
+      --gradient-main: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      --transition: all 0.3s ease;
+      
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 1.5rem;
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      color: var(--text-primary);
+      background: var(--bg-primary);
+      border-radius: 16px;
+      box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
+    }
+    
+    .cc-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--glass-border);
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+    
+    .cc-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      background: var(--gradient-main);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    
+    .cc-stats {
+      display: flex;
+      gap: 1rem;
+      font-size: 0.9rem;
+    }
+    
+    .cc-stat {
+      background: var(--bg-card);
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    
+    .cc-stat-value {
+      font-weight: 700;
+      color: var(--accent);
+    }
+    
+    .cc-progress {
+      width: 100%;
+      height: 6px;
+      background: var(--bg-input);
+      border-radius: 3px;
+      margin-bottom: 1.5rem;
+      overflow: hidden;
+    }
+    
+    .cc-progress-bar {
+      height: 100%;
+      background: var(--gradient-main);
+      border-radius: 3px;
+      transition: width 0.4s ease;
+      width: 0%;
+    }
+    
+    .cc-task {
+      background: var(--bg-card);
+      border: 1px solid var(--glass-border);
+      border-radius: 12px;
+      padding: 1.2rem;
+      margin-bottom: 1rem;
+    }
+    
+    .cc-task-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 0.8rem;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+    
+    .cc-task-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin: 0;
+    }
+    
+    .cc-difficulty {
+      padding: 0.3rem 0.8rem;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+    
+    .cc-difficulty.easy { background: rgba(16, 185, 129, 0.2); color: var(--success); }
+    .cc-difficulty.medium { background: rgba(245, 158, 11, 0.2); color: var(--warning); }
+    .cc-difficulty.hard { background: rgba(239, 68, 68, 0.2); color: var(--error); }
+    
+    .cc-category {
+      display: inline-block;
+      padding: 0.2rem 0.6rem;
+      background: var(--glass);
+      border-radius: 6px;
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      margin-bottom: 0.8rem;
+    }
+    
+    .cc-task-desc {
+      color: var(--text-secondary);
+      line-height: 1.6;
+      margin-bottom: 1rem;
+    }
+    
+    .cc-examples {
+      background: var(--bg-input);
+      border-radius: 8px;
+      padding: 0.8rem;
+      margin-top: 0.8rem;
+      font-size: 0.9rem;
+    }
+    
+    .cc-examples-title {
+      font-weight: 600;
+      margin-bottom: 0.4rem;
+      color: var(--text-primary);
+    }
+    
+    .cc-examples code {
+      display: block;
+      font-family: monospace;
+      color: var(--success);
+      margin: 0.2rem 0;
+    }
+    
+    .cc-code-container {
+      position: relative;
+      margin-bottom: 1rem;
+    }
+    
+    .cc-code {
+      width: 100%;
+      min-height: 180px;
+      padding: 1rem;
+      border-radius: 10px;
+      border: 1px solid var(--glass-border);
+      background: var(--bg-input);
+      color: var(--text-primary);
+      font-family: 'Fira Code', 'Consolas', monospace;
+      font-size: 0.95rem;
+      line-height: 1.5;
+      outline: none;
+      resize: vertical;
+      tab-size: 2;
+    }
+    
+    .cc-code:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
+    }
+    
+    .cc-code-actions {
+      position: absolute;
+      top: 0.5rem;
+      right: 0.5rem;
+      display: flex;
+      gap: 0.3rem;
+    }
+    
+    .cc-code-btn {
+      background: var(--glass);
+      border: none;
+      color: var(--text-secondary);
+      padding: 0.3rem 0.6rem;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+    
+    .cc-code-btn:hover {
+      background: var(--accent);
+      color: white;
+    }
+    
+    .cc-controls {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      margin-bottom: 1rem;
+    }
+    
+    .cc-btn {
+      padding: 0.7rem 1.2rem;
+      background: var(--gradient-main);
+      border: none;
+      border-radius: 10px;
+      color: white;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.95rem;
+    }
+    
+    .cc-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 25px -5px rgba(0,0,0,0.3);
+    }
+    
+    .cc-btn:active {
+      transform: translateY(0);
+    }
+    
+    .cc-btn.sec {
+      background: var(--glass);
+      color: var(--text-primary);
+    }
+    
+    .cc-btn.sec:hover {
+      background: var(--accent);
+      color: white;
+    }
+    
+    .cc-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+    
+    .cc-timer {
+      background: var(--bg-card);
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    
+    .cc-timer.warning {
+      color: var(--warning);
+      animation: pulse 1s infinite;
+    }
+    
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.7; }
+    }
+    
+    .cc-res {
+      background: var(--bg-card);
+      border: 1px solid var(--glass-border);
+      border-radius: 12px;
+      padding: 1.2rem;
+      min-height: 80px;
+      font-family: monospace;
+      font-size: 0.95rem;
+      line-height: 1.6;
+    }
+    
+    .cc-res.cc-success {
+      border-left: 4px solid var(--success);
+      background: rgba(16, 185, 129, 0.1);
+    }
+    
+    .cc-res.cc-error {
+      border-left: 4px solid var(--error);
+      background: rgba(239, 68, 68, 0.1);
+    }
+    
+    .cc-res.cc-info {
+      border-left: 4px solid var(--accent);
+      background: rgba(59, 130, 246, 0.1);
+    }
+    
+    .cc-test-results {
+      margin-top: 1rem;
+      padding-top: 1rem;
+      border-top: 1px dashed var(--glass-border);
+    }
+    
+    .cc-test-case {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.5rem 0;
+      font-size: 0.9rem;
+    }
+    
+    .cc-test-case.pass { color: var(--success); }
+    .cc-test-case.fail { color: var(--error); }
+    
+    .cc-footer {
+      margin-top: 1.5rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--glass-border);
+      text-align: center;
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+    }
+    
+    .cc-keyboard-hint {
+      margin-top: 0.5rem;
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+    }
+    
+    .cc-keyboard-hint kbd {
+      background: var(--bg-input);
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      font-family: monospace;
+      margin: 0 0.2rem;
+    }
+    
+    @media (max-width: 600px) {
+      .learning-tool { padding: 1rem; }
+      .cc-header { flex-direction: column; align-items: flex-start; }
+      .cc-controls { width: 100%; }
+      .cc-btn { flex: 1; justify-content: center; }
+    }
+  </style>
+
+  <!-- Header -->
+  <div class="cc-header">
+    <div class="cc-title">🎯 Code Challenge Arena</div>
+    <div class="cc-stats">
+      <div class="cc-stat">🏆 Score: <span class="cc-stat-value" id="cc-score">0</span></div>
+      <div class="cc-stat">✅ Solved: <span class="cc-stat-value" id="cc-solved">0</span>/<span id="cc-total">0</span></div>
+      <div class="cc-timer" id="cc-timer">⏱️ <span id="cc-time">00:00</span></div>
+    </div>
+  </div>
+
+  <!-- Progress Bar -->
+  <div class="cc-progress">
+    <div class="cc-progress-bar" id="cc-progress-bar"></div>
+  </div>
+
+  <!-- Challenge Task -->
+  <div class="cc-task" id="cc-task">
+    <div class="cc-task-header">
+      <h3 class="cc-task-title" id="cc-task-title">Loading challenge...</h3>
+      <span class="cc-difficulty" id="cc-difficulty">Easy</span>
+    </div>
+    <div class="cc-category" id="cc-category">Strings</div>
+    <p class="cc-task-desc" id="cc-task-desc"></p>
+    <div class="cc-examples">
+      <div class="cc-examples-title">📋 Examples:</div>
+      <div id="cc-examples"></div>
+    </div>
+  </div>
+
+  <!-- Code Editor -->
+  <div class="cc-code-container">
+    <div class="cc-code-actions">
+      <button class="cc-code-btn" id="cc-copy" title="Copy Code">📋</button>
+      <button class="cc-code-btn" id="cc-reset" title="Reset Code">🔄</button>
+      <button class="cc-code-btn" id="cc-solution" title="Show Solution">💡</button>
+    </div>
+    <textarea class="cc-code" id="cc-code" placeholder="// Write your JavaScript solution here&#10;// Press Ctrl+Enter or Cmd+Enter to run&#10;&#10;function solution() {&#10;  // Your code here&#10;}"></textarea>
+  </div>
+
+  <!-- Controls -->
+  <div class="cc-controls">
+    <button class="cc-btn" id="cc-run">▶ Run Code <kbd class="keyboard-hint">Ctrl+Enter</kbd></button>
+    <button class="cc-btn sec" id="cc-hint">💡 Hint</button>
+    <button class="cc-btn sec" id="cc-solution-btn">🔓 View Solution</button>
+    <button class="cc-btn sec" id="cc-next">Next →</button>
+  </div>
+
+  <!-- Results -->
+  <div class="cc-res" id="cc-res">
+    <div style="color: var(--text-secondary);">Run your code to see results here...</div>
+  </div>
+
+  <!-- Footer -->
+  <div class="cc-footer">
+    <div>🎮 Keyboard: <kbd>Ctrl+Enter</kbd> Run | <kbd>Ctrl+H</kbd> Hint | <kbd>Ctrl+N</kbd> Next</div>
+    <div class="cc-keyboard-hint">💡 Pro Tip: Use console.log() to debug your code!</div>
+  </div>
+
+  <script>
+    (function(){
+      // ====== CHALLENGES DATABASE ======
+      const challenges = [
+        {
+          id: 1,
+          title: "Reverse a String",
+          desc: "Write a function `reverseStr(str)` that returns the reversed version of the input string.",
+          category: "Strings",
+          difficulty: "easy",
+          hint: "Use split('', reverse(), join() method chain or a for loop iterating backwards.",
+          examples: [
+            { input: 'reverseStr("hello")', output: '"olleh"' },
+            { input: 'reverseStr("Code")', output: '"edoC"' },
+            { input: 'reverseStr("12345")', output: '"54321"' }
+          ],
+          starterCode: `function reverseStr(str) {
+  // Your code here
+  return str;
+}`,
+          solution: `function reverseStr(str) {
+  return str.split('').reverse().join('');
+}`,
+          tests: [
+            { args: ["hello"], expected: "olleh" },
+            { args: ["Code"], expected: "edoC" },
+            { args: ["12345"], expected: "54321" },
+            { args: [""], expected: "" }
+          ],
+          check: (code, userFunc) => {
+            try {
+              const fn = new Function('return ' + code.match(/function reverseStr[^}]+(?:\{[^}]*\})?/s)?.[0] || 'null')();
+              return fn && typeof fn === 'function' && 
+                fn("hello") === "olleh" && 
+                fn("Code") === "edoC";
+            } catch(e) { return false; }
+          }
+        },
+        {
+          id: 2,
+          title: "Array Sum",
+          desc: "Create a function `arraySum(arr)` that returns the sum of all numbers in an array.",
+          category: "Arrays",
+          difficulty: "easy",
+          hint: "Use reduce() method or a for loop to accumulate the sum.",
+          examples: [
+            { input: 'arraySum([1,2,3])', output: '6' },
+            { input: 'arraySum([10,-5,3])', output: '8' },
+            { input: 'arraySum([])', output: '0' }
+          ],
+          starterCode: `function arraySum(arr) {
+  // Your code here
+  return 0;
+}`,
+          solution: `function arraySum(arr) {
+  return arr.reduce((sum, num) => sum + num, 0);
+}`,
+          tests: [
+            { args: [[1,2,3]], expected: 6 },
+            { args: [[10,-5,3]], expected: 8 },
+            { args: [[]], expected: 0 },
+            { args: [[-1,-2,-3]], expected: -6 }
+          ],
+          check: (code, userFunc) => {
+            try {
+              const fn = new Function('return ' + code.match(/function arraySum[^}]+(?:\{[^}]*\})?/s)?.[0] || 'null')();
+              return fn && fn([1,2,3]) === 6 && fn([10,-5,3]) === 8;
+            } catch(e) { return false; }
+          }
+        },
+        {
+          id: 3,
+          title: "Find Max Number",
+          desc: "Write `findMax(arr)` that returns the largest number in an array.",
+          category: "Arrays",
+          difficulty: "easy",
+          hint: "Use Math.max() with spread operator or iterate to track maximum.",
+          examples: [
+            { input: 'findMax([3,7,2,9])', output: '9' },
+            { input: 'findMax([-5,-2,-10])', output: '-2' }
+          ],
+          starterCode: `function findMax(arr) {
+  // Your code here
+}`,
+          solution: `function findMax(arr) {
+  return Math.max(...arr);
+}`,
+          tests: [
+            { args: [[3,7,2,9]], expected: 9 },
+            { args: [[-5,-2,-10]], expected: -2 },
+            { args: [[42]], expected: 42 }
+          ],
+          check: (code) => code.includes('findMax') && (code.includes('Math.max') || code.includes('if'))
+        },
+        {
+          id: 4,
+          title: "Palindrome Checker",
+          desc: "Create `isPalindrome(str)` that returns true if string reads same forwards and backwards (ignore case).",
+          category: "Strings",
+          difficulty: "medium",
+          hint: "Convert to lowercase, remove non-alphanumeric chars, then compare with reversed version.",
+          examples: [
+            { input: 'isPalindrome("racecar")', output: 'true' },
+            { input: 'isPalindrome("Hello")', output: 'false' },
+            { input: 'isPalindrome("A man a plan a canal Panama")', output: 'true' }
+          ],
+          starterCode: `function isPalindrome(str) {
+  // Your code here
+}`,
+          solution: `function isPalindrome(str) {
+  const clean = str.toLowerCase().replace(/[^a-z0-9]/g, '');
+  return clean === clean.split('').reverse().join('');
+}`,
+          tests: [
+            { args: ["racecar"], expected: true },
+            { args: ["Hello"], expected: false },
+            { args: ["A man a plan a canal Panama"], expected: true },
+            { args: ["12321"], expected: true }
+          ],
+          check: (code) => code.includes('isPalindrome') && (code.includes('toLowerCase') || code.includes('reverse'))
+        },
+        {
+          id: 5,
+          title: "FizzBuzz",
+          desc: "Write `fizzBuzz(n)` that returns array from 1 to n where multiples of 3='Fizz', 5='Buzz', both='FizzBuzz'.",
+          category: "Logic",
+          difficulty: "medium",
+          hint: "Use modulo operator (%) to check divisibility. Check for both 3 and 5 first!",
+          examples: [
+            { input: 'fizzBuzz(5)', output: '[1, 2, "Fizz", 4, "Buzz"]' },
+            { input: 'fizzBuzz(15)', output: 'includes "FizzBuzz" at index 14' }
+          ],
+          starterCode: `function fizzBuzz(n) {
+  const result = [];
+  // Your code here
+  return result;
+}`,
+          solution: `function fizzBuzz(n) {
+  const result = [];
+  for(let i=1; i<=n; i++) {
+    if(i%15===0) result.push('FizzBuzz');
+    else if(i%3===0) result.push('Fizz');
+    else if(i%5===0) result.push('Buzz');
+    else result.push(i);
+  }
+  return result;
+}`,
+          tests: [
+            { args: [5], expected: [1,2,"Fizz",4,"Buzz"] },
+            { args: [3], expected: [1,2,"Fizz"] },
+            { args: [15], expected: (r) => r[14] === "FizzBuzz" }
+          ],
+          check: (code) => code.includes('fizzBuzz') && code.includes('%')
+        },
+        {
+          id: 6,
+          title: "Object Key Filter",
+          desc: "Create `filterKeys(obj, prefix)` that returns new object with only keys starting with given prefix.",
+          category: "Objects",
+          difficulty: "medium",
+          hint: "Use Object.entries() with filter() and Object.fromEntries(), or for...in loop.",
+          examples: [
+            { input: 'filterKeys({name:"John", age:30, nick:"JD"}, "n")', output: '{name: "John", nick: "JD"}' }
+          ],
+          starterCode: `function filterKeys(obj, prefix) {
+  // Your code here
+}`,
+          solution: `function filterKeys(obj, prefix) {
+  return Object.fromEntries(
+    Object.entries(obj).filter(([key]) => key.startsWith(prefix))
+  );
+}`,
+          tests: [
+            { args: [{name:"John", age:30, nick:"JD"}, "n"], expected: (r) => r.name==="John" && r.nick==="JD" && !r.age },
+            { args: [{a:1, b:2, ab:3}, "a"], expected: (r) => r.a===1 && r.ab===3 && !r.b }
+          ],
+          check: (code) => code.includes('filterKeys') && (code.includes('startsWith') || code.includes('indexOf'))
+        },
+        {
+          id: 7,
+          title: "Debounce Function",
+          desc: "Implement `debounce(fn, delay)` that returns debounced version of fn (delays execution until after delay ms).",
+          category: "Functions",
+          difficulty: "hard",
+          hint: "Use setTimeout and clearTimeout. Store timer ID in closure. Return function that resets timer.",
+          examples: [
+            { input: 'const db = debounce(console.log, 100); db("hi"); db("hello"); // Only "hello" logs after 100ms' }
+          ],
+          starterCode: `function debounce(fn, delay) {
+  // Your code here
+  return function(...args) {
+    // Implementation
+  };
+}`,
+          solution: `function debounce(fn, delay) {
+  let timer;
+  return function(...args) {
+    clearTimeout(timer);
+    timer = setTimeout(() => fn.apply(this, args), delay);
+  };
+}`,
+          tests: [
+            { args: [], expected: (r) => typeof r === 'function' }
+          ],
+          check: (code) => code.includes('debounce') && code.includes('setTimeout') && code.includes('clearTimeout')
+        },
+        {
+          id: 8,
+          title: "Flatten Nested Array",
+          desc: "Write `flatten(arr)` that flattens nested arrays of any depth into single-level array.",
+          category: "Arrays",
+          difficulty: "hard",
+          hint: "Use recursion or Array.flat(Infinity). Check if element is array with Array.isArray().",
+          examples: [
+            { input: 'flatten([1,[2,[3,4],5]])', output: '[1,2,3,4,5]' },
+            { input: 'flatten([[[1]],2])', output: '[1,2]' }
+          ],
+          starterCode: `function flatten(arr) {
+  // Your code here
+}`,
+          solution: `function flatten(arr) {
+  return arr.flat(Infinity);
+  // Or recursive:
+  // return arr.reduce((acc, val) => 
+  //   Array.isArray(val) ? acc.concat(flatten(val)) : acc.concat(val), []);
+}`,
+          tests: [
+            { args: [[1,[2,[3,4],5]]], expected: [1,2,3,4,5] },
+            { args: [[[1]],2], expected: [1,2] },
+            { args: [[1,2,3]], expected: [1,2,3] }
+          ],
+          check: (code) => code.includes('flatten') && (code.includes('flat') || code.includes('reduce') || code.includes('recursion'))
+        },
+        {
+          id: 9,
+          title: "Throttle Function",
+          desc: "Implement `throttle(fn, limit)` that ensures fn is called at most once per 'limit' milliseconds.",
+          category: "Functions",
+          difficulty: "hard",
+          hint: "Track last execution time. Use Date.now(). Only execute if enough time has passed.",
+          examples: [
+            { input: 'const th = throttle(console.log, 1000); th("a"); th("b"); // Only "a" logs immediately, "b" after 1s' }
+          ],
+          starterCode: `function throttle(fn, limit) {
+  let lastCall = 0;
+  return function(...args) {
+    // Your code here
+  };
+}`,
+          solution: `function throttle(fn, limit) {
+  let lastCall = 0;
+  return function(...args) {
+    const now = Date.now();
+    if(now - lastCall >= limit) {
+      lastCall = now;
+      fn.apply(this, args);
+    }
+  };
+}`,
+          tests: [
+            { args: [], expected: (r) => typeof r === 'function' }
+          ],
+          check: (code) => code.includes('throttle') && code.includes('Date.now')
+        },
+        {
+          id: 10,
+          title: "Deep Clone Object",
+          desc: "Create `deepClone(obj)` that creates deep copy of object/array (handles nested structures).",
+          category: "Objects",
+          difficulty: "hard",
+          hint: "Use recursion. Handle arrays and objects separately. Use structuredClone() if available, or JSON methods for simple cases.",
+          examples: [
+            { input: 'const a={x:{y:1}}; const b=deepClone(a); b.x.y=2; console.log(a.x.y); // Should still be 1' }
+          ],
+          starterCode: `function deepClone(obj) {
+  // Your code here
+}`,
+          solution: `function deepClone(obj) {
+  if(obj === null || typeof obj !== 'object') return obj;
+  if(Array.isArray(obj)) return obj.map(deepClone);
+  return Object.fromEntries(Object.entries(obj).map(([k,v]) => [k, deepClone(v)]));
+}`,
+          tests: [
+            { args: [{a:1}], expected: (r) => r.a===1 && r!==arguments[0] }
+          ],
+          check: (code) => code.includes('deepClone') && (code.includes('recursion') || code.includes('structuredClone') || code.includes('JSON'))
+        }
+      ];
+
+      // ====== STATE MANAGEMENT ======
+      let state = {
+        currentIdx: 0,
+        score: 0,
+        solved: new Set(),
+        startTime: Date.now(),
+        timerInterval: null,
+        hintShown: false,
+        solutionRevealed: false
+      };
+
+      // ====== DOM ELEMENTS ======
+      const els = {
+        task: document.getElementById('cc-task'),
+        taskTitle: document.getElementById('cc-task-title'),
+        difficulty: document.getElementById('cc-difficulty'),
+        category: document.getElementById('cc-category'),
+        taskDesc: document.getElementById('cc-task-desc'),
+        examples: document.getElementById('cc-examples'),
+        code: document.getElementById('cc-code'),
+        res: document.getElementById('cc-res'),
+        run: document.getElementById('cc-run'),
+        hint: document.getElementById('cc-hint'),
+        solutionBtn: document.getElementById('cc-solution-btn'),
+        solution: document.getElementById('cc-solution'),
+        next: document.getElementById('cc-next'),
+        copy: document.getElementById('cc-copy'),
+        reset: document.getElementById('cc-reset'),
+        score: document.getElementById('cc-score'),
+        solved: document.getElementById('cc-solved'),
+        total: document.getElementById('cc-total'),
+        timer: document.getElementById('cc-time'),
+        timerEl: document.getElementById('cc-timer'),
+        progressBar: document.getElementById('cc-progress-bar')
+      };
+
+      // ====== UTILITY FUNCTIONS ======
+      const formatTime = (ms) => {
+        const totalSec = Math.floor(ms / 1000);
+        const min = String(Math.floor(totalSec / 60)).padStart(2, '0');
+        const sec = String(totalSec % 60).padStart(2, '0');
+        return `${min}:${sec}`;
+      };
+
+      const updateTimer = () => {
+        const elapsed = Date.now() - state.startTime;
+        els.timer.textContent = formatTime(elapsed);
+        // Warning when > 5 minutes
+        els.timerEl.classList.toggle('warning', elapsed > 300000);
+      };
+
+      const updateProgress = () => {
+        const pct = (state.solved.size / challenges.length) * 100;
+        els.progressBar.style.width = `${pct}%`;
+        els.solved.textContent = state.solved.size;
+        els.total.textContent = challenges.length;
+        els.score.textContent = state.score;
+      };
+
+      const loadChallenge = (idx) => {
+        const c = challenges[idx];
+        state.hintShown = false;
+        state.solutionRevealed = false;
+        
+        els.taskTitle.textContent = `#${c.id}. ${c.title}`;
+        els.difficulty.textContent = c.difficulty;
+        els.difficulty.className = `cc-difficulty ${c.difficulty}`;
+        els.category.textContent = `📁 ${c.category}`;
+        els.taskDesc.textContent = c.desc;
+        
+        // Render examples
+        els.examples.innerHTML = c.examples.map(ex => 
+          `<code>${ex.input} → ${ex.output}</code>`
+        ).join('');
+        
+        // Load starter code
+        els.code.value = c.starterCode || '';
+        
+        // Reset result area
+        els.res.innerHTML = '<div style="color: var(--text-secondary);">💡 Write your solution and click "Run Code" to test!</div>';
+        els.res.className = 'cc-res';
+        
+        // Update UI
+        updateProgress();
+      };
+
+      const runTests = (userCode) => {
+        const challenge = challenges[state.currentIdx];
+        const results = [];
+        let allPassed = true;
+        
+        // Execute user code in isolated scope
+        let userFunc;
+        try {
+          // Extract function from code
+          const fnMatch = userCode.match(/function\s+(\w+)\s*\([^)]*\)\s*\{[\s\S]*?\}(?=\s*(?:function|$))/);
+          if(fnMatch) {
+            new Function(userCode)();
+            userFunc = window[fnMatch[1]];
+          }
+        } catch(e) {
+          return { success: false, error: `Syntax Error: ${e.message}`, results: [] };
+        }
+        
+        if(!userFunc || typeof userFunc !== 'function') {
+          return { success: false, error: '❌ Function not found or not properly defined!', results: [] };
+        }
+        
+        // Run each test case
+        for(const test of challenge.tests) {
+          try {
+            const result = userFunc(...test.args);
+            let passed;
+            
+            if(typeof test.expected === 'function') {
+              passed = test.expected(result);
+            } else {
+              passed = JSON.stringify(result) === JSON.stringify(test.expected);
+            }
+            
+            results.push({
+              input: JSON.stringify(test.args),
+              expected: JSON.stringify(test.expected),
+              actual: JSON.stringify(result),
+              passed
+            });
+            
+            if(!passed) allPassed = false;
+          } catch(e) {
+            results.push({
+              input: JSON.stringify(test.args),
+              expected: JSON.stringify(test.expected),
+              actual: `❌ Error: ${e.message}`,
+              passed: false
+            });
+            allPassed = false;
+          }
+        }
+        
+        return { success: allPassed, results };
+      };
+
+      const showResult = (result) => {
+        if(result.error) {
+          els.res.innerHTML = `<div style="color: var(--error);">${result.error}</div>`;
+          els.res.className = 'cc-res cc-error';
+          return;
+        }
+        
+        let html = result.success 
+          ? `<div style="color: var(--success); font-weight: 600; margin-bottom: 0.8rem;">✅ All tests passed! Great job! 🎉</div>`
+          : `<div style="color: var(--warning); font-weight: 600; margin-bottom: 0.8rem;">⚠️ Some tests failed. Keep trying! 💪</div>`;
+        
+        html += '<div class="cc-test-results">';
+        result.results.forEach((r, i) => {
+          const status = r.passed ? '✅' : '❌';
+          const cls = r.passed ? 'pass' : 'fail';
+          html += `
+            <div class="cc-test-case ${cls}">
+              <span>Test ${i+1}: ${r.input}</span>
+              <span>${status} ${r.passed ? 'Pass' : `Expected: ${r.expected}, Got: ${r.actual}`}</span>
+            </div>
+          `;
+        });
+        html += '</div>';
+        
+        els.res.innerHTML = html;
+        els.res.className = `cc-res ${result.success ? 'cc-success' : 'cc-error'}`;
+        
+        // Update score if passed
+        if(result.success && !state.solved.has(challenges[state.currentIdx].id)) {
+          state.solved.add(challenges[state.currentIdx].id);
+          state.score += challenges[state.currentIdx].difficulty === 'hard' ? 30 : 
+                        challenges[state.currentIdx].difficulty === 'medium' ? 20 : 10;
+          updateProgress();
+          
+          // Confetti effect (simple)
+          setTimeout(() => {
+            els.res.innerHTML += '<div style="margin-top:1rem;text-align:center;font-size:2rem;">🎊</div>';
+          }, 300);
+        }
+      };
+
+      // ====== EVENT HANDLERS ======
+      els.run.addEventListener('click', () => {
+        const code = els.code.value;
+        const result = runTests(code);
+        showResult(result);
+      });
+
+      els.hint.addEventListener('click', () => {
+        const c = challenges[state.currentIdx];
+        if(!state.hintShown) {
+          // Deduct small penalty for hint
+          state.score = Math.max(0, state.score - 2);
+          updateProgress();
+          state.hintShown = true;
+        }
+        els.res.innerHTML = `<div style="color: var(--accent);">💡 <strong>Hint:</strong> ${c.hint}</div>`;
+        els.res.className = 'cc-res cc-info';
+      });
+
+      els.solutionBtn.addEventListener('click', () => {
+        const c = challenges[state.currentIdx];
+        if(!state.solutionRevealed) {
+          state.score = Math.max(0, state.score - 5);
+          updateProgress();
+          state.solutionRevealed = true;
+        }
+        els.code.value = c.solution;
+        els.res.innerHTML = `<div style="color: var(--text-secondary);">🔓 Solution revealed. Try to understand the logic! 🧠</div>`;
+        els.res.className = 'cc-res cc-info';
+      });
+
+      els.next.addEventListener('click', () => {
+        state.currentIdx = (state.currentIdx + 1) % challenges.length;
+        state.startTime = Date.now(); // Reset timer for new challenge
+        loadChallenge(state.currentIdx);
+      });
+
+      els.copy.addEventListener('click', async () => {
+        try {
+          await navigator.clipboard.writeText(els.code.value);
+          els.copy.textContent = '✅';
+          setTimeout(() => els.copy.textContent = '📋', 1500);
+        } catch(e) {
+          alert('Copy failed. Please select and copy manually.');
+        }
+      });
+
+      els.reset.addEventListener('click', () => {
+        if(confirm('Reset code to starter template?')) {
+          els.code.value = challenges[state.currentIdx].starterCode || '';
+          els.res.innerHTML = '<div style="color: var(--text-secondary);">Code reset. Start fresh! 🔄</div>';
+          els.res.className = 'cc-res cc-info';
+        }
+      });
+
+      // Keyboard shortcuts
+      document.addEventListener('keydown', (e) => {
+        if(e.target === els.code) {
+          // Ctrl+Enter or Cmd+Enter to run
+          if((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+            e.preventDefault();
+            els.run.click();
+          }
+          // Ctrl+H for hint
+          if((e.ctrlKey || e.metaKey) && e.key === 'h') {
+            e.preventDefault();
+            els.hint.click();
+          }
+          // Ctrl+N for next
+          if((e.ctrlKey || e.metaKey) && e.key === 'n') {
+            e.preventDefault();
+            els.next.click();
+          }
+        }
+      });
+
+      // Tab key support in textarea
+      els.code.addEventListener('keydown', (e) => {
+        if(e.key === 'Tab') {
+          e.preventDefault();
+          const start = els.code.selectionStart;
+          const end = els.code.selectionEnd;
+          els.code.value = els.code.value.substring(0, start) + '  ' + els.code.value.substring(end);
+          els.code.selectionStart = els.code.selectionEnd = start + 2;
+        }
+      });
+
+      // ====== INITIALIZATION ======
+      const init = () => {
+        // Load saved progress from localStorage
+        const saved = localStorage.getItem('cc-progress');
+        if(saved) {
+          try {
+            const data = JSON.parse(saved);
+            state.solved = new Set(data.solved || []);
+            state.score = data.score || 0;
+            state.currentIdx = data.currentIdx || 0;
+          } catch(e) {}
+        }
+        
+        // Start timer
+        state.startTime = Date.now();
+        state.timerInterval = setInterval(updateTimer, 1000);
+        
+        // Load first challenge
+        loadChallenge(state.currentIdx);
+        
+        // Save progress periodically
+        setInterval(() => {
+          localStorage.setItem('cc-progress', JSON.stringify({
+            solved: Array.from(state.solved),
+            score: state.score,
+            currentIdx: state.currentIdx
+          }));
+        }, 10000);
+      };
+
+      // Start the app
+      init();
+    })();
+  </script>
+</div>

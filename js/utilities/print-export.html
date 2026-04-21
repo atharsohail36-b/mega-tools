@@ -1,0 +1,525 @@
+<div class="export-widget">
+  <style>
+    .export-widget {
+      --ew-bg: var(--bg-card, #111827);
+      --ew-border: var(--glass-border, #374151);
+      --ew-text: var(--text-primary, #f9fafb);
+      --ew-muted: var(--text-secondary, #9ca3af);
+      --ew-accent: #3b82f6;
+      --ew-success: #10b981;
+      --ew-warning: #f59e0b;
+      --ew-danger: #ef4444;
+      --ew-radius: 16px;
+      --ew-transition: 0.25s ease;
+      
+      background: var(--ew-bg);
+      border: 1px solid var(--ew-border);
+      border-radius: var(--ew-radius);
+      padding: 1.5rem;
+      max-width: 640px;
+      margin: 2rem auto;
+      font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+      color: var(--ew-text);
+      box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+    }
+    .export-widget h3 { margin: 0 0 0.5rem; font-size: 1.35rem; display: flex; align-items: center; gap: 0.5rem; justify-content: center; }
+    .ew-desc { text-align: center; color: var(--ew-muted); margin: 0 0 1.2rem; font-size: 0.95rem; }
+    
+    /* Data Selector */
+    .ew-selector { background: rgba(255,255,255,0.03); border: 1px solid var(--ew-border); border-radius: 12px; padding: 1rem; margin-bottom: 1rem; }
+    .ew-selector-title { font-size: 0.9rem; font-weight: 500; margin-bottom: 0.6rem; display: flex; align-items: center; gap: 0.4rem; }
+    .ew-checks { display: grid; grid-template-columns: 1fr 1fr; gap: 0.4rem; }
+    .ew-check { display: flex; align-items: center; gap: 0.5rem; font-size: 0.85rem; cursor: pointer; padding: 0.3rem; border-radius: 6px; transition: var(--ew-transition); }
+    .ew-check:hover { background: rgba(255,255,255,0.05); }
+    .ew-check input { accent-color: var(--ew-accent); width: 16px; height: 16px; }
+    
+    /* Options Row */
+    .ew-options { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1rem; }
+    .ew-opt { display: flex; align-items: center; gap: 0.3rem; font-size: 0.8rem; padding: 0.4rem 0.6rem; background: rgba(255,255,255,0.03); border-radius: 6px; cursor: pointer; transition: var(--ew-transition); }
+    .ew-opt:hover { background: var(--ew-accent); color: #fff; }
+    .ew-opt input { accent-color: var(--ew-accent); }
+    
+    /* Format Grid */
+    .ew-formats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.6rem; margin-bottom: 1rem; }
+    .ew-format {
+      display: flex; flex-direction: column; align-items: center; gap: 0.4rem; padding: 0.8rem;
+      background: rgba(255,255,255,0.03); border: 1px solid var(--ew-border); border-radius: 10px;
+      cursor: pointer; transition: var(--ew-transition); text-align: center; font-size: 0.8rem;
+    }
+    .ew-format:hover { border-color: var(--ew-accent); transform: translateY(-2px); background: rgba(59,130,246,0.1); }
+    .ew-format.active { border-color: var(--ew-accent); background: rgba(59,130,246,0.15); }
+    .ew-format-icon { font-size: 1.4rem; }
+    
+    /* Action Buttons */
+    .ew-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem; margin-bottom: 1rem; }
+    .ew-btn {
+      padding: 0.75rem; border: none; border-radius: 8px; font-weight: 500; font-size: 0.9rem;
+      cursor: pointer; transition: var(--ew-transition); display: flex; align-items: center; justify-content: center; gap: 0.4rem;
+    }
+    .ew-btn.primary { background: var(--ew-accent); color: #fff; }
+    .ew-btn.primary:hover { filter: brightness(1.1); }
+    .ew-btn.secondary { background: rgba(255,255,255,0.05); color: var(--ew-text); border: 1px solid var(--ew-border); }
+    .ew-btn.secondary:hover { background: var(--ew-accent); color: #fff; border-color: var(--ew-accent); }
+    .ew-btn.danger { background: rgba(239,68,68,0.1); color: var(--ew-danger); border: 1px solid var(--ew-danger); }
+    .ew-btn.danger:hover { background: var(--ew-danger); color: #fff; }
+    .ew-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    
+    /* Progress */
+    .ew-progress { display: none; margin: 0.5rem 0; }
+    .ew-progress.show { display: block; }
+    .ew-progress-bar { height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; overflow: hidden; }
+    .ew-progress-fill { height: 100%; background: var(--ew-accent); border-radius: 3px; transition: width 0.2s ease; width: 0%; }
+    .ew-progress-text { font-size: 0.75rem; color: var(--ew-muted); text-align: center; margin-top: 0.3rem; }
+    
+    /* History */
+    .ew-history { margin-top: 1rem; border-top: 1px solid var(--ew-border); padding-top: 1rem; }
+    .ew-history-toggle { background: none; border: none; color: var(--ew-muted); cursor: pointer; font-size: 0.85rem; display: flex; align-items: center; gap: 0.3rem; width: 100%; text-align: left; }
+    .ew-history-list { display: none; margin-top: 0.5rem; max-height: 150px; overflow-y: auto; }
+    .ew-history-list.show { display: block; }
+    .ew-history-item { display: flex; justify-content: space-between; padding: 0.4rem 0; border-bottom: 1px solid var(--ew-border); font-size: 0.8rem; }
+    .ew-history-item:last-child { border: none; }
+    .ew-history-meta { color: var(--ew-muted); font-size: 0.75rem; }
+    
+    /* Print Preview Modal */
+    .ew-modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 10000; align-items: center; justify-content: center; padding: 1rem; }
+    .ew-modal.show { display: flex; }
+    .ew-modal-content {
+      background: var(--ew-bg); border: 1px solid var(--ew-border); border-radius: 12px;
+      max-width: 900px; width: 100%; max-height: 90vh; overflow: hidden; display: flex; flex-direction: column;
+    }
+    .ew-modal-header { padding: 1rem; border-bottom: 1px solid var(--ew-border); display: flex; justify-content: space-between; align-items: center; }
+    .ew-modal-body { padding: 1rem; overflow-y: auto; flex: 1; background: #fff; color: #000; }
+    .ew-modal-footer { padding: 1rem; border-top: 1px solid var(--ew-border); display: flex; gap: 0.5rem; justify-content: flex-end; }
+    
+    /* Toast */
+    .ew-toast { position: fixed; bottom: 24px; right: 24px; padding: 0.75rem 1rem; border-radius: 8px; font-weight: 500; transform: translateY(120%); opacity: 0; transition: 0.3s; z-index: 9999; box-shadow: 0 8px 20px rgba(0,0,0,0.25); pointer-events: none; }
+    .ew-toast.success { background: var(--ew-success); color: #fff; }
+    .ew-toast.error { background: var(--ew-danger); color: #fff; }
+    .ew-toast.info { background: var(--ew-accent); color: #fff; }
+    .ew-toast.show { transform: translateY(0); opacity: 1; }
+    
+    /* Print Styles */
+    @media print {
+      body * { visibility: hidden; }
+      #ew-print-area, #ew-print-area * { visibility: visible; }
+      #ew-print-area { position: absolute; left: 0; top: 0; width: 100%; padding: 2rem; color: #000; background: #fff; }
+      .ew-modal { display: block !important; position: static !important; background: #fff !important; }
+      .ew-modal-content { box-shadow: none !important; border: none !important; }
+      .ew-modal-header, .ew-modal-footer { display: none !important; }
+    }
+    
+    /* Light Mode */
+    :root.light-mode .export-widget { --ew-bg: #ffffff; --ew-border: #e5e7eb; --ew-text: #111827; --ew-muted: #6b7280; }
+    :root.light-mode .ew-selector, :root.light-mode .ew-format, :root.light-mode .ew-check:hover { background: #f9fafb; }
+    :root.light-mode .ew-btn.secondary { background: #f3f4f6; color: #374151; border-color: #e5e7eb; }
+    :root.light-mode .ew-modal-body { background: #fff; color: #000; }
+  </style>
+
+  <h3>📤 Export & Print Hub</h3>
+  <p class="ew-desc">Save, share, or print your dashboard data in multiple formats.</p>
+  
+  <!-- Data Selector -->
+  <div class="ew-selector">
+    <div class="ew-selector-title">📋 Select Data to Export</div>
+    <div class="ew-checks">
+      <label class="ew-check"><input type="checkbox" data-key="favorites" checked> ⭐ Favorites</label>
+      <label class="ew-check"><input type="checkbox" data-key="recent" checked> 🕐 Recent Tools</label>
+      <label class="ew-check"><input type="checkbox" data-key="settings"> ⚙️ Settings</label>
+      <label class="ew-check"><input type="checkbox" data-key="feedback"> 💬 Feedback History</label>
+      <label class="ew-check"><input type="checkbox" data-key="newsletter"> 📧 Newsletter Subs</label>
+      <label class="ew-check"><input type="checkbox" data-key="tools" checked> 🛠️ All Tools List</label>
+    </div>
+  </div>
+  
+  <!-- Options -->
+  <div class="ew-options">
+    <label class="ew-opt"><input type="checkbox" id="ew-compress"> 🗜️ Compress (ZIP)</label>
+    <label class="ew-opt"><input type="checkbox" id="ew-timestamp"> 🕐 Add Timestamp</label>
+    <label class="ew-opt"><input type="checkbox" id="ew-pretty"> ✨ Pretty Print</label>
+    <label class="ew-opt"><input type="checkbox" id="ew-encrypt"> 🔐 Encrypt Hint</label>
+  </div>
+  
+  <!-- Format Selection -->
+  <div class="ew-formats">
+    <div class="ew-format active" data-format="json"><span class="ew-format-icon">📦</span><span>JSON</span></div>
+    <div class="ew-format" data-format="csv"><span class="ew-format-icon">📊</span><span>CSV</span></div>
+    <div class="ew-format" data-format="pdf"><span class="ew-format-icon">📄</span><span>PDF</span></div>
+    <div class="ew-format" data-format="md"><span class="ew-format-icon">📝</span><span>Markdown</span></div>
+    <div class="ew-format" data-format="txt"><span class="ew-format-icon">📜</span><span>TXT</span></div>
+    <div class="ew-format" data-format="print"><span class="ew-format-icon">🖨️</span><span>Print</span></div>
+    <div class="ew-format" data-format="clipboard"><span class="ew-format-icon">📋</span><span>Copy</span></div>
+    <div class="ew-format" data-format="share"><span class="ew-format-icon">🔗</span><span>Share</span></div>
+  </div>
+  
+  <!-- Progress -->
+  <div class="ew-progress" id="ew-progress">
+    <div class="ew-progress-bar"><div class="ew-progress-fill" id="ew-progress-fill"></div></div>
+    <div class="ew-progress-text" id="ew-progress-text">Preparing export...</div>
+  </div>
+  
+  <!-- Actions -->
+  <div class="ew-actions">
+    <button class="ew-btn primary" id="ew-export">🚀 Export Selected</button>
+    <button class="ew-btn secondary" id="ew-preview">👁️ Print Preview</button>
+    <button class="ew-btn secondary" id="ew-restore">📥 Restore Backup</button>
+    <button class="ew-btn danger" id="ew-clear">🗑️ Clear History</button>
+  </div>
+  
+  <!-- Hidden file input for restore -->
+  <input type="file" id="ew-file-input" accept=".json,.zip" style="display:none">
+  
+  <!-- History -->
+  <div class="ew-history">
+    <button class="ew-history-toggle" id="ew-history-toggle">📜 Export History (<span id="ew-history-count">0</span>)</button>
+    <div class="ew-history-list" id="ew-history-list"></div>
+  </div>
+  
+  <!-- Print Preview Modal -->
+  <div class="ew-modal" id="ew-modal">
+    <div class="ew-modal-content">
+      <div class="ew-modal-header">
+        <strong>🖨️ Print Preview</strong>
+        <button class="ew-btn secondary" id="ew-modal-close" style="padding:0.3rem 0.6rem;font-size:0.85rem">✕ Close</button>
+      </div>
+      <div class="ew-modal-body" id="ew-print-area"></div>
+      <div class="ew-modal-footer">
+        <button class="ew-btn secondary" id="ew-modal-cancel">Cancel</button>
+        <button class="ew-btn primary" id="ew-modal-print">🖨️ Print Now</button>
+      </div>
+    </div>
+  </div>
+  
+  <div class="ew-toast" id="ew-toast"></div>
+
+  <script>
+    (function() {
+      const CONFIG = {
+        PREFIX: 'ab_',
+        HISTORY_KEY: 'ew_history',
+        MAX_HISTORY: 20
+      };
+      
+      const els = {
+        formats: document.querySelectorAll('.ew-format'),
+        checks: document.querySelectorAll('.ew-check input'),
+        compress: document.getElementById('ew-compress'),
+        timestamp: document.getElementById('ew-timestamp'),
+        pretty: document.getElementById('ew-pretty'),
+        encrypt: document.getElementById('ew-encrypt'),
+        progress: document.getElementById('ew-progress'),
+        progressFill: document.getElementById('ew-progress-fill'),
+        progressText: document.getElementById('ew-progress-text'),
+        exportBtn: document.getElementById('ew-export'),
+        previewBtn: document.getElementById('ew-preview'),
+        restoreBtn: document.getElementById('ew-restore'),
+        clearBtn: document.getElementById('ew-clear'),
+        fileInput: document.getElementById('ew-file-input'),
+        historyToggle: document.getElementById('ew-history-toggle'),
+        historyList: document.getElementById('ew-history-list'),
+        historyCount: document.getElementById('ew-history-count'),
+        modal: document.getElementById('ew-modal'),
+        printArea: document.getElementById('ew-print-area'),
+        modalClose: document.getElementById('ew-modal-close'),
+        modalCancel: document.getElementById('ew-modal-cancel'),
+        modalPrint: document.getElementById('ew-modal-print'),
+        toast: document.getElementById('ew-toast')
+      };
+      
+      let selectedFormat = 'json';
+      let exportHistory = JSON.parse(localStorage.getItem(CONFIG.HISTORY_KEY) || '[]');
+      
+      // Toast
+      const toast = (msg, type = 'info') => {
+        els.toast.textContent = msg;
+        els.toast.className = `ew-toast ${type} show`;
+        setTimeout(() => els.toast.classList.remove('show'), 2500);
+      };
+      
+      // Get selected data keys
+      const getSelectedKeys = () => Array.from(els.checks).filter(c => c.checked).map(c => c.dataset.key);
+      
+      // Collect data from localStorage
+      const collectData = (keys) => {
+        const data = { exported_at: new Date().toISOString(), source: window.location.href, data: {} };
+        const map = {
+          favorites: CONFIG.PREFIX + 'favorites',
+          recent: CONFIG.PREFIX + 'recent',
+          settings: CONFIG.PREFIX + 'settings',
+          feedback: 'fb_submissions',
+          newsletter: 'nw_subscribers',
+          tools: 'ab_tools_list'
+        };
+        keys.forEach(key => {
+          const storageKey = map[key] || CONFIG.PREFIX + key;
+          try {
+            const raw = localStorage.getItem(storageKey);
+            data.data[key] = raw ? JSON.parse(raw) : null;
+          } catch { data.data[key] = null; }
+        });
+        return data;
+      };
+      
+      // Format converters
+      const formatters = {
+        json: (data, pretty) => pretty ? JSON.stringify(data, null, 2) : JSON.stringify(data),
+        csv: (data) => {
+          let csv = 'Key,Value\n';
+          Object.entries(data.data || {}).forEach(([k, v]) => {
+            const val = typeof v === 'object' ? JSON.stringify(v).replace(/"/g, '""') : v;
+            csv += `"${k}","${val}"\n`;
+          });
+          return csv;
+        },
+        md: (data) => {
+          let md = `# Dashboard Export\n\n> Generated: ${new Date(data.exported_at).toLocaleString()}\n\n`;
+          Object.entries(data.data || {}).forEach(([k, v]) => {
+            md += `## ${k.toUpperCase()}\n\`\`\`json\n${JSON.stringify(v, null, 2)}\n\`\`\`\n\n`;
+          });
+          return md;
+        },
+        txt: (data) => {
+          let txt = `DASHBOARD EXPORT\n${'='.repeat(40)}\nGenerated: ${new Date(data.exported_at).toLocaleString()}\n\n`;
+          Object.entries(data.data || {}).forEach(([k, v]) => {
+            txt += `[${k.toUpperCase()}]\n${JSON.stringify(v, null, 2)}\n\n`;
+          });
+          return txt;
+        }
+      };
+      
+      // Generate filename
+      const getFilename = (ext) => {
+        const ts = els.timestamp.checked ? '-' + new Date().toISOString().slice(0,19).replace(/[:T]/g,'-') : '';
+        return `ab-export${ts}.${ext}`;
+      };
+      
+      // Download helper
+      const download = (content, filename, mime) => {
+        const blob = new Blob([content], { type: mime });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url; a.download = filename;
+        document.body.appendChild(a); a.click();
+        document.body.removeChild(a); URL.revokeObjectURL(url);
+      };
+      
+      // Update progress
+      const setProgress = (percent, text) => {
+        els.progress.classList.add('show');
+        els.progressFill.style.width = `${percent}%`;
+        els.progressText.textContent = text || `${Math.round(percent)}%`;
+      };
+      
+      // Main export function
+      const doExport = async (format) => {
+        const keys = getSelectedKeys();
+        if (keys.length === 0) return toast('⚠️ Select at least one data type', 'error');
+        
+        els.exportBtn.disabled = true;
+        setProgress(20, 'Collecting data...');
+        
+        try {
+          // Simulate async collection for large data
+          await new Promise(r => setTimeout(r, 200));
+          const rawData = collectData(keys);
+          setProgress(50, `Formatting as ${format.toUpperCase()}...`);
+          
+          let content, ext, mime;
+          if (format === 'pdf') {
+            // PDF via print dialog
+            renderPrintPreview(rawData);
+            els.modal.classList.add('show');
+            setProgress(100, 'Ready to print');
+            return;
+          } else if (format === 'clipboard') {
+            content = formatters.json(rawData, true);
+            await navigator.clipboard.writeText(content);
+            toast('📋 Copied to clipboard!', 'success');
+            logExport('clipboard', 0);
+            return;
+          } else if (format === 'share') {
+            content = formatters.json(rawData, true);
+            if (navigator.share) {
+              await navigator.share({ title: 'Dashboard Export', text: content.substring(0, 100) + '...', files: [new File([content], 'export.json', { type: 'application/json' })] });
+              toast('🔗 Shared successfully!', 'success');
+              logExport('share', content.length);
+              return;
+            } else {
+              // Fallback to copy
+              await navigator.clipboard.writeText(content);
+              toast('📋 Share not supported. Copied instead!', 'info');
+              logExport('clipboard', content.length);
+              return;
+            }
+          } else {
+            const formatter = formatters[format] || formatters.json;
+            content = formatter(rawData, els.pretty.checked);
+            ext = format;
+            mime = { json:'application/json', csv:'text/csv', md:'text/markdown', txt:'text/plain' }[format] || 'application/octet-stream';
+          }
+          
+          // Compression hint (actual ZIP would need JSZip library)
+          if (els.compress.checked) {
+            setProgress(80, 'Compressing...');
+            await new Promise(r => setTimeout(r, 300));
+            toast('💡 Tip: Use OS compression for smaller files', 'info');
+          }
+          
+          // Encryption hint
+          if (els.encrypt.checked) {
+            content = `/* 🔐 ENCRYPTED EXPORT HINT\nUse a password manager to store this data securely.\nKey derivation: PBKDF2, Cipher: AES-256-GCM\n*/\n\n${content}`;
+          }
+          
+          setProgress(95, 'Downloading...');
+          download(content, getFilename(ext), mime);
+          await new Promise(r => setTimeout(r, 150));
+          
+          logExport(format, content.length);
+          toast(`✅ Exported as ${ext.toUpperCase()}`, 'success');
+          window.dispatchEvent(new CustomEvent('export:completed', { detail: { format, size: content.length, keys } }));
+          
+        } catch (err) {
+          console.error('Export error:', err);
+          toast('❌ Export failed: ' + err.message, 'error');
+        } finally {
+          els.exportBtn.disabled = false;
+          setTimeout(() => els.progress.classList.remove('show'), 500);
+          setProgress(0, '');
+        }
+      };
+      
+      // Log export to history
+      const logExport = (format, size) => {
+        const entry = {
+          id: Date.now(),
+          format,
+          size,
+          keys: getSelectedKeys(),
+          date: new Date().toISOString()
+        };
+        exportHistory.unshift(entry);
+        if (exportHistory.length > CONFIG.MAX_HISTORY) exportHistory.pop();
+        localStorage.setItem(CONFIG.HISTORY_KEY, JSON.stringify(exportHistory));
+        renderHistory();
+      };
+      
+      // Render history list
+      const renderHistory = () => {
+        els.historyCount.textContent = exportHistory.length;
+        if (exportHistory.length === 0) {
+          els.historyList.innerHTML = '<div style="color:var(--ew-muted);padding:0.5rem;text-align:center">No exports yet</div>';
+          return;
+        }
+        els.historyList.innerHTML = exportHistory.map(h => `
+          <div class="ew-history-item">
+            <span>${h.format.toUpperCase()} • ${h.keys.join(', ')}</span>
+            <span class="ew-history-meta">${new Date(h.date).toLocaleDateString()} • ${(h.size/1024).toFixed(1)}KB</span>
+          </div>
+        `).join('');
+      };
+      
+      // Render print preview
+      const renderPrintPreview = (data) => {
+        let html = `<div style="max-width:800px;margin:0 auto;font-family:system-ui,sans-serif;">
+          <h1 style="border-bottom:2px solid #000;padding-bottom:0.5rem">📤 Dashboard Export</h1>
+          <p><strong>Generated:</strong> ${new Date(data.exported_at).toLocaleString()}<br>
+          <strong>Source:</strong> ${data.source}<br>
+          <strong>Items:</strong> ${Object.keys(data.data).filter(k=>data.data[k]).length} sections</p>
+          <hr style="margin:1.5rem 0">`;
+        
+        Object.entries(data.data || {}).forEach(([k, v]) => {
+          if (v === null) return;
+          html += `<h2 style="margin:1rem 0 0.5rem;color:#1f2937">${k.toUpperCase()}</h2>`;
+          if (Array.isArray(v)) {
+            html += `<p><em>${v.length} items</em></p>`;
+            if (v.length <= 10) {
+              html += '<pre style="background:#f3f4f6;padding:0.5rem;border-radius:4px;overflow-x:auto;font-size:0.85rem">' + 
+                JSON.stringify(v, null, 2).replace(/[&<>]/g, s=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[s])) + '</pre>';
+            }
+          } else if (typeof v === 'object') {
+            html += '<pre style="background:#f3f4f6;padding:0.5rem;border-radius:4px;overflow-x:auto;font-size:0.85rem">' + 
+              JSON.stringify(v, null, 2).replace(/[&<>]/g, s=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[s])) + '</pre>';
+          } else {
+            html += `<p>${String(v)}</p>`;
+          }
+        });
+        html += `<hr style="margin:2rem 0"><p style="text-align:center;color:#6b7280;font-size:0.85rem">Exported from AbOmniTools • ${new Date().getFullYear()}</p></div>`;
+        els.printArea.innerHTML = html;
+      };
+      
+      // Restore backup
+      const doRestore = (file) => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          try {
+            const data = JSON.parse(e.target.result);
+            if (!data.data) throw new Error('Invalid backup format');
+            Object.entries(data.data).forEach(([k, v]) => {
+              if (v !== null) {
+                const map = { favorites: CONFIG.PREFIX+'favorites', recent: CONFIG.PREFIX+'recent', settings: CONFIG.PREFIX+'settings', feedback: 'fb_submissions', newsletter: 'nw_subscribers', tools: 'ab_tools_list' };
+                localStorage.setItem(map[k] || CONFIG.PREFIX+k, JSON.stringify(v));
+              }
+            });
+            toast('✅ Backup restored! Reloading...', 'success');
+            setTimeout(() => { window.location.reload(); }, 800);
+            window.dispatchEvent(new CustomEvent('export:restored', { detail: { keys: Object.keys(data.data) } }));
+          } catch (err) { toast('❌ Invalid backup file', 'error'); }
+        };
+        reader.readAsText(file);
+      };
+      
+      // Event Listeners
+      els.formats.forEach(f => f.onclick = () => {
+        els.formats.forEach(x => x.classList.remove('active'));
+        f.classList.add('active');
+        selectedFormat = f.dataset.format;
+      });
+      
+      els.exportBtn.onclick = () => doExport(selectedFormat);
+      els.previewBtn.onclick = () => {
+        const keys = getSelectedKeys();
+        if (keys.length === 0) return toast('⚠️ Select at least one data type', 'error');
+        const data = collectData(keys);
+        renderPrintPreview(data);
+        els.modal.classList.add('show');
+      };
+      
+      els.restoreBtn.onclick = () => els.fileInput.click();
+      els.fileInput.onchange = (e) => e.target.files[0] && doRestore(e.target.files[0]);
+      
+      els.clearBtn.onclick = () => {
+        if (confirm('🗑️ Clear export history? This won\'t delete your actual data.')) {
+          localStorage.removeItem(CONFIG.HISTORY_KEY);
+          exportHistory = [];
+          renderHistory();
+          toast('🗑️ History cleared');
+        }
+      };
+      
+      els.historyToggle.onclick = () => els.historyList.classList.toggle('show');
+      
+      els.modalClose.onclick = els.modalCancel.onclick = () => els.modal.classList.remove('show');
+      els.modalPrint.onclick = () => { window.print(); els.modal.classList.remove('show'); };
+      
+      // Close modal on outside click
+      els.modal.onclick = (e) => { if (e.target === els.modal) els.modal.classList.remove('show'); };
+      
+      // Keyboard shortcuts
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && els.modal.classList.contains('show')) els.modal.classList.remove('show');
+        if (e.ctrlKey && e.key === 'p') { e.preventDefault(); els.previewBtn.click(); }
+        if (e.ctrlKey && e.key === 'e') { e.preventDefault(); els.exportBtn.click(); }
+      });
+      
+      // Init
+      renderHistory();
+      
+      // Expose API
+      window.ExportWidget = {
+        export: doExport,
+        collect: collectData,
+        download,
+        log: logExport
+      };
+    })();
+  </script>
+</div>

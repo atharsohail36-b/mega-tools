@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>✨ AI Tools Hub</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+      color: #fff;
+      min-height: 100vh;
+      padding: 20px;
+    }
+    .container { max-width: 1200px; margin: 0 auto; }
+    
+    /* Header */
+    .header { text-align: center; padding: 30px 20px; }
+    .header h1 {
+      font-size: 2.5rem;
+      background: linear-gradient(90deg, #6366f1, #8b5cf6, #ec4899);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 10px;
+    }
+    .header p { color: #94a3b8; font-size: 1.1rem; }
+    
+    /* Search */
+    .search-box {
+      max-width: 600px;
+      margin: 0 auto 25px;
+      position: relative;
+    }
+    .search-box input {
+      width: 100%;
+      padding: 15px 20px 15px 50px;
+      border-radius: 15px;
+      border: 2px solid #334155;
+      background: #1e293b;
+      color: #fff;
+      font-size: 1rem;
+      outline: none;
+      transition: 0.3s;
+    }
+    .search-box input:focus {
+      border-color: #6366f1;
+      box-shadow: 0 0 20px rgba(99, 102, 241, 0.3);
+    }
+    .search-box i {
+      position: absolute;
+      left: 18px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #94a3b8;
+    }
+    
+    /* Filters */
+    .filters {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 25px;
+    }
+    .filter-btn {
+      padding: 8px 20px;
+      border-radius: 25px;
+      border: 2px solid #334155;
+      background: #1e293b;
+      color: #94a3b8;
+      cursor: pointer;
+      transition: 0.3s;
+      font-size: 0.9rem;
+    }
+    .filter-btn:hover, .filter-btn.active {
+      background: #6366f1;
+      border-color: #6366f1;
+      color: #fff;
+    }
+    
+    /* Tools Grid */
+    .tools-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 20px;
+    }
+    
+    /* Tool Card */
+    .tool-card {
+      background: #1e293b;
+      border-radius: 20px;
+      padding: 20px;
+      border: 2px solid #334155;
+      transition: 0.3s;
+      cursor: pointer;
+    }
+    .tool-card:hover {
+      transform: translateY(-5px);
+      border-color: #6366f1;
+      box-shadow: 0 10px 40px rgba(99, 102, 241, 0.2);
+    }
+    .tool-icon {
+      width: 50px;
+      height: 50px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.3rem;
+      margin-bottom: 15px;
+    }
+    .tool-category {
+      display: inline-block;
+      padding: 4px 12px;
+      background: #334155;
+      border-radius: 10px;
+      font-size: 0.8rem;
+      color: #6366f1;
+      margin-bottom: 10px;
+    }
+    .tool-name {
+      font-size: 1.3rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    .tool-desc {
+      color: #94a3b8;
+      font-size: 0.95rem;
+      line-height: 1.5;
+      margin-bottom: 15px;
+    }
+    .tool-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 15px;
+    }
+    .tool-tag {
+      padding: 3px 10px;
+      background: #334155;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      color: #cbd5e1;
+    }
+    .tool-tag.free { color: #10b981; background: rgba(16, 185, 129, 0.15); }
+    .tool-tag.paid { color: #f59e0b; background: rgba(245, 158, 11, 0.15); }
+    .tool-tag.api { color: #8b5cf6; background: rgba(139, 92, 246, 0.15); }
+    
+    .tool-actions {
+      display: flex;
+      gap: 10px;
+    }
+    .tool-btn {
+      flex: 1;
+      padding: 10px;
+      border-radius: 10px;
+      border: none;
+      font-weight: 600;
+      cursor: pointer;
+      transition: 0.3s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      font-size: 0.9rem;
+    }
+    .tool-btn.primary {
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      color: #fff;
+    }
+    .tool-btn.primary:hover {
+      box-shadow: 0 5px 20px rgba(99, 102, 241, 0.4);
+    }
+    .tool-btn.secondary {
+      background: #334155;
+      color: #fff;
+    }
+    .tool-btn.secondary:hover {
+      background: #475569;
+    }
+    
+    /* Modal */
+    .modal-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.8);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      z-index: 1000;
+    }
+    .modal-overlay.show { display: flex; }
+    .modal {
+      background: #1e293b;
+      border-radius: 24px;
+      border: 2px solid #334155;
+      max-width: 600px;
+      width: 100%;
+      max-height: 90vh;
+      overflow-y: auto;
+      padding: 25px;
+    }
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 20px;
+      padding-bottom: 15px;
+      border-bottom: 1px solid #334155;
+    }
+    .modal-title {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .modal-title-icon {
+      width: 45px;
+      height: 45px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+    }
+    .modal-close {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      background: #334155;
+      border: none;
+      color: #fff;
+      cursor: pointer;
+      font-size: 1.1rem;
+      transition: 0.3s;
+    }
+    .modal-close:hover { background: #ef4444; }
+    
+    .modal-desc {
+      color: #94a3b8;
+      line-height: 1.6;
+      margin-bottom: 20px;
+    }
+    .modal-features {
+      margin-bottom: 20px;
+    }
+    .modal-features h4 {
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .modal-features ul {
+      list-style: none;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+    .modal-features li {
+      padding: 8px 12px;
+      background: #334155;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .modal-features li i { color: #10b981; }
+    
+    .modal-footer {
+      display: flex;
+      gap: 10px;
+      padding-top: 15px;
+      border-top: 1px solid #334155;
+    }
+    .modal-btn {
+      flex: 1;
+      padding: 12px;
+      border-radius: 12px;
+      border: none;
+      font-weight: 600;
+      cursor: pointer;
+      transition: 0.3s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      font-size: 0.95rem;
+    }
+    .modal-btn.primary {
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      color: #fff;
+    }
+    .modal-btn.primary:hover {
+      box-shadow: 0 5px 25px rgba(99, 102, 241, 0.4);
+    }
+    .modal-btn.secondary {
+      background: #334155;
+      color: #fff;
+    }
+    .modal-btn.secondary:hover { background: #475569; }
+    
+    /* Empty State */
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: #94a3b8;
+    }
+    .empty-state i {
+      font-size: 4rem;
+      margin-bottom: 20px;
+      opacity: 0.5;
+    }
+    
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      padding: 12px 20px;
+      background: #1e293b;
+      border: 2px solid #334155;
+      border-left: 4px solid #10b981;
+      border-radius: 12px;
+      color: #fff;
+      font-weight: 500;
+      display: none;
+      align-items: center;
+      gap: 10px;
+      z-index: 2000;
+      animation: slideIn 0.3s ease;
+    }
+    .toast.show { display: flex; }
+    .toast.error { border-left-color: #ef4444; }
+    @keyframes slideIn {
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+    
+    /* Responsive */
+    @media (max-width: 768px) {
+      .header h1 { font-size: 2rem; }
+      .tools-grid { grid-template-columns: 1fr; }
+      .modal-features ul { grid-template-columns: 1fr; }
+      .modal-footer { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <header class="header">
+      <h1><i class="fas fa-robot"></i> AI Tools Hub</h1>
+      <p>Discover powerful AI tools for every need</p>
+    </header>
+    
+    <!-- Search -->
+    <div class="search-box">
+      <i class="fas fa-search"></i>
+      <input type="text" id="searchInput" placeholder="Search tools...">
+    </div>
+    
+    <!-- Filters -->
+    <div class="filters">
+      <button class="filter-btn active" data-filter="all">All</button>
+      <button class="filter-btn" data-filter="free">Free</button>
+      <button class="filter-btn" data-filter="paid">Premium</button>
+      <button class="filter-btn" data-filter="api">API</button>
+    </div>
+    
+    <!-- Tools Grid -->
+    <div class="tools-grid" id="toolsGrid"></div>
+    
+    <!-- Empty State -->
+    <div class="empty-state" id="emptyState" style="display: none;">
+      <i class="fas fa-search"></i>
+      <h3>No tools found</h3>
+      <p>Try a different search or filter</p>
+    </div>
+  </div>
+  
+  <!-- Modal -->
+  <div class="modal-overlay" id="modalOverlay">
+    <div class="modal">
+      <div class="modal-header">
+        <div class="modal-title">
+          <div class="modal-title-icon" id="modalIcon"><i class="fas fa-robot"></i></div>
+          <h2 id="modalTitle">Tool Name</h2>
+        </div>
+        <button class="modal-close" id="modalClose"><i class="fas fa-times"></i></button>
+      </div>
+      <p class="modal-desc" id="modalDesc"></p>
+      <div class="modal-features">
+        <h4><i class="fas fa-check-circle"></i> Features</h4>
+        <ul id="modalFeatures"></ul>
+      </div>
+      <div class="modal-footer">
+        <a href="#" class="modal-btn primary" id="modalVisit" target="_blank">
+          <i class="fas fa-external-link-alt"></i> Visit Website
+        </a>
+        <button class="modal-btn secondary" id="modalCopy">
+          <i class="fas fa-copy"></i> Copy Link
+        </button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Toast -->
+  <div class="toast" id="toast">
+    <i class="fas fa-check-circle"></i>
+    <span id="toastMessage">Done!</span>
+  </div>
+
+  <script>
+    // ✅ SIMPLE TOOLS DATA - Guaranteed to work
+    const tools = [
+      {
+        id: 'chatgpt',
+        name: 'ChatGPT',
+        category: 'LLM',
+        icon: 'fas fa-comments',
+        desc: 'Advanced conversational AI by OpenAI. Perfect for writing, coding, and analysis.',
+        url: 'https://chat.openai.com',
+        tags: ['free', 'paid', 'api'],
+        features: ['Natural conversations', 'Code generation', 'Multi-language', 'File analysis']
+      },
+      {
+        id: 'claude',
+        name: 'Claude',
+        category: 'LLM',
+        icon: 'fas fa-brain',
+        desc: 'Anthropic\'s helpful AI assistant with exceptional reasoning and long context.',
+        url: 'https://claude.ai',
+        tags: ['free', 'paid'],
+        features: ['200K context', 'Document analysis', 'Ethical AI', 'Code help']
+      },
+      {
+        id: 'midjourney',
+        name: 'Midjourney',
+        category: 'Image',
+        icon: 'fas fa-palette',
+        desc: 'Create stunning AI art through simple text prompts. Industry-leading quality.',
+        url: 'https://www.midjourney.com',
+        tags: ['paid'],
+        features: ['Photorealistic art', 'Style reference', 'Character consistency', 'Upscaling']
+      },
+      {
+        id: 'runway',
+        name: 'Runway ML',
+        category: 'Video',
+        icon: 'fas fa-video',
+        desc: 'All-in-one AI video editing with generation, effects, and professional tools.',
+        url: 'https://runwayml.com',
+        tags: ['free', 'paid', 'api'],
+        features: ['Gen-2 video', 'Motion brush', 'Green screen', 'Slow motion']
+      },
+      {
+        id: 'elevenlabs',
+        name: 'ElevenLabs',
+        category: 'Audio',
+        icon: 'fas fa-microphone-alt',
+        desc: 'Industry-leading AI voice generation with realistic speech synthesis.',
+        url: 'https://elevenlabs.io',
+        tags: ['free', 'paid', 'api'],
+        features: ['Voice cloning', '100+ languages', 'Emotion control', 'Dubbing']
+      },
+      {
+        id: 'copilot',
+        name: 'GitHub Copilot',
+        category: 'Dev',
+        icon: 'fab fa-github',
+        desc: 'AI pair programmer that suggests code completions in real-time.',
+        url: 'https://github.com/features/copilot',
+        tags: ['paid', 'api'],
+        features: ['IDE integration', 'Multi-language', 'Code explanation', 'Tests']
+      },
+      {
+        id: 'cursor',
+        name: 'Cursor',
+        category: 'Dev',
+        icon: 'fas fa-code',
+        desc: 'AI-first code editor built for speed with contextual understanding.',
+        url: 'https://cursor.sh',
+        tags: ['free', 'paid'],
+        features: ['Codebase indexing', 'AI chat', 'Auto-fix', 'Multi-file edits']
+      },
+      {
+        id: 'notion',
+        name: 'Notion AI',
+        category: 'Productivity',
+        icon: 'fab fa-notion',
+        desc: 'Integrate powerful AI into your notes, docs, and workflows seamlessly.',
+        url: 'https://www.notion.so/product/ai',
+        tags: ['paid'],
+        features: ['Write & edit', 'Summarize', 'Action items', 'Translation']
+      },
+      {
+        id: 'perplexity',
+        name: 'Perplexity',
+        category: 'Search',
+        icon: 'fas fa-search',
+        desc: 'AI-powered answer engine with cited sources and real-time web search.',
+        url: 'https://www.perplexity.ai',
+        tags: ['free', 'paid', 'api'],
+        features: ['Cited sources', 'Real-time search', 'Follow-ups', 'File upload']
+      },
+      {
+        id: 'canva',
+        name: 'Canva AI',
+        category: 'Design',
+        icon: 'fab fa-canva',
+        desc: 'All-in-one design platform with Magic Studio AI tools for everyone.',
+        url: 'https://www.canva.com',
+        tags: ['free', 'paid'],
+        features: ['Magic Edit', 'BG remover', 'AI video', 'Brand kit']
+      }
+    ];
+
+    // ✅ DOM Elements - Simple selection
+    const grid = document.getElementById('toolsGrid');
+    const searchInput = document.getElementById('searchInput');
+    const filterBtns = document.querySelectorAll('.filter-btn');
+    const emptyState = document.getElementById('emptyState');
+    const modalOverlay = document.getElementById('modalOverlay');
+    const modalClose = document.getElementById('modalClose');
+    const modalTitle = document.getElementById('modalTitle');
+    const modalIcon = document.getElementById('modalIcon');
+    const modalDesc = document.getElementById('modalDesc');
+    const modalFeatures = document.getElementById('modalFeatures');
+    const modalVisit = document.getElementById('modalVisit');
+    const modalCopy = document.getElementById('modalCopy');
+    const toast = document.getElementById('toast');
+    const toastMessage = document.getElementById('toastMessage');
+
+    // ✅ Current state
+    let currentFilter = 'all';
+    let currentSearch = '';
+    let currentTool = null;
+
+    // ✅ Render Tools - Simple and direct
+    function renderTools() {
+      // Filter tools
+      let filtered = tools.filter(tool => {
+        // Category filter
+        if (currentFilter !== 'all' && !tool.tags.includes(currentFilter)) {
+          return false;
+        }
+        // Search filter
+        if (currentSearch) {
+          const s = currentSearch.toLowerCase();
+          return tool.name.toLowerCase().includes(s) || 
+                 tool.category.toLowerCase().includes(s) || 
+                 tool.desc.toLowerCase().includes(s);
+        }
+        return true;
+      });
+
+      // Show/hide empty state
+      if (filtered.length === 0) {
+        grid.style.display = 'none';
+        emptyState.style.display = 'block';
+      } else {
+        grid.style.display = 'grid';
+        emptyState.style.display = 'none';
+      }
+
+      // Render cards
+      grid.innerHTML = filtered.map(tool => {
+        const tagsHtml = tool.tags.map(tag => {
+          const labels = { free: 'Free', paid: 'Premium', api: 'API' };
+          return `<span class="tool-tag ${tag}">${labels[tag] || tag}</span>`;
+        }).join('');
+
+        return `
+          <div class="tool-card" data-id="${tool.id}">
+            <div class="tool-icon"><i class="${tool.icon}"></i></div>
+            <span class="tool-category">${tool.category}</span>
+            <h3 class="tool-name">${tool.name}</h3>
+            <p class="tool-desc">${tool.desc}</p>
+            <div class="tool-tags">${tagsHtml}</div>
+            <div class="tool-actions">
+              <a href="${tool.url}" target="_blank" class="tool-btn primary" onclick="event.stopPropagation()">
+                <i class="fas fa-external-link-alt"></i> Visit
+              </a>
+              <button class="tool-btn secondary" onclick="openModal('${tool.id}')">
+                <i class="fas fa-info-circle"></i> Details
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      // Add click listeners for cards
+      document.querySelectorAll('.tool-card').forEach(card => {
+        card.addEventListener('click', function(e) {
+          if (!e.target.closest('a') && !e.target.closest('button')) {
+            openModal(this.dataset.id);
+          }
+        });
+      });
+    }
+
+    // ✅ Open Modal - Simple and working
+    function openModal(toolId) {
+      const tool = tools.find(t => t.id === toolId);
+      if (!tool) return;
+      
+      currentTool = tool;
+      
+      modalIcon.innerHTML = `<i class="${tool.icon}"></i>`;
+      modalTitle.textContent = tool.name;
+      modalDesc.textContent = tool.desc;
+      modalVisit.href = tool.url;
+      
+      modalFeatures.innerHTML = tool.features.map(f => 
+        `<li><i class="fas fa-check"></i> ${f}</li>`
+      ).join('');
+      
+      modalOverlay.classList.add('show');
+      document.body.style.overflow = 'hidden';
+    }
+
+    // ✅ Close Modal
+    function closeModal() {
+      modalOverlay.classList.remove('show');
+      document.body.style.overflow = '';
+      currentTool = null;
+    }
+
+    // ✅ Copy Link
+    function copyLink() {
+      if (!currentTool) return;
+      navigator.clipboard.writeText(currentTool.url).then(() => {
+        showToast('Link copied!', 'success');
+      }).catch(() => {
+        showToast('Failed to copy', 'error');
+      });
+    }
+
+    // ✅ Show Toast
+    function showToast(msg, type = 'success') {
+      toastMessage.textContent = msg;
+      toast.className = `toast ${type} show`;
+      setTimeout(() => toast.classList.remove('show'), 2500);
+    }
+
+    // ✅ Setup Event Listeners - Run after DOM is ready
+    function setupListeners() {
+      // Search
+      searchInput.addEventListener('input', function() {
+        currentSearch = this.value;
+        renderTools();
+      });
+
+      // Filters
+      filterBtns.forEach(btn => {
+        btn.addEventListener('click', function() {
+          filterBtns.forEach(b => b.classList.remove('active'));
+          this.classList.add('active');
+          currentFilter = this.dataset.filter;
+          renderTools();
+        });
+      });
+
+      // Modal close
+      modalClose.addEventListener('click', closeModal);
+      modalOverlay.addEventListener('click', function(e) {
+        if (e.target === modalOverlay) closeModal();
+      });
+
+      // Modal copy
+      modalCopy.addEventListener('click', copyLink);
+
+      // Keyboard
+      document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && modalOverlay.classList.contains('show')) {
+          closeModal();
+        }
+      });
+    }
+
+    // ✅ Initialize - Simple and guaranteed
+    function init() {
+      renderTools();
+      setupListeners();
+      console.log('✅ AI Tools Hub loaded successfully!');
+    }
+
+    // ✅ Run when DOM is ready
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', init);
+    } else {
+      init();
+    }
+  </script>
+</body>
+</html>

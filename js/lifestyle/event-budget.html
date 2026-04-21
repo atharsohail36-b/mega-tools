@@ -1,0 +1,238 @@
+<div class="lifestyle-tool event-budget">
+  <style>
+    .event-budget {
+      --eb-bg: #0b1120; --eb-card: #161e31; --eb-border: #2a3654;
+      --eb-text: #e2e8f0; --eb-sec: #94a3b8; --eb-accent: #38bdf8;
+      --eb-green: #22c55e; --eb-yellow: #f59e0b; --eb-red: #ef4444;
+      --eb-radius: 16px; font-family: system-ui, -apple-system, sans-serif;
+      max-width: 720px; margin: 0 auto; padding: 1.5rem;
+      background: var(--eb-bg); color: var(--eb-text); border-radius: var(--eb-radius);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+    }
+    .eb-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.2rem; flex-wrap: wrap; gap: 0.5rem; }
+    .eb-header h2 { margin: 0; font-size: 1.4rem; background: linear-gradient(90deg, var(--eb-accent), #a78bfa); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .eb-actions { display: flex; gap: 0.5rem; }
+    .eb-btn-sm { padding: 0.4rem 0.8rem; background: var(--eb-card); border: 1px solid var(--eb-border); color: var(--eb-sec); border-radius: 8px; cursor: pointer; font-size: 0.8rem; transition: 0.2s; }
+    .eb-btn-sm:hover { background: var(--eb-border); color: var(--eb-text); }
+    .eb-budget-row { display: flex; align-items: center; gap: 0.8rem; margin-bottom: 1rem; }
+    .eb-budget-row label { font-size: 0.9rem; color: var(--eb-sec); white-space: nowrap; }
+    .eb-budget-input { flex: 1; padding: 0.7rem; border-radius: 10px; border: 1px solid var(--eb-border); background: var(--eb-card); color: var(--eb-text); font-size: 1rem; outline: none; }
+    .eb-budget-input:focus { border-color: var(--eb-accent); box-shadow: 0 0 0 2px rgba(56,189,248,0.15); }
+    .eb-form { display: grid; grid-template-columns: 1.5fr 1fr auto; gap: 0.5rem; margin-bottom: 1rem; }
+    .eb-form input, .eb-form select, .eb-form button { padding: 0.7rem; border-radius: 10px; border: 1px solid var(--eb-border); background: var(--eb-card); color: var(--eb-text); outline: none; }
+    .eb-form button { background: var(--eb-accent); color: #0b1120; font-weight: 600; cursor: pointer; transition: 0.2s; }
+    .eb-form button:hover { background: #0ea5e9; transform: translateY(-1px); }
+    .eb-filters { display: flex; gap: 0.5rem; margin-bottom: 1rem; overflow-x: auto; padding-bottom: 0.3rem; scrollbar-width: none; }
+    .eb-filters::-webkit-scrollbar { display: none; }
+    .eb-tag { padding: 0.3rem 0.8rem; background: var(--eb-card); border: 1px solid var(--eb-border); border-radius: 20px; cursor: pointer; font-size: 0.8rem; white-space: nowrap; transition: 0.2s; }
+    .eb-tag:hover { border-color: var(--eb-accent); }
+    .eb-tag.active { background: var(--eb-accent); color: #0b1120; border-color: var(--eb-accent); }
+    .eb-list { max-height: 320px; overflow-y: auto; display: flex; flex-direction: column; gap: 0.6rem; padding-right: 4px; margin-bottom: 1rem; }
+    .eb-list::-webkit-scrollbar { width: 6px; }
+    .eb-list::-webkit-scrollbar-thumb { background: var(--eb-border); border-radius: 10px; }
+    .eb-item { display: flex; justify-content: space-between; align-items: center; padding: 0.8rem; background: var(--eb-card); border: 1px solid var(--eb-border); border-radius: 12px; transition: 0.25s; animation: ebSlide 0.3s ease; }
+    .eb-item:hover { border-color: var(--eb-accent); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
+    .eb-info { min-width: 0; }
+    .eb-name { font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; }
+    .eb-meta { display: flex; gap: 0.6rem; font-size: 0.75rem; color: var(--eb-sec); margin-top: 0.2rem; flex-wrap: wrap; }
+    .eb-amount { font-weight: 700; font-size: 1rem; color: var(--eb-text); white-space: nowrap; }
+    .eb-row-acts { display: flex; gap: 0.3rem; }
+    .eb-act { background: none; border: none; color: var(--eb-sec); cursor: pointer; padding: 0.4rem; border-radius: 6px; transition: 0.2s; }
+    .eb-act:hover { background: var(--eb-border); color: var(--eb-text); }
+    .eb-empty { text-align: center; padding: 2rem 1rem; color: var(--eb-sec); font-style: italic; }
+    .eb-summary { background: var(--eb-card); border: 1px solid var(--eb-border); border-radius: 14px; padding: 1.2rem; text-align: center; margin-bottom: 1rem; }
+    .eb-spent { font-size: 2.2rem; font-weight: 800; margin: 0.3rem 0; transition: color 0.3s; }
+    .eb-bar { height: 10px; background: var(--eb-bg); border-radius: 5px; overflow: hidden; margin: 0.6rem 0; }
+    .eb-fill { height: 100%; background: linear-gradient(90deg, var(--eb-green), var(--eb-yellow), var(--eb-red)); width: 0; transition: width 0.5s cubic-bezier(0.4,0,0.2,1); border-radius: 5px; }
+    .eb-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 0.8rem; margin-top: 1rem; }
+    .eb-stat { background: rgba(56,189,248,0.05); padding: 0.8rem; border-radius: 10px; text-align: center; }
+    .eb-stat-val { font-size: 1.1rem; font-weight: 600; }
+    .eb-stat-lbl { font-size: 0.75rem; color: var(--eb-sec); margin-top: 0.2rem; }
+    .eb-toast { position: fixed; bottom: 20px; right: 20px; padding: 0.8rem 1.2rem; border-radius: 10px; background: var(--eb-card); border: 1px solid var(--eb-border); color: var(--eb-text); font-size: 0.9rem; opacity: 0; transform: translateY(20px); transition: 0.3s; pointer-events: none; z-index: 999; box-shadow: 0 8px 24px rgba(0,0,0,0.5); }
+    .eb-toast.show { opacity: 1; transform: translateY(0); }
+    .eb-toast.success { border-color: var(--eb-green); color: var(--eb-green); }
+    .eb-toast.warn { border-color: var(--eb-yellow); color: var(--eb-yellow); }
+    @keyframes ebSlide { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
+    @media (max-width: 600px) {
+      .eb-form { grid-template-columns: 1fr; }
+      .eb-header { flex-direction: column; align-items: flex-start; }
+      .eb-stats { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+
+  <div class="eb-header">
+    <h2>📊 Event Budget Tracker</h2>
+    <div class="eb-actions">
+      <button class="eb-btn-sm" id="eb-export">📤 CSV</button>
+      <button class="eb-btn-sm" id="eb-reset">🗑️ Clear</button>
+    </div>
+  </div>
+
+  <div class="eb-budget-row">
+    <label>💰 Total Budget</label>
+    <input type="number" class="eb-budget-input" id="eb-budget" value="50000" min="0" step="1000">
+  </div>
+
+  <form class="eb-form" id="eb-form">
+    <select id="eb-cat">
+      <option value="Venue">🏢 Venue</option>
+      <option value="Catering">🍽️ Catering</option>
+      <option value="Decor">🎨 Decor</option>
+      <option value="Marketing">📢 Marketing</option>
+      <option value="Travel">✈️ Travel</option>
+      <option value="Misc">📦 Misc</option>
+      <option value="Custom">✏️ Custom</option>
+    </select>
+    <input type="number" id="eb-amt" placeholder="Amount" min="1" step="100" required>
+    <button type="submit">➕ Add</button>
+  </form>
+  <input type="text" id="eb-custom-cat" placeholder="Enter custom category..." style="display:none;padding:0.5rem 0.7rem;margin:-0.5rem 0 0.5rem;border-radius:8px;border:1px solid var(--eb-border);background:var(--eb-card);color:var(--eb-text);width:100%;">
+
+  <div class="eb-filters" id="eb-filters"></div>
+  <div class="eb-list" id="eb-list"></div>
+
+  <div class="eb-summary">
+    <div style="font-size:0.9rem;color:var(--eb-sec);">Spent / Remaining</div>
+    <div class="eb-spent" id="eb-spent">₹0</div>
+    <div class="eb-bar"><div class="eb-fill" id="eb-fill"></div></div>
+    <div class="eb-stats">
+      <div class="eb-stat"><div class="eb-stat-val" id="eb-left">₹50,000</div><div class="eb-stat-lbl">Remaining</div></div>
+      <div class="eb-stat"><div class="eb-stat-val" id="eb-count">0</div><div class="eb-stat-lbl">Items</div></div>
+      <div class="eb-stat"><div class="eb-stat-val" id="eb-avg">₹0</div><div class="eb-stat-lbl">Avg/Item</div></div>
+    </div>
+  </div>
+
+  <div class="eb-toast" id="eb-toast"></div>
+
+  <script>
+  (function(){
+    const KEY = 'ev-budget-pro-v1';
+    const fmt = (n) => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(n);
+    const toast = (msg, type='success') => {
+      const el = document.getElementById('eb-toast');
+      el.textContent = msg; el.className = `eb-toast show ${type}`;
+      setTimeout(() => el.className = 'eb-toast', 3000);
+    };
+
+    let state = { budget: 50000, expenses: [], filter: 'all' };
+    const saved = JSON.parse(localStorage.getItem(KEY) || '{}');
+    if(saved.budget) state.budget = saved.budget;
+    if(saved.expenses) state.expenses = saved.expenses;
+
+    const els = {
+      budget: document.getElementById('eb-budget'),
+      form: document.getElementById('eb-form'),
+      cat: document.getElementById('eb-cat'),
+      amt: document.getElementById('eb-amt'),
+      customCat: document.getElementById('eb-custom-cat'),
+      filters: document.getElementById('eb-filters'),
+      list: document.getElementById('eb-list'),
+      spent: document.getElementById('eb-spent'),
+      fill: document.getElementById('eb-fill'),
+      left: document.getElementById('eb-left'),
+      count: document.getElementById('eb-count'),
+      avg: document.getElementById('eb-avg'),
+      export: document.getElementById('eb-export'),
+      reset: document.getElementById('eb-reset')
+    };
+
+    els.budget.value = state.budget;
+
+    const save = () => localStorage.setItem(KEY, JSON.stringify({ budget: state.budget, expenses: state.expenses }));
+    const getFiltered = () => state.filter === 'all' ? state.expenses : state.expenses.filter(e => e.cat === state.filter);
+
+    const render = () => {
+      const filtered = getFiltered();
+      const total = state.expenses.reduce((s,e)=>s+e.amt,0);
+      const remaining = state.budget - total;
+      const pct = state.budget > 0 ? (total/state.budget)*100 : 0;
+
+      els.spent.textContent = `${fmt(total)} / ${fmt(state.budget)}`;
+      els.spent.style.color = pct>100?'var(--eb-red)':pct>85?'var(--eb-yellow)':'var(--eb-text)';
+      els.fill.style.width = Math.min(100, pct)+'%';
+      els.left.textContent = fmt(remaining);
+      els.count.textContent = state.expenses.length;
+      els.avg.textContent = fmt(state.expenses.length ? total/state.expenses.length : 0);
+
+      // Filters
+      const cats = [...new Set(state.expenses.map(e=>e.cat))];
+      els.filters.innerHTML = `<span class="eb-tag ${state.filter==='all'?'active':''}" data-f="all">All (${state.expenses.length})</span>`;
+      cats.forEach(c => {
+        const cCount = state.expenses.filter(e=>e.cat===c).length;
+        els.filters.innerHTML += `<span class="eb-tag ${state.filter===c?'active':''}" data-f="${c}">${c} (${cCount})</span>`;
+      });
+      els.filters.querySelectorAll('.eb-tag').forEach(t => t.onclick = () => { state.filter = t.dataset.f; render(); });
+
+      // List
+      els.list.innerHTML = '';
+      if(filtered.length === 0) {
+        els.list.innerHTML = `<div class="eb-empty">${state.expenses.length===0?'No expenses yet. Start adding!':'No items in this category.'}</div>`;
+        return;
+      }
+      filtered.forEach(exp => {
+        const idx = state.expenses.findIndex(x=>x.id===exp.id);
+        const d = document.createElement('div'); d.className='eb-item';
+        d.innerHTML = `
+          <div class="eb-info">
+            <span class="eb-name">${exp.cat}</span>
+            <div class="eb-meta"><span>📅 ${exp.date}</span><span>💳 ${fmt(exp.amt)}</span></div>
+          </div>
+          <div class="eb-row-acts">
+            <button class="eb-act" data-act="edit" data-id="${exp.id}" title="Edit">✏️</button>
+            <button class="eb-act" data-act="del" data-id="${exp.id}" title="Delete">🗑️</button>
+          </div>`;
+        els.list.appendChild(d);
+      });
+
+      // Event Delegation
+      els.list.querySelectorAll('[data-act]').forEach(btn => {
+        btn.onclick = () => {
+          const id = btn.dataset.id;
+          if(btn.dataset.act==='del') {
+            if(confirm('Delete this expense permanently?')) {
+              state.expenses.splice(state.expenses.findIndex(x=>x.id===id),1); save(); render(); toast('Expense deleted','warn');
+            }
+          } else {
+            const exp = state.expenses.find(x=>x.id===id);
+            const newAmt = prompt(`Edit Amount for ${exp.cat}:`, exp.amt);
+            if(newAmt && !isNaN(newAmt) && parseFloat(newAmt)>0) {
+              exp.amt = parseFloat(newAmt); save(); render(); toast('Expense updated','success');
+            }
+          }
+        };
+      });
+    };
+
+    els.budget.oninput = () => { state.budget = parseFloat(els.budget.value)||0; save(); render(); };
+    els.cat.onchange = () => { els.customCat.style.display = els.cat.value==='Custom'?'block':'none'; if(els.cat.value!=='Custom') els.customCat.value=''; };
+
+    els.form.onsubmit = (e) => {
+      e.preventDefault();
+      const cat = els.cat.value === 'Custom' ? (els.customCat.value.trim() || 'Uncategorized') : els.cat.value;
+      const amt = parseFloat(els.amt.value);
+      if(amt <= 0) return toast('Enter valid amount','warn');
+      state.expenses.unshift({ id: crypto.randomUUID?.() || Date.now().toString(36)+Math.random().toString(36).slice(2), cat, amt, date: new Date().toLocaleDateString('en-IN') });
+      save(); els.amt.value=''; render(); toast('Expense added','success');
+    };
+
+    els.export.onclick = () => {
+      if(state.expenses.length===0) return toast('No data to export','warn');
+      const csv = [['Category','Amount','Date'], ...state.expenses.map(e=>[e.cat, e.amt, e.date])].map(r=>r.join(',')).join('\n');
+      const blob = new Blob([csv], {type:'text/csv'});
+      const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+      a.download = `event-budget-${new Date().toISOString().slice(0,10)}.csv`;
+      a.click(); toast('CSV exported!','success');
+    };
+
+    els.reset.onclick = () => {
+      if(confirm('Clear all data & reset budget? This cannot be undone.')) {
+        localStorage.removeItem(KEY);
+        state = { budget: 50000, expenses: [], filter: 'all' };
+        els.budget.value = 50000; render(); toast('Tracker reset','warn');
+      }
+    };
+
+    render();
+  })();
+  </script>
+</div>

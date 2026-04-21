@@ -1,0 +1,309 @@
+<div class="student-tool">
+  <style>
+    .student-tool {
+      --glass-border: rgba(255,255,255,0.15);
+      --bg-card: #1e1e2e;
+      --bg-hover: #2a2a3c;
+      --text-primary: #e2e2e2;
+      --text-secondary: #a0a0b0;
+      --accent: #6366f1;
+      --accent-glow: rgba(99,102,241,0.3);
+      --gradient-main: linear-gradient(135deg, #8b5cf6, #6366f1);
+      --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 1.5rem;
+      font-family: system-ui, -apple-system, sans-serif;
+      color: var(--text-primary);
+    }
+    .fs-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem; }
+    .fs-header h2 { margin: 0; font-size: 1.5rem; background: var(--gradient-main); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .fs-stats { font-size: 0.85rem; color: var(--text-secondary); background: var(--bg-card); padding: 0.4rem 0.8rem; border-radius: 20px; border: 1px solid var(--glass-border); }
+    .fs-controls { display: flex; gap: 0.6rem; margin-bottom: 1.2rem; flex-wrap: wrap; align-items: center; }
+    .fs-input, .fs-filter { padding: 0.7rem; border-radius: 8px; border: 1px solid var(--glass-border); background: var(--bg-card); color: var(--text-primary); outline: none; transition: var(--transition); }
+    .fs-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow); }
+    .fs-filter { cursor: pointer; font-size: 0.85rem; } .fs-filter:hover { background: var(--bg-hover); } .fs-filter.active { background: var(--accent); color: #fff; border-color: transparent; }
+    .fs-add-btn { padding: 0.7rem 1rem; background: var(--gradient-main); border: none; border-radius: 8px; color: #fff; font-weight: 600; cursor: pointer; transition: var(--transition); margin-left: auto; }
+    .fs-add-btn:hover { transform: translateY(-2px); box-shadow: 0 4px 12px var(--accent-glow); }
+    .fs-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 1rem; max-height: 60vh; overflow-y: auto; padding-right: 5px; }
+    .fs-card { background: var(--bg-card); border: 1px solid var(--glass-border); border-radius: 12px; padding: 1rem; transition: var(--transition); position: relative; display: flex; flex-direction: column; gap: 0.6rem; }
+    .fs-card:hover { transform: translateY(-3px); border-color: var(--accent); box-shadow: 0 6px 16px rgba(0,0,0,0.25); }
+    .fs-card-top { display: flex; justify-content: space-between; align-items: flex-start; }
+    .fs-cat { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.5px; background: rgba(99,102,241,0.15); color: var(--accent); padding: 0.2rem 0.5rem; border-radius: 6px; font-weight: 600; }
+    .fs-actions { display: flex; gap: 0.3rem; }
+    .fs-icon { width: 28px; height: 28px; border-radius: 50%; background: var(--bg-hover); border: none; color: var(--text-secondary); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: var(--transition); font-size: 0.9rem; }
+    .fs-icon:hover { background: var(--accent); color: #fff; } .fs-icon.fav.active { background: #f59e0b; color: #000; } .fs-icon.del:hover { background: #ef4444; }
+    .fs-name { font-weight: 600; font-size: 0.95rem; margin: 0; }
+    .fs-eq { font-family: 'Courier New', Consolas, monospace; background: var(--bg-hover); padding: 0.7rem; border-radius: 8px; color: var(--text-primary); font-size: 1rem; text-align: center; letter-spacing: 0.5px; margin-top: auto; }
+    .fs-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: var(--transition); z-index: 1000; }
+    .fs-modal.open { opacity: 1; pointer-events: auto; }
+    .fs-modal-content { background: var(--bg-card); border: 1px solid var(--glass-border); border-radius: 16px; padding: 1.5rem; width: 90%; max-width: 450px; transform: translateY(20px); transition: var(--transition); }
+    .fs-modal.open .fs-modal-content { transform: translateY(0); }
+    .fs-modal h3 { margin: 0 0 1rem; color: var(--text-primary); }
+    .fs-modal input, .fs-modal select, .fs-modal textarea { width: 100%; padding: 0.8rem; margin-bottom: 0.8rem; border-radius: 8px; border: 1px solid var(--glass-border); background: var(--bg-hover); color: var(--text-primary); outline: none; }
+    .fs-modal-btns { display: flex; gap: 0.8rem; justify-content: flex-end; margin-top: 0.5rem; }
+    .fs-modal-btn { padding: 0.7rem 1.2rem; border-radius: 8px; border: none; cursor: pointer; font-weight: 600; transition: var(--transition); }
+    .fs-modal-btn.cancel { background: var(--bg-hover); color: var(--text-primary); }
+    .fs-modal-btn.submit { background: var(--gradient-main); color: #fff; }
+    .fs-toast { position: fixed; bottom: 20px; right: 20px; background: var(--bg-card); border: 1px solid var(--glass-border); padding: 0.8rem 1.2rem; border-radius: 8px; color: var(--text-primary); box-shadow: 0 4px 12px rgba(0,0,0,0.3); transform: translateY(100px); opacity: 0; transition: all 0.3s ease; z-index: 1000; font-size: 0.9rem; }
+    .fs-toast.show { transform: translateY(0); opacity: 1; }
+    .fs-empty { text-align: center; padding: 2rem; color: var(--text-secondary); grid-column: 1/-1; }
+    @media (max-width: 600px) {
+      .fs-controls { flex-direction: column; align-items: stretch; }
+      .fs-add-btn { margin-left: 0; }
+      .fs-grid { max-height: 50vh; }
+    }
+  </style>
+
+  <div class="fs-header">
+    <h2>📐 Formula Sheet</h2>
+    <span class="fs-stats" id="fs-stats">Loading...</span>
+  </div>
+
+  <div class="fs-controls">
+    <input class="fs-input" id="fs-search" placeholder="🔍 Search name or formula..." style="flex:1; min-width:180px;">
+    <button class="fs-filter active" data-cat="all">All</button>
+    <button class="fs-filter" data-cat="Math">Math</button>
+    <button class="fs-filter" data-cat="Physics">Physics</button>
+    <button class="fs-filter" data-cat="Chemistry">Chemistry</button>
+    <button class="fs-filter" data-cat="fav">⭐ Favorites</button>
+    <button class="fs-add-btn" id="fs-add-btn">+ Add Formula</button>
+    <button class="fs-filter" id="fs-export" title="Export JSON">📤</button>
+    <label class="fs-filter" style="margin:0; cursor:pointer;" title="Import JSON">📥 <input type="file" id="fs-import" accept=".json" style="display:none"></label>
+  </div>
+
+  <div class="fs-grid" id="fs-grid"></div>
+
+  <div class="fs-modal" id="fs-modal">
+    <div class="fs-modal-content">
+      <h3>Add New Formula</h3>
+      <input id="fs-m-name" placeholder="Formula Name (e.g., Newton's Law)">
+      <input id="fs-m-formula" placeholder="Equation (e.g., F = ma)">
+      <select id="fs-m-cat">
+        <option value="Math">🔢 Math</option>
+        <option value="Physics">⚡ Physics</option>
+        <option value="Chemistry">🧪 Chemistry</option>
+        <option value="Custom">📝 Custom</option>
+      </select>
+      <div class="fs-modal-btns">
+        <button class="fs-modal-btn cancel" id="fs-m-cancel">Cancel</button>
+        <button class="fs-modal-btn submit" id="fs-m-submit">Save Formula</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="fs-toast" id="fs-toast"></div>
+
+  <script>
+    (function() {
+      const STORAGE_KEY = 'formula_sheet_v2';
+      const BUILT_IN = [
+        {id:'bi1', n:'Quadratic Formula', e:'x = (-b ± √(b²-4ac)) / 2a', c:'Math', fav:false},
+        {id:'bi2', n:'Pythagorean Theorem', e:'a² + b² = c²', c:'Math', fav:false},
+        {id:'bi3', n:'Area of Circle', e:'A = πr²', c:'Math', fav:false},
+        {id:'bi4', n:'Newton\'s 2nd Law', e:'F = ma', c:'Physics', fav:false},
+        {id:'bi5', n:'Kinetic Energy', e:'KE = ½mv²', c:'Physics', fav:false},
+        {id:'bi6', n:'Ohm\'s Law', e:'V = IR', c:'Physics', fav:false},
+        {id:'bi7', n:'Molarity', e:'M = mol / L', c:'Chemistry', fav:false},
+        {id:'bi8', n:'Ideal Gas Law', e:'PV = nRT', c:'Chemistry', fav:false},
+        {id:'bi9', n:'pH Calculation', e:'pH = -log[H⁺]', c:'Chemistry', fav:false}
+      ];
+
+      let formulas = [];
+      let filterCat = 'all';
+      let searchQuery = '';
+
+      const els = {
+        grid: document.getElementById('fs-grid'),
+        search: document.getElementById('fs-search'),
+        filters: document.querySelectorAll('.fs-filter[data-cat]'),
+        addBtn: document.getElementById('fs-add-btn'),
+        stats: document.getElementById('fs-stats'),
+        modal: document.getElementById('fs-modal'),
+        mName: document.getElementById('fs-m-name'),
+        mFormula: document.getElementById('fs-m-formula'),
+        mCat: document.getElementById('fs-m-cat'),
+        mCancel: document.getElementById('fs-m-cancel'),
+        mSubmit: document.getElementById('fs-m-submit'),
+        exportBtn: document.getElementById('fs-export'),
+        importBtn: document.getElementById('fs-import'),
+        toast: document.getElementById('fs-toast')
+      };
+
+      const init = () => {
+        try {
+          const saved = localStorage.getItem(STORAGE_KEY);
+          const custom = saved ? JSON.parse(saved) : [];
+          // Merge built-in + custom, keep favorites
+          formulas = BUILT_IN.map(b => {
+            const c = custom.find(x => x.id === b.id);
+            return c ? {...b, fav: c.fav} : b;
+          }).concat(custom.filter(x => !BUILT_IN.some(b => b.id === x.id)));
+        } catch { formulas = [...BUILT_IN]; }
+        setupEvents();
+        render();
+      };
+
+      const save = () => {
+        const toSave = formulas.map(f => ({id:f.id, n:f.n, e:f.e, c:f.c, fav:f.fav, isCustom: f.id.startsWith('cust_')}));
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(toSave));
+        updateStats();
+      };
+
+      const showToast = (msg) => {
+        els.toast.textContent = msg;
+        els.toast.classList.add('show');
+        setTimeout(() => els.toast.classList.remove('show'), 2000);
+      };
+
+      const updateStats = () => {
+        const total = formulas.length;
+        const custom = formulas.filter(f => f.id.startsWith('cust_')).length;
+        const favs = formulas.filter(f => f.fav).length;
+        els.stats.textContent = `📊 ${total} Total • 📝 ${custom} Custom • ⭐ ${favs} Favorites`;
+      };
+
+      const render = () => {
+        updateStats();
+        const q = searchQuery.toLowerCase();
+        const filtered = formulas.filter(f => {
+          const matchCat = filterCat === 'all' || (filterCat === 'fav' ? f.fav : f.c === filterCat);
+          const matchSearch = !q || f.n.toLowerCase().includes(q) || f.e.toLowerCase().includes(q);
+          return matchCat && matchSearch;
+        });
+
+        els.grid.innerHTML = '';
+        if (filtered.length === 0) {
+          els.grid.innerHTML = `<div class="fs-empty">${formulas.length ? 'No formulas match your filter.' : 'No formulas yet. Add one!'}</div>`;
+          return;
+        }
+
+        filtered.forEach(f => {
+          const isCustom = f.id.startsWith('cust_');
+          const card = document.createElement('div');
+          card.className = 'fs-card';
+          card.innerHTML = `
+            <div class="fs-card-top">
+              <span class="fs-cat">${f.c}</span>
+              <div class="fs-actions">
+                <button class="fs-icon fav ${f.fav?'active':''}" data-id="${f.id}" title="Favorite">★</button>
+                <button class="fs-icon" data-action="copy" data-val="${f.e.replace(/"/g,'&quot;')}" title="Copy">📋</button>
+                ${isCustom ? `<button class="fs-icon del" data-action="del" data-id="${f.id}" title="Delete">🗑️</button>` : ''}
+              </div>
+            </div>
+            <div class="fs-name">${escapeHtml(f.n)}</div>
+            <div class="fs-eq">${escapeHtml(f.e)}</div>
+          `;
+          els.grid.appendChild(card);
+        });
+      };
+
+      const escapeHtml = (str) => {
+        const div = document.createElement('div');
+        div.textContent = str;
+        return div.innerHTML;
+      };
+
+      const toggleFav = (id) => {
+        const f = formulas.find(x => x.id === id);
+        if (f) { f.fav = !f.fav; save(); render(); }
+      };
+
+      const copyToClipboard = async (text) => {
+        try {
+          await navigator.clipboard.writeText(text);
+          showToast('📋 Copied to clipboard!');
+        } catch {
+          const ta = document.createElement('textarea');
+          ta.value = text; document.body.appendChild(ta); ta.select(); document.execCommand('copy');
+          document.body.removeChild(ta);
+          showToast('📋 Copied to clipboard!');
+        }
+      };
+
+      const deleteFormula = (id) => {
+        if (!confirm('Delete this formula permanently?')) return;
+        formulas = formulas.filter(f => f.id !== id);
+        save(); render(); showToast('🗑️ Deleted');
+      };
+
+      const openModal = () => { els.modal.classList.add('open'); els.mName.focus(); };
+      const closeModal = () => { els.modal.classList.remove('open'); els.mName.value=''; els.mFormula.value=''; };
+      const addFormula = () => {
+        const name = els.mName.value.trim();
+        const eq = els.mFormula.value.trim();
+        const cat = els.mCat.value;
+        if (!name || !eq) return showToast('⚠️ Fill all fields');
+        const newF = { id: `cust_${Date.now()}`, n: name, e: eq, c: cat, fav: false };
+        formulas.unshift(newF);
+        save(); render(); closeModal(); showToast('✅ Formula added');
+      };
+
+      const exportData = () => {
+        const blob = new Blob([JSON.stringify(formulas, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url; a.download = `formulas_backup_${new Date().toISOString().slice(0,10)}.json`;
+        a.click(); URL.revokeObjectURL(url);
+        showToast('📤 Exported successfully');
+      };
+
+      const importData = (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+          try {
+            const imported = JSON.parse(ev.target.result);
+            if (Array.isArray(imported)) {
+              // Merge: keep built-in, add new customs
+              imported.forEach(imp => {
+                if (!formulas.some(f => f.id === imp.id)) {
+                  if (!imp.id.startsWith('cust_')) imp.id = `cust_${Date.now()}${Math.random().toString(36).slice(2,6)}`;
+                  formulas.push(imp);
+                }
+              });
+              save(); render(); showToast('📥 Imported successfully');
+            }
+          } catch { showToast('❌ Invalid JSON file'); }
+        };
+        reader.readAsText(file);
+        e.target.value = ''; // reset input
+      };
+
+      const setupEvents = () => {
+        els.search.addEventListener('input', (e) => { searchQuery = e.target.value; render(); });
+        els.filters.forEach(btn => {
+          btn.addEventListener('click', () => {
+            if (btn.id) return; // skip export/import
+            els.filters.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            filterCat = btn.dataset.cat;
+            render();
+          });
+        });
+        els.addBtn.addEventListener('click', openModal);
+        els.mCancel.addEventListener('click', closeModal);
+        els.mSubmit.addEventListener('click', addFormula);
+        els.exportBtn.addEventListener('click', exportData);
+        els.importBtn.addEventListener('change', importData);
+        els.grid.addEventListener('click', (e) => {
+          const btn = e.target.closest('.fs-icon');
+          if (!btn) return;
+          const action = btn.dataset.action;
+          const id = btn.dataset.id;
+          if (btn.classList.contains('fav')) toggleFav(id);
+          else if (action === 'copy') copyToClipboard(btn.dataset.val);
+          else if (action === 'del') deleteFormula(id);
+        });
+        els.modal.addEventListener('click', (e) => { if (e.target === els.modal) closeModal(); });
+        document.addEventListener('keydown', (e) => {
+          if (e.key === '/' && document.activeElement !== els.search) { e.preventDefault(); els.search.focus(); }
+          if (e.key === 'Escape') closeModal();
+        });
+      };
+
+      init();
+    })();
+  </script>
+</div>

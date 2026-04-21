@@ -1,0 +1,297 @@
+<div class="div-tool">
+  <style>
+    .div-tool {
+      --bg: #0f172a; --card: #1e293b; --card-hover: #253347;
+      --text: #f8fafc; --text-muted: #94a3b8; --border: #334155;
+      --accent: #10b981; --danger: #ef4444; --warning: #f59e0b; --info: #3b82f6;
+      --glow: rgba(16,185,129,0.2);
+      font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+      max-width: 480px; margin: 2rem auto; background: var(--bg);
+      border-radius: 20px; box-shadow: 0 8px 30px rgba(0,0,0,0.35);
+      overflow: hidden; color: var(--text); line-height: 1.4;
+    }
+    .div-tool * { box-sizing: border-box; }
+    .dt-header { padding: 1.2rem; text-align: center; border-bottom: 1px solid var(--border); background: linear-gradient(180deg, rgba(16,185,129,0.08), transparent); }
+    .dt-header h2 { margin: 0; font-size: 1.3rem; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 0.5rem; }
+    .dt-section { padding: 1rem 1.5rem; background: var(--card); border-bottom: 1px solid var(--border); }
+    .dt-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; }
+    .dt-full { grid-column: span 2; }
+    .dt-input, .dt-select { width: 100%; padding: 0.85rem; border-radius: 10px; border: 1px solid var(--border); background: #0b1120; color: var(--text); font-size: 1rem; outline: none; transition: all 0.2s; }
+    .dt-input:focus, .dt-select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--glow); }
+    .dt-label { display: block; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.3rem; }
+    .dt-row { display: flex; gap: 0.8rem; align-items: center; margin-bottom: 0.8rem; }
+    .dt-toggle { position: relative; width: 44px; height: 24px; background: var(--border); border-radius: 12px; cursor: pointer; transition: 0.3s; }
+    .dt-toggle::after { content: ''; position: absolute; left: 2px; top: 2px; width: 20px; height: 20px; background: #fff; border-radius: 50%; transition: 0.3s; }
+    .dt-toggle.active { background: var(--accent); }
+    .dt-toggle.active::after { left: 22px; }
+    .dt-results { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.8rem; }
+    .dt-card { background: #0b1120; border: 1px solid var(--border); border-radius: 12px; padding: 0.9rem; text-align: center; transition: all 0.2s; }
+    .dt-card:hover { border-color: var(--accent); transform: translateY(-2px); }
+    .dt-val { font-size: 1.15rem; font-weight: 700; margin-bottom: 0.2rem; }
+    .dt-lbl { font-size: 0.75rem; color: var(--text-muted); }
+    .dt-yield-badge { display: inline-block; padding: 0.2rem 0.5rem; border-radius: 6px; font-size: 0.75rem; font-weight: 600; margin-top: 0.4rem; }
+    .dt-yield-low { background: rgba(239,68,68,0.15); color: var(--danger); }
+    .dt-yield-med { background: rgba(245,158,11,0.15); color: var(--warning); }
+    .dt-yield-high { background: rgba(16,185,129,0.15); color: var(--accent); }
+    .dt-chart { padding: 1.2rem; background: var(--card); border-bottom: 1px solid var(--border); }
+    .dt-bar-wrap { height: 12px; background: #1e293b; border-radius: 6px; overflow: hidden; display: flex; }
+    .dt-bar-prin { height: 100%; background: #475569; transition: width 0.5s; }
+    .dt-bar-div { height: 100%; background: linear-gradient(90deg, #10b981, #059669); transition: width 0.5s; }
+    .dt-legend { display: flex; justify-content: center; gap: 1rem; margin-top: 0.6rem; font-size: 0.75rem; color: var(--text-muted); }
+    .dt-legend span::before { content: ''; display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 4px; vertical-align: middle; }
+    .dt-table-wrap { background: var(--card); max-height: 260px; overflow-y: auto; border-bottom: 1px solid var(--border); }
+    .dt-table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
+    .dt-table th { position: sticky; top: 0; background: #0b1120; padding: 0.6rem; text-align: right; color: var(--text-muted); font-weight: 500; border-bottom: 1px solid var(--border); }
+    .dt-table th:first-child { text-align: left; }
+    .dt-table td { padding: 0.5rem 0.6rem; text-align: right; border-bottom: 1px solid var(--border); }
+    .dt-table td:first-child { text-align: left; color: var(--text-muted); }
+    .dt-table tr:hover td { background: rgba(16,185,129,0.05); }
+    .dt-actions { padding: 1rem 1.5rem; background: var(--card); display: flex; gap: 0.8rem; }
+    .dt-btn { flex: 1; padding: 0.75rem; border: none; border-radius: 10px; font-weight: 500; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 0.4rem; }
+    .dt-btn-primary { background: var(--accent); color: #0f172a; }
+    .dt-btn-primary:hover { background: #059669; transform: translateY(-1px); }
+    .dt-btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text-muted); }
+    .dt-btn-outline:hover { background: var(--card-hover); color: var(--text); border-color: var(--accent); }
+    .dt-footer { padding: 0.8rem 1.5rem; text-align: center; font-size: 0.75rem; color: var(--text-muted); background: rgba(0,0,0,0.2); }
+    .dt-save-ind { position: fixed; bottom: 1rem; right: 1rem; background: var(--accent); color: #0f172a; padding: 0.4rem 0.8rem; border-radius: 20px; font-size: 0.8rem; opacity: 0; transition: opacity 0.3s; pointer-events: none; }
+    .dt-save-ind.show { opacity: 1; }
+    @media (max-width: 480px) {
+      .dt-results { grid-template-columns: 1fr; }
+      .div-tool { margin: 1rem; }
+    }
+  </style>
+
+  <div class="dt-header">
+    <h2>📈 Dividend & DRIP Planner</h2>
+    <p style="color:var(--text-muted); margin:0.3rem 0 0; font-size:0.85rem;">Yield analysis • Growth simulation • Tax-adjusted returns</p>
+  </div>
+
+  <div class="dt-section">
+    <div class="dt-grid">
+      <div><label class="dt-label">Share Price (₹)</label><input type="number" class="dt-input" id="dt-price" placeholder="1200" min="0"></div>
+      <div><label class="dt-label">Annual Div/Share (₹)</label><input type="number" class="dt-input" id="dt-div" placeholder="36" min="0"></div>
+      <div><label class="dt-label">Shares Held</label><input type="number" class="dt-input" id="dt-shares" placeholder="100" min="0"></div>
+      <div><label class="dt-label">Holding Period (Yrs)</label><input type="number" class="dt-input" id="dt-yrs" placeholder="5" min="1"></div>
+    </div>
+    <div class="dt-row" style="margin-top:0.8rem">
+      <div class="dt-toggle" id="dt-drip"></div>
+      <div>
+        <div style="font-size:0.9rem;font-weight:500">Dividend Reinvestment (DRIP)</div>
+        <div style="font-size:0.75rem;color:var(--text-muted)">Auto-compound dividends into more shares</div>
+      </div>
+    </div>
+    <div class="dt-grid">
+      <div><label class="dt-label">Expected Dividend Growth (%)</label><input type="number" class="dt-input" id="dt-growth" placeholder="0" min="0" max="50" step="0.1"></div>
+      <div><label class="dt-label">Payout Frequency</label><select class="dt-select" id="dt-freq"><option value="annual">Annual</option><option value="quarterly">Quarterly</option><option value="monthly">Monthly</option></select></div>
+      <div class="dt-full"><label class="dt-label">Tax on Dividends (%)</label><input type="number" class="dt-input" id="dt-tax" placeholder="0" min="0" max="100" step="0.1"></div>
+    </div>
+  </div>
+
+  <div class="dt-results">
+    <div class="dt-card">
+      <div class="dt-val" id="dt-yield">0%</div>
+      <div class="dt-lbl">Dividend Yield</div>
+      <div class="dt-yield-badge" id="dt-yield-badge">--</div>
+    </div>
+    <div class="dt-card">
+      <div class="dt-val" id="dt-ann">₹0</div>
+      <div class="dt-lbl">Annual Income (Gross)</div>
+    </div>
+    <div class="dt-card">
+      <div class="dt-val" id="dt-net">₹0</div>
+      <div class="dt-lbl">Total Net (After Tax)</div>
+    </div>
+  </div>
+
+  <div class="dt-chart">
+    <div style="display:flex;justify-content:space-between;margin-bottom:0.5rem;font-size:0.85rem">
+      <span>Portfolio Breakdown</span>
+      <span id="dt-roi">ROI: 0%</span>
+    </div>
+    <div class="dt-bar-wrap"><div class="dt-bar-prin" id="dt-bar-prin" style="width:100%"></div><div class="dt-bar-div" id="dt-bar-div" style="width:0%"></div></div>
+    <div class="dt-legend"><span>Initial Capital</span><span>Dividends & Reinvested</span></div>
+  </div>
+
+  <div class="dt-table-wrap">
+    <table class="dt-table">
+      <thead><tr><th>Year</th><th>Shares</th><th>Div/Share</th><th>Gross Div</th><th>Net Div</th></tr></thead>
+      <tbody id="dt-tbody"></tbody>
+    </table>
+  </div>
+
+  <div class="dt-actions">
+    <button class="dt-btn dt-btn-outline" id="dt-export">📥 Export CSV</button>
+    <button class="dt-btn dt-btn-primary" id="dt-reset">🔄 Reset</button>
+  </div>
+
+  <div class="dt-footer">
+    📊 Assumes constant share price for DRIP reinvestment • Tax applied on gross dividends • Data auto-saved locally
+  </div>
+  <div class="dt-save-ind" id="dt-save-ind">✓ Saved</div>
+
+  <script>
+    (function() {
+      const STORAGE_KEY = 'div_calc_v2';
+      const INR = v => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(v || 0);
+      const PCT = v => v.toFixed(2) + '%';
+
+      const els = {
+        price: document.getElementById('dt-price'),
+        div: document.getElementById('dt-div'),
+        shares: document.getElementById('dt-shares'),
+        yrs: document.getElementById('dt-yrs'),
+        drip: document.getElementById('dt-drip'),
+        growth: document.getElementById('dt-growth'),
+        freq: document.getElementById('dt-freq'),
+        tax: document.getElementById('dt-tax'),
+        yield: document.getElementById('dt-yield'),
+        yieldBadge: document.getElementById('dt-yield-badge'),
+        ann: document.getElementById('dt-ann'),
+        net: document.getElementById('dt-net'),
+        roi: document.getElementById('dt-roi'),
+        barPrin: document.getElementById('dt-bar-prin'),
+        barDiv: document.getElementById('dt-bar-div'),
+        tbody: document.getElementById('dt-tbody'),
+        exportBtn: document.getElementById('dt-export'),
+        resetBtn: document.getElementById('dt-reset'),
+        saveInd: document.getElementById('dt-save-ind')
+      };
+
+      let state = { price: 1200, div: 36, shares: 100, yrs: 5, drip: false, growth: 0, freq: 'annual', tax: 0 };
+      let saveTimeout, yearlyData = [];
+
+      const load = () => {
+        try {
+          const s = localStorage.getItem(STORAGE_KEY);
+          if(s) Object.assign(state, JSON.parse(s));
+        } catch(e) {}
+        els.price.value = state.price; els.div.value = state.div; els.shares.value = state.shares;
+        els.yrs.value = state.yrs; els.growth.value = state.growth; els.freq.value = state.freq; els.tax.value = state.tax;
+        if(state.drip) els.drip.classList.add('active');
+        calculate();
+      };
+
+      const save = () => {
+        try {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+          els.saveInd.classList.add('show');
+          setTimeout(() => els.saveInd.classList.remove('show'), 1500);
+        } catch(e) {}
+      };
+
+      const calculate = () => {
+        const price = parseFloat(els.price.value) || 0;
+        const div = parseFloat(els.div.value) || 0;
+        const shares = parseFloat(els.shares.value) || 0;
+        const yrs = parseInt(els.yrs.value) || 1;
+        const growth = parseFloat(els.growth.value) || 0;
+        const tax = parseFloat(els.tax.value) || 0;
+        const drip = els.drip.classList.contains('active');
+
+        if(price <= 0 || shares <= 0 || div <= 0) {
+          clearUI(); return;
+        }
+
+        state = { price, div, shares, yrs, drip, growth, freq: els.freq.value, tax };
+        save();
+
+        const yieldPct = (div / price) * 100;
+        const annIncome = div * shares;
+        
+        // Yield Badge
+        let badgeClass = 'dt-yield-low', badgeText = '🔻 Low (<3%)';
+        if(yieldPct >= 3 && yieldPct < 5) { badgeClass = 'dt-yield-med'; badgeText = '⚖️ Moderate (3-5%)'; }
+        if(yieldPct >= 5) { badgeClass = 'dt-yield-high'; badgeText = '🔺 High (5%+)'; }
+
+        els.yield.textContent = PCT(yieldPct);
+        els.yieldBadge.className = 'dt-yield-badge ' + badgeClass;
+        els.yieldBadge.textContent = badgeText;
+
+        // Simulation
+        yearlyData = [];
+        let curShares = shares;
+        let totalGross = 0, totalNet = 0;
+        
+        for(let y=1; y<=yrs; y++) {
+          let yDiv = div * Math.pow(1 + growth/100, y-1);
+          let gross = yDiv * curShares;
+          let net = gross * (1 - tax/100);
+          
+          totalGross += gross;
+          totalNet += net;
+
+          if(drip && net > 0) {
+            let newShares = net / price;
+            curShares += newShares;
+          }
+          yearlyData.push({ year: y, shares: curShares, divPerShare: yDiv, gross, net });
+        }
+
+        const finalVal = curShares * price;
+        const initialInvest = shares * price;
+        const totalReturn = (finalVal - initialInvest) + totalNet;
+        const roi = (totalReturn / initialInvest) * 100;
+
+        els.ann.textContent = INR(annIncome);
+        els.net.textContent = INR(totalNet);
+        els.roi.textContent = `ROI: ${PCT(roi)}`;
+
+        // Progress Bar
+        const prinW = (initialInvest / finalVal) * 100;
+        const divW = 100 - prinW;
+        els.barPrin.style.width = `${Math.max(0, prinW)}%`;
+        els.barDiv.style.width = `${Math.max(0, divW)}%`;
+
+        // Table
+        els.tbody.innerHTML = '';
+        const frag = document.createDocumentFragment();
+        const showData = yearlyData.length <= 10 ? yearlyData : [...yearlyData.slice(0, 5), {year:'...', shares:'...', divPerShare:'...', gross:'...', net:'...'}, yearlyData.slice(-3)];
+        showData.forEach(d => {
+          const tr = document.createElement('tr');
+          if(typeof d.year === 'string') tr.innerHTML = `<td>...</td><td>...</td><td>...</td><td>...</td><td>...</td>`;
+          else tr.innerHTML = `<td>${d.year}</td><td>${d.shares.toFixed(1)}</td><td>${INR(d.divPerShare)}</td><td>${INR(d.gross)}</td><td>${INR(d.net)}</td>`;
+          frag.appendChild(tr);
+        });
+        els.tbody.appendChild(frag);
+      };
+
+      const clearUI = () => {
+        els.yield.textContent = '0%'; els.ann.textContent = '₹0'; els.net.textContent = '₹0';
+        els.roi.textContent = 'ROI: 0%'; els.barPrin.style.width = '100%'; els.barDiv.style.width = '0%';
+        els.tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:1rem;color:var(--text-muted)">Enter valid details to calculate</td></tr>';
+      };
+
+      // Events
+      [els.price, els.div, els.shares, els.yrs, els.growth, els.tax].forEach(el => {
+        el.addEventListener('input', () => { clearTimeout(saveTimeout); saveTimeout = setTimeout(calculate, 300); });
+      });
+      els.freq.addEventListener('change', calculate);
+      els.drip.addEventListener('click', () => { els.drip.classList.toggle('active'); calculate(); });
+
+      els.exportBtn.addEventListener('click', () => {
+        if(yearlyData.length === 0) return;
+        let csv = 'Year,Shares Held,Div/Share,Gross Dividend,Net Dividend,Reinvested Shares\n';
+        yearlyData.forEach((d,i) => {
+          const prevShares = i === 0 ? state.shares : yearlyData[i-1].shares;
+          csv += `${d.year},${d.shares.toFixed(2)},${d.divPerShare.toFixed(2)},${d.gross.toFixed(2)},${d.net.toFixed(2)},${(d.shares-prevShares).toFixed(2)}\n`;
+        });
+        const blob = new Blob([csv], { type: 'text/csv' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a'); a.href = url; a.download = `dividend_schedule_${new Date().toISOString().slice(0,10)}.csv`; a.click(); URL.revokeObjectURL(url);
+      });
+
+      els.resetBtn.addEventListener('click', () => {
+        if(confirm('Reset all to default values?')) {
+          localStorage.removeItem(STORAGE_KEY);
+          state = { price: 1200, div: 36, shares: 100, yrs: 5, drip: false, growth: 0, freq: 'annual', tax: 0 };
+          els.price.value = 1200; els.div.value = 36; els.shares.value = 100; els.yrs.value = 5;
+          els.growth.value = 0; els.freq.value = 'annual'; els.tax.value = 0;
+          els.drip.classList.remove('active');
+          calculate();
+        }
+      });
+
+      load();
+    })();
+  </script>
+</div>

@@ -1,0 +1,318 @@
+<div class="professional-tool">
+  <style>
+    .professional-tool {
+      --bg: #f8fafc; --card: #ffffff; --border: #e2e8f0;
+      --text: #0f172a; --text-sec: #64748b; --accent: #3b82f6;
+      --success: #10b981; --warning: #f59e0b; --danger: #ef4444;
+      --shadow: 0 4px 12px rgba(0,0,0,0.05); --radius: 12px;
+      font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+      max-width: 720px; margin: 0 auto; padding: 1.8rem;
+      background: var(--bg); border-radius: 16px; box-shadow: var(--shadow);
+      box-sizing: border-box; position: relative; overflow: hidden;
+    }
+    .professional-tool * { box-sizing: border-box; }
+    .pt-header { margin-bottom: 1.2rem; }
+    .pt-header h3 { margin: 0; font-size: 1.45rem; color: var(--text); }
+    .pt-header p { margin: 0.3rem 0 0; font-size: 0.85rem; color: var(--text-sec); }
+    .pt-controls { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 1rem; margin-bottom: 1rem; }
+    .pt-label { display: flex; flex-direction: column; gap: 0.35rem; font-size: 0.82rem; font-weight: 600; color: var(--text-sec); }
+    .pt-label input, .pt-label select, .pt-label textarea {
+      padding: 0.8rem; border: 1px solid var(--border); border-radius: var(--radius);
+      background: var(--card); color: var(--text); font-size: 0.92rem; outline: none; transition: all 0.2s;
+    }
+    .pt-label input:focus, .pt-label select:focus, .pt-label textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(59,130,246,0.12); }
+    .pt-tags { display: flex; gap: 0.6rem; flex-wrap: wrap; margin-bottom: 1rem; align-items: center; }
+    .pt-tags span { font-size: 0.8rem; color: var(--text-sec); font-weight: 500; }
+    .pt-tag {
+      padding: 0.35rem 0.65rem; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px;
+      font-size: 0.8rem; color: var(--accent); cursor: pointer; transition: all 0.2s; user-select: none;
+    }
+    .pt-tag:hover { background: var(--accent); color: #fff; border-color: var(--accent); transform: translateY(-1px); }
+    .pt-actions { display: flex; gap: 0.8rem; margin-bottom: 1.2rem; flex-wrap: wrap; }
+    .pt-btn {
+      padding: 0.8rem 1.2rem; border: none; border-radius: var(--radius); font-weight: 600; cursor: pointer;
+      transition: all 0.2s; font-size: 0.9rem; display: flex; align-items: center; gap: 0.5rem;
+    }
+    .pt-btn-primary { background: var(--accent); color: #fff; flex: 1; min-width: 140px; justify-content: center; }
+    .pt-btn-primary:hover { background: #2563eb; transform: translateY(-1px); }
+    .pt-btn-secondary { background: var(--card); border: 1px solid var(--border); color: var(--text-sec); }
+    .pt-btn-secondary:hover { background: #f1f5f9; }
+    .pt-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+    .pt-editor { margin-bottom: 1.2rem; }
+    .pt-field { margin-bottom: 0.8rem; }
+    .pt-field label { display: block; font-size: 0.82rem; font-weight: 600; color: var(--text-sec); margin-bottom: 0.3rem; }
+    .pt-field input, .pt-field textarea { width: 100%; padding: 0.8rem; border: 1px solid var(--border); border-radius: var(--radius); background: var(--card); color: var(--text); font-family: inherit; line-height: 1.5; resize: vertical; outline: none; transition: all 0.2s; }
+    .pt-field input:focus, .pt-field textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(59,130,246,0.12); }
+    .pt-stats { display: flex; gap: 1rem; font-size: 0.78rem; color: var(--text-sec); margin-bottom: 1.2rem; padding-bottom: 1rem; border-bottom: 1px solid var(--border); }
+    .pt-preview { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.2rem; margin-bottom: 1.2rem; min-height: 120px; line-height: 1.6; color: var(--text); white-space: pre-wrap; }
+    .pt-preview .p-subject { font-weight: 700; margin-bottom: 0.8rem; padding-bottom: 0.5rem; border-bottom: 1px dashed var(--border); }
+    .pt-history { display: none; }
+    .pt-history.active { display: block; }
+    .pt-history h4 { margin: 0 0 0.8rem; font-size: 1rem; color: var(--text); }
+    .pt-history-list { display: flex; flex-direction: column; gap: 0.6rem; }
+    .pt-history-item { display: flex; justify-content: space-between; align-items: center; padding: 0.7rem; background: var(--card); border: 1px solid var(--border); border-radius: 8px; cursor: pointer; transition: all 0.2s; }
+    .pt-history-item:hover { border-color: var(--accent); background: #f8fafc; }
+    .pt-history-meta { font-size: 0.82rem; font-weight: 600; color: var(--text); }
+    .pt-history-date { font-size: 0.75rem; color: var(--text-sec); }
+    .pt-toast {
+      position: absolute; bottom: 1.2rem; right: 1.2rem; background: var(--text); color: #fff;
+      padding: 0.75rem 1.1rem; border-radius: 10px; font-size: 0.85rem; transform: translateY(120%);
+      transition: transform 0.3s cubic-bezier(0.4,0,0.2,1); z-index: 10; pointer-events: none;
+    }
+    .pt-toast.show { transform: translateY(0); }
+    .spinner { width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.3); border-top-color: #fff; border-radius: 50%; animation: spin 0.6s linear infinite; display: none; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    @media (max-width: 600px) {
+      .professional-tool { padding: 1.2rem; }
+      .pt-controls { grid-template-columns: 1fr; }
+      .pt-actions { flex-direction: column; }
+      .pt-btn { width: 100%; justify-content: center; }
+    }
+  </style>
+
+  <div class="pt-header">
+    <h3>✉️ Smart Email Generator</h3>
+    <p>Professional templates with tone control, live preview & draft history</p>
+  </div>
+
+  <div class="pt-controls">
+    <label class="pt-label">Email Type
+      <select id="pt-type">
+        <option value="formal">Formal Inquiry</option>
+        <option value="followup">Follow-Up</option>
+        <option value="cold">Cold Outreach</option>
+        <option value="thankyou">Thank You</option>
+        <option value="apology">Apology & Resolution</option>
+      </select>
+    </label>
+    <label class="pt-label">Tone
+      <select id="pt-tone">
+        <option value="professional">Professional & Polished</option>
+        <option value="friendly">Friendly & Conversational</option>
+        <option value="concise">Concise & Direct</option>
+        <option value="persuasive">Persuasive & Action-Oriented</option>
+      </select>
+    </label>
+    <label class="pt-label">Recipient Name
+      <input type="text" id="pt-name" placeholder="e.g., Sarah Chen">
+    </label>
+    <label class="pt-label">Company / Project
+      <input type="text" id="pt-company" placeholder="e.g., TechNova Inc.">
+    </label>
+    <label class="pt-label">Your Role / Title
+      <input type="text" id="pt-role" placeholder="e.g., Product Manager">
+    </label>
+    <label class="pt-label">Specific Date/Context
+      <input type="text" id="pt-date" placeholder="e.g., next Tuesday / our meeting on 12th">
+    </label>
+  </div>
+
+  <div class="pt-tags">
+    <span>Quick Insert:</span>
+    <div class="pt-tag" data-v="{{name}}">{{name}}</div>
+    <div class="pt-tag" data-v="{{company}}">{{company}}</div>
+    <div class="pt-tag" data-v="{{role}}">{{role}}</div>
+    <div class="pt-tag" data-v="{{date}}">{{date}}</div>
+    <div class="pt-tag" data-v="{{link}}">{{link}}</div>
+    <div class="pt-tag" data-v="{{meeting}}">{{meeting}}</div>
+  </div>
+
+  <div class="pt-actions">
+    <button class="pt-btn pt-btn-primary" id="pt-gen">
+      <span class="spinner" id="gen-spinner"></span> Generate Email
+    </button>
+    <button class="pt-btn pt-btn-secondary" id="pt-save">💾 Save Draft</button>
+    <button class="pt-btn pt-btn-secondary" id="pt-history">📜 History</button>
+  </div>
+
+  <div class="pt-editor">
+    <div class="pt-field">
+      <label>Subject Line</label>
+      <input type="text" id="pt-subject" placeholder="Auto-generated subject will appear here">
+    </div>
+    <div class="pt-field">
+      <label>Email Body (Editable)</label>
+      <textarea id="pt-body" rows="8" placeholder="Click Generate or write manually..."></textarea>
+    </div>
+  </div>
+
+  <div class="pt-stats" id="pt-stats">
+    <span>Words: <b>0</b></span>
+    <span>Chars: <b>0</b></span>
+    <span>Est. Read Time: <b>0s</b></span>
+  </div>
+
+  <div class="pt-preview" id="pt-preview">
+    <div class="p-subject">Subject: Ready to generate...</div>
+    <div>Body will appear here after generation. You can edit directly above.</div>
+  </div>
+
+  <div class="pt-history" id="pt-history-panel">
+    <h4>📜 Saved Drafts</h4>
+    <div class="pt-history-list" id="pt-history-list"></div>
+  </div>
+
+  <div class="pt-toast" id="pt-toast"></div>
+
+  <script>
+    (function(){
+      // Template Engine
+      const templates = {
+        formal: {
+          professional: { sub: "Inquiry Regarding {{company}} Collaboration", body: "Dear {{name}},\n\nI hope this message finds you well. My name is {{role}}, and I am reaching out to explore potential collaboration opportunities between our teams and {{company}}.\n\nGiven your recent initiatives, I believe there is strong alignment for mutual value. Would you be open to a brief introductory call at your convenience next {{date}}?\n\nI look forward to the possibility of working together.\n\nSincerely,\n{{role}}" },
+          concise: { sub: "Quick Question for {{name}} at {{company}}", body: "Hi {{name}},\n\nI'm {{role}} reaching out regarding a potential synergy with {{company}}. Could we schedule a 10-minute call on {{date}} to discuss next steps?\n\nBest,\n{{role}}" }
+        },
+        followup: {
+          professional: { sub: "Following Up: {{company}} Next Steps", body: "Hi {{name}},\n\nI hope you're having a productive week. I'm following up on our conversation from {{date}} regarding {{company}}'s upcoming priorities.\n\nPlease let me know if you've had a chance to review the materials I shared. I'm happy to adjust the proposal or schedule a quick sync.\n\nWarm regards,\n{{role}}" },
+          friendly: { sub: "Checking in 👋", body: "Hey {{name}},\n\nJust circling back on our chat from {{date}}! Hope things at {{company}} are going well.\n\nWhenever you have a moment, let me know your thoughts on moving forward. No rush at all.\n\nCheers,\n{{role}}" }
+        },
+        cold: {
+          persuasive: { sub: "Quick Idea for {{company}}'s Growth", body: "Hello {{name}},\n\nI've been closely following {{company}}'s trajectory, and I noticed an opportunity to optimize {{date}}. At [Your Company], we've helped similar teams achieve 30% efficiency gains.\n\nCould we connect for a 15-min strategy call next week? I'll share a custom breakdown relevant to your workflow.\n\nBest,\n{{role}}" },
+          concise: { sub: "Re: {{company}} Partnership", body: "Hi {{name}},\n\n{{role}} here. I saw {{company}} is scaling {{date}} and thought our solution might align with your goals.\n\nOpen to a quick intro call this week? I'll keep it brief and value-focused.\n\nThanks,\n{{role}}" }
+        },
+        thankyou: {
+          professional: { sub: "Thank You - {{company}} Meeting", body: "Dear {{name}},\n\nThank you for taking the time to meet with me on {{date}}. I truly appreciated the opportunity to learn more about {{company}}'s vision and current initiatives.\n\nAs discussed, I'll send over the action items and relevant resources by EOD. Please don't hesitate to reach out if you need anything in the meantime.\n\nWarm regards,\n{{role}}" }
+        },
+        apology: {
+          professional: { sub: "Apology Regarding {{date}}", body: "Dear {{name}},\n\nPlease accept my sincere apologies for the oversight regarding {{date}} at {{company}}. We take full responsibility and have already implemented steps to prevent this from recurring.\n\nI'd appreciate the chance to make this right. Please let me know a convenient time to discuss resolution options.\n\nSincerely,\n{{role}}" }
+        }
+      };
+
+      // Default fallbacks
+      const getFallback = (key) => ({
+        name: 'there', company: 'your team', role: 'Your Name', date: 'next week',
+        link: 'https://yourlink.com', meeting: 'calendar link'
+      })[key];
+
+      // State
+      const state = { history: JSON.parse(localStorage.getItem('pt_drafts')||'[]') };
+      const els = {
+        type: document.getElementById('pt-type'), tone: document.getElementById('pt-tone'),
+        name: document.getElementById('pt-name'), company: document.getElementById('pt-company'),
+        role: document.getElementById('pt-role'), date: document.getElementById('pt-date'),
+        subject: document.getElementById('pt-subject'), body: document.getElementById('pt-body'),
+        preview: document.getElementById('pt-preview'), stats: document.getElementById('pt-stats'),
+        gen: document.getElementById('pt-gen'), save: document.getElementById('pt-save'),
+        histBtn: document.getElementById('pt-history'), histPanel: document.getElementById('pt-history-panel'),
+        histList: document.getElementById('pt-history-list'), toast: document.getElementById('pt-toast'),
+        spinner: document.getElementById('gen-spinner')
+      };
+
+      // Utils
+      const toast = msg => { els.toast.textContent = msg; els.toast.classList.add('show'); setTimeout(()=>els.toast.classList.remove('show'), 2200); };
+      const copyText = async txt => { try { await navigator.clipboard.writeText(txt); toast('📋 Copied to clipboard'); } catch { const a=document.createElement('textarea'); a.value=txt; document.body.appendChild(a); a.select(); document.execCommand('copy'); document.body.removeChild(a); toast('📋 Copied'); } };
+      const updateStats = () => {
+        const txt = els.body.value;
+        const words = txt.trim() ? txt.trim().split(/\s+/).length : 0;
+        const chars = txt.length;
+        const mins = Math.ceil(words / 200 * 60);
+        els.stats.innerHTML = `<span>Words: <b>${words}</b></span><span>Chars: <b>${chars}</b></span><span>Est. Read Time: <b>${mins}s</b></span>`;
+      };
+      const updatePreview = () => {
+        const sub = els.subject.value || 'No Subject';
+        const body = els.body.value || 'Waiting for content...';
+        els.preview.innerHTML = `<div class="p-subject">Subject: ${sub}</div><div>${body}</div>`;
+      };
+
+      // Core Functions
+      const generate = () => {
+        els.gen.disabled = true; els.spinner.style.display = 'block';
+        setTimeout(()=>{
+          const type = els.type.value, tone = els.tone.value;
+          const vars = { name: els.name.value, company: els.company.value, role: els.role.value, date: els.date.value, link: '', meeting: '' };
+          
+          // Find best matching template, fallback to first available
+          let tpl = templates[type]?.[tone] || templates[type]?.professional || templates.formal.professional;
+          let sub = tpl.sub, body = tpl.body;
+
+          // Replace placeholders
+          Object.keys(vars).forEach(k => {
+            const val = vars[k] || getFallback(k);
+            const regex = new RegExp(`\\{\\{${k}\\}\\}`, 'gi');
+            sub = sub.replace(regex, val);
+            body = body.replace(regex, val);
+          });
+
+          els.subject.value = sub;
+          els.body.value = body;
+          updateStats(); updatePreview();
+          els.gen.disabled = false; els.spinner.style.display = 'none';
+          toast('✅ Email generated successfully');
+        }, 400);
+      };
+
+      const saveDraft = () => {
+        if(!els.body.value.trim()) return toast('⚠️ Generate or write something first');
+        const draft = { sub: els.subject.value, body: els.body.value, time: Date.now() };
+        state.history.unshift(draft);
+        if(state.history.length > 8) state.history.pop();
+        localStorage.setItem('pt_drafts', JSON.stringify(state.history));
+        renderHistory();
+        toast('💾 Draft saved');
+      };
+
+      const renderHistory = () => {
+        if(!state.history.length) {
+          els.histList.innerHTML = '<div style="color:var(--text-sec);text-align:center;padding:1rem;">No saved drafts yet.</div>';
+          return;
+        }
+        els.histList.innerHTML = state.history.map((d, i) => `
+          <div class="pt-history-item" data-idx="${i}">
+            <div>
+              <div class="pt-history-meta">${d.sub || 'Untitled'}</div>
+              <div class="pt-history-date">${new Date(d.time).toLocaleString()}</div>
+            </div>
+            <span style="color:var(--danger);cursor:pointer;font-weight:600;" data-del="${i}">🗑️</span>
+          </div>
+        `).join('');
+      };
+
+      const loadDraft = (idx) => {
+        const d = state.history[idx];
+        els.subject.value = d.sub; els.body.value = d.body;
+        updateStats(); updatePreview();
+        els.histPanel.classList.remove('active');
+        toast('📂 Draft loaded');
+      };
+
+      const deleteDraft = (idx) => {
+        state.history.splice(idx, 1);
+        localStorage.setItem('pt_drafts', JSON.stringify(state.history));
+        renderHistory();
+        toast('🗑️ Draft deleted');
+      };
+
+      // Event Listeners
+      els.gen.addEventListener('click', generate);
+      els.save.addEventListener('click', saveDraft);
+      els.histBtn.addEventListener('click', () => {
+        els.histPanel.classList.toggle('active');
+        renderHistory();
+      });
+      document.querySelectorAll('.pt-tag').forEach(t => t.addEventListener('click', () => {
+        const v = t.dataset.v, ta = els.body, s = ta.selectionStart, e = ta.selectionEnd;
+        ta.value = ta.value.substring(0, s) + v + ta.value.substring(e);
+        ta.focus(); updateStats(); updatePreview();
+      }));
+      els.body.addEventListener('input', () => { updateStats(); updatePreview(); });
+      els.subject.addEventListener('input', updatePreview);
+
+      // Copy button (add via JS to actions bar)
+      const copyBtn = document.createElement('button');
+      copyBtn.className = 'pt-btn pt-btn-secondary';
+      copyBtn.innerHTML = '📋 Copy';
+      els.histBtn.parentNode.appendChild(copyBtn);
+      copyBtn.addEventListener('click', () => copyText(`${els.subject.value}\n\n${els.body.value}`));
+
+      els.histList.addEventListener('click', e => {
+        const del = e.target.closest('[data-del]');
+        const item = e.target.closest('[data-idx]');
+        if(del) { e.stopPropagation(); deleteDraft(del.dataset.del); }
+        else if(item) loadDraft(item.dataset.idx);
+      });
+
+      // Init
+      updateStats(); updatePreview(); renderHistory();
+    })();
+  </script>
+</div>

@@ -1,0 +1,368 @@
+<div class="lorem-pro">
+  <style>
+    .lorem-pro{
+      --lp-bg: #0f1115; --lp-card: #1a1d24; --lp-border: #2a2d36;
+      --lp-text: #e4e7ec; --lp-muted: #8b949e; --lp-accent: #6366f1;
+      --lp-success: #10b981; --lp-code: #0d1117;
+      font-family: system-ui, -apple-system, monospace;
+      background: var(--lp-bg); color: var(--lp-text);
+      max-width: 780px; margin: 2rem auto; padding: 1.8rem;
+      border-radius: 24px; border: 1px solid var(--lp-border);
+      box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+    }
+    .lp-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:1.2rem;flex-wrap:wrap;gap:0.8rem;}
+    .lp-header h2{margin:0;font-size:1.5rem;background:linear-gradient(135deg,#6366f1,#ec4899);-webkit-background-clip:text;background-clip:text;color:transparent;}
+    
+    .lp-controls{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:0.7rem;margin-bottom:1rem;}
+    .lp-control{display:flex;flex-direction:column;gap:0.3rem;}
+    .lp-control label{font-size:0.7rem;color:var(--lp-muted);text-transform:uppercase;letter-spacing:0.5px;}
+    .lp-control input,.lp-control select{
+      padding:0.6rem;background:var(--lp-card);border:1px solid var(--lp-border);
+      border-radius:8px;color:var(--lp-text);font-size:0.9rem;outline:none;transition:0.2s;
+    }
+    .lp-control input:focus,.lp-control select:focus{border-color:var(--lp-accent);}
+    .lp-control input[type="checkbox"]{width:auto;margin:0;}
+    .lp-control .chk-row{display:flex;align-items:center;gap:0.4rem;font-size:0.85rem;}
+    
+    .lp-actions{display:flex;gap:0.5rem;margin-bottom:1rem;flex-wrap:wrap;}
+    .lp-btn{padding:0.6rem 1rem;background:var(--lp-card);border:1px solid var(--lp-border);border-radius:8px;color:var(--lp-text);cursor:pointer;font-size:0.85rem;transition:0.2s;display:flex;align-items:center;gap:0.3rem;}
+    .lp-btn:hover{border-color:var(--lp-accent);}
+    .lp-btn.primary{background:linear-gradient(135deg,#6366f1,#8b5cf6);border:none;color:#fff;font-weight:600;}
+    .lp-btn.primary:hover{transform:translateY(-2px);box-shadow:0 4px 12px rgba(99,102,241,0.4);}
+    .lp-btn.active{border-color:var(--lp-success);background:rgba(16,185,129,0.1);}
+    
+    .lp-output-wrap{background:var(--lp-card);border:1px solid var(--lp-border);border-radius:14px;overflow:hidden;margin-bottom:1rem;}
+    .lp-output-header{display:flex;justify-content:space-between;align-items:center;padding:0.6rem 1rem;background:var(--lp-bg);border-bottom:1px solid var(--lp-border);font-size:0.8rem;color:var(--lp-muted);}
+    .lp-output-stats{display:flex;gap:1rem;}
+    .lp-output-stats span{display:flex;align-items:center;gap:0.3rem;}
+    .lp-output{padding:1rem;min-height:180px;max-height:300px;overflow:auto;line-height:1.7;font-size:0.95rem;white-space:pre-wrap;word-wrap:break-word;}
+    .lp-output.html-mode{font-family:monospace;font-size:0.85rem;}
+    .lp-output.html-mode .tag{color:#7ee787;}
+    .lp-output.html-mode .attr{color:#79c0ff;}
+    .lp-output.html-mode .val{color:#a5d6ff;}
+    
+    .lp-history{display:flex;gap:0.4rem;flex-wrap:wrap;margin-bottom:1rem;}
+    .lp-hist-item{padding:0.3rem 0.6rem;background:var(--lp-card);border:1px solid var(--lp-border);border-radius:6px;font-size:0.75rem;cursor:pointer;transition:0.2s;}
+    .lp-hist-item:hover{border-color:var(--lp-accent);}
+    
+    .lp-toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--lp-card);border:1px solid var(--lp-border);color:var(--lp-text);padding:0.8rem 1.2rem;border-radius:12px;font-size:0.9rem;opacity:0;pointer-events:none;transition:0.3s;z-index:1000;box-shadow:0 4px 12px rgba(0,0,0,0.5);}
+    .lp-toast.show{transform:translateX(-50%) translateY(0);opacity:1;}
+    
+    @media(max-width:600px){
+      .lp-controls{grid-template-columns:1fr 1fr;}
+      .lp-output-stats{flex-wrap:wrap;}
+    }
+  </style>
+
+  <div class="lp-header">
+    <h2>📝 Lorem Ipsum Pro</h2>
+    <span style="font-size:0.8rem;color:var(--lp-muted);">⌨️ Ctrl+Enter to Generate</span>
+  </div>
+
+  <div class="lp-controls">
+    <div class="lp-control">
+      <label>Count</label>
+      <input type="number" id="lp-count" value="3" min="1" max="200">
+    </div>
+    <div class="lp-control">
+      <label>Type</label>
+      <select id="lp-type">
+        <option value="paragraphs">Paragraphs</option>
+        <option value="sentences">Sentences</option>
+        <option value="words">Words</option>
+        <option value="bytes">Bytes</option>
+      </select>
+    </div>
+    <div class="lp-control">
+      <label>Style</label>
+      <select id="lp-style">
+        <option value="classic">📜 Classic Latin</option>
+        <option value="corporate">💼 Corporate</option>
+        <option value="tech">💻 Tech Startup</option>
+        <option value="fun">🎉 Fun & Casual</option>
+        <option value="minimal">✨ Minimal</option>
+      </select>
+    </div>
+    <div class="lp-control">
+      <label>Format</label>
+      <select id="lp-format">
+        <option value="plain">Plain Text</option>
+        <option value="html">HTML Tags</option>
+        <option value="markdown">Markdown</option>
+      </select>
+    </div>
+    <div class="lp-control">
+      <label>Seed (optional)</label>
+      <input type="text" id="lp-seed" placeholder="For reproducible output">
+    </div>
+    <div class="lp-control">
+      <label>Options</label>
+      <div class="chk-row"><input type="checkbox" id="lp-classic-start" checked><span>Start classic</span></div>
+      <div class="chk-row"><input type="checkbox" id="lp-punct" checked><span>Punctuation</span></div>
+      <div class="chk-row"><input type="checkbox" id="lp-capitalize"><span>Capitalize</span></div>
+    </div>
+  </div>
+
+  <div class="lp-actions">
+    <button class="lp-btn primary" id="lp-generate">✨ Generate</button>
+    <button class="lp-btn" id="lp-copy-plain">📋 Copy Plain</button>
+    <button class="lp-btn" id="lp-copy-html">🔗 Copy HTML</button>
+    <button class="lp-btn" id="lp-copy-md">📦 Copy MD</button>
+    <button class="lp-btn" id="lp-download">💾 Download .txt</button>
+    <button class="lp-btn" id="lp-clear">🗑️ Clear</button>
+  </div>
+
+  <div class="lp-history" id="lp-history"></div>
+
+  <div class="lp-output-wrap">
+    <div class="lp-output-header">
+      <div class="lp-output-stats">
+        <span>📊 <b id="lp-words">0</b> words</span>
+        <span>🔤 <b id="lp-chars">0</b> chars</span>
+        <span>📄 <b id="lp-lines">0</b> lines</span>
+      </div>
+      <span id="lp-format-label">Plain Text</span>
+    </div>
+    <div class="lp-output" id="lp-output">Click "Generate" to create lorem ipsum text...</div>
+  </div>
+
+  <div class="lp-toast" id="lp-toast"></div>
+
+  <script>
+    (function(){
+      const $ = id => document.getElementById(id);
+      
+      // Word Banks for Different Styles
+      const banks = {
+        classic: 'lorem ipsum dolor sit amet consectetur adipiscing elit sed do eiusmod tempor incididunt ut labore et dolore magna aliqua ut enim ad minim veniam quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur excepteur sint occaecat cupidatat non proident sunt in culpa qui officia deserunt mollit anim id est laborum'.split(' '),
+        corporate: 'synergy paradigm shift leverage proactive scalable innovative disruptive optimize streamline enterprise solution framework methodology deliverable actionable stakeholder value-proposition ROI KPIs bandwidth capacity scalable agile holistic strategic tactical operational execution deliverables milestones stakeholders alignment'.split(' '),
+        tech: 'algorithm blockchain cloud-native microservices API endpoint deployment scalable containerize Kubernetes Docker serverless frontend backend fullstack devops CI/CD agile sprint refactor debug prototype iterate deploy monitor analytics metrics latency throughput scalability resilience'.split(' '),
+        fun: 'awesome fantastic incredible amazing wonderful brilliant spectacular marvelous extraordinary phenomenal rad groovy cool sweet dope lit fire vibes chill vibes good times happy dance party celebrate friends laughter adventure explore discover create inspire dream believe achieve'.split(' '),
+        minimal: 'simple clean pure minimal essential focus clarity purpose calm peace flow ease grace light soft warm true real honest kind gentle brave strong wise'.split(' ')
+      };
+
+      const punctuation = ['.', ',', ';', ':', '!', '?', '—', '...'];
+      let history = JSON.parse(localStorage.getItem('lp-history') || '[]');
+      let seededRand = null;
+
+      // Seeded Random (reproducible output)
+      const seedRandom = (seed) => {
+        let h = 2166136261 >>> 0;
+        for(let i=0;i<seed.length;i++){
+          h = Math.imul(h ^ seed.charCodeAt(i), 16777619);
+        }
+        return () => {
+          h += h << 13; h ^= h >>> 7;
+          h += h << 3; h ^= h >>> 17;
+          h += h << 5;
+          return ((h >>> 0) / 4294967296);
+        };
+      };
+
+      const rand = (max) => {
+        if(seededRand) return Math.floor(seededRand() * max);
+        return Math.floor(Math.random() * max);
+      };
+
+      const pick = arr => arr[rand(arr.length)];
+
+      // Generate Words
+      const genWords = (n, style, opts) => {
+        const bank = banks[style] || banks.classic;
+        let words = [];
+        
+        // Classic start option
+        if(opts.classicStart && style==='classic' && $('lp-type').value!=='words'){
+          const starter = 'lorem ipsum dolor sit amet consectetur adipiscing elit'.split(' ');
+          words = words.concat(starter.slice(0, Math.min(n, starter.length)));
+          n -= words.length;
+        }
+        
+        for(let i=0;i<n;i++){
+          let w = pick(bank);
+          if(opts.capitalize && (i===0 || rand(10)>7)) w = w.charAt(0).toUpperCase() + w.slice(1);
+          if(opts.punct && rand(8)===0) w += pick(punctuation);
+          words.push(w);
+        }
+        return words.join(' ');
+      };
+
+      // Generate Sentence
+      const genSentence = (style, opts) => {
+        const len = 8 + rand(12);
+        let s = genWords(len, style, {...opts, capitalize: true});
+        s = s.replace(/[,;:!?]+$/,'').trim();
+        s += rand(3)===0 ? pick(['!','?']) : '.';
+        return s;
+      };
+
+      // Generate Paragraph
+      const genParagraph = (style, opts) => {
+        const sentences = 3 + rand(4);
+        let p = [];
+        for(let i=0;i<sentences;i++) p.push(genSentence(style, {...opts, capitalize: i===0 || rand(3)===0}));
+        return p.join(' ');
+      };
+
+      // Main Generator
+      const generate = () => {
+        const count = parseInt($('lp-count').value) || 1;
+        const type = $('lp-type').value;
+        const style = $('lp-style').value;
+        const format = $('lp-format').value;
+        const seed = $('lp-seed').value.trim();
+        const opts = {
+          classicStart: $('lp-classic-start').checked,
+          punct: $('lp-punct').checked,
+          capitalize: $('lp-capitalize').checked
+        };
+
+        // Init seeded random if provided
+        seededRand = seed ? seedRandom(seed) : null;
+
+        let content = '';
+        if(type === 'words') content = genWords(count, style, opts);
+        else if(type === 'sentences') content = Array(count).fill(0).map(()=>genSentence(style, opts)).join(' ');
+        else if(type === 'bytes') {
+          // Generate until we hit byte count
+          let result = '', target = count;
+          while(new TextEncoder().encode(result).length < target){
+            result += genWords(20, style, opts) + ' ';
+          }
+          content = result.slice(0, count);
+        }
+        else content = Array(count).fill(0).map(()=>genParagraph(style, opts)).join('\n\n');
+
+        // Format output
+        let display = content;
+        if(format === 'html'){
+          display = content.split('\n\n').map(p => `<p>${p}</p>`).join('\n');
+        } else if(format === 'markdown'){
+          display = content.split('\n\n').map(p => `> ${p}`).join('\n\n');
+        }
+
+        // Render with syntax highlighting for HTML
+        const out = $('lp-output');
+        if(format === 'html'){
+          out.className = 'lp-output html-mode';
+          out.innerHTML = display
+            .replace(/</g,'&lt;').replace(/>/g,'&gt;')
+            .replace(/(&lt;\/?)(\w+)([^&]*?)(&gt;)/g, '<span class="tag">$1$2</span><span class="attr">$3</span><span class="tag">$4</span>');
+        } else {
+          out.className = 'lp-output';
+          out.textContent = display;
+        }
+
+        // Update stats
+        $('lp-words').textContent = content.trim().split(/\s+/).filter(w=>w).length;
+        $('lp-chars').textContent = content.length;
+        $('lp-lines').textContent = content.split('\n').length;
+        $('lp-format-label').textContent = format==='html'?'HTML':format==='markdown'?'Markdown':'Plain Text';
+
+        // Save to history
+        addToHistory({content, style, type, format, timestamp: Date.now()});
+        
+        showToast('✨ Generated!');
+      };
+
+      // History Management
+      const addToHistory = (item) => {
+        history.unshift(item);
+        if(history.length > 10) history.pop();
+        localStorage.setItem('lp-history', JSON.stringify(history));
+        renderHistory();
+      };
+
+      const renderHistory = () => {
+        const container = $('lp-history');
+        container.innerHTML = history.map((h,i) => {
+          const preview = h.content.slice(0,40).replace(/\n/g,' ') + '...';
+          return `<button class="lp-hist-item" data-idx="${i}" title="${h.style} • ${h.type}">${preview}</button>`;
+        }).join('');
+        container.querySelectorAll('.lp-hist-item').forEach(btn => {
+          btn.onclick = () => {
+            const h = history[btn.dataset.idx];
+            $('lp-output').textContent = h.content;
+            $('lp-words').textContent = h.content.trim().split(/\s+/).filter(w=>w).length;
+            $('lp-chars').textContent = h.content.length;
+            $('lp-lines').textContent = h.content.split('\n').length;
+            showToast('📜 History item loaded');
+          };
+        });
+      };
+
+      // Copy Functions
+      const copyPlain = () => {
+        const text = $('lp-output').innerText || $('lp-output').textContent;
+        navigator.clipboard.writeText(text).then(()=>showToast('📋 Copied plain text'));
+      };
+
+      const copyHTML = () => {
+        const content = $('lp-output').textContent || '';
+        const type = $('lp-type').value;
+        let html = '';
+        if(type === 'paragraphs') html = content.split('\n\n').map(p => `<p>${p.trim()}</p>`).join('\n');
+        else if(type === 'sentences') html = `<p>${content}</p>`;
+        else html = `<span>${content}</span>`;
+        navigator.clipboard.writeText(html).then(()=>showToast('🔗 Copied HTML'));
+      };
+
+      const copyMarkdown = () => {
+        const content = $('lp-output').textContent || '';
+        const md = content.split('\n\n').map(p => `> ${p.trim()}`).join('\n\n');
+        navigator.clipboard.writeText(md).then(()=>showToast('📦 Copied Markdown'));
+      };
+
+      // Download
+      const download = () => {
+        const content = $('lp-output').textContent || '';
+        const blob = new Blob([content], {type:'text/plain'});
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url; a.download = `lorem-${Date.now()}.txt`;
+        a.click();
+        URL.revokeObjectURL(url);
+        showToast('💾 Downloaded lorem.txt');
+      };
+
+      // Toast
+      const showToast = msg => {
+        const t = $('lp-toast'); t.textContent = msg; t.classList.add('show');
+        setTimeout(()=>t.classList.remove('show'), 2200);
+      };
+
+      // Event Listeners
+      $('lp-generate').onclick = generate;
+      $('lp-copy-plain').onclick = copyPlain;
+      $('lp-copy-html').onclick = copyHTML;
+      $('lp-copy-md').onclick = copyMarkdown;
+      $('lp-download').onclick = download;
+      $('lp-clear').onclick = () => {
+        $('lp-output').textContent = '';
+        $('lp-words').textContent = '0';
+        $('lp-chars').textContent = '0';
+        $('lp-lines').textContent = '0';
+        showToast('🗑️ Cleared');
+      };
+
+      // Keyboard shortcut
+      document.addEventListener('keydown', e => {
+        if((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+          e.preventDefault(); generate();
+        }
+      });
+
+      // Auto-generate on style/format change (optional)
+      // $('lp-style').onchange = generate;
+      // $('lp-format').onchange = generate;
+
+      // Init
+      renderHistory();
+      if(history.length > 0) {
+        // Load last generated on startup (optional)
+        // const last = history[0];
+        // $('lp-output').textContent = last.content;
+      }
+    })();
+  </script>
+</div>

@@ -1,0 +1,317 @@
+<div class="mq-app">
+  <style>
+    .mq-app {
+      --mq-bg: #0f172a;
+      --mq-panel: #1e293b;
+      --mq-border: #334155;
+      --mq-accent: #6366f1;
+      --mq-success: #10b981;
+      --mq-danger: #ef4444;
+      --mq-warning: #f59e0b;
+      --mq-text: #f8fafc;
+      --mq-muted: #94a3b8;
+      max-width: 480px; margin: 2rem auto; padding: 1.5rem;
+      background: var(--mq-panel); border-radius: 16px;
+      box-shadow: 0 12px 30px rgba(0,0,0,0.3); border: 1px solid var(--mq-border);
+      font-family: system-ui, -apple-system, sans-serif; color: var(--mq-text);
+      position: relative; overflow: hidden; text-align: center;
+    }
+    .mq-header { font-size: 1.4rem; font-weight: 800; margin: 0 0 1rem; background: linear-gradient(90deg, var(--mq-accent), #8b5cf6); -webkit-background-clip: text; background-clip: text; color: transparent; }
+    
+    .mq-controls { display: flex; gap: 0.5rem; justify-content: center; margin-bottom: 1rem; flex-wrap: wrap; }
+    .mq-select, .mq-btn-sm { padding: 0.5rem 0.8rem; border-radius: 8px; background: #334155; color: #fff; border: 1px solid var(--mq-border); cursor: pointer; font-size: 0.85rem; font-weight: 600; }
+    .mq-select:focus, .mq-btn-sm:hover { background: #475569; outline: none; }
+    
+    .mq-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.5rem; margin-bottom: 1rem; }
+    .mq-stat { background: rgba(255,255,255,0.05); padding: 0.5rem; border-radius: 10px; border: 1px solid var(--mq-border); }
+    .mq-stat span { display: block; font-size: 0.7rem; color: var(--mq-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+    .mq-stat b { font-size: 1rem; display: block; margin-top: 2px; }
+    
+    .mq-timer { height: 6px; background: rgba(255,255,255,0.1); border-radius: 10px; overflow: hidden; margin-bottom: 1.2rem; }
+    .mq-timer-fill { height: 100%; width: 100%; background: var(--mq-success); transition: width 0.05s linear, background 0.3s; }
+    .mq-timer-fill.critical { background: var(--mq-danger); animation: pulse 1s infinite; }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.6} }
+    
+    .mq-question { font-size: 2.5rem; font-weight: 800; margin: 1rem 0; padding: 1.2rem; background: #111827; border-radius: 14px; border: 2px solid var(--mq-border); letter-spacing: 1px; min-height: 60px; display: flex; align-items: center; justify-content: center; }
+    
+    .mq-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.8rem; margin-bottom: 1rem; }
+    .mq-opt { padding: 1rem; background: #111827; border: 2px solid var(--mq-border); border-radius: 12px; font-size: 1.3rem; font-weight: 600; cursor: pointer; transition: 0.2s; color: var(--mq-text); position: relative; overflow: hidden; }
+    .mq-opt:hover:not(:disabled) { border-color: var(--mq-accent); transform: translateY(-2px); }
+    .mq-opt:active:not(:disabled) { transform: translateY(0); }
+    .mq-opt.correct { background: var(--mq-success); border-color: var(--mq-success); animation: pop 0.35s; }
+    .mq-opt.wrong { background: var(--mq-danger); border-color: var(--mq-danger); opacity: 0.7; animation: shake 0.4s; }
+    .mq-opt:disabled { cursor: default; pointer-events: none; }
+    .mq-opt .key-hint { position: absolute; top: 6px; right: 8px; font-size: 0.65rem; background: rgba(0,0,0,0.3); padding: 2px 5px; border-radius: 4px; opacity: 0.7; }
+    @keyframes pop { 50%{transform:scale(1.08)} }
+    @keyframes shake { 25%,75%{transform:translateX(-4px)} 50%{transform:translateX(4px)} }
+    
+    .mq-overlay { position: absolute; inset: 0; background: rgba(15,23,42,0.94); backdrop-filter: blur(8px); display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 2rem; opacity: 0; pointer-events: none; transition: opacity 0.3s; z-index: 10; border-radius: 16px; }
+    .mq-overlay.active { opacity: 1; pointer-events: auto; }
+    .mq-overlay h2 { margin: 0 0 0.5rem; font-size: 1.8rem; }
+    .mq-overlay p { color: var(--mq-muted); margin: 0 0 1.5rem; line-height: 1.5; max-width: 260px; }
+    .mq-btn { padding: 0.9rem 2rem; background: linear-gradient(135deg, var(--mq-accent), #8b5cf6); border: none; border-radius: 12px; color: #fff; font-weight: 700; font-size: 1rem; cursor: pointer; box-shadow: 0 4px 15px rgba(99,102,241,0.4); transition: 0.2s; }
+    .mq-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(99,102,241,0.5); }
+    
+    .mq-confetti { position: absolute; width: 6px; height: 6px; border-radius: 2px; pointer-events: none; animation: fall linear forwards; }
+    @keyframes fall { to { transform: translateY(60vh) rotate(720deg); opacity: 0; } }
+  </style>
+
+  <div class="mq-header">🧮 Math Quest Pro</div>
+  <div class="mq-controls">
+    <select class="mq-select" id="mq-mode">
+      <option value="mixed">🎲 Mixed Operations</option>
+      <option value="add">➕ Addition Only</option>
+      <option value="sub">➖ Subtraction Only</option>
+      <option value="mul">✖️ Multiplication Only</option>
+      <option value="div">➗ Division Only</option>
+    </select>
+    <button class="mq-btn-sm" id="mq-sound">🔊</button>
+  </div>
+
+  <div class="mq-stats">
+    <div class="mq-stat"><span>Level</span><b id="mq-lvl">1</b></div>
+    <div class="mq-stat"><span>Score</span><b id="mq-sc">0</b></div>
+    <div class="mq-stat"><span>Lives</span><b id="mq-hp">❤️❤️❤️</b></div>
+    <div class="mq-stat"><span>Accuracy</span><b id="mq-acc">100%</b></div>
+  </div>
+
+  <div class="mq-timer"><div class="mq-timer-fill" id="mq-tm"></div></div>
+  <div class="mq-question" id="mq-q">Press Start!</div>
+  <div class="mq-grid" id="mq-opts"></div>
+
+  <div class="mq-overlay active" id="mq-start">
+    <h2>🌟 Start Math Quest</h2>
+    <p>Choose a mode, solve problems before time runs out. Streaks multiply your score!</p>
+    <button class="mq-btn" id="mq-start-btn">▶ Play Now</button>
+  </div>
+  <div class="mq-overlay" id="mq-levelup">
+    <h2>🎉 Level Up!</h2>
+    <p>Numbers get bigger & timer gets shorter. Keep it up!</p>
+    <button class="mq-btn" id="mq-next-btn">Continue</button>
+  </div>
+  <div class="mq-overlay" id="mq-gameover">
+    <h2>💔 Game Over</h2>
+    <p>Final: <b id="mq-fsc">0</b> | High Score: <b id="mq-hsc">0</b><br>Accuracy: <b id="mq-facc">0%</b></p>
+    <button class="mq-btn" id="mq-restart-btn">Try Again</button>
+  </div>
+
+  <script>
+    (function() {
+      'use strict';
+      const state = {
+        lvl: 1, sc: 0, hp: 3, streak: 0, correct: 0, total: 0,
+        time: 0, maxTime: 12, tm: null, q: null, opts: [], playing: false,
+        sound: true, audioCtx: null, high: 0, qPerLvl: 5
+      };
+
+      const $ = id => document.getElementById(id);
+      const el = {
+        mode: $('mq-mode'), sound: $('mq-sound'), lvl: $('mq-lvl'), sc: $('mq-sc'), hp: $('mq-hp'), acc: $('mq-acc'),
+        tm: $('mq-tm'), q: $('mq-q'), opts: $('mq-opts'),
+        start: $('mq-start'), levelup: $('mq-levelup'), gameover: $('mq-gameover'),
+        fsc: $('mq-fsc'), hsc: $('mq-hsc'), facc: $('mq-facc'),
+        startBtn: $('mq-start-btn'), nextBtn: $('mq-next-btn'), restartBtn: $('mq-restart-btn')
+      };
+
+      // Audio
+      const initAudio = () => {
+        if(!state.audioCtx) state.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if(state.audioCtx.state==='suspended') state.audioCtx.resume();
+      };
+      const beep = (f,t,d,del=0) => {
+        if(!state.audioCtx || !state.sound) return;
+        const o = state.audioCtx.createOscillator(), g = state.audioCtx.createGain();
+        o.type=t; o.frequency.value=f;
+        g.gain.setValueAtTime(0.08, state.audioCtx.currentTime+del);
+        g.gain.exponentialRampToValueAtTime(0.01, state.audioCtx.currentTime+del+d);
+        o.connect(g).connect(state.audioCtx.destination);
+        o.start(state.audioCtx.currentTime+del); o.stop(state.audioCtx.currentTime+del+d);
+      };
+      const sfx = t => {
+        if(t==='ok') { beep(600,'sine',0.08); beep(900,'sine',0.08,0.06); }
+        if(t==='no') beep(200,'sawtooth',0.2);
+        if(t==='up') [400,500,600,800].forEach((f,i)=>beep(f,'sine',0.1,i*0.07));
+        if(t==='die') [600,500,400,300].forEach((f,i)=>beep(f,'triangle',0.15,i*0.09));
+      };
+
+      // Safe Storage
+      const loadData = () => {
+        try { const d = JSON.parse(localStorage.getItem('mq_hs')); state.high = d.best || 0; } catch { state.high = 0; }
+        el.hsc.textContent = state.high;
+      };
+      const saveData = () => {
+        try { localStorage.setItem('mq_hs', JSON.stringify({best: Math.max(state.sc, state.high)})); } catch {}
+      };
+
+      // Math Generation
+      const rand = (min,max) => Math.floor(Math.random()*(max-min+1))+min;
+      const genQ = () => {
+        const mode = el.mode.value;
+        const pool = mode === 'mixed' ? ['+','-','*','/'] : [mode];
+        const op = pool[Math.floor(Math.random()*pool.length)];
+        const range = 5 + state.lvl * 3;
+        let a, b, ans;
+        
+        if(op === '+') { a = rand(1,range); b = rand(1,range); ans = a+b; }
+        else if(op === '-') { a = rand(10,range+10); b = rand(1,a); ans = a-b; }
+        else if(op === '*') { a = rand(2,Math.min(12,range)); b = rand(2,Math.min(12,range)); ans = a*b; }
+        else { b = rand(2,Math.min(10,range)); ans = rand(2,range); a = b*ans; }
+        
+        const sym = {'+':'+','-':'-','*':'×','/':'÷'};
+        state.q = { text: `${a} ${sym[op]} ${b}`, ans };
+      };
+
+      const genOpts = () => {
+        const correct = state.q.ans;
+        const opts = new Set([correct]);
+        let attempts = 0;
+        while(opts.size < 4 && attempts < 20) {
+          const off = rand(-5,5) || 1;
+          const fake = correct + off;
+          if(fake >= 0 && fake !== correct) opts.add(fake);
+          attempts++;
+        }
+        state.opts = Array.from(opts).sort(()=>Math.random()-0.5);
+      };
+
+      // UI Updates
+      const ui = () => {
+        el.lvl.textContent = state.lvl;
+        el.sc.textContent = state.sc;
+        el.hp.textContent = '❤️'.repeat(state.hp) + '🤍'.repeat(Math.max(0, 3-state.hp));
+        el.acc.textContent = state.total ? Math.round((state.correct/state.total)*100)+'%' : '100%';
+      };
+
+      const renderQ = () => {
+        el.q.textContent = state.q.text + ' = ?';
+        el.opts.innerHTML = state.opts.map((o,i)=>`<button class="mq-opt" data-v="${o}">${o}<span class="key-hint">${i+1}</span></button>`).join('');
+      };
+
+      const confetti = () => {
+        const cols = ['#f43f5e','#10b981','#3b82f6','#f59e0b','#8b5cf6','#ffffff'];
+        for(let i=0;i<20;i++){
+          const c = document.createElement('div'); c.className='mq-confetti';
+          c.style.left = rand(0,100)+'%'; c.style.top='-10px';
+          c.style.background = cols[rand(0,cols.length-1)];
+          c.style.animationDuration = (1+Math.random())+'s';
+          document.body.appendChild(c);
+          setTimeout(()=>c.remove(), 1500);
+        }
+      };
+
+      // Timer
+      const startTimer = () => {
+        clearInterval(state.tm);
+        state.maxTime = Math.max(6, 12 - state.lvl*0.7);
+        state.time = state.maxTime;
+        el.tm.style.width = '100%'; el.tm.classList.remove('critical');
+        state.tm = setInterval(()=>{
+          state.time -= 0.05;
+          el.tm.style.width = (state.time/state.maxTime*100)+'%';
+          if(state.time <= 3) el.tm.classList.add('critical');
+          if(state.time <= 0) { clearInterval(state.tm); timeOut(); }
+        }, 50);
+      };
+
+      const timeOut = () => {
+        if(!state.playing) return;
+        sfx('no'); state.hp--; state.streak=0; state.total++; ui();
+        document.querySelectorAll('.mq-opt').forEach(b=>{
+          b.disabled=true;
+          if(parseInt(b.dataset.v)===state.q.ans) b.classList.add('correct');
+          else b.classList.add('wrong');
+        });
+        setTimeout(nextStep, 800);
+      };
+
+      // Game Flow
+      const loadRound = () => {
+        if(!state.playing) return;
+        genQ(); genOpts(); renderQ(); startTimer(); ui();
+      };
+
+      const handleAns = (val, btn) => {
+        if(!state.playing) return;
+        clearInterval(state.tm);
+        document.querySelectorAll('.mq-opt').forEach(b=>b.disabled=true);
+        state.total++;
+        
+        if(val === state.q.ans) {
+          btn.classList.add('correct');
+          sfx('ok'); state.streak++; state.correct++;
+          const bonus = 10 + Math.floor(state.streak/2)*5;
+          state.sc += bonus;
+          confetti();
+        } else {
+          btn.classList.add('wrong');
+          sfx('no'); state.streak=0; state.hp--;
+          document.querySelectorAll('.mq-opt').forEach(b=>parseInt(b.dataset.v)===state.q.ans && b.classList.add('correct'));
+        }
+        ui();
+        setTimeout(nextStep, 700);
+      };
+
+      const nextStep = () => {
+        if(state.hp <= 0) return gameOver();
+        if(state.correct >= state.qPerLvl * state.lvl) return levelUp();
+        loadRound();
+      };
+
+      const levelUp = () => {
+        state.playing = false;
+        sfx('up'); state.lvl++; confetti();
+        setTimeout(()=>el.levelup.classList.add('active'), 400);
+      };
+
+      const gameOver = () => {
+        state.playing = false;
+        sfx('die'); saveData();
+        el.fsc.textContent = state.sc;
+        el.hsc.textContent = Math.max(state.sc, state.high);
+        el.facc.textContent = el.acc.textContent;
+        el.gameover.classList.add('active');
+      };
+
+      // Controls
+      const start = () => {
+        initAudio();
+        Object.assign(state, {lvl:1, sc:0, hp:3, streak:0, correct:0, total:0, playing:true});
+        el.start.classList.remove('active');
+        loadRound();
+      };
+
+      const nextLvl = () => {
+        el.levelup.classList.remove('active');
+        state.playing = true;
+        loadRound();
+      };
+
+      const restart = () => {
+        el.gameover.classList.remove('active');
+        start();
+      };
+
+      // Events
+      el.startBtn.onclick = start;
+      el.nextBtn.onclick = nextLvl;
+      el.restartBtn.onclick = restart;
+      el.sound.onclick = function(){ state.sound=!state.sound; this.textContent=state.sound?'🔊':'🔇'; };
+      
+      el.opts.addEventListener('click', e => {
+        const btn = e.target.closest('.mq-opt');
+        if(btn && !btn.disabled) handleAns(parseInt(btn.dataset.v), btn);
+      });
+
+      document.addEventListener('keydown', e => {
+        if(!state.playing) return;
+        const k = parseInt(e.key);
+        if(k>=1 && k<=4 && el.opts.children[k-1]) {
+          handleAns(parseInt(el.opts.children[k-1].dataset.v), el.opts.children[k-1]);
+        }
+      });
+
+      // Init
+      loadData(); ui();
+    })();
+  </script>
+</div>

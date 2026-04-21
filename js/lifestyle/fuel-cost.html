@@ -1,0 +1,224 @@
+<div class="lifestyle-tool fuel-calc">
+  <style>
+    .fuel-calc {
+      --fc-bg: #0b1120; --fc-card: #161e31; --fc-border: #2a3654;
+      --fc-text: #e2e8f0; --fc-sec: #94a3b8; --fc-accent: #38bdf8;
+      --fc-green: #22c55e; --fc-yellow: #f59e0b; --fc-red: #ef4444;
+      --fc-radius: 16px; font-family: system-ui, -apple-system, sans-serif;
+      max-width: 700px; margin: 0 auto; padding: 1.5rem;
+      background: var(--fc-bg); color: var(--fc-text); border-radius: var(--fc-radius);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+    }
+    .fc-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.2rem; flex-wrap: wrap; gap: 0.5rem; }
+    .fc-header h2 { margin: 0; font-size: 1.4rem; background: linear-gradient(90deg, var(--fc-accent), #a78bfa); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .fc-form { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 0.8rem; margin-bottom: 1rem; }
+    .fc-field { display: flex; flex-direction: column; gap: 0.4rem; }
+    .fc-field label { font-size: 0.85rem; color: var(--fc-sec); }
+    .fc-input, .fc-select { padding: 0.7rem; border-radius: 10px; border: 1px solid var(--fc-border); background: var(--fc-card); color: var(--fc-text); outline: none; transition: 0.2s; }
+    .fc-input:focus, .fc-select:focus { border-color: var(--fc-accent); box-shadow: 0 0 0 2px rgba(56,189,248,0.15); }
+    .fc-toggle { display: flex; align-items: center; gap: 0.5rem; margin: 0.5rem 0 1rem; cursor: pointer; user-select: none; }
+    .fc-toggle input { width: 18px; height: 18px; accent-color: var(--fc-accent); }
+    .fc-res { background: var(--fc-card); border: 1px solid var(--fc-border); border-radius: 14px; padding: 1.5rem; text-align: center; margin-bottom: 1rem; position: relative; overflow: hidden; }
+    .fc-total { font-size: 2.6rem; font-weight: 800; margin: 0.4rem 0; transition: color 0.3s; }
+    .fc-breakdown { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 0.6rem; margin: 1rem 0; text-align: center; }
+    .fc-stat { background: rgba(56,189,248,0.05); padding: 0.6rem; border-radius: 10px; }
+    .fc-stat-val { font-weight: 600; font-size: 0.95rem; }
+    .fc-stat-lbl { font-size: 0.75rem; color: var(--fc-sec); margin-top: 0.2rem; }
+    .fc-bar { height: 8px; background: var(--fc-bg); border-radius: 4px; overflow: hidden; margin: 0.5rem 0; }
+    .fc-fill { height: 100%; background: linear-gradient(90deg, var(--fc-green), var(--fc-yellow), var(--fc-red)); width: 0; transition: width 0.4s cubic-bezier(0.4,0,0.2,1); }
+    .fc-tip { background: rgba(245,158,11,0.1); border-left: 3px solid var(--fc-yellow); padding: 0.8rem; border-radius: 8px; margin-bottom: 1rem; font-size: 0.9rem; line-height: 1.4; min-height: 2em; }
+    .fc-history { max-height: 150px; overflow-y: auto; background: var(--fc-card); border: 1px solid var(--fc-border); border-radius: 10px; padding: 0.5rem; margin-bottom: 1rem; }
+    .fc-hist-item { display: flex; justify-content: space-between; align-items: center; padding: 0.5rem; font-size: 0.85rem; border-bottom: 1px solid var(--fc-border); }
+    .fc-hist-item:last-child { border: none; }
+    .fc-actions { display: flex; gap: 0.6rem; flex-wrap: wrap; }
+    .fc-btn { flex: 1; min-width: 110px; padding: 0.8rem; border-radius: 10px; border: 1px solid var(--fc-border); background: var(--fc-card); color: var(--fc-sec); cursor: pointer; font-weight: 500; transition: 0.2s; }
+    .fc-btn:hover { background: var(--fc-border); color: var(--fc-text); }
+    .fc-btn.primary { background: var(--fc-accent); color: #0b1120; font-weight: 600; border: none; }
+    .fc-btn.primary:hover { background: #0ea5e9; transform: translateY(-1px); }
+    .fc-empty { text-align: center; color: var(--fc-sec); font-style: italic; padding: 0.5rem; }
+    .fc-toast { position: fixed; bottom: 20px; right: 20px; padding: 0.8rem 1.2rem; border-radius: 10px; background: var(--fc-card); border: 1px solid var(--fc-border); color: var(--fc-text); font-size: 0.9rem; opacity: 0; transform: translateY(20px); transition: 0.3s; pointer-events: none; z-index: 999; box-shadow: 0 8px 24px rgba(0,0,0,0.5); }
+    .fc-toast.show { opacity: 1; transform: translateY(0); }
+    .fc-toast.success { border-color: var(--fc-green); color: var(--fc-green); }
+    @media (max-width: 500px) {
+      .fc-form { grid-template-columns: 1fr; }
+      .fc-actions { flex-direction: column; }
+      .fc-header { flex-direction: column; align-items: flex-start; }
+    }
+  </style>
+
+  <div class="fc-header">
+    <h2>⛽ Smart Fuel Cost Calculator</h2>
+  </div>
+
+  <form class="fc-form" id="fc-form">
+    <div class="fc-field">
+      <label>🚘 Fuel Type</label>
+      <select class="fc-select" id="fc-fuel">
+        <option value="petrol">⛽ Petrol</option>
+        <option value="diesel">🛢️ Diesel</option>
+        <option value="cng">🌬️ CNG</option>
+        <option value="ev">🔌 Electric</option>
+      </select>
+    </div>
+    <div class="fc-field">
+      <label>📏 Distance (km)</label>
+      <input type="number" class="fc-input" id="fc-dist" min="1" step="0.1" value="500">
+    </div>
+    <div class="fc-field">
+      <label>⚙️ Efficiency (km/L or km/kWh)</label>
+      <input type="number" class="fc-input" id="fc-eff" min="0.1" step="0.1" value="15">
+    </div>
+    <div class="fc-field">
+      <label>💰 Price (₹/L or ₹/kWh)</label>
+      <input type="number" class="fc-input" id="fc-price" min="0.1" step="0.1" value="100">
+    </div>
+  </form>
+
+  <label class="fc-toggle">
+    <input type="checkbox" id="fc-round">
+    <span>🔄 Round Trip (×2 Distance)</span>
+  </label>
+
+  <div class="fc-res">
+    <div style="font-size:0.9rem;color:var(--fc-sec);">Estimated Trip Cost</div>
+    <div class="fc-total" id="fc-total">₹0</div>
+    <div class="fc-bar"><div class="fc-fill" id="fc-fill"></div></div>
+    <div class="fc-breakdown">
+      <div class="fc-stat"><div class="fc-stat-val" id="fc-liters">0</div><div class="fc-stat-lbl">Fuel/Power Used</div></div>
+      <div class="fc-stat"><div class="fc-stat-val" id="fc-cpk">₹0.00</div><div class="fc-stat-lbl">Cost / km</div></div>
+      <div class="fc-stat"><div class="fc-stat-val" id="fc-co2">0 kg</div><div class="fc-stat-lbl">CO₂ Emitted</div></div>
+    </div>
+  </div>
+
+  <div class="fc-tip" id="fc-tip">💡 Fill in your trip details to see real-time cost & eco impact.</div>
+
+  <div class="fc-history" id="fc-history">
+    <div class="fc-empty">No saved trips yet. Use 💾 Save to track.</div>
+  </div>
+
+  <div class="fc-actions">
+    <button class="fc-btn primary" id="fc-save">💾 Save Trip</button>
+    <button class="fc-btn" id="fc-copy">📋 Copy Report</button>
+    <button class="fc-btn" id="fc-clear-hist">🗑️ Clear History</button>
+  </div>
+
+  <div class="fc-toast" id="fc-toast"></div>
+
+  <script>
+  (function(){
+    const KEY = 'fuel-calc-pro-v1';
+    const fmt = (n) => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(n);
+    const toast = (msg, type='success') => {
+      const el = document.getElementById('fc-toast');
+      el.textContent = msg; el.className = `fc-toast show ${type}`;
+      setTimeout(() => el.className = 'fc-toast', 3000);
+    };
+
+    const els = {
+      form: document.getElementById('fc-form'),
+      fuel: document.getElementById('fc-fuel'),
+      dist: document.getElementById('fc-dist'),
+      eff: document.getElementById('fc-eff'),
+      price: document.getElementById('fc-price'),
+      round: document.getElementById('fc-round'),
+      total: document.getElementById('fc-total'),
+      fill: document.getElementById('fc-fill'),
+      liters: document.getElementById('fc-liters'),
+      cpk: document.getElementById('fc-cpk'),
+      co2: document.getElementById('fc-co2'),
+      tip: document.getElementById('fc-tip'),
+      history: document.getElementById('fc-history'),
+      save: document.getElementById('fc-save'),
+      copy: document.getElementById('fc-copy'),
+      clearHist: document.getElementById('fc-clear-hist')
+    };
+
+    // Fuel presets & CO2 factors (kg per unit)
+    const FUEL_DATA = {
+      petrol: { price: 100, eff: 14, co2: 2.31, unit: 'L' },
+      diesel: { price: 90, eff: 18, co2: 2.68, unit: 'L' },
+      cng: { price: 85, eff: 22, co2: 1.74, unit: 'kg' },
+      ev: { price: 8, eff: 6, co2: 0.55, unit: 'kWh' }
+    };
+
+    let history = JSON.parse(localStorage.getItem(KEY) || '[]');
+
+    const renderHistory = () => {
+      if(history.length === 0) { els.history.innerHTML = '<div class="fc-empty">No saved trips yet. Use 💾 Save to track.</div>'; return; }
+      els.history.innerHTML = history.map((h,i) => 
+        `<div class="fc-hist-item"><span>📅 ${h.date} | ${h.fuel.toUpperCase()} | ${h.dist}km</span><strong>${fmt(h.cost)}</strong></div>`
+      ).reverse().join('');
+    };
+
+    const calc = () => {
+      const dist = parseFloat(els.dist.value) || 0;
+      const eff = parseFloat(els.eff.value) || 1;
+      const price = parseFloat(els.price.value) || 0;
+      const round = els.round.checked;
+      const actualDist = dist * (round ? 2 : 1);
+      
+      if(eff <= 0 || actualDist <= 0) {
+        els.total.textContent = '₹0'; els.fill.style.width = '0%'; return;
+      }
+
+      const units = actualDist / eff;
+      const cost = units * price;
+      const cpk = cost / actualDist;
+      const co2 = units * FUEL_DATA[els.fuel.value].co2;
+
+      els.total.textContent = fmt(cost);
+      els.liters.textContent = `${units.toFixed(1)} ${FUEL_DATA[els.fuel.value].unit}`;
+      els.cpk.textContent = `₹${cpk.toFixed(2)}`;
+      els.co2.textContent = `${co2.toFixed(1)} kg`;
+
+      const pct = Math.min(100, (cpk / 5) * 100); // 5₹/km benchmark
+      els.fill.style.width = pct + '%';
+      els.total.style.color = cpk < 2 ? 'var(--fc-green)' : cpk < 3.5 ? 'var(--fc-yellow)' : 'var(--fc-red)';
+
+      // Dynamic Tips
+      let tip = "💡 ";
+      if(cpk < 1.5) tip += "🌟 Excellent efficiency! You're saving money & reducing emissions.";
+      else if(cpk < 2.5) tip += "👍 Good cost/km. Try maintaining steady speed & proper tire pressure for ~10% savings.";
+      else if(cpk < 4) tip += "📈 Moderate cost. Consider carpooling or switching to EV/CNG for long trips.";
+      else tip += "⚠️ High cost/km! Check vehicle servicing, avoid AC overload, or explore public transit.";
+      els.tip.textContent = tip;
+    };
+
+    // Real-time updates
+    [els.fuel, els.dist, els.eff, els.price, els.round].forEach(el => el.addEventListener('input', calc));
+    els.fuel.addEventListener('change', () => {
+      const d = FUEL_DATA[els.fuel.value];
+      els.price.value = d.price;
+      els.eff.value = d.eff;
+      calc();
+    });
+
+    // Save Trip
+    els.save.onclick = () => {
+      const d = parseFloat(els.dist.value), p = parseFloat(els.price.value), e = parseFloat(els.eff.value);
+      if(!d || !p || !e) return toast('Enter valid trip details','warn');
+      const cost = (d * (els.round.checked?2:1) / e) * p;
+      history.push({ date: new Date().toLocaleDateString('en-IN'), fuel: els.fuel.value, dist: d, cost });
+      if(history.length > 10) history.shift(); // Keep last 10
+      localStorage.setItem(KEY, JSON.stringify(history));
+      renderHistory(); toast('Trip saved successfully!','success');
+    };
+
+    // Copy Report
+    els.copy.onclick = () => {
+      const txt = `⛽ Fuel Cost Report\nDistance: ${els.dist.value}km ${els.round.checked?'(Round)':''}\nFuel: ${els.fuel.value.toUpperCase()}\nCost: ${els.total.textContent}\nCost/km: ${els.cpk.textContent}\nCO₂: ${els.co2.textContent}\nDate: ${new Date().toLocaleDateString()}`;
+      navigator.clipboard.writeText(txt).then(() => toast('📋 Report copied!','success'));
+    };
+
+    els.clearHist.onclick = () => {
+      if(confirm('Clear all saved trips?')) {
+        history = []; localStorage.removeItem(KEY); renderHistory(); toast('History cleared','warn');
+      }
+    };
+
+    // Init
+    els.fuel.dispatchEvent(new Event('change'));
+    renderHistory();
+  })();
+  </script>
+</div>

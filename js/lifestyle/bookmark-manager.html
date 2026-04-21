@@ -1,0 +1,231 @@
+<div class="lifestyle-tool">
+  <style>
+    .lifestyle-tool {
+      --bm-bg: #0b1120;
+      --bm-card: #161e31;
+      --bm-border: #2a3654;
+      --bm-text: #e2e8f0;
+      --bm-text-sec: #94a3b8;
+      --bm-accent: #38bdf8;
+      --bm-accent-hover: #0ea5e9;
+      --bm-success: #22c55e;
+      --bm-warn: #f59e0b;
+      --bm-error: #ef4444;
+      --bm-radius: 14px;
+      --bm-shadow: 0 8px 24px rgba(0,0,0,0.4);
+      font-family: system-ui, -apple-system, sans-serif;
+      max-width: 720px; margin: 0 auto; padding: 1.5rem;
+      background: var(--bm-bg); color: var(--bm-text);
+      border-radius: var(--bm-radius); box-shadow: var(--bm-shadow);
+      position: relative; overflow: visible;
+    }
+    .bm-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+    .bm-header h2 { margin: 0; font-size: 1.5rem; background: linear-gradient(90deg, var(--bm-accent), #a78bfa); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .bm-actions { display: flex; gap: 0.5rem; }
+    .bm-actions button { padding: 0.5rem 0.8rem; background: var(--bm-card); border: 1px solid var(--bm-border); color: var(--bm-text-sec); border-radius: 8px; cursor: pointer; font-size: 0.85rem; transition: 0.2s; }
+    .bm-actions button:hover { background: var(--bm-border); color: var(--bm-text); }
+    .bm-search, .bm-form input, .bm-form button { padding: 0.75rem; border-radius: 10px; border: 1px solid var(--bm-border); background: var(--bm-card); color: var(--bm-text); outline: none; transition: 0.2s; }
+    .bm-search { width: 100%; margin-bottom: 0.8rem; }
+    .bm-search:focus, .bm-form input:focus { border-color: var(--bm-accent); box-shadow: 0 0 0 2px rgba(56,189,248,0.15); }
+    .bm-form { display: flex; gap: 0.5rem; margin-bottom: 1rem; flex-wrap: wrap; }
+    .bm-form input { flex: 1; min-width: 140px; }
+    .bm-form button { background: var(--bm-accent); color: #0b1120; font-weight: 600; cursor: pointer; min-width: 70px; }
+    .bm-form button:hover { background: var(--bm-accent-hover); transform: translateY(-1px); }
+    .bm-filters { display: flex; gap: 0.5rem; margin-bottom: 1rem; overflow-x: auto; padding-bottom: 0.3rem; scrollbar-width: none; }
+    .bm-filters::-webkit-scrollbar { display: none; }
+    .bm-tag { padding: 0.4rem 0.9rem; background: var(--bm-card); border: 1px solid var(--bm-border); border-radius: 20px; cursor: pointer; font-size: 0.8rem; white-space: nowrap; transition: 0.2s; }
+    .bm-tag:hover { border-color: var(--bm-accent); }
+    .bm-tag.active { background: var(--bm-accent); color: #0b1120; border-color: var(--bm-accent); }
+    .bm-list { max-height: 380px; overflow-y: auto; display: flex; flex-direction: column; gap: 0.6rem; padding-right: 4px; }
+    .bm-list::-webkit-scrollbar { width: 6px; }
+    .bm-list::-webkit-scrollbar-thumb { background: var(--bm-border); border-radius: 10px; }
+    .bm-item { display: flex; justify-content: space-between; align-items: center; padding: 0.9rem; background: var(--bm-card); border: 1px solid var(--bm-border); border-radius: 12px; transition: 0.25s; animation: slideIn 0.3s ease; }
+    .bm-item:hover { border-color: var(--bm-accent); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
+    .bm-item.pinned { border-left: 3px solid var(--bm-warn); background: linear-gradient(90deg, rgba(245,158,11,0.1) 0%, transparent 100%); }
+    .bm-meta { display: flex; align-items: center; gap: 0.8rem; flex: 1; min-width: 0; }
+    .bm-favicon { width: 22px; height: 22px; border-radius: 5px; object-fit: cover; background: #fff; padding: 2px; }
+    .bm-info { min-width: 0; }
+    .bm-link { color: var(--bm-text); text-decoration: none; font-weight: 500; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+    .bm-link:hover { color: var(--bm-accent); }
+    .bm-sub { display: flex; gap: 0.6rem; align-items: center; font-size: 0.75rem; color: var(--bm-text-sec); margin-top: 0.2rem; flex-wrap: wrap; }
+    .bm-tag-sm { background: var(--bm-border); padding: 0.15rem 0.5rem; border-radius: 6px; font-size: 0.7rem; }
+    .bm-actions-row { display: flex; gap: 0.4rem; flex-shrink: 0; }
+    .bm-act { background: none; border: none; color: var(--bm-text-sec); cursor: pointer; padding: 0.4rem; border-radius: 8px; font-size: 1rem; transition: 0.2s; }
+    .bm-act:hover { background: var(--bm-border); color: var(--bm-text); }
+    .bm-empty { text-align: center; padding: 2.5rem 1rem; color: var(--bm-text-sec); font-style: italic; }
+    .bm-toast { position: fixed; bottom: 20px; right: 20px; padding: 0.8rem 1.2rem; border-radius: 10px; background: var(--bm-card); border: 1px solid var(--bm-border); color: var(--bm-text); font-size: 0.9rem; opacity: 0; transform: translateY(20px); transition: 0.3s; pointer-events: none; z-index: 999; box-shadow: var(--bm-shadow); }
+    .bm-toast.show { opacity: 1; transform: translateY(0); }
+    .bm-toast.success { border-color: var(--bm-success); color: var(--bm-success); }
+    .bm-toast.warn { border-color: var(--bm-warn); color: var(--bm-warn); }
+    .bm-toast.error { border-color: var(--bm-error); color: var(--bm-error); }
+    @keyframes slideIn { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
+    @media (max-width: 600px) {
+      .bm-form { flex-direction: column; }
+      .bm-form input, .bm-form button { width: 100%; }
+      .bm-header { flex-direction: column; align-items: flex-start; gap: 0.8rem; }
+    }
+  </style>
+
+  <div class="bm-header">
+    <h2>🔖 Smart Bookmarks</h2>
+    <div class="bm-actions">
+      <button id="bm-export">📤 Export</button>
+      <button id="bm-import">📥 Import</button>
+      <input type="file" id="bm-import-file" hidden accept=".json">
+    </div>
+  </div>
+
+  <input type="text" class="bm-search" id="bm-srch" placeholder="🔍 Search by title, URL or tag...">
+  
+  <form class="bm-form" id="bm-form">
+    <input type="url" id="bm-url" placeholder="https://example.com" required>
+    <input type="text" id="bm-title" placeholder="Title (auto-detected)">
+    <input type="text" id="bm-tag" placeholder="Tag (e.g., Work)">
+    <button type="submit" class="bm-add">➕ Add</button>
+  </form>
+
+  <div class="bm-filters" id="bm-filters"></div>
+  <div class="bm-list" id="bm-list"></div>
+  <div class="bm-toast" id="bm-toast"></div>
+
+  <script>
+    (function(){
+      const KEY = 'smart-bm-data';
+      let bookmarks = JSON.parse(localStorage.getItem(KEY) || '[]');
+      let activeFilter = 'all';
+      let searchQuery = '';
+
+      const els = {
+        form: document.getElementById('bm-form'),
+        url: document.getElementById('bm-url'),
+        title: document.getElementById('bm-title'),
+        tag: document.getElementById('bm-tag'),
+        search: document.getElementById('bm-srch'),
+        filters: document.getElementById('bm-filters'),
+        list: document.getElementById('bm-list'),
+        exportBtn: document.getElementById('bm-export'),
+        importBtn: document.getElementById('bm-import'),
+        importFile: document.getElementById('bm-import-file'),
+        toast: document.getElementById('bm-toast')
+      };
+
+      const save = () => localStorage.setItem(KEY, JSON.stringify(bookmarks));
+      const esc = (str) => String(str || '').replace(/[&<>"'`]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"\'":'&#39;','`':'&#96;'}[c]));
+      const normUrl = (u) => { if(!u) return ''; u = u.trim(); if(!/^https?:\/\//i.test(u)) u = 'https://' + u; try { new URL(u); return u; } catch { return ''; } };
+      const getDomain = (url) => { try { return new URL(url).hostname; } catch { return ''; } };
+      const getFav = (d) => d ? `https://www.google.com/s2/favicons?domain=${d}&sz=32` : '';
+      const toast = (msg, type='info') => { els.toast.textContent = msg; els.toast.className = `bm-toast show ${type}`; setTimeout(() => els.toast.className = 'bm-toast', 3000); };
+
+      const getFiltered = () => {
+        let data = [...bookmarks];
+        if (activeFilter !== 'all') data = data.filter(b => b.tag === activeFilter);
+        const q = searchQuery.toLowerCase();
+        if (q) data = data.filter(b => (b.title||'').toLowerCase().includes(q) || b.url.toLowerCase().includes(q) || (b.tag||'').toLowerCase().includes(q));
+        return data.sort((a,b) => (b.pinned?1:0) - (a.pinned?1:0) || b.created - a.created);
+      };
+
+      const renderFilters = () => {
+        const tags = [...new Set(bookmarks.map(b => b.tag).filter(Boolean))];
+        els.filters.innerHTML = `<span class="bm-tag ${activeFilter==='all'?'active':''}" data-f="all">All (${bookmarks.length})</span>`;
+        tags.forEach(t => {
+          const c = bookmarks.filter(b => b.tag === t).length;
+          els.filters.innerHTML += `<span class="bm-tag ${activeFilter===t?'active':''}" data-f="${esc(t)}">${esc(t)} (${c})</span>`;
+        });
+        els.filters.querySelectorAll('.bm-tag').forEach(el => el.onclick = () => { activeFilter = el.dataset.f; render(); });
+      };
+
+      const renderList = () => {
+        const filtered = getFiltered();
+        els.list.innerHTML = '';
+        if (filtered.length === 0) {
+          els.list.innerHTML = `<div class="bm-empty">📭 ${bookmarks.length === 0 ? 'No bookmarks yet. Add your first link!' : 'No matches found.'}</div>`;
+          return;
+        }
+
+        filtered.forEach(b => {
+          const idx = bookmarks.findIndex(x => x.id === b.id);
+          const domain = getDomain(b.url);
+          const div = document.createElement('div');
+          div.className = `bm-item ${b.pinned ? 'pinned' : ''}`;
+          div.innerHTML = `
+            <div class="bm-meta">
+              <img src="${getFav(domain)}" class="bm-favicon" alt="" onerror="this.style.display='none'">
+              <div class="bm-info">
+                <a href="${esc(b.url)}" target="_blank" rel="noopener" class="bm-link">${esc(b.title || b.url)}</a>
+                <div class="bm-sub">
+                  <span class="bm-tag-sm">${esc(b.tag || 'Uncategorized')}</span>
+                  <span>📅 ${new Date(b.created).toLocaleDateString()}</span>
+                  ${b.pinned ? '📌 Pinned' : ''}
+                </div>
+              </div>
+            </div>
+            <div class="bm-actions-row">
+              <button class="bm-act" data-act="copy" title="Copy URL">📋</button>
+              <button class="bm-act" data-act="pin" title="${b.pinned?'Unpin':'Pin'}">${b.pinned?'📌':'📍'}</button>
+              <button class="bm-act" data-act="edit" title="Edit">✏️</button>
+              <button class="bm-act" data-act="del" title="Delete">🗑️</button>
+            </div>`;
+          
+          div.querySelector('[data-act="copy"]').onclick = () => { navigator.clipboard.writeText(b.url); toast('URL copied!', 'success'); };
+          div.querySelector('[data-act="pin"]').onclick = () => { b.pinned = !b.pinned; save(); render(); };
+          div.querySelector('[data-act="edit"]').onclick = () => {
+            const nt = prompt('Edit Title:', b.title || '') ?? b.title;
+            const ng = prompt('Edit Tag:', b.tag || '') ?? b.tag;
+            if(nt || ng) { b.title = nt; b.tag = ng; save(); render(); toast('Updated', 'success'); }
+          };
+          div.querySelector('[data-act="del"]').onclick = () => {
+            if(confirm('Delete this bookmark permanently?')) {
+              bookmarks.splice(idx, 1); save(); render(); toast('Deleted', 'warn');
+            }
+          };
+          els.list.appendChild(div);
+        });
+      };
+
+      const render = () => { renderFilters(); renderList(); };
+
+      els.form.onsubmit = (e) => {
+        e.preventDefault();
+        const url = normUrl(els.url.value);
+        if(!url) return toast('Invalid URL format', 'error');
+        if(bookmarks.some(b => b.url === url)) return toast('Bookmark already exists!', 'warn');
+        bookmarks.unshift({ id: crypto.randomUUID?.() || Date.now().toString()+Math.random(), url, title: els.title.value.trim(), tag: els.tag.value.trim() || 'Uncategorized', created: Date.now(), pinned: false });
+        save(); render(); els.form.reset(); toast('Bookmark added!', 'success');
+      };
+
+      els.search.oninput = (e) => { searchQuery = e.target.value; renderList(); };
+
+      els.exportBtn.onclick = () => {
+        const blob = new Blob([JSON.stringify(bookmarks, null, 2)], {type: 'application/json'});
+        const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+        a.download = `bookmarks-backup-${new Date().toISOString().slice(0,10)}.json`;
+        a.click(); toast('Exported successfully!', 'success');
+      };
+
+      els.importBtn.onclick = () => els.importFile.click();
+      els.importFile.onchange = (e) => {
+        const file = e.target.files[0]; if(!file) return;
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+          try {
+            const data = JSON.parse(ev.target.result);
+            if(!Array.isArray(data)) throw new Error('Invalid format');
+            const exist = new Set(bookmarks.map(b => b.url));
+            let added = 0;
+            data.forEach(b => {
+              if(b.url && !exist.has(normUrl(b.url) || b.url)) {
+                bookmarks.unshift({ id: crypto.randomUUID?.() || Date.now().toString()+Math.random(), url: normUrl(b.url)||b.url, title: b.title||'', tag: b.tag||'Uncategorized', created: b.created||Date.now(), pinned: false });
+                exist.add(b.url); added++;
+              }
+            });
+            save(); render(); toast(`Imported ${added} bookmarks!`, 'success');
+          } catch { toast('Invalid JSON file', 'error'); }
+          els.importFile.value = '';
+        };
+        reader.readAsText(file);
+      };
+
+      render();
+    })();
+  </script>
+</div>

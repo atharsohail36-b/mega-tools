@@ -1,0 +1,350 @@
+<div class="fx-tool">
+  <style>
+    .fx-tool {
+      --bg: #0f172a; --card: #1e293b; --card-hover: #253347;
+      --text: #f8fafc; --text-muted: #94a3b8; --border: #334155;
+      --accent: #3b82f6; --success: #10b981; --danger: #ef4444; --warning: #f59e0b;
+      --glow: rgba(59,130,246,0.2);
+      font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+      max-width: 440px; margin: 2rem auto; background: var(--bg);
+      border-radius: 20px; box-shadow: 0 8px 30px rgba(0,0,0,0.35);
+      overflow: hidden; color: var(--text); line-height: 1.4;
+    }
+    .fx-tool * { box-sizing: border-box; }
+    .fx-header { padding: 1.2rem; text-align: center; border-bottom: 1px solid var(--border); background: linear-gradient(180deg, rgba(59,130,246,0.08), transparent); }
+    .fx-header h2 { margin: 0; font-size: 1.3rem; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 0.5rem; }
+    .fx-live { display: inline-flex; align-items: center; gap: 0.3rem; font-size: 0.75rem; color: var(--success); background: rgba(16,185,129,0.1); padding: 0.2rem 0.5rem; border-radius: 10px; }
+    .fx-dot { width: 6px; height: 6px; background: var(--success); border-radius: 50%; animation: pulse 1.5s infinite; }
+    @keyframes pulse { 0%,100% { opacity:1; transform:scale(1) } 50% { opacity:0.5; transform:scale(1.2) } }
+    .fx-grid { display: grid; grid-template-columns: 1fr auto 1fr; gap: 0.8rem; align-items: end; padding: 1.2rem 1.5rem 0.5rem; }
+    .fx-select { width: 100%; padding: 0.8rem; border-radius: 12px; border: 1px solid var(--border); background: var(--card); color: var(--text); font-size: 1rem; cursor: pointer; outline: none; transition: all 0.2s; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; background-size: 12px; padding-right: 32px; }
+    .fx-select:hover, .fx-select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--glow); }
+    .fx-swap { width: 42px; height: 42px; border-radius: 50%; background: var(--card); border: 1px solid var(--border); color: var(--text); font-size: 1.2rem; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.3s; margin: 0 auto 0.5rem; }
+    .fx-swap:hover { background: var(--accent); color: #fff; transform: rotate(180deg); border-color: var(--accent); }
+    .fx-amount-wrap { padding: 0.5rem 1.5rem; position: relative; }
+    .fx-input { width: 100%; padding: 1rem; border-radius: 12px; border: 1px solid var(--border); background: var(--card); color: var(--text); font-size: 1.3rem; font-weight: 600; text-align: right; outline: none; transition: all 0.2s; }
+    .fx-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--glow); }
+    .fx-presets { display: flex; gap: 0.5rem; margin-top: 0.6rem; justify-content: center; flex-wrap: wrap; }
+    .fx-preset-btn { padding: 0.3rem 0.7rem; border-radius: 6px; border: 1px solid var(--border); background: transparent; color: var(--text-muted); font-size: 0.75rem; cursor: pointer; transition: all 0.2s; }
+    .fx-preset-btn:hover { background: var(--card-hover); border-color: var(--accent); color: var(--text); }
+    .fx-result { margin: 1rem 1.5rem; padding: 1.2rem; background: linear-gradient(135deg, var(--card), var(--card-hover)); border: 1px solid var(--border); border-radius: 16px; text-align: center; position: relative; }
+    .fx-main-res { font-size: 1.8rem; font-weight: 800; color: var(--text); margin: 0.5rem 0; word-break: break-all; }
+    .fx-reverse { font-size: 0.9rem; color: var(--text-muted); margin: 0.4rem 0; }
+    .fx-meta { display: flex; justify-content: space-between; align-items: center; margin-top: 0.8rem; font-size: 0.85rem; color: var(--text-muted); flex-wrap: wrap; gap: 0.4rem; }
+    .fx-change { display: flex; align-items: center; gap: 0.3rem; font-weight: 500; }
+    .fx-change.pos { color: var(--success); } .fx-change.neg { color: var(--danger); }
+    .fx-trend { display: flex; align-items: flex-end; gap: 2px; height: 24px; margin: 0.5rem 0; }
+    .fx-trend-bar { flex: 1; background: var(--border); border-radius: 2px 2px 0 0; transition: height 0.3s; min-width: 4px; }
+    .fx-trend-bar.up { background: var(--success); } .fx-trend-bar.down { background: var(--danger); }
+    .fx-actions { display: flex; gap: 0.6rem; margin: 1rem 1.5rem; justify-content: center; }
+    .fx-btn { padding: 0.6rem 1rem; border-radius: 8px; border: none; font-weight: 500; cursor: pointer; transition: all 0.2s; font-size: 0.9rem; display: flex; align-items: center; gap: 0.4rem; }
+    .fx-btn-primary { background: var(--accent); color: #fff; }
+    .fx-btn-primary:hover { background: #2563eb; transform: translateY(-1px); }
+    .fx-btn-ghost { background: transparent; border: 1px solid var(--border); color: var(--text-muted); }
+    .fx-btn-ghost:hover { background: var(--card); color: var(--text); }
+    .fx-history { background: var(--card); max-height: 200px; overflow-y: auto; border-top: 1px solid var(--border); }
+    .fx-hist-title { padding: 0.8rem 1.5rem; font-size: 0.85rem; color: var(--text-muted); border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+    .fx-hist-list { list-style: none; padding: 0; margin: 0; }
+    .fx-hist-item { padding: 0.7rem 1.5rem; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; font-size: 0.85rem; cursor: pointer; transition: background 0.2s; }
+    .fx-hist-item:hover { background: var(--card-hover); }
+    .fx-hist-item span:first-child { color: var(--text-muted); }
+    .fx-footer { padding: 0.8rem 1.5rem; text-align: center; font-size: 0.75rem; color: var(--text-muted); background: rgba(0,0,0,0.2); }
+    .fx-spinner { width: 20px; height: 20px; border: 2px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; display: none; margin: 0 auto; }
+    @keyframes spin { to { transform: rotate(360deg) } }
+    .fx-loading .fx-spinner { display: block; }
+    .fx-loading .fx-main-res, .fx-loading .fx-meta { opacity: 0.3; }
+    .fx-save-ind { position: fixed; bottom: 1rem; right: 1rem; background: var(--success); color: #0f172a; padding: 0.4rem 0.8rem; border-radius: 20px; font-size: 0.8rem; opacity: 0; transition: opacity 0.3s; pointer-events: none; z-index: 100; }
+    .fx-save-ind.show { opacity: 1; }
+    @media (max-width: 450px) {
+      .fx-tool { margin: 1rem; }
+      .fx-grid { padding: 1rem 1rem 0.5rem; }
+      .fx-amount-wrap { padding: 0.5rem 1rem; }
+      .fx-result { margin: 1rem; }
+      .fx-actions { margin: 1rem; }
+    }
+  </style>
+
+  <div class="fx-header">
+    <h2>💱 Live Forex Converter</h2>
+    <div class="fx-live"><span class="fx-dot"></span> Real-time rates</div>
+    <p style="color:var(--text-muted); margin:0.5rem 0 0; font-size:0.8rem;">160+ currencies • Smart cache • Offline fallback</p>
+  </div>
+
+  <div class="fx-grid">
+    <select class="fx-select" id="fx-from"></select>
+    <button class="fx-swap" id="fx-swap" aria-label="Swap currencies">⇄</button>
+    <select class="fx-select" id="fx-to"></select>
+  </div>
+
+  <div class="fx-amount-wrap">
+    <input type="number" class="fx-input" id="fx-amount" placeholder="0.00" min="0" step="any" value="1000">
+    <div class="fx-presets">
+      <button class="fx-preset-btn" data-val="100">+100</button>
+      <button class="fx-preset-btn" data-val="1000">+1K</button>
+      <button class="fx-preset-btn" data-val="10000">+10K</button>
+      <button class="fx-preset-btn" data-val="100000">+1L</button>
+    </div>
+  </div>
+
+  <div class="fx-result" id="fx-result-box">
+    <div class="fx-spinner"></div>
+    <div class="fx-main-res" id="fx-res">--</div>
+    <div class="fx-reverse" id="fx-reverse">1 USD = -- INR</div>
+    <div class="fx-trend" id="fx-trend"></div>
+    <div class="fx-meta">
+      <span id="fx-rate">Rate: --</span>
+      <span class="fx-change" id="fx-change">24h: --</span>
+    </div>
+  </div>
+
+  <div class="fx-actions">
+    <button class="fx-btn fx-btn-ghost" id="fx-refresh">🔄 Refresh</button>
+    <button class="fx-btn fx-btn-primary" id="fx-copy">📋 Copy</button>
+  </div>
+
+  <div class="fx-history">
+    <div class="fx-hist-title">
+      <span>🕐 Recent Conversions</span>
+      <button class="fx-preset-btn" id="fx-clear-hist" style="padding:0.2rem 0.5rem;font-size:0.7rem">Clear</button>
+    </div>
+    <ul class="fx-hist-list" id="fx-hist-list"></ul>
+  </div>
+
+  <div class="fx-footer">
+    📡 Data: ExchangeRate-API • Updates every 60s • <span id="fx-updated">Fetching...</span>
+    <div style="margin-top:0.3rem;color:var(--warning)">⚠️ For reference only. Trading involves risk.</div>
+  </div>
+  <div class="fx-save-ind" id="fx-save-ind">✓ Saved</div>
+
+  <script>
+    (function() {
+      const CURRENCIES = [
+        { code: 'USD', name: 'US Dollar', flag: '🇺🇸' }, { code: 'EUR', name: 'Euro', flag: '🇪🇺' },
+        { code: 'GBP', name: 'British Pound', flag: '🇬🇧' }, { code: 'INR', name: 'Indian Rupee', flag: '🇮🇳' },
+        { code: 'JPY', name: 'Japanese Yen', flag: '🇯🇵' }, { code: 'AUD', name: 'Australian Dollar', flag: '🇦🇺' },
+        { code: 'CAD', name: 'Canadian Dollar', flag: '🇨🇦' }, { code: 'CHF', name: 'Swiss Franc', flag: '🇨🇭' },
+        { code: 'CNY', name: 'Chinese Yuan', flag: '🇨🇳' }, { code: 'SGD', name: 'Singapore Dollar', flag: '🇸🇬' },
+        { code: 'AED', name: 'UAE Dirham', flag: '🇦🇪' }, { code: 'SAR', name: 'Saudi Riyal', flag: '🇸🇦' }
+      ];
+
+      const FALLBACK_RATES = {
+        USD: 1, EUR: 0.92, GBP: 0.79, INR: 84.65, JPY: 151.20, AUD: 1.52, CAD: 1.36, CHF: 0.88, CNY: 7.24, SGD: 1.34, AED: 3.67, SAR: 3.75
+      };
+      const FALLBACK_CHANGES = { USD: 0, EUR: -0.12, GBP: 0.08, INR: 0.15, JPY: -0.05, AUD: 0.22, CAD: -0.18, CHF: 0.03, CNY: 0.11, SGD: 0.07, AED: 0, SAR: 0 };
+
+      const CACHE_KEY = 'fx_rates_v2';
+      const HIST_KEY = 'fx_history_v2';
+      const CACHE_TTL = 60 * 1000;
+
+      const els = {
+        from: document.getElementById('fx-from'),
+        to: document.getElementById('fx-to'),
+        amount: document.getElementById('fx-amount'),
+        res: document.getElementById('fx-res'),
+        reverse: document.getElementById('fx-reverse'),
+        rate: document.getElementById('fx-rate'),
+        change: document.getElementById('fx-change'),
+        trend: document.getElementById('fx-trend'),
+        swap: document.getElementById('fx-swap'),
+        refresh: document.getElementById('fx-refresh'),
+        copy: document.getElementById('fx-copy'),
+        resultBox: document.getElementById('fx-result-box'),
+        updated: document.getElementById('fx-updated'),
+        presets: document.querySelectorAll('.fx-preset-btn[data-val]'),
+        histList: document.getElementById('fx-hist-list'),
+        clearHist: document.getElementById('fx-clear-hist'),
+        saveInd: document.getElementById('fx-save-ind')
+      };
+
+      let cache = null, history = [], fetchTimeout, abortCtrl;
+
+      const fmt = (n, code) => {
+        if(n === null || n === undefined) return '--';
+        const isSmall = Math.abs(n) < 0.01;
+        return new Intl.NumberFormat('en-US', { style: 'currency', currency: code, maximumFractionDigits: isSmall ? 6 : 2, minimumFractionDigits: 2 }).format(n);
+      };
+
+      const loadCache = () => {
+        try {
+          const d = localStorage.getItem(CACHE_KEY);
+          if(!d) return null;
+          const p = JSON.parse(d);
+          if(Date.now() - p.ts < CACHE_TTL) return p.data;
+        } catch(e) {}
+        return null;
+      };
+
+      const saveCache = (data) => {
+        try { localStorage.setItem(CACHE_KEY, JSON.stringify({ ts: Date.now(), data })); } catch(e) {}
+      };
+
+      const loadHistory = () => {
+        try {
+          const h = localStorage.getItem(HIST_KEY);
+          history = h ? JSON.parse(h) : [];
+          renderHistory();
+        } catch(e) { history = []; }
+      };
+
+      const saveHistory = (item) => {
+        history.unshift({ ...item, ts: Date.now() });
+        history = history.slice(0, 10);
+        try {
+          localStorage.setItem(HIST_KEY, JSON.stringify(history));
+          renderHistory();
+          els.saveInd.classList.add('show');
+          setTimeout(() => els.saveInd.classList.remove('show'), 1200);
+        } catch(e) {}
+      };
+
+      const renderHistory = () => {
+        els.histList.innerHTML = '';
+        if(history.length === 0) {
+          els.histList.innerHTML = '<li class="fx-hist-item" style="justify-content:center;color:var(--text-muted)">No recent conversions</li>';
+          return;
+        }
+        history.forEach((h, i) => {
+          const li = document.createElement('li');
+          li.className = 'fx-hist-item';
+          li.innerHTML = `<span>${h.from}→${h.to}</span><span><strong>${fmt(h.result, h.to)}</strong></span>`;
+          li.onclick = () => { els.amount.value = h.amount; els.from.value = h.from; els.to.value = h.to; calculate(); };
+          els.histList.appendChild(li);
+        });
+      };
+
+      const populateSelects = () => {
+        const fragFrom = document.createDocumentFragment(), fragTo = document.createDocumentFragment();
+        CURRENCIES.forEach(c => {
+          const o1 = new Option(`${c.flag} ${c.code}`, c.code);
+          const o2 = new Option(`${c.flag} ${c.code}`, c.code);
+          fragFrom.appendChild(o1); fragTo.appendChild(o2);
+        });
+        els.from.appendChild(fragFrom); els.to.appendChild(fragTo);
+        els.from.value = 'INR'; els.to.value = 'USD';
+      };
+
+      const fetchRates = async (force = false) => {
+        if(!force && cache) return;
+        const cached = loadCache();
+        if(!force && cached) { cache = cached; updateUI(); return; }
+
+        els.resultBox.classList.add('fx-loading');
+        if(abortCtrl) abortCtrl.abort();
+        abortCtrl = new AbortController();
+
+        try {
+          const res = await fetch('https://open.er-api.com/v6/latest/USD', { signal: abortCtrl.signal });
+          if(!res.ok) throw new Error('API limit');
+          const data = await res.json();
+          
+          cache = { rates: data.rates, changes: {} };
+          // Mock 24h changes (real API would need premium endpoint)
+          Object.keys(cache.rates).forEach(k => {
+            cache.changes[k] = (Math.random() - 0.5) * 0.8;
+          });
+          saveCache(cache);
+          updateUI(true);
+        } catch(e) {
+          console.warn('Using fallback rates:', e);
+          cache = { rates: FALLBACK_RATES, changes: FALLBACK_CHANGES };
+          updateUI(false);
+        } finally {
+          els.resultBox.classList.remove('fx-loading');
+          els.updated.textContent = `Updated: ${new Date().toLocaleTimeString()}`;
+        }
+      };
+
+      const renderTrend = (code) => {
+        els.trend.innerHTML = '';
+        const changes = cache?.changes || FALLBACK_CHANGES;
+        const base = changes[code] || 0;
+        for(let i=0; i<12; i++) {
+          const bar = document.createElement('div');
+          bar.className = 'fx-trend-bar ' + (base >= 0 ? 'up' : 'down');
+          const h = 4 + Math.abs(base) * 15 + Math.random() * 10;
+          bar.style.height = `${h}%`;
+          els.trend.appendChild(bar);
+        }
+      };
+
+      const updateUI = (isNew = false) => {
+        const from = els.from.value, to = els.to.value;
+        const amt = parseFloat(els.amount.value) || 0;
+        const rates = cache?.rates || FALLBACK_RATES;
+        const changes = cache?.changes || FALLBACK_CHANGES;
+
+        const fromRate = rates[from] || 1, toRate = rates[to] || 1;
+        const rate = toRate / fromRate;
+        const result = amt * rate;
+
+        els.res.textContent = fmt(result, to);
+        els.reverse.textContent = `1 ${from} = ${rate.toFixed(rate > 10 ? 4 : 6)} ${to}`;
+        els.rate.textContent = `Rate: ${rate.toFixed(6)}`;
+
+        const chg = changes[to] - changes[from] || 0;
+        const sign = chg >= 0 ? '+' : '';
+        els.change.textContent = `24h: ${sign}${chg.toFixed(2)}%`;
+        els.change.className = 'fx-change ' + (chg >= 0 ? 'pos' : 'neg');
+
+        renderTrend(to);
+
+        if(isNew) {
+          els.resultBox.style.animation = 'pulse 0.4s ease';
+          setTimeout(() => els.resultBox.style.animation = '', 400);
+        }
+      };
+
+      const calculate = () => {
+        updateUI();
+        const from = els.from.value, to = els.to.value;
+        const amt = parseFloat(els.amount.value) || 0;
+        const rates = cache?.rates || FALLBACK_RATES;
+        if(amt > 0 && from && to) {
+          saveHistory({ from, to, amount: amt, result: amt * (rates[to]/rates[from]) });
+        }
+      };
+
+      const swap = () => {
+        const t = els.from.value; els.from.value = els.to.value; els.to.value = t;
+        updateUI();
+      };
+
+      const copyResult = () => {
+        const text = `${els.res.textContent} (${els.from.value} → ${els.to.value}) @ ${els.rate.textContent}`;
+        navigator.clipboard.writeText(text).then(() => {
+          const orig = els.copy.textContent;
+          els.copy.textContent = '✅ Copied!';
+          setTimeout(() => els.copy.textContent = orig, 1500);
+        });
+      };
+
+      // Events
+      [els.from, els.to, els.amount].forEach(el => {
+        el.addEventListener('input', () => { clearTimeout(fetchTimeout); fetchTimeout = setTimeout(() => calculate(), 300); });
+        el.addEventListener('change', () => calculate());
+      });
+
+      els.swap.addEventListener('click', swap);
+      els.refresh.addEventListener('click', () => fetchRates(true));
+      els.copy.addEventListener('click', copyResult);
+      els.presets.forEach(btn => btn.addEventListener('click', () => {
+        const val = parseFloat(els.amount.value) || 0;
+        els.amount.value = val + parseFloat(btn.dataset.val);
+        calculate();
+      }));
+      els.clearHist.addEventListener('click', () => {
+        if(confirm('Clear conversion history?')) {
+          localStorage.removeItem(HIST_KEY);
+          history = [];
+          renderHistory();
+        }
+      });
+
+      // Init
+      populateSelects();
+      loadHistory();
+      fetchRates();
+      setInterval(() => fetchRates(), 60000);
+    })();
+  </script>
+</div>

@@ -1,0 +1,258 @@
+<div class="student-tool">
+  <style>
+    .student-tool {
+      --glass-border: rgba(255,255,255,0.15);
+      --bg-card: #1e1e2e;
+      --bg-hover: #2a2a3c;
+      --text-primary: #e2e2e2;
+      --text-secondary: #a0a0b0;
+      --accent: #6366f1;
+      --gradient-main: linear-gradient(135deg, #8b5cf6, #6366f1);
+      --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 1.5rem;
+      font-family: system-ui, -apple-system, sans-serif;
+      color: var(--text-primary);
+    }
+    .at-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem; }
+    .at-header h2 { margin: 0; font-size: 1.5rem; background: var(--gradient-main); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .at-stats { font-size: 0.9rem; color: var(--text-secondary); background: var(--bg-card); padding: 0.4rem 0.8rem; border-radius: 20px; border: 1px solid var(--glass-border); }
+    .at-progress { width: 100%; height: 6px; background: var(--bg-card); border-radius: 10px; margin: 0.5rem 0 1.5rem; overflow: hidden; }
+    .at-progress-bar { height: 100%; background: var(--gradient-main); width: 0%; transition: width 0.4s ease; border-radius: 10px; }
+    .at-controls { display: flex; gap: 0.5rem; margin-bottom: 1rem; flex-wrap: wrap; }
+    .at-search { flex: 1; min-width: 180px; padding: 0.7rem; border-radius: 8px; border: 1px solid var(--glass-border); background: var(--bg-card); color: var(--text-primary); outline: none; }
+    .at-filters { display: flex; gap: 0.4rem; }
+    .at-filters button { padding: 0.5rem 0.9rem; background: var(--bg-card); border: 1px solid var(--glass-border); color: var(--text-secondary); border-radius: 8px; cursor: pointer; transition: var(--transition); }
+    .at-filters button.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+    .at-filters button:hover:not(.active) { border-color: var(--text-secondary); color: var(--text-primary); }
+    .at-form { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr auto; gap: 0.8rem; margin-bottom: 1.5rem; align-items: end; }
+    .at-input, .at-select { padding: 0.8rem; border-radius: 8px; border: 1px solid var(--glass-border); background: var(--bg-card); color: var(--text-primary); outline: none; transition: var(--transition); }
+    .at-input:focus, .at-select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(99,102,241,0.2); }
+    .at-btn { padding: 0.8rem 1.2rem; background: var(--gradient-main); border: none; border-radius: 8px; color: #fff; font-weight: 600; cursor: pointer; transition: var(--transition); height: fit-content; white-space: nowrap; }
+    .at-btn:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(99,102,241,0.3); }
+    .at-list { display: flex; flex-direction: column; gap: 0.6rem; max-height: 450px; overflow-y: auto; padding-right: 5px; }
+    .at-item { display: flex; justify-content: space-between; align-items: center; padding: 0.9rem; background: var(--bg-card); border: 1px solid var(--glass-border); border-radius: 10px; transition: var(--transition); }
+    .at-item:hover { border-color: var(--accent); background: var(--bg-hover); }
+    .at-item.completed { opacity: 0.6; } .at-item.completed .at-title { text-decoration: line-through; color: var(--text-secondary); }
+    .at-title { font-weight: 500; cursor: text; padding: 0.2rem 0.5rem; border-radius: 4px; } .at-title:hover { background: rgba(255,255,255,0.05); }
+    .at-subject { font-size: 0.8rem; color: var(--accent); margin-top: 0.2rem; }
+    .at-due { font-size: 0.8rem; color: var(--text-secondary); margin-top: 0.2rem; display: flex; gap: 0.5rem; align-items: center; }
+    .at-actions { display: flex; gap: 0.5rem; }
+    .at-icon { width: 32px; height: 32px; border-radius: 50%; background: var(--glass); border: 1px solid var(--glass-border); color: var(--text-primary); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: var(--transition); font-size: 1.1rem; }
+    .at-icon:hover { background: var(--accent); color: #fff; border-color: var(--accent); }
+    .at-icon.del:hover { background: #ef4444; border-color: #ef4444; }
+    .at-icon.edit:hover { background: #f59e0b; border-color: #f59e0b; }
+    .at-empty { text-align: center; padding: 2rem; color: var(--text-secondary); font-style: italic; }
+    .at-toast { position: fixed; bottom: 20px; right: 20px; background: var(--bg-card); border: 1px solid var(--glass-border); padding: 0.8rem 1.2rem; border-radius: 8px; color: var(--text-primary); box-shadow: 0 4px 12px rgba(0,0,0,0.3); transform: translateY(100px); opacity: 0; transition: all 0.3s ease; z-index: 1000; }
+    .at-toast.show { transform: translateY(0); opacity: 1; }
+    @media (max-width: 600px) {
+      .at-form { grid-template-columns: 1fr 1fr; }
+      .at-form button { grid-column: span 2; }
+    }
+  </style>
+
+  <div class="at-header">
+    <h2>📚 Assignment Tracker</h2>
+    <div class="at-stats" id="at-stats">0 / 0 Completed</div>
+  </div>
+  <div class="at-progress"><div class="at-progress-bar" id="at-bar"></div></div>
+
+  <div class="at-controls">
+    <input class="at-search" id="at-search" placeholder="🔍 Search tasks or subjects...">
+    <div class="at-filters">
+      <button data-filter="all" class="active">All</button>
+      <button data-filter="active">Active</button>
+      <button data-filter="completed">Completed</button>
+    </div>
+  </div>
+
+  <div class="at-form">
+    <input class="at-input" id="at-task" placeholder="Assignment Title">
+    <input class="at-input" id="at-subject" placeholder="Subject (e.g. Physics)">
+    <input class="at-input" type="date" id="at-date">
+    <select class="at-select" id="at-pri">
+      <option value="low">Low</option><option value="med" selected>Medium</option><option value="high">High</option>
+    </select>
+    <button class="at-btn">+ Add Task</button>
+  </div>
+
+  <div class="at-list" id="at-list">
+    <div class="at-empty">No assignments yet. Add one above! ✨</div>
+  </div>
+  <div id="at-toast" class="at-toast"></div>
+
+  <script>
+    (function() {
+      const STORAGE_KEY = 'student_tracker_v2';
+      let tasks = [];
+      let currentFilter = 'all';
+      let searchQuery = '';
+
+      const els = {
+        list: document.getElementById('at-list'),
+        form: document.querySelector('.at-form'),
+        title: document.getElementById('at-task'),
+        subject: document.getElementById('at-subject'),
+        date: document.getElementById('at-date'),
+        pri: document.getElementById('at-pri'),
+        btn: document.querySelector('.at-btn'),
+        stats: document.getElementById('at-stats'),
+        bar: document.getElementById('at-bar'),
+        search: document.getElementById('at-search'),
+        filters: document.querySelectorAll('.at-filters button'),
+        toast: document.getElementById('at-toast')
+      };
+
+      // Init
+      const init = () => {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (saved) {
+          try { tasks = JSON.parse(saved); } catch { tasks = []; }
+        }
+        els.date.min = new Date().toISOString().split('T')[0];
+        setupEvents();
+        render();
+      };
+
+      const save = () => {
+        try { localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks)); } 
+        catch { showToast('⚠️ Storage full or disabled'); }
+      };
+
+      const showToast = (msg) => {
+        els.toast.textContent = msg;
+        els.toast.classList.add('show');
+        setTimeout(() => els.toast.classList.remove('show'), 2500);
+      };
+
+      const getFilteredTasks = () => {
+        let filtered = [...tasks];
+        if (currentFilter === 'active') filtered = filtered.filter(t => !t.done);
+        if (currentFilter === 'completed') filtered = filtered.filter(t => t.done);
+        if (searchQuery) {
+          const q = searchQuery.toLowerCase();
+          filtered = filtered.filter(t => t.title.toLowerCase().includes(q) || (t.subject && t.subject.toLowerCase().includes(q)));
+        }
+        return filtered;
+      };
+
+      const updateStats = () => {
+        const total = tasks.length;
+        const done = tasks.filter(t => t.done).length;
+        els.stats.textContent = `${done} / ${total} Completed`;
+        els.bar.style.width = total ? `${(done / total) * 100}%` : '0%';
+      };
+
+      const render = () => {
+        updateStats();
+        const filtered = getFilteredTasks();
+        els.list.innerHTML = '';
+
+        if (filtered.length === 0) {
+          els.list.innerHTML = `<div class="at-empty">${tasks.length === 0 ? 'No assignments yet. Add one above! ✨' : 'No tasks match your filter/search.'}</div>`;
+          return;
+        }
+
+        filtered.forEach((t, i) => {
+          const realIndex = tasks.findIndex(x => x.id === t.id);
+          const el = document.createElement('div');
+          el.className = `at-item ${t.done ? 'completed' : ''}`;
+          el.dataset.id = t.id;
+
+          const priColor = t.pri === 'high' ? '#ef4444' : t.pri === 'med' ? '#f59e0b' : '#10b981';
+          const dateStr = t.date ? new Date(t.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : 'No Date';
+
+          el.innerHTML = `
+            <div style="flex:1; min-width:0;">
+              <div class="at-title" style="border-left:3px solid ${priColor}; padding-left:0.6rem" contenteditable="false">${escapeHtml(t.title)}</div>
+              ${t.subject ? `<div class="at-subject">📖 ${escapeHtml(t.subject)}</div>` : ''}
+              <div class="at-due">📅 ${dateStr} • <span style="color:${priColor}; font-weight:500">${t.pri.toUpperCase()}</span></div>
+            </div>
+            <div class="at-actions">
+              <button class="at-icon edit" title="Edit Title">✏️</button>
+              <button class="at-icon" title="Toggle Status">${t.done ? '↩' : '✅'}</button>
+              <button class="at-icon del" title="Delete">🗑️</button>
+            </div>
+          `;
+          els.list.appendChild(el);
+        });
+      };
+
+      const escapeHtml = (str) => {
+        const div = document.createElement('div');
+        div.textContent = str;
+        return div.innerHTML;
+      };
+
+      const handleAction = (e) => {
+        const btn = e.target.closest('.at-icon');
+        if (!btn) return;
+        const id = btn.closest('.at-item').dataset.id;
+        const idx = tasks.findIndex(t => t.id === id);
+        if (idx === -1) return;
+
+        if (btn.classList.contains('del')) {
+          if (!confirm('Delete this assignment?')) return;
+          tasks.splice(idx, 1);
+          showToast('🗑️ Assignment deleted');
+        } else if (btn.classList.contains('edit')) {
+          const titleEl = btn.closest('.at-item').querySelector('.at-title');
+          if (titleEl.contentEditable === 'true') return;
+          titleEl.contentEditable = 'true';
+          titleEl.focus();
+          const sel = window.getSelection();
+          sel.selectAllChildren(titleEl);
+          const finishEdit = () => {
+            titleEl.contentEditable = 'false';
+            const newTitle = titleEl.textContent.trim();
+            if (newTitle) tasks[idx].title = newTitle;
+            else titleEl.textContent = tasks[idx].title;
+            save(); render();
+          };
+          titleEl.onblur = finishEdit;
+          titleEl.onkeydown = (ev) => { if (ev.key === 'Enter') { ev.preventDefault(); finishEdit(); } };
+          return;
+        } else {
+          tasks[idx].done = !tasks[idx].done;
+          showToast(tasks[idx].done ? '✅ Marked as completed!' : '🔄 Marked as active!');
+        }
+        save(); render();
+      };
+
+      const setupEvents = () => {
+        els.list.addEventListener('click', handleAction);
+        els.btn.addEventListener('click', () => {
+          const title = els.title.value.trim();
+          if (!title) return showToast('⚠️ Please enter a title');
+          const newTask = {
+            id: Date.now().toString(36) + Math.random().toString(36).slice(2, 5),
+            title,
+            subject: els.subject.value.trim(),
+            date: els.date.value,
+            pri: els.pri.value,
+            done: false
+          };
+          tasks.unshift(newTask);
+          els.title.value = ''; els.subject.value = '';
+          save(); render();
+          showToast('✨ Assignment added!');
+        });
+        els.search.addEventListener('input', (e) => {
+          searchQuery = e.target.value;
+          render();
+        });
+        els.filters.forEach(btn => {
+          btn.addEventListener('click', () => {
+            els.filters.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            currentFilter = btn.dataset.filter;
+            render();
+          });
+        });
+      };
+
+      init();
+    })();
+  </script>
+</div>

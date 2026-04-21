@@ -1,0 +1,649 @@
+<div class="img-prompt-pro">
+  <style>
+    .img-prompt-pro {
+      --ipp-primary: #6366f1; --ipp-primary-hover: #4f46e5; --ipp-accent: #8b5cf6;
+      --ipp-pink: #ec4899; --ipp-bg: #0f0f1a; --ipp-card: #1a1a2e; --ipp-input: #1e1e3f;
+      --ipp-border: #334155; --ipp-text: #f1f5f9; --ipp-text-muted: #94a3b8;
+      --ipp-success: #10b981; --ipp-error: #ef4444; --ipp-warning: #f59e0b;
+      --ipp-radius: 12px; --ipp-shadow: 0 4px 20px rgba(0,0,0,0.4);
+      --ipp-transition: all 0.25s cubic-bezier(0.4,0,0.2,1);
+      
+      max-width: 900px; margin: 1.5rem auto; padding: 1.2rem;
+      background: var(--ipp-card); border: 1px solid var(--ipp-border);
+      border-radius: var(--ipp-radius); box-shadow: var(--ipp-shadow);
+      font-family: system-ui, -apple-system, 'Segoe UI', sans-serif; color: var(--ipp-text);
+    }
+    .ipp-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; padding-bottom: 0.8rem; border-bottom: 1px solid var(--ipp-border); flex-wrap: wrap; gap: 0.5rem; }
+    .ipp-title { font-size: 1.3rem; font-weight: 700; display: flex; align-items: center; gap: 0.5rem; }
+    .ipp-title i { color: var(--ipp-primary); }
+    .ipp-badges { display: flex; gap: 0.4rem; flex-wrap: wrap; }
+    .ipp-badge { padding: 0.25rem 0.6rem; background: var(--ipp-input); border-radius: 6px; font-size: 0.7rem; color: var(--ipp-text-muted); }
+    
+    .ipp-platforms { display: flex; gap: 0.5rem; margin-bottom: 1rem; flex-wrap: wrap; }
+    .ipp-platform { padding: 0.5rem 1rem; border-radius: 10px; border: 2px solid var(--ipp-border); background: var(--ipp-input); color: var(--ipp-text-muted); cursor: pointer; transition: var(--ipp-transition); font-size: 0.85rem; font-weight: 500; display: flex; align-items: center; gap: 0.4rem; }
+    .ipp-platform:hover { border-color: var(--ipp-primary); color: var(--ipp-text); }
+    .ipp-platform.active { background: var(--ipp-primary); border-color: transparent; color: white; box-shadow: 0 2px 10px rgba(99,102,241,0.3); }
+    
+    .ipp-section { margin-bottom: 1rem; }
+    .ipp-section-title { font-size: 0.85rem; font-weight: 600; color: var(--ipp-text-muted); margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.4rem; }
+    .ipp-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0.8rem; }
+    .ipp-field { display: flex; flex-direction: column; gap: 0.3rem; }
+    .ipp-label { font-size: 0.8rem; color: var(--ipp-text-muted); }
+    .ipp-input, .ipp-select, .ipp-textarea { width: 100%; padding: 0.65rem 0.85rem; background: var(--ipp-input); border: 2px solid var(--ipp-border); border-radius: 8px; color: var(--ipp-text); font-size: 0.9rem; outline: none; transition: var(--ipp-transition); font-family: inherit; }
+    .ipp-input:focus, .ipp-select:focus, .ipp-textarea:focus { border-color: var(--ipp-primary); box-shadow: 0 0 0 3px rgba(99,102,241,0.15); }
+    .ipp-textarea { min-height: 70px; resize: vertical; line-height: 1.5; }
+    .ipp-input-full { grid-column: 1 / -1; }
+    
+    .ipp-actions { display: flex; gap: 0.5rem; margin-bottom: 1rem; flex-wrap: wrap; }
+    .ipp-btn { padding: 0.6rem 1rem; border-radius: 8px; border: 1px solid var(--ipp-border); background: var(--ipp-input); color: var(--ipp-text); font-size: 0.85rem; cursor: pointer; transition: var(--ipp-transition); display: flex; align-items: center; gap: 0.4rem; font-weight: 500; }
+    .ipp-btn:hover { background: var(--ipp-primary); border-color: transparent; color: white; transform: translateY(-1px); }
+    .ipp-btn.primary { background: linear-gradient(135deg, var(--ipp-primary), var(--ipp-accent)); border: none; color: white; font-weight: 600; font-size: 0.95rem; padding: 0.7rem 1.5rem; }
+    .ipp-btn.primary:hover { box-shadow: 0 4px 20px rgba(99,102,241,0.4); transform: translateY(-2px); }
+    .ipp-btn.random { background: linear-gradient(135deg, var(--ipp-pink), var(--ipp-accent)); border: none; color: white; }
+    .ipp-btn.random:hover { box-shadow: 0 4px 20px rgba(236,72,153,0.4); }
+    
+    .ipp-output-box { background: #0a0a14; border: 2px solid var(--ipp-border); border-radius: 12px; padding: 1rem; margin-bottom: 1rem; position: relative; }
+    .ipp-output-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; }
+    .ipp-output-title { font-size: 0.85rem; font-weight: 600; }
+    .ipp-output-stats { font-size: 0.75rem; color: var(--ipp-text-muted); }
+    .ipp-output { font-family: 'Fira Code', 'Courier New', monospace; font-size: 0.9rem; line-height: 1.6; color: var(--ipp-text); min-height: 80px; white-space: pre-wrap; word-break: break-word; }
+    .ipp-output-placeholder { color: var(--ipp-text-muted); font-style: italic; }
+    .ipp-output-actions { display: flex; justify-content: space-between; align-items: center; margin-top: 0.8rem; padding-top: 0.8rem; border-top: 1px solid var(--ipp-border); flex-wrap: wrap; gap: 0.5rem; }
+    .ipp-output-btns { display: flex; gap: 0.4rem; }
+    
+    .ipp-negative-box { margin-bottom: 1rem; }
+    .ipp-neg-header { display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
+    .ipp-neg-toggle { transition: var(--ipp-transition); }
+    .ipp-neg-toggle.collapsed { transform: rotate(-90deg); }
+    .ipp-neg-content { margin-top: 0.5rem; display: grid; gap: 0.5rem; }
+    .ipp-neg-content.collapsed { display: none; }
+    
+    .ipp-presets { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1rem; }
+    .ipp-preset { padding: 0.35rem 0.7rem; background: var(--ipp-input); border: 1px solid var(--ipp-border); border-radius: 16px; color: var(--ipp-text-muted); font-size: 0.75rem; cursor: pointer; transition: var(--ipp-transition); white-space: nowrap; }
+    .ipp-preset:hover { background: var(--ipp-pink); color: white; border-color: transparent; }
+    
+    .ipp-params { display: flex; gap: 0.4rem; flex-wrap: wrap; margin-bottom: 1rem; }
+    .ipp-param { padding: 0.35rem 0.7rem; background: var(--ipp-input); border: 1px solid var(--ipp-border); border-radius: 8px; font-size: 0.75rem; color: var(--ipp-text-muted); cursor: pointer; transition: var(--ipp-transition); display: flex; align-items: center; gap: 0.3rem; }
+    .ipp-param:hover, .ipp-param.active { background: var(--ipp-accent); color: white; border-color: transparent; }
+    
+    .ipp-status { display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0.8rem; background: var(--ipp-input); border-radius: 8px; font-size: 0.8rem; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.4rem; }
+    .ipp-status-msg { display: flex; align-items: center; gap: 0.4rem; }
+    .ipp-status-msg.success { color: var(--ipp-success); }
+    .ipp-status-msg.error { color: var(--ipp-error); }
+    .ipp-status-info { color: var(--ipp-text-muted); }
+    
+    .ipp-history { margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--ipp-border); }
+    .ipp-history-header { display: flex; justify-content: space-between; align-items: center; cursor: pointer; margin-bottom: 0.5rem; }
+    .ipp-history-title { font-size: 0.9rem; font-weight: 600; display: flex; align-items: center; gap: 0.4rem; }
+    .ipp-history-toggle { color: var(--ipp-text-muted); transition: var(--ipp-transition); }
+    .ipp-history-toggle.collapsed { transform: rotate(-90deg); }
+    .ipp-history-list { display: grid; gap: 0.4rem; max-height: 150px; overflow-y: auto; transition: var(--ipp-transition); }
+    .ipp-history-list.collapsed { display: none; }
+    .ipp-history-item { padding: 0.5rem 0.7rem; background: var(--ipp-input); border-radius: 8px; cursor: pointer; border-left: 3px solid var(--ipp-primary); transition: var(--ipp-transition); font-size: 0.8rem; display: flex; justify-content: space-between; align-items: center; }
+    .ipp-history-item:hover { background: #252545; }
+    .ipp-history-preview { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 220px; color: var(--ipp-text-muted); }
+    .ipp-history-platform { font-size: 0.7rem; padding: 0.15rem 0.5rem; background: var(--ipp-bg); border-radius: 4px; }
+    .ipp-history-del { padding: 0.2rem 0.4rem; background: transparent; border: none; color: var(--ipp-error); cursor: pointer; border-radius: 4px; font-size: 0.75rem; }
+    .ipp-history-del:hover { background: rgba(239,68,68,0.15); }
+    
+    .ipp-toast { position: fixed; bottom: 1.2rem; right: 1.2rem; padding: 0.7rem 1.1rem; background: var(--ipp-card); border-left: 4px solid var(--ipp-success); border-radius: 10px; box-shadow: var(--ipp-shadow); display: flex; align-items: center; gap: 0.5rem; z-index: 9999; transform: translateY(150%); transition: transform 0.35s cubic-bezier(0.68,-0.55,0.265,1.55); font-size: 0.9rem; }
+    .ipp-toast.show { transform: translateY(0); }
+    .ipp-toast.error { border-left-color: var(--ipp-error); }
+    
+    @media (max-width: 700px) {
+      .img-prompt-pro { padding: 1rem; }
+      .ipp-grid { grid-template-columns: 1fr; }
+      .ipp-actions { flex-direction: column; }
+      .ipp-btn { width: 100%; justify-content: center; }
+      .ipp-platforms { justify-content: center; }
+    }
+  </style>
+
+  <div class="ipp-header">
+    <div class="ipp-title"><i class="fas fa-palette"></i> AI Image Prompt Pro</div>
+    <div class="ipp-badges"><span class="ipp-badge">Midjourney</span><span class="ipp-badge">DALL-E</span><span class="ipp-badge">Stable Diffusion</span><span class="ipp-badge">Leonardo AI</span></div>
+  </div>
+
+  <!-- Platform Selection -->
+  <div class="ipp-platforms">
+    <button class="ipp-platform active" data-platform="midjourney">🎨 Midjourney</button>
+    <button class="ipp-platform" data-platform="dalle">🤖 DALL-E 3</button>
+    <button class="ipp-platform" data-platform="sd">🌟 Stable Diffusion</button>
+    <button class="ipp-platform" data-platform="leonardo">🦁 Leonardo AI</button>
+  </div>
+
+  <!-- Quick Presets -->
+  <div class="ipp-presets">
+    <span class="ipp-preset" data-preset="cinematic">🎬 Cinematic</span>
+    <span class="ipp-preset" data-preset="anime">🌸 Anime</span>
+    <span class="ipp-preset" data-preset="3d">🧊 3D Render</span>
+    <span class="ipp-preset" data-preset="oil">🖌️ Oil Painting</span>
+    <span class="ipp-preset" data-preset="pixel">👾 Pixel Art</span>
+    <span class="ipp-preset" data-preset="fantasy">🐉 Fantasy</span>
+    <span class="ipp-preset" data-preset="sci-fi">🚀 Sci-Fi</span>
+  </div>
+
+  <!-- Main Form -->
+  <div class="ipp-section">
+    <div class="ipp-section-title">📝 Prompt Details</div>
+    <div class="ipp-grid">
+      <div class="ipp-field ipp-input-full">
+        <label class="ipp-label">Main Subject *</label>
+        <input type="text" class="ipp-input" id="ipp-subject" placeholder="e.g., A cyberpunk city at night with neon signs and flying cars">
+      </div>
+      <div class="ipp-field">
+        <label class="ipp-label">Art Style</label>
+        <select class="ipp-select" id="ipp-style">
+          <option value="">Select Style</option>
+          <option value="photorealistic">Photorealistic</option>
+          <option value="anime/manga">Anime / Manga</option>
+          <option value="oil painting">Oil Painting</option>
+          <option value="watercolor">Watercolor</option>
+          <option value="digital illustration">Digital Illustration</option>
+          <option value="3D render">3D Render</option>
+          <option value="pixel art">Pixel Art</option>
+          <option value="concept art">Concept Art</option>
+          <option value="comic book">Comic Book</option>
+          <option value="surrealism">Surrealism</option>
+          <option value="minimalist">Minimalist</option>
+          <option value="gothic">Gothic</option>
+          <option value="cyberpunk">Cyberpunk</option>
+          <option value="steampunk">Steampunk</option>
+        </select>
+      </div>
+      <div class="ipp-field">
+        <label class="ipp-label">Lighting</label>
+        <select class="ipp-select" id="ipp-lighting">
+          <option value="">Select Lighting</option>
+          <option value="cinematic lighting">Cinematic Lighting</option>
+          <option value="golden hour">Golden Hour</option>
+          <option value="neon glow">Neon Glow</option>
+          <option value="soft studio lighting">Soft Studio Lighting</option>
+          <option value="dramatic backlight">Dramatic Backlight</option>
+          <option value="moonlight">Moonlight</option>
+          <option value="volumetric fog">Volumetric Fog</option>
+          <option value="natural sunlight">Natural Sunlight</option>
+          <option value="bioluminescence">Bioluminescence</option>
+        </select>
+      </div>
+      <div class="ipp-field">
+        <label class="ipp-label">Camera Angle</label>
+        <select class="ipp-select" id="ipp-angle">
+          <option value="">Select Angle</option>
+          <option value="eye level">Eye Level</option>
+          <option value="low angle">Low Angle</option>
+          <option value="high angle">High Angle</option>
+          <option value="aerial view">Aerial View</option>
+          <option value="close-up macro">Close-up Macro</option>
+          <option value="wide angle shot">Wide Angle Shot</option>
+          <option value="dutch angle">Dutch Angle</option>
+          <option value="over the shoulder">Over the Shoulder</option>
+          <option value="bird's eye view">Bird's Eye View</option>
+          <option value="worm's eye view">Worm's Eye View</option>
+        </select>
+      </div>
+      <div class="ipp-field">
+        <label class="ipp-label">Mood / Atmosphere</label>
+        <select class="ipp-select" id="ipp-mood">
+          <option value="">Select Mood</option>
+          <option value="ethereal">Ethereal</option>
+          <option value="dark and moody">Dark and Moody</option>
+          <option value="vibrant and energetic">Vibrant and Energetic</option>
+          <option value="peaceful and serene">Peaceful and Serene</option>
+          <option value="mysterious">Mysterious</option>
+          <option value="nostalgic">Nostalgic</option>
+          <option value="futuristic">Futuristic</option>
+          <option value="romantic">Romantic</option>
+          <option value="chaotic">Chaotic</option>
+          <option value="whimsical">Whimsical</option>
+        </select>
+      </div>
+      <div class="ipp-field">
+        <label class="ipp-label">Color Palette</label>
+        <select class="ipp-select" id="ipp-color">
+          <option value="">Select Palette</option>
+          <option value="warm tones">Warm Tones</option>
+          <option value="cool tones">Cool Tones</option>
+          <option value="pastel colors">Pastel Colors</option>
+          <option value="monochrome">Monochrome</option>
+          <option value="vibrant neon">Vibrant Neon</option>
+          <option value="earth tones">Earth Tones</option>
+          <option value="complementary colors">Complementary Colors</option>
+          <option value="muted palette">Muted Palette</option>
+          <option value="high contrast">High Contrast</option>
+        </select>
+      </div>
+      <div class="ipp-field">
+        <label class="ipp-label">Quality Level</label>
+        <select class="ipp-select" id="ipp-quality">
+          <option value="masterpiece, best quality">Masterpiece</option>
+          <option value="highly detailed, 4k resolution">High Detail (4K)</option>
+          <option value="ultra realistic, 8k UHD">Ultra Realistic (8K)</option>
+          <option value="trending on artstation">Artstation Trending</option>
+          <option value="award winning photography">Award Winning Photo</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- Negative Prompt (SD/DALL-E) -->
+  <div class="ipp-section ipp-negative-box">
+    <div class="ipp-neg-header" id="ipp-neg-toggle">
+      <div class="ipp-section-title" style="margin:0">🚫 Negative Prompt</div>
+      <span class="ipp-neg-toggle">▼</span>
+    </div>
+    <div class="ipp-neg-content collapsed" id="ipp-neg-content">
+      <textarea class="ipp-textarea" id="ipp-negative" placeholder="Things to avoid: blurry, low quality, deformed, watermark, text..."></textarea>
+      <div style="display:flex;gap:0.4rem;flex-wrap:wrap">
+        <span class="ipp-param" data-neg="blurry, low quality">Blurry/Low Quality</span>
+        <span class="ipp-param" data-neg="deformed, ugly">Deformed/Ugly</span>
+        <span class="ipp-param" data-neg="watermark, text">Watermark/Text</span>
+        <span class="ipp-param" data-neg="extra limbs, bad anatomy">Bad Anatomy</span>
+        <span class="ipp-param" data-neg="nsfw, nude">NSFW</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Platform Params -->
+  <div class="ipp-section">
+    <div class="ipp-section-title">⚙️ Platform Parameters</div>
+    <div class="ipp-params" id="ipp-params">
+      <!-- Dynamic params based on platform -->
+    </div>
+  </div>
+
+  <!-- Action Buttons -->
+  <div class="ipp-actions">
+    <button class="ipp-btn primary" id="ipp-generate">✨ Generate Prompt</button>
+    <button class="ipp-btn random" id="ipp-random">🎲 Random Prompt</button>
+    <button class="ipp-btn" id="ipp-copy">📋 Copy</button>
+    <button class="ipp-btn" id="ipp-clear">🗑️ Clear</button>
+  </div>
+
+  <!-- Output -->
+  <div class="ipp-output-box">
+    <div class="ipp-output-header">
+      <span class="ipp-output-title">🖼️ Generated Prompt</span>
+      <span class="ipp-output-stats" id="ipp-stats">0 words | 0 chars</span>
+    </div>
+    <div class="ipp-output ipp-output-placeholder" id="ipp-output">Your image prompt will appear here...</div>
+    <div class="ipp-output-actions">
+      <div class="ipp-output-btns">
+        <button class="ipp-btn" id="ipp-copy-markdown">📝 Markdown</button>
+        <button class="ipp-btn" id="ipp-copy-json">📦 JSON</button>
+        <button class="ipp-btn" id="ipp-download">💾 Export</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Status -->
+  <div class="ipp-status">
+    <span class="ipp-status-msg" id="ipp-status-msg">✅ Ready to generate</span>
+    <span class="ipp-status-info" id="ipp-status-info">Platform: Midjourney</span>
+  </div>
+
+  <!-- History -->
+  <div class="ipp-history">
+    <div class="ipp-history-header" id="ipp-history-toggle">
+      <div class="ipp-history-title"><i class="fas fa-history"></i> Prompt History</div>
+      <span class="ipp-history-toggle">▼</span>
+    </div>
+    <div class="ipp-history-list" id="ipp-history-list"></div>
+  </div>
+
+  <div class="ipp-toast" id="ipp-toast"><i class="fas fa-check-circle"></i><span id="ipp-toast-msg"></span></div>
+
+  <script>
+    (function() {
+      'use strict';
+      const $ = id => document.getElementById(id);
+      const $$ = sel => document.querySelectorAll(sel);
+
+      const els = {
+        platforms: $$('.ipp-platform'), presets: $$('.ipp-preset'),
+        subject: $('ipp-subject'), style: $('ipp-style'), lighting: $('ipp-lighting'),
+        angle: $('ipp-angle'), mood: $('ipp-mood'), color: $('ipp-color'), quality: $('ipp-quality'),
+        negative: $('ipp-negative'), negToggle: $('ipp-neg-toggle'), negContent: $('ipp-neg-content'),
+        negParams: $$('.ipp-param[data-neg]'),
+        paramsContainer: $('ipp-params'),
+        generate: $('ipp-generate'), random: $('ipp-random'), copy: $('ipp-copy'),
+        clear: $('ipp-clear'), copyMd: $('ipp-copy-markdown'), copyJson: $('ipp-copy-json'),
+        download: $('ipp-download'),
+        output: $('ipp-output'), stats: $('ipp-stats'),
+        statusMsg: $('ipp-status-msg'), statusInfo: $('ipp-status-info'),
+        historyToggle: $('ipp-history-toggle'), historyList: $('ipp-history-list'),
+        toast: $('ipp-toast'), toastMsg: $('ipp-toast-msg')
+      };
+
+      const state = {
+        platform: 'midjourney',
+        params: {},
+        history: [],
+        historyCollapsed: false,
+        negCollapsed: true,
+        lastPrompt: ''
+      };
+
+      try { state.history = JSON.parse(localStorage.getItem('ipp_history') || '[]'); } catch { state.history = []; }
+
+      function toast(msg, type = 'success') {
+        els.toastMsg.textContent = msg;
+        els.toast.className = `ipp-toast ${type} show`;
+        setTimeout(() => els.toast.classList.remove('show'), 2500);
+      }
+
+      function setStatus(msg, type = 'info', extra = '') {
+        els.statusMsg.textContent = msg;
+        els.statusMsg.className = `ipp-status-msg ${type}`;
+        els.statusInfo.textContent = extra || `Platform: ${state.platform}`;
+      }
+
+      function updateStats(text) {
+        const words = text.trim() ? text.trim().split(/\s+/).length : 0;
+        const chars = text.length;
+        els.stats.textContent = `${words} words | ${chars} chars`;
+      }
+
+      // Platform Config
+      const platformConfig = {
+        midjourney: {
+          params: [
+            { label: '--v 6.0', key: '--v 6.0' },
+            { label: '--v 5.2', key: '--v 5.2' },
+            { label: '--ar 16:9', key: '--ar 16:9' },
+            { label: '--ar 1:1', key: '--ar 1:1' },
+            { label: '--ar 9:16', key: '--ar 9:16' },
+            { label: '--ar 21:9', key: '--ar 21:9' },
+            { label: '--stylize 250', key: '--stylize 250' },
+            { label: '--stylize 750', key: '--stylize 750' },
+            { label: '--style raw', key: '--style raw' },
+            { label: '--quality 0.5', key: '--quality 0.5' },
+            { label: '--quality 1', key: '--quality 1' },
+            { label: '--quality 2', key: '--quality 2' },
+            { label: '--tile', key: '--tile' },
+            { label: '--chaos 25', key: '--chaos 25' },
+            { label: '--chaos 50', key: '--chaos 50' }
+          ]
+        },
+        dalle: { params: [
+            { label: 'Style: Vivid', key: 'Style: Vivid' },
+            { label: 'Style: Natural', key: 'Style: Natural' },
+            { label: 'Size: 1024x1024', key: 'Size: 1024x1024' },
+            { label: 'Size: 1792x1024', key: 'Size: 1792x1024' },
+            { label: 'Size: 1024x1792', key: 'Size: 1024x1792' },
+            { label: 'Quality: standard', key: 'Quality: standard' },
+            { label: 'Quality: hd', key: 'Quality: hd' }
+          ]
+        },
+        sd: { params: [
+            { label: 'SDXL 1.0', key: 'SDXL 1.0' },
+            { label: 'SD 1.5', key: 'SD 1.5' },
+            { label: 'CFG: 7', key: 'CFG: 7' },
+            { label: 'CFG: 12', key: 'CFG: 12' },
+            { label: 'Steps: 20', key: 'Steps: 20' },
+            { label: 'Steps: 30', key: 'Steps: 30' },
+            { label: 'Steps: 50', key: 'Steps: 50' },
+            { label: 'Sampler: Euler a', key: 'Sampler: Euler a' },
+            { label: 'Sampler: DPM++ 2M', key: 'Sampler: DPM++ 2M' },
+            { label: 'Hires Fix', key: 'Hires Fix' }
+          ]
+        },
+        leonardo: { params: [
+            { label: 'Leonardo Vision XL', key: 'Leonardo Vision XL' },
+            { label: 'PhotoReal', key: 'PhotoReal' },
+            { label: 'Alchemy', key: 'Alchemy' },
+            { label: 'Guidance: 7', key: 'Guidance: 7' },
+            { label: 'Guidance: 10', key: 'Guidance: 10' },
+            { label: 'Steps: 30', key: 'Steps: 30' },
+            { label: 'Steps: 50', key: 'Steps: 50' },
+            { label: 'Dimensions: 1024x768', key: 'Dimensions: 1024x768' },
+            { label: 'Dimensions: 768x1024', key: 'Dimensions: 768x1024' }
+          ]
+        }
+      };
+
+      function renderParams() {
+        const config = platformConfig[state.platform];
+        els.paramsContainer.innerHTML = config.params.map(p => `
+          <button class="ipp-param" data-key="${p.key}">${p.label}</button>
+        `).join('');
+        // Re-attach click handlers
+        els.paramsContainer.querySelectorAll('.ipp-param').forEach(btn => {
+          btn.onclick = () => {
+            btn.classList.toggle('active');
+            state.params[btn.dataset.key] = btn.classList.contains('active');
+          };
+        });
+        // Preserve active states if they exist
+        Object.keys(state.params).forEach(k => {
+          const btn = els.paramsContainer.querySelector(`[data-key="${k}"]`);
+          if (btn && state.params[k]) btn.classList.add('active');
+        });
+      }
+
+      // Platform Switching
+      els.platforms.forEach(btn => {
+        btn.onclick = () => {
+          els.platforms.forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          state.platform = btn.dataset.platform;
+          state.params = {};
+          renderParams();
+          setStatus('✅ Platform changed', 'success', `Platform: ${btn.textContent.trim()}`);
+        };
+      });
+
+      // Presets
+      const presetData = {
+        cinematic: { style: 'digital illustration', lighting: 'cinematic lighting', angle: 'wide angle shot', mood: 'dramatic', color: 'high contrast', quality: 'masterpiece, best quality' },
+        anime: { style: 'anime/manga', lighting: 'soft studio lighting', angle: 'eye level', mood: 'vibrant and energetic', color: 'vibrant neon', quality: 'trending on artstation' },
+        '3d': { style: '3D render', lighting: 'natural sunlight', angle: 'low angle', mood: 'futuristic', color: 'cool tones', quality: 'ultra realistic, 8k UHD' },
+        oil: { style: 'oil painting', lighting: 'golden hour', angle: 'eye level', mood: 'romantic', color: 'warm tones', quality: 'award winning photography' },
+        pixel: { style: 'pixel art', lighting: 'neon glow', angle: 'eye level', mood: 'nostalgic', color: 'vibrant neon', quality: 'highly detailed, 4k resolution' },
+        fantasy: { style: 'concept art', lighting: 'volumetric fog', angle: 'aerial view', mood: 'ethereal', color: 'pastel colors', quality: 'masterpiece, best quality' },
+        'sci-fi': { style: 'cyberpunk', lighting: 'neon glow', angle: 'dutch angle', mood: 'futuristic', color: 'vibrant neon', quality: 'ultra realistic, 8k UHD' }
+      };
+      els.presets.forEach(btn => {
+        btn.onclick = () => {
+          const p = presetData[btn.dataset.preset];
+          if (!p) return;
+          els.style.value = p.style; els.lighting.value = p.lighting;
+          els.angle.value = p.angle; els.mood.value = p.mood;
+          els.color.value = p.color; els.quality.value = p.quality;
+          toast(`✨ Preset "${btn.textContent.trim()}" applied`);
+        };
+      });
+
+      // Negative Prompt Toggle
+      els.negToggle.onclick = () => {
+        state.negCollapsed = !state.negCollapsed;
+        els.negContent.classList.toggle('collapsed', state.negCollapsed);
+        els.negToggle.classList.toggle('collapsed', state.negCollapsed);
+      };
+
+      // Negative Params
+      els.negParams.forEach(btn => {
+        btn.onclick = () => {
+          const val = btn.dataset.neg;
+          const current = els.negative.value;
+          if (current.includes(val)) {
+            els.negative.value = current.replace(val, '').replace(/,\s*,/g, ',').trim();
+            btn.classList.remove('active');
+          } else {
+            els.negative.value = current ? current + ', ' + val : val;
+            btn.classList.add('active');
+          }
+        };
+      });
+
+      // Random Subjects/Styles for Random Generator
+      const randomData = {
+        subjects: [
+          'A mystical forest with glowing mushrooms and ancient ruins',
+          'A futuristic cyberpunk city skyline at night',
+          'An underwater kingdom with coral castles',
+          'A lone astronaut on Mars at sunset',
+          'A cozy cottage in a snowy mountain landscape',
+          'A dragon perched on a cliff overlooking a valley',
+          'A steampunk airship flying through clouds',
+          'An abandoned amusement park reclaimed by nature',
+          'A magical library floating in the sky',
+          'A samurai standing in a field of cherry blossoms',
+          'A neon-lit Tokyo street in the rain',
+          'A Viking ship sailing through a stormy sea',
+          'A crystal cave with bioluminescent creatures',
+          'A retro-futuristic diner on a desert highway',
+          'A witch brewing potions in a mossy forest cabin'
+        ],
+        styles: ['photorealistic', 'anime/manga', 'oil painting', 'watercolor', 'digital illustration', '3D render', 'pixel art', 'concept art'],
+        lighting: ['cinematic lighting', 'golden hour', 'neon glow', 'soft studio lighting', 'dramatic backlight', 'moonlight', 'volumetric fog'],
+        angles: ['eye level', 'low angle', 'high angle', 'aerial view', 'close-up macro', 'wide angle shot', 'dutch angle'],
+        moods: ['ethereal', 'dark and moody', 'vibrant and energetic', 'peaceful and serene', 'mysterious', 'nostalgic', 'futuristic', 'whimsical']
+      };
+      const rand = arr => arr[Math.floor(Math.random() * arr.length)];
+
+      function generatePrompt() {
+        const subject = els.subject.value.trim();
+        if (!subject) { setStatus('⚠️ Please enter a subject', 'error'); toast('Subject is required', 'error'); els.subject.focus(); return; }
+        
+        const parts = [subject];
+        if (els.style.value) parts.push(els.style.value + ' style');
+        if (els.lighting.value) parts.push(els.lighting.value);
+        if (els.angle.value) parts.push(els.angle.value + ' perspective');
+        if (els.mood.value) parts.push(els.mood.value + ' atmosphere');
+        if (els.color.value) parts.push(els.color.value);
+        if (els.quality.value) parts.push(els.quality.value);
+
+        let prompt = parts.join(', ');
+        
+        // Add platform-specific params
+        const activeParams = Object.keys(state.params).filter(k => state.params[k]);
+        if (activeParams.length > 0) {
+          if (state.platform === 'midjourney') {
+            prompt += ' ' + activeParams.join(' ');
+          } else {
+            prompt += '\n\nParameters: ' + activeParams.join(', ');
+          }
+        }
+
+        // Add negative prompt for SD/DALL-E
+        if (els.negative.value.trim() && (state.platform === 'sd' || state.platform === 'dalle')) {
+          prompt += '\n\nNegative prompt: ' + els.negative.value.trim();
+        }
+
+        els.output.textContent = prompt;
+        els.output.classList.remove('ipp-output-placeholder');
+        updateStats(prompt);
+        state.lastPrompt = prompt;
+        
+        setStatus('✅ Prompt generated', 'success');
+        toast('✨ Prompt generated successfully');
+        saveHistory(subject.substring(0, 30), state.platform, prompt.substring(0, 50));
+        
+        els.output.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+
+      function randomPrompt() {
+        els.subject.value = rand(randomData.subjects);
+        els.style.value = rand(randomData.styles);
+        els.lighting.value = rand(randomData.lighting);
+        els.angle.value = rand(randomData.angles);
+        els.mood.value = rand(randomData.moods);
+        els.quality.value = rand(['masterpiece, best quality', 'ultra realistic, 8k UHD', 'trending on artstation']);
+        generatePrompt();
+        toast('🎲 Random prompt generated');
+      }
+
+      // Copy Functions
+      function copyToClipboard(text) {
+        navigator.clipboard.writeText(text).then(() => {
+          toast('📋 Copied to clipboard');
+        }).catch(() => {
+          const ta = document.createElement('textarea'); ta.value = text; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
+          toast('📋 Copied (fallback)');
+        });
+      }
+
+      els.copy.onclick = () => {
+        const txt = els.output.value || els.output.textContent;
+        if (!txt || els.output.classList.contains('ipp-output-placeholder')) { toast('Nothing to copy', 'error'); return; }
+        copyToClipboard(txt);
+      };
+
+      els.copyMd.onclick = () => {
+        const txt = els.output.textContent;
+        if (!txt || els.output.classList.contains('ipp-output-placeholder')) { toast('Nothing to copy', 'error'); return; }
+        const md = '```\n' + txt + '\n```';
+        copyToClipboard(md);
+      };
+
+      els.copyJson.onclick = () => {
+        const txt = els.output.textContent;
+        if (!txt || els.output.classList.contains('ipp-output-placeholder')) { toast('Nothing to copy', 'error'); return; }
+        const json = JSON.stringify({ prompt: txt, platform: state.platform, timestamp: new Date().toISOString() }, null, 2);
+        copyToClipboard(json);
+      };
+
+      els.download.onclick = () => {
+        const txt = els.output.textContent;
+        if (!txt || els.output.classList.contains('ipp-output-placeholder')) { toast('Nothing to export', 'error'); return; }
+        const blob = new Blob([txt], { type: 'text/plain' });
+        const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+        a.download = `prompt_${state.platform}_${Date.now()}.txt`;
+        a.click(); URL.revokeObjectURL(a.href);
+        toast('💾 Exported');
+      };
+
+      els.clear.onclick = () => {
+        els.subject.value = ''; els.style.value = ''; els.lighting.value = '';
+        els.angle.value = ''; els.mood.value = ''; els.color.value = '';
+        els.quality.value = 'masterpiece, best quality'; els.negative.value = '';
+        els.output.textContent = 'Your image prompt will appear here...';
+        els.output.classList.add('ipp-output-placeholder');
+        state.params = {};
+        updateStats('');
+        setStatus('✅ Ready', 'success');
+        els.negParams.forEach(b => b.classList.remove('active'));
+        renderParams();
+        els.subject.focus();
+      };
+
+      // History
+      function saveHistory(input, platform, preview) {
+        state.history.unshift({ input, platform, preview, time: new Date().toLocaleTimeString() });
+        if (state.history.length > 15) state.history.pop();
+        try { localStorage.setItem('ipp_history', JSON.stringify(state.history)); } catch {}
+        renderHistory();
+      }
+      function renderHistory() {
+        els.historyList.innerHTML = state.history.length ? state.history.map((h, i) => `
+          <div class="ipp-history-item" onclick="window._ippLoad(${i})">
+            <div><span class="ipp-history-platform">${h.platform}</span><span class="ipp-history-preview" title="${h.input}">${h.input}</span></div>
+            <div style="text-align:right"><span style="font-size:0.7rem;color:var(--ipp-text-muted)">${h.time}</span><br><button class="ipp-history-del" onclick="window._ippDel(${i});event.stopPropagation()">✕</button></div>
+          </div>`).join('') : '<span style="color:var(--ipp-text-muted);font-size:0.8rem;padding:0.5rem">No prompts yet</span>';
+      }
+      window._ippLoad = i => { const h = state.history[i]; els.subject.value = h.input; els.platform = h.platform; setStatus('📜 Loaded from history'); };
+      window._ippDel = i => { state.history.splice(i, 1); try { localStorage.setItem('ipp_history', JSON.stringify(state.history)); } catch {} renderHistory(); toast('🗑️ Deleted'); };
+
+      els.historyToggle.onclick = () => {
+        state.historyCollapsed = !state.historyCollapsed;
+        els.historyList.classList.toggle('collapsed', state.historyCollapsed);
+        els.historyToggle.classList.toggle('collapsed', state.historyCollapsed);
+      };
+
+      // Keyboard Shortcuts
+      document.addEventListener('keydown', e => {
+        if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { e.preventDefault(); generatePrompt(); }
+        if (e.key === '/' && document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'TEXTAREA') { e.preventDefault(); els.subject.focus(); }
+      });
+
+      // Init
+      els.generate.onclick = generatePrompt;
+      els.random.onclick = randomPrompt;
+      renderParams();
+      renderHistory();
+      setStatus('✅ Ready to generate');
+      console.log('🎨 AI Image Prompt Pro Initialized Successfully');
+    })();
+  </script>
+</div>

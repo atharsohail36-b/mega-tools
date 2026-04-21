@@ -1,0 +1,299 @@
+<div class="md-pro">
+  <style>
+    .md-pro{
+      --md-bg: #0f1115; --md-card: #1a1d24; --md-border: #2a2d36;
+      --md-text: #e4e7ec; --md-muted: #8b949e; --md-accent: #6366f1;
+      --md-code: #0d1117; --md-success: #10b981; --md-warn: #f59e0b;
+      font-family: system-ui, -apple-system, sans-serif;
+      background: var(--md-bg); color: var(--md-text);
+      max-width: 1000px; margin: 2rem auto; padding: 1.5rem;
+      border-radius: 20px; border: 1px solid var(--md-border);
+      box-shadow: 0 10px 40px rgba(0,0,0,0.5); display: flex; flex-direction: column; height: 85vh; min-height: 500px;
+    }
+    .md-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:0.8rem;flex-wrap:wrap;gap:0.5rem;}
+    .md-header h2{margin:0;font-size:1.4rem;background:linear-gradient(135deg,#6366f1,#ec4899);-webkit-background-clip:text;background-clip:text;color:transparent;}
+    .md-stats{display:flex;gap:1rem;font-size:0.8rem;color:var(--md-muted);}
+    .md-stats span b{color:var(--md-text);}
+    
+    .md-toolbar{display:flex;gap:0.3rem;margin-bottom:0.6rem;flex-wrap:wrap;padding:0.4rem;background:var(--md-card);border:1px solid var(--md-border);border-radius:10px;}
+    .md-btn{padding:0.4rem 0.6rem;background:transparent;border:1px solid transparent;border-radius:6px;color:var(--md-text);cursor:pointer;font-size:0.9rem;transition:0.2s;}
+    .md-btn:hover{background:rgba(99,102,241,0.1);border-color:var(--md-accent);color:var(--md-accent);}
+    .md-btn.active{background:var(--md-accent);color:#fff;}
+    
+    .md-modes{display:flex;gap:0.3rem;margin-left:auto;}
+    .md-mode-btn{padding:0.3rem 0.6rem;background:var(--md-bg);border:1px solid var(--md-border);border-radius:6px;font-size:0.8rem;cursor:pointer;color:var(--md-muted);transition:0.2s;}
+    .md-mode-btn.active{background:var(--md-accent);color:#fff;border-color:var(--md-accent);}
+    
+    .md-main{display:flex;flex:1;gap:0.8rem;min-height:0;position:relative;}
+    .md-pane{background:var(--md-card);border:1px solid var(--md-border);border-radius:12px;overflow:hidden;display:flex;flex-direction:column;transition:0.2s;}
+    .md-editor{flex:1;min-width:0;}
+    .md-preview{flex:1;min-width:0;overflow:auto;}
+    .md-editor textarea{flex:1;width:100%;background:transparent;border:none;outline:none;color:var(--md-text);font-family:'JetBrains Mono',monospace;font-size:0.95rem;line-height:1.6;resize:none;padding:1rem;box-sizing:border-box;}
+    
+    .md-preview-content{padding:1.2rem;font-size:0.95rem;line-height:1.7;color:var(--md-text);}
+    .md-preview-content h1,.md-preview-content h2,.md-preview-content h3,.md-preview-content h4{margin:1em 0 0.4em;font-weight:600;border-bottom:1px solid var(--md-border);padding-bottom:0.2em;}
+    .md-preview-content p{margin:0.8em 0;}
+    .md-preview-content a{color:var(--md-accent);text-decoration:none;}
+    .md-preview-content a:hover{text-decoration:underline;}
+    .md-preview-content strong,.md-preview-content b{font-weight:700;}
+    .md-preview-content em,.md-preview-content i{font-style:italic;}
+    .md-preview-content code{background:var(--md-code);padding:0.2em 0.4em;border-radius:4px;font-size:0.9em;}
+    .md-preview-content pre{background:var(--md-code);padding:1em;border-radius:8px;overflow-x:auto;margin:1em 0;}
+    .md-preview-content pre code{background:transparent;padding:0;}
+    .md-preview-content blockquote{border-left:3px solid var(--md-accent);padding-left:1em;margin:1em 0;color:var(--md-muted);font-style:italic;}
+    .md-preview-content ul,.md-preview-content ol{padding-left:1.5em;margin:0.8em 0;}
+    .md-preview-content li{margin:0.3em 0;}
+    .md-preview-content hr{border:0;border-top:1px solid var(--md-border);margin:1.5em 0;}
+    .md-preview-content table{width:100%;border-collapse:collapse;margin:1em 0;}
+    .md-preview-content th,.md-preview-content td{border:1px solid var(--md-border);padding:0.5em 0.8em;text-align:left;}
+    .md-preview-content th{background:var(--md-bg);}
+    .md-preview-content img{max-width:100%;border-radius:8px;margin:0.5em 0;}
+    
+    .md-footer{display:flex;justify-content:space-between;align-items:center;margin-top:0.8rem;flex-wrap:wrap;gap:0.5rem;}
+    .md-actions{display:flex;gap:0.4rem;}
+    .md-action{padding:0.5rem 0.8rem;background:var(--md-card);border:1px solid var(--md-border);border-radius:8px;color:var(--md-text);cursor:pointer;font-size:0.85rem;transition:0.2s;display:flex;align-items:center;gap:0.3rem;}
+    .md-action:hover{border-color:var(--md-accent);}
+    .md-action.primary{background:linear-gradient(135deg,#6366f1,#8b5cf6);border:none;color:#fff;}
+    .md-action.primary:hover{transform:translateY(-2px);box-shadow:0 4px 12px rgba(99,102,241,0.4);}
+    
+    .md-toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--md-card);border:1px solid var(--md-border);color:var(--md-text);padding:0.7rem 1rem;border-radius:10px;font-size:0.85rem;opacity:0;pointer-events:none;transition:0.3s;z-index:1000;box-shadow:0 4px 12px rgba(0,0,0,0.5);}
+    .md-toast.show{transform:translateX(-50%) translateY(0);opacity:1;}
+    
+    .md-hidden{display:none;}
+    @media(max-width:700px){
+      .md-main{flex-direction:column;}
+      .md-toolbar{gap:0.2rem;}
+      .md-btn{padding:0.3rem 0.4rem;}
+    }
+  </style>
+
+  <div class="md-header">
+    <h2>📝 Markdown Pro</h2>
+    <div class="md-stats">
+      <span><b id="md-words">0</b> words</span>
+      <span><b id="md-chars">0</b> chars</span>
+      <span><b id="md-lines">0</b> lines</span>
+    </div>
+  </div>
+
+  <div class="md-toolbar">
+    <button class="md-btn" data-cmd="h1" title="Heading 1 (Ctrl+1)">H1</button>
+    <button class="md-btn" data-cmd="h2" title="Heading 2 (Ctrl+2)">H2</button>
+    <button class="md-btn" data-cmd="h3" title="Heading 3 (Ctrl+3)">H3</button>
+    <button class="md-btn" data-cmd="bold" title="Bold (Ctrl+B)"><b>B</b></button>
+    <button class="md-btn" data-cmd="italic" title="Italic (Ctrl+I)"><i>I</i></button>
+    <button class="md-btn" data-cmd="strike" title="Strikethrough">S</button>
+    <button class="md-btn" data-cmd="code" title="Inline Code">&lt;/&gt;</button>
+    <button class="md-btn" data-cmd="block" title="Code Block">{ }</button>
+    <button class="md-btn" data-cmd="quote" title="Blockquote">❝</button>
+    <button class="md-btn" data-cmd="ul" title="Unordered List">• List</button>
+    <button class="md-btn" data-cmd="ol" title="Ordered List">1. List</button>
+    <button class="md-btn" data-cmd="link" title="Link (Ctrl+K)">🔗</button>
+    <button class="md-btn" data-cmd="img" title="Image">🖼️</button>
+    <button class="md-btn" data-cmd="hr" title="Horizontal Rule">―</button>
+    <div class="md-modes">
+      <button class="md-mode-btn active" data-mode="split">↔️ Split</button>
+      <button class="md-mode-btn" data-mode="editor">📝 Edit</button>
+      <button class="md-mode-btn" data-mode="preview">👁️ Preview</button>
+    </div>
+  </div>
+
+  <div class="md-main">
+    <div class="md-pane md-editor" id="pane-editor">
+      <textarea id="md-in" placeholder="# Start writing...\nUse markdown or toolbar shortcuts."></textarea>
+    </div>
+    <div class="md-pane md-preview" id="pane-preview">
+      <div class="md-preview-content" id="md-out"></div>
+    </div>
+  </div>
+
+  <div class="md-footer">
+    <div style="font-size:0.8rem;color:var(--md-muted);">⌨️ Ctrl+S: Auto-Save | Ctrl+Z/Y: Undo/Redo | Tab: Indent</div>
+    <div class="md-actions">
+      <button class="md-action" id="md-copy-md">📋 Copy MD</button>
+      <button class="md-action" id="md-copy-html">🔗 Copy HTML</button>
+      <button class="md-action" id="md-download">💾 Save .md</button>
+      <button class="md-action primary" id="md-clear">🗑️ Clear</button>
+    </div>
+  </div>
+
+  <div class="md-toast" id="md-toast"></div>
+
+  <script>
+    (function(){
+      const $ = id => document.getElementById(id);
+      const ta = $('md-in'), out = $('md-out');
+      let saveTimer, mode = 'split';
+
+      // 🛡️ HTML Escape
+      const escape = str => str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+
+      // 📝 Robust Markdown Parser
+      const parseMD = txt => {
+        let html = escape(txt);
+        // Code Blocks
+        html = html.replace(/```(\w*)\n([\s\S]*?)```/g, (m,lang,code) => `<pre><code class="language-${lang||''}">${code.trim()}</code></pre>`);
+        // Inline Code
+        html = html.replace(/`([^`]+)`/g, '<code>$1</code>');
+        // Headings
+        html = html.replace(/^###### (.*$)/gmi, '<h6>$1</h6>');
+        html = html.replace(/^##### (.*$)/gmi, '<h5>$1</h5>');
+        html = html.replace(/^#### (.*$)/gmi, '<h4>$1</h4>');
+        html = html.replace(/^### (.*$)/gmi, '<h3>$1</h3>');
+        html = html.replace(/^## (.*$)/gmi, '<h2>$1</h2>');
+        html = html.replace(/^# (.*$)/gmi, '<h1>$1</h1>');
+        // HR
+        html = html.replace(/^(\s*)([-*_]{3,})\s*$/gmi, '<hr>');
+        // Blockquote
+        html = html.replace(/^>\s?(.*$)/gmi, '<blockquote>$1</blockquote>');
+        // Lists
+        html = html.replace(/^(\s*)[-*+]\s(.*$)/gmi, '<ul><li>$2</li></ul>');
+        html = html.replace(/^(\s*)\d+\.\s(.*$)/gmi, '<ol><li>$2</li></ol>');
+        // Merge adjacent lists
+        html = html.replace(/<\/ul>\s*<ul>/gmi, '').replace(/<\/ol>\s*<ol>/gmi, '');
+        // Tables
+        html = html.replace(/(\|.+\|)\n(\|[-:| ]+\|)\n([\s\S]*?(?=\n\n|\n?$))/gmi, (m,header,sep,body) => {
+          const hCells = header.split('|').filter(c=>c.trim()).map(c=>`<th>${c.trim()}</th>`).join('');
+          const bRows = body.trim().split('\n').map(r => {
+            const cells = r.split('|').filter(c=>c.trim()).map(c=>`<td>${c.trim()}</td>`).join('');
+            return `<tr>${cells}</tr>`;
+          }).join('');
+          return `<table><thead><tr>${hCells}</tr></thead><tbody>${bRows}</tbody></table>`;
+        });
+        // Images & Links
+        html = html.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<img src="$2" alt="$1">');
+        html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>');
+        // Bold/Italic/Strike
+        html = html.replace(/\*\*\*(.*?)\*\*\*/g, '<strong><em>$1</em></strong>');
+        html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+        html = html.replace(/\*(.*?)\*/g, '<em>$1</em>');
+        html = html.replace(/~~(.*?)~~/g, '<del>$1</del>');
+        // Paragraphs & Line Breaks
+        html = html.split('\n\n').map(p => {
+          if(/<\/?(h[1-6]|ul|ol|li|blockquote|pre|table|hr|img)/i.test(p)) return p;
+          return `<p>${p.replace(/\n/g, '<br>')}</p>`;
+        }).join('\n');
+        return html;
+      };
+
+      // 📊 Stats Update
+      const updateStats = () => {
+        const txt = ta.value;
+        $('md-words').textContent = txt.trim() ? txt.trim().split(/\s+/).length : 0;
+        $('md-chars').textContent = txt.length;
+        $('md-lines').textContent = txt.split('\n').length;
+      };
+
+      // 💾 Auto-Save
+      const autoSave = () => {
+        clearTimeout(saveTimer);
+        saveTimer = setTimeout(()=>{
+          localStorage.setItem('md-pro-content', ta.value);
+          showToast('💾 Auto-saved');
+        }, 1500);
+      };
+
+      // 🔧 Toolbar Insert
+      const insert = (start, end, prefix, suffix='') => {
+        ta.focus();
+        const s = ta.selectionStart, e = ta.selectionEnd;
+        const sel = ta.value.substring(s, e);
+        const repl = prefix + (sel || start) + suffix;
+        ta.value = ta.value.substring(0, s) + repl + ta.value.substring(e);
+        ta.setSelectionRange(s + prefix.length, s + prefix.length + (sel||start).length);
+        ta.dispatchEvent(new Event('input'));
+      };
+
+      // 🎨 Render
+      const render = () => {
+        out.innerHTML = parseMD(ta.value);
+        updateStats();
+        autoSave();
+      };
+
+      // 📦 Export/Clipboard
+      const copyToClip = (text, msg) => {
+        navigator.clipboard.writeText(text).then(()=>showToast(msg));
+      };
+      const downloadFile = (content, type) => {
+        const blob = new Blob([content], {type: type==='md'?'text/markdown':'text/html'});
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a'); a.href=url; a.download=`note-${Date.now()}.${type}`;
+        a.click(); URL.revokeObjectURL(url); showToast('💾 Downloaded');
+      };
+
+      // 🔔 Toast
+      const showToast = msg => {
+        const t = $('md-toast'); t.textContent = msg; t.classList.add('show');
+        setTimeout(()=>t.classList.remove('show'), 2200);
+      };
+
+      // 🖱️ Event Listeners
+      ta.addEventListener('input', render);
+      
+      // Toolbar
+      document.querySelectorAll('.md-btn').forEach(btn => {
+        btn.onclick = () => {
+          const cmd = btn.dataset.cmd;
+          switch(cmd){
+            case 'h1': insert('', '', '# ', '\n'); break;
+            case 'h2': insert('', '', '## ', '\n'); break;
+            case 'h3': insert('', '', '### ', '\n'); break;
+            case 'bold': insert('', '', '**', '**'); break;
+            case 'italic': insert('', '', '*', '*'); break;
+            case 'strike': insert('', '', '~~', '~~'); break;
+            case 'code': insert('', '', '`', '`'); break;
+            case 'block': insert('', '', '```\n', '\n```'); break;
+            case 'quote': insert('', '', '> ', '\n'); break;
+            case 'ul': insert('- item', '', '\n', '\n'); break;
+            case 'ol': insert('1. item', '', '\n', '\n'); break;
+            case 'link': insert('', '', '[text](', ')'); break;
+            case 'img': insert('', '', '![alt](', ')'); break;
+            case 'hr': insert('\n---\n', '', ''); break;
+          }
+        };
+      });
+
+      // Mode Toggle
+      document.querySelectorAll('.md-mode-btn').forEach(btn => {
+        btn.onclick = () => {
+          mode = btn.dataset.mode;
+          document.querySelectorAll('.md-mode-btn').forEach(b=>b.classList.remove('active'));
+          btn.classList.add('active');
+          $('pane-editor').style.display = mode==='preview' ? 'none' : '';
+          $('pane-preview').style.display = mode==='editor' ? 'none' : '';
+        };
+      });
+
+      // Actions
+      $('md-copy-md').onclick = () => copyToClip(ta.value, '📋 Markdown copied');
+      $('md-copy-html').onclick = () => copyToClip(out.innerHTML, '🔗 HTML copied');
+      $('md-download').onclick = () => downloadFile(ta.value, 'md');
+      $('md-clear').onclick = () => { if(confirm('Clear editor?')){ta.value='';render();}};
+
+      // Keyboard Shortcuts
+      ta.addEventListener('keydown', e => {
+        if(e.key === 'Tab'){
+          e.preventDefault();
+          const s = ta.selectionStart;
+          ta.value = ta.value.substring(0,s) + '  ' + ta.value.substring(ta.selectionEnd);
+          ta.selectionStart = ta.selectionEnd = s + 2;
+          ta.dispatchEvent(new Event('input'));
+        }
+        if((e.ctrlKey||e.metaKey) && e.key==='s'){ e.preventDefault(); localStorage.setItem('md-pro-content', ta.value); showToast('💾 Saved'); }
+        if((e.ctrlKey||e.metaKey) && e.key==='b'){ e.preventDefault(); insert('','','**','**'); }
+        if((e.ctrlKey||e.metaKey) && e.key==='i'){ e.preventDefault(); insert('','','*','*'); }
+        if((e.ctrlKey||e.metaKey) && e.key==='k'){ e.preventDefault(); insert('','','[',']()'); }
+        if(e.key==='1' && (e.ctrlKey||e.metaKey)){ e.preventDefault(); insert('','# ','\n'); }
+        if(e.key==='2' && (e.ctrlKey||e.metaKey)){ e.preventDefault(); insert('','## ','\n'); }
+        if(e.key==='3' && (e.ctrlKey||e.metaKey)){ e.preventDefault(); insert('','### ','\n'); }
+      });
+
+      // Init
+      const saved = localStorage.getItem('md-pro-content');
+      if(saved) ta.value = saved;
+      else ta.value = "# Welcome to Markdown Pro\n\nStart writing your notes, documentation, or drafts here.\n\n## Features\n- **Live Preview** with side-by-side split\n- **Toolbar shortcuts** & keyboard bindings\n- **Auto-save** to browser storage\n- Export as `.md` or `.html`\n\n> Pro Tip: Use `Ctrl+S` to save, `Tab` to indent.\n\nHappy writing! ✨";
+      render();
+    })();
+  </script>
+</div>

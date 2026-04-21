@@ -1,0 +1,237 @@
+<div class="sci-calc" lang="en">
+  <style>
+    :root {
+      --bg-main: #0b0e11; --bg-card: #161a21; --bg-input: #1e232c;
+      --border: rgba(255,255,255,0.08); --text: #f1f5f9; --text-sec: #94a3b8;
+      --accent: #38bdf8; --accent-glow: rgba(56,189,248,0.2);
+      --fn-bg: rgba(168,85,247,0.15); --fn-clr: #a855f7;
+      --grad: linear-gradient(135deg, #38bdf8, #818cf8); --radius: 14px;
+      --trans: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .sci-calc { max-width: 460px; margin: 0 auto; padding: 1.2rem; font-family: system-ui, -apple-system, sans-serif; color: var(--text); user-select: none; }
+    .calc-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.8rem; flex-wrap: wrap; gap: 0.6rem; }
+    .calc-header h3 { margin: 0; font-size: 1.15rem; font-weight: 700; background: var(--grad); -webkit-background-clip: text; color: transparent; }
+    .header-controls { display: flex; gap: 0.4rem; }
+    .ctrl-btn { background: var(--bg-input); border: 1px solid var(--border); border-radius: 8px; padding: 0.4rem 0.7rem; color: var(--text-sec); cursor: pointer; transition: var(--trans); font-size: 0.8rem; display: flex; align-items: center; gap: 5px; }
+    .ctrl-btn:hover { background: rgba(255,255,255,0.05); color: var(--text); }
+    .ctrl-btn.active { background: var(--accent); color: #0b0e11; border-color: var(--accent); }
+    .ctrl-btn.mem-active { background: var(--fn-clr); color: #fff; border-color: var(--fn-clr); }
+
+    .calc-display { background: var(--bg-input); border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem; margin-bottom: 0.8rem; text-align: right; min-height: 80px; display: flex; flex-direction: column; justify-content: flex-end; box-shadow: inset 0 2px 6px rgba(0,0,0,0.3); position: relative; }
+    .calc-expr { font-size: 0.9rem; color: var(--text-sec); min-height: 1.1rem; word-break: break-all; margin-bottom: 4px; font-family: 'Courier New', monospace; }
+    .calc-res { font-size: 2.1rem; font-weight: 700; color: var(--accent); min-height: 2.4rem; line-height: 1.1; word-break: break-all; transition: var(--trans); }
+    .calc-res.error { color: var(--danger); font-size: 1.6rem; }
+    .copy-icon { position: absolute; top: 8px; left: 8px; cursor: pointer; opacity: 0.5; transition: var(--trans); }
+    .copy-icon:hover { opacity: 1; color: var(--accent); }
+
+    .mem-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.5rem; margin-bottom: 0.6rem; }
+    .mem-btn { padding: 0.6rem; background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; color: var(--text-sec); font-size: 0.85rem; cursor: pointer; transition: var(--trans); font-weight: 500; }
+    .mem-btn:hover { background: rgba(255,255,255,0.05); color: var(--text); }
+
+    .sci-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 0.6rem; }
+    .sbtn { padding: 0.95rem; border: none; border-radius: 12px; background: var(--bg-card); color: var(--text); font-size: 1rem; cursor: pointer; transition: var(--trans); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; outline: none; }
+    .sbtn:hover { background: rgba(255,255,255,0.06); transform: translateY(-2px); box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
+    .sbtn:active { transform: scale(0.96); }
+    .sbtn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+    .sbtn.fn { background: var(--fn-bg); color: var(--fn-clr); border-color: rgba(168,85,247,0.2); }
+    .sbtn.op { background: rgba(56,189,248,0.15); color: var(--accent); }
+    .sbtn.eq { background: var(--grad); color: #0b0e11; font-weight: 700; grid-column: span 2; }
+    .sbtn.clear { background: rgba(239,68,68,0.15); color: #ef4444; }
+    .sbtn.wide { grid-column: span 2; }
+
+    .hist-panel { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); max-height: 0; overflow: hidden; transition: max-height 0.3s ease, padding 0.3s ease; margin-top: 0.8rem; }
+    .hist-panel.open { max-height: 160px; padding: 0.7rem; overflow-y: auto; }
+    .hist-item { display: flex; justify-content: space-between; padding: 0.5rem; border-radius: 8px; cursor: pointer; transition: var(--trans); font-size: 0.85rem; color: var(--text-sec); border-bottom: 1px solid var(--border); }
+    .hist-item:last-child { border-bottom: none; }
+    .hist-item:hover { background: rgba(255,255,255,0.05); color: var(--text); }
+    .hist-res { color: var(--accent); font-weight: 600; }
+    .empty-hist { text-align: center; color: var(--text-sec); padding: 0.8rem 0; font-size: 0.8rem; }
+
+    @media (max-width: 480px) {
+      .sci-calc { padding: 1rem 0.6rem; }
+      .sci-grid { gap: 0.45rem; }
+      .sbtn { padding: 0.85rem; font-size: 0.95rem; }
+      .calc-res { font-size: 1.8rem; }
+    }
+  </style>
+
+  <div class="calc-header">
+    <h3>🔬 Scientific Calculator</h3>
+    <div class="header-controls">
+      <button class="ctrl-btn active" id="deg-btn">DEG</button>
+      <button class="ctrl-btn" id="rad-btn">RAD</button>
+      <button class="ctrl-btn" id="mem-ind" style="opacity:0.3">M</button>
+      <button class="ctrl-btn" id="hist-btn">📜</button>
+    </div>
+  </div>
+
+  <div class="calc-display" aria-live="polite">
+    <div class="copy-icon" id="copy-btn" title="Copy Result">📋</div>
+    <div class="calc-expr"></div>
+    <div class="calc-res">0</div>
+  </div>
+
+  <div class="mem-row">
+    <button class="mem-btn" data-m="MC">MC</button>
+    <button class="mem-btn" data-m="MR">MR</button>
+    <button class="mem-btn" data-m="M+">M+</button>
+    <button class="mem-btn" data-m="M-">M-</button>
+  </div>
+
+  <div class="sci-grid" role="group" aria-label="Scientific Calculator">
+    <button class="sbtn fn" data-v="sin(">sin</button><button class="sbtn fn" data-v="cos(">cos</button><button class="sbtn fn" data-v="tan(">tan</button><button class="sbtn fn" data-v="log(">log</button><button class="sbtn fn" data-v="ln(">ln</button>
+    <button class="sbtn fn" data-v="√(">√</button><button class="sbtn fn" data-v="^">xʸ</button><button class="sbtn fn" data-v="!">n!</button><button class="sbtn fn" data-v="π">π</button><button class="sbtn fn" data-v="e">e</button>
+    <button class="sbtn fn" data-v="(">(</button><button class="sbtn fn" data-v=")">)</button><button class="sbtn fn" data-v="1/">1/x</button><button class="sbtn fn" data-v="abs(">|x|</button><button class="sbtn fn" data-v="E">EXP</button>
+    <button class="sbtn" data-v="7">7</button><button class="sbtn" data-v="8">8</button><button class="sbtn" data-v="9">9</button><button class="sbtn op" data-v="/">÷</button><button class="sbtn clear" data-v="AC">AC</button>
+    <button class="sbtn" data-v="4">4</button><button class="sbtn" data-v="5">5</button><button class="sbtn" data-v="6">6</button><button class="sbtn op" data-v="*">×</button><button class="sbtn" data-v="del">⌫</button>
+    <button class="sbtn" data-v="1">1</button><button class="sbtn" data-v="2">2</button><button class="sbtn" data-v="3">3</button><button class="sbtn op" data-v="-">−</button><button class="sbtn eq" data-v="=">=</button>
+    <button class="sbtn wide" data-v="0">0</button><button class="sbtn" data-v=".">.</button><button class="sbtn op" data-v="+">+</button>
+  </div>
+
+  <div class="hist-panel" id="history">
+    <div class="empty-hist">No history yet</div>
+  </div>
+
+  <script>
+    (function(){
+      'use strict';
+      const exprEl = document.querySelector('.calc-expr'), resEl = document.querySelector('.calc-res');
+      const histPanel = document.getElementById('history');
+      const degBtn = document.getElementById('deg-btn'), radBtn = document.getElementById('rad-btn');
+      const memInd = document.getElementById('mem-ind');
+      const histBtn = document.getElementById('hist-btn'), copyBtn = document.getElementById('copy-btn');
+
+      let expression = '', memory = 0, isDeg = true, history = JSON.parse(localStorage.getItem('sci_hist')||'[]');
+
+      const update = () => {
+        exprEl.textContent = expression || '';
+        resEl.textContent = expression || '0';
+        resEl.classList.remove('error');
+      };
+
+      const factorial = n => {
+        if(n<0) return NaN;
+        if(n===0 || n===1) return 1;
+        if(n>170) return Infinity;
+        let res = 1; for(let i=2;i<=n;i++) res*=i; return res;
+      };
+
+      const preprocess = str => {
+        let e = str.replace(/×/g,'*').replace(/÷/g,'/').replace(/−/g,'-').replace(/π/g,'Math.PI').replace(/\be\b/g,'Math.E');
+        // Trig conversion
+        if(isDeg) {
+          e = e.replace(/(sin|cos|tan)\(([^)]+)\)/g, (m,fn,arg) => `Math.${fn}(((${arg})*Math.PI/180))`);
+        } else {
+          e = e.replace(/(sin|cos|tan)\(/g, 'Math.$1(');
+        }
+        e = e.replace(/log\(/g,'Math.log10(').replace(/ln\(/g,'Math.log(').replace(/√\(/g,'Math.sqrt(').replace(/abs\(/g,'Math.abs(');
+        // Implicit multiplication: 2sin -> 2*sin, )( -> )*(, 2( -> 2*(
+        e = e.replace(/(\d)(Math\.\w+|\()/g,'$1*$2').replace(/\)\(/g,')*(');
+        // Power & Factorial
+        e = e.replace(/\^/g,'**').replace(/(\d+)!/g,'factorial($1)');
+        // Validate strictly
+        if(!/^[\d\+\-\*\/\.\(\)\sMathEPIfactorialsincotlogabqrt]*$/.test(e.replace(/\s/g,''))) throw new Error('Invalid Input');
+        return e;
+      };
+
+      const calculate = () => {
+        if(!expression) return;
+        try {
+          const processed = preprocess(expression);
+          const result = new Function('factorial', 'Math', `return ${processed}`)(factorial, Math);
+          if(!isFinite(result)) throw new Error('Math Error');
+          const formatted = parseFloat(result.toFixed(12)).toString();
+          history.unshift({ expr: expression, res: formatted, ts: new Date().toLocaleTimeString() });
+          if(history.length > 15) history.pop();
+          localStorage.setItem('sci_hist', JSON.stringify(history));
+          renderHistory();
+          expression = formatted;
+          update();
+        } catch(err) {
+          resEl.textContent = err.message || 'Error';
+          resEl.classList.add('error');
+          setTimeout(() => { expression = ''; update(); }, 1200);
+        }
+      };
+
+      const handleInput = v => {
+        if(resEl.classList.contains('error')) { expression = ''; resEl.classList.remove('error'); }
+        if(v==='AC') { expression = ''; }
+        else if(v==='del') { expression = expression.slice(0,-1); }
+        else if(v==='=') { calculate(); return; }
+        else if(v==='1/') { expression += '1/'; }
+        else { expression += v; }
+        update();
+      };
+
+      const handleMem = action => {
+        const current = parseFloat(resEl.textContent) || 0;
+        if(action==='MC') memory = 0;
+        else if(action==='MR') { expression += memory; update(); }
+        else if(action==='M+') memory += current;
+        else if(action==='M-') memory -= current;
+        memInd.style.opacity = memory !== 0 ? '1' : '0.3';
+        memInd.classList.toggle('mem-active', memory !== 0);
+      };
+
+      const renderHistory = () => {
+        histPanel.innerHTML = history.length ? history.map(h => 
+          `<div class="hist-item" data-res="${h.res}"><span class="hist-expr">${h.expr}</span><span class="hist-res">= ${h.res}</span></div>`
+        ).join('') : '<div class="empty-hist">No history yet</div>';
+      };
+
+      const copyResult = async () => {
+        const txt = resEl.textContent === '0' || resEl.classList.contains('error') ? '' : resEl.textContent;
+        if(!txt) return;
+        try {
+          await navigator.clipboard.writeText(txt);
+          copyBtn.textContent = '✅'; setTimeout(() => copyBtn.textContent = '📋', 1500);
+        } catch(e){}
+      };
+
+      // Event Delegation
+      document.querySelector('.sci-grid').addEventListener('click', e => {
+        const btn = e.target.closest('.sbtn');
+        if(btn) handleInput(btn.dataset.v);
+      });
+      document.querySelector('.mem-row').addEventListener('click', e => {
+        const btn = e.target.closest('.mem-btn');
+        if(btn) handleMem(btn.dataset.m);
+      });
+
+      // Controls
+      degBtn.addEventListener('click', () => { isDeg = true; degBtn.classList.add('active'); radBtn.classList.remove('active'); });
+      radBtn.addEventListener('click', () => { isDeg = false; radBtn.classList.add('active'); degBtn.classList.remove('active'); });
+      histBtn.addEventListener('click', () => {
+        const open = histPanel.classList.toggle('open');
+        histBtn.textContent = open ? '🔽' : '📜';
+      });
+      histPanel.addEventListener('click', e => {
+        const item = e.target.closest('.hist-item');
+        if(item) { expression = item.dataset.res; update(); }
+      });
+      copyBtn.addEventListener('click', copyResult);
+
+      // Keyboard Support
+      document.addEventListener('keydown', e => {
+        const k = e.key;
+        if(/^[0-9.]$/.test(k)) { e.preventDefault(); handleInput(k); }
+        else if(['+','-','*','/','(',')','^','!'].includes(k)) { e.preventDefault(); handleInput(k); }
+        else if(k === 'Enter' || k === '=') { e.preventDefault(); calculate(); }
+        else if(k === 'Escape' || k.toLowerCase() === 'c') { e.preventDefault(); handleInput('AC'); }
+        else if(k === 'Backspace') { e.preventDefault(); handleInput('del'); }
+        else if(k === 's') { e.preventDefault(); handleInput('sin('); }
+        else if(k === 'c') { e.preventDefault(); handleInput('cos('); }
+        else if(k === 't') { e.preventDefault(); handleInput('tan('); }
+        else if(k === 'p') { e.preventDefault(); handleInput('π'); }
+        else if(k === 'l') { e.preventDefault(); handleInput('log('); }
+        else if(k === 'n') { e.preventDefault(); handleInput('ln('); }
+        else if(k === 'r') { e.preventDefault(); handleInput('√('); }
+      });
+
+      // Init
+      renderHistory();
+      update();
+    })();
+  </script>
+</div>

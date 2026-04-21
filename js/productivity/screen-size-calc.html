@@ -1,0 +1,245 @@
+<div class="screen-calc-pro">
+  <style>
+    .screen-calc-pro{
+      --sc-bg: #0f1115; --sc-card: #1a1d24; --sc-border: #2a2d36;
+      --sc-text: #e4e7ec; --sc-muted: #8b949e; --sc-accent: #6366f1;
+      --sc-success: #10b981; --sc-code: #0d1117;
+      font-family: system-ui, -apple-system, sans-serif;
+      background: var(--sc-bg); color: var(--sc-text);
+      max-width: 680px; margin: 2rem auto; padding: 1.8rem;
+      border-radius: 24px; border: 1px solid var(--sc-border);
+      box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+    }
+    .sc-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:1.2rem;flex-wrap:wrap;gap:0.8rem;}
+    .sc-header h2{margin:0;font-size:1.5rem;background:linear-gradient(135deg,#6366f1,#10b981);-webkit-background-clip:text;background-clip:text;color:transparent;}
+    .sc-badge{font-size:0.75rem;background:var(--sc-card);border:1px solid var(--sc-border);padding:0.3rem 0.7rem;border-radius:20px;color:var(--sc-muted);}
+    
+    .sc-inputs{display:grid;grid-template-columns:repeat(3,1fr);gap:0.8rem;margin-bottom:1rem;}
+    .sc-input-wrap{display:flex;flex-direction:column;gap:0.3rem;}
+    .sc-input-wrap label{font-size:0.7rem;color:var(--sc-muted);text-transform:uppercase;letter-spacing:0.5px;}
+    .sc-input-wrap input,.sc-input-wrap select{
+      padding:0.7rem;background:var(--sc-card);border:1px solid var(--sc-border);
+      border-radius:10px;color:var(--sc-text);font-size:1rem;outline:none;transition:0.2s;
+    }
+    .sc-input-wrap input:focus,.sc-input-wrap select:focus{border-color:var(--sc-accent);box-shadow:0 0 0 3px rgba(99,102,241,0.2);}
+    .sc-inputs > .sc-input-wrap:nth-child(4){grid-column:span 3;}
+    
+    .sc-presets{display:flex;gap:0.5rem;margin-bottom:1rem;flex-wrap:wrap;}
+    .sc-preset{padding:0.4rem 0.8rem;background:var(--sc-card);border:1px solid var(--sc-border);border-radius:8px;cursor:pointer;font-size:0.85rem;transition:0.2s;}
+    .sc-preset:hover{border-color:var(--sc-accent);background:#23262f;}
+    .sc-preset.active{border-color:var(--sc-accent);background:rgba(99,102,241,0.15);color:var(--sc-accent);}
+    
+    .sc-preview-wrap{background:var(--sc-card);border:1px solid var(--sc-border);border-radius:12px;padding:1.2rem;margin-bottom:1rem;text-align:center;min-height:120px;display:flex;align-items:center;justify-content:center;}
+    .sc-preview-box{
+      width:100%; max-width:280px; background:linear-gradient(135deg,rgba(99,102,241,0.25),rgba(16,185,129,0.25));
+      border:2px dashed var(--sc-accent);border-radius:8px;position:relative;transition:all 0.4s cubic-bezier(0.4,0,0.2,1);
+    }
+    .sc-preview-info{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-weight:600;font-size:0.95rem;white-space:nowrap;}
+    
+    .sc-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:0.8rem;margin-bottom:1rem;}
+    .sc-card{background:var(--sc-card);border:1px solid var(--sc-border);border-radius:12px;padding:0.9rem;text-align:center;transition:0.2s;}
+    .sc-card:hover{border-color:var(--sc-accent);}
+    .sc-val{font-size:1.3rem;font-weight:700;color:var(--sc-accent);margin-bottom:0.2rem;}
+    .sc-lbl{font-size:0.75rem;color:var(--sc-muted);text-transform:uppercase;}
+    
+    .sc-device{background:var(--sc-card);border:1px solid var(--sc-border);border-radius:12px;padding:0.8rem 1rem;margin-bottom:1rem;font-size:0.9rem;color:var(--sc-muted);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:0.5rem;}
+    .sc-device span b{color:var(--sc-success);}
+    
+    .sc-actions{display:flex;gap:0.6rem;justify-content:center;flex-wrap:wrap;}
+    .sc-btn{padding:0.6rem 1rem;background:var(--sc-card);border:1px solid var(--sc-border);border-radius:10px;color:var(--sc-text);cursor:pointer;transition:0.2s;font-size:0.9rem;display:flex;align-items:center;gap:0.4rem;}
+    .sc-btn:hover{border-color:var(--sc-accent);}
+    .sc-btn.primary{background:linear-gradient(135deg,#6366f1,#8b5cf6);border:none;color:#fff;font-weight:600;}
+    .sc-btn.primary:hover{transform:translateY(-2px);box-shadow:0 4px 12px rgba(99,102,241,0.4);}
+    
+    .sc-toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--sc-card);border:1px solid var(--sc-border);color:var(--sc-text);padding:0.8rem 1.2rem;border-radius:12px;font-size:0.9rem;opacity:0;pointer-events:none;transition:0.3s;z-index:1000;box-shadow:0 4px 12px rgba(0,0,0,0.5);}
+    .sc-toast.show{transform:translateX(-50%) translateY(0);opacity:1;}
+    
+    @media(max-width:600px){
+      .sc-inputs{grid-template-columns:1fr 1fr;}
+      .sc-inputs > .sc-input-wrap:nth-child(4){grid-column:span 2;}
+      .sc-grid{grid-template-columns:1fr 1fr;}
+    }
+  </style>
+
+  <div class="sc-header">
+    <h2>📐 Screen Calculator Pro</h2>
+    <span class="sc-badge">⚡ Real-time</span>
+  </div>
+
+  <div class="sc-inputs">
+    <div class="sc-input-wrap">
+      <label>Width</label>
+      <input type="number" id="sc-w" value="27.5" min="0.1" step="any">
+    </div>
+    <div class="sc-input-wrap">
+      <label>Height</label>
+      <input type="number" id="sc-h" value="15.5" min="0.1" step="any">
+    </div>
+    <div class="sc-input-wrap">
+      <label>Unit</label>
+      <select id="sc-unit">
+        <option value="in">Inches (")</option>
+        <option value="cm">Centimeters</option>
+        <option value="mm">Millimeters</option>
+        <option value="px">Pixels</option>
+      </select>
+    </div>
+    <div class="sc-input-wrap">
+      <label>PPI / DPI (Optional)</label>
+      <input type="number" id="sc-ppi" value="96" min="1" step="any" placeholder="96 (web), 141 (Mac), 326 (iPhone)">
+    </div>
+  </div>
+
+  <div class="sc-presets">
+    <button class="sc-preset" data-w="27.5" data-h="15.5" data-p="96">🖥️ 27" Monitor</button>
+    <button class="sc-preset" data-w="6.1" data-h="2.8" data-p="460">📱 iPhone 15 Pro</button>
+    <button class="sc-preset" data-w="1920" data-h="1080" data-p="0">💻 1080p</button>
+    <button class="sc-preset" data-w="3840" data-h="2160" data-p="0">📺 4K UHD</button>
+    <button class="sc-preset" data-w="1080" data-h="1920" data-p="0">📲 9:16 Mobile</button>
+  </div>
+
+  <div class="sc-preview-wrap">
+    <div class="sc-preview-box" id="sc-box">
+      <span class="sc-preview-info" id="sc-prev-info">16:9</span>
+    </div>
+  </div>
+
+  <div class="sc-grid">
+    <div class="sc-card"><div class="sc-val" id="sc-diag">0"</div><div class="sc-lbl">Diagonal</div></div>
+    <div class="sc-card"><div class="sc-val" id="sc-ratio">0:0</div><div class="sc-lbl">Aspect Ratio</div></div>
+    <div class="sc-card"><div class="sc-val" id="sc-px">0 × 0</div><div class="sc-lbl">Pixels</div></div>
+    <div class="sc-card"><div class="sc-val" id="sc-mp">0 MP</div><div class="sc-lbl">Megapixels</div></div>
+    <div class="sc-card"><div class="sc-val" id="sc-area">0 in²</div><div class="sc-lbl">Screen Area</div></div>
+    <div class="sc-card"><div class="sc-val" id="sc-pixel">0 PPI</div><div class="sc-lbl">Pixel Density</div></div>
+  </div>
+
+  <div class="sc-device" id="sc-device">🔍 Match: Calculating...</div>
+
+  <div class="sc-actions">
+    <button class="sc-btn primary" id="sc-copy">📋 Copy Results</button>
+    <button class="sc-btn" id="sc-reset">↺ Reset</button>
+  </div>
+
+  <div class="sc-toast" id="sc-toast"></div>
+
+  <script>
+    (function(){
+      const $ = id => document.getElementById(id);
+      const inputs = [$('sc-w'), $('sc-h'), $('sc-unit'), $('sc-ppi')];
+      
+      // Known Devices Database
+      const devices = [
+        {name:'Standard Monitor (24")', diag:24, ratio:16/9},
+        {name:'MacBook Air 13.6"', diag:13.6, ratio:16/10},
+        {name:'iPad Pro 12.9"', diag:12.9, ratio:4/3},
+        {name:'iPhone 15 Pro', diag:6.1, ratio:19.5/9},
+        {name:'4K TV (55")', diag:55, ratio:16/9},
+        {name:'Ultrawide Monitor (34")', diag:34, ratio:21/9},
+        {name:'Steam Deck', diag:7, ratio:16/10},
+        {name:'Nintendo Switch', diag:6.2, ratio:16/9}
+      ];
+
+      const toIn = {in:1, cm:0.393701, mm:0.0393701, px:1};
+      const commonRatios = [[16,9],[16,10],[4,3],[21,9],[32,9],[1,1],[9,16],[3,2],[19.5,9]];
+
+      // GCD & Aspect Ratio Matcher
+      const getRatio = (w,h) => {
+        const asp = w/h;
+        for(let [rw,rh] of commonRatios){
+          if(Math.abs(asp - rw/rh) < 0.02) return `${rw}:${rh}`;
+        }
+        const gcd = (a,b) => b===0?a:gcd(b,a%b);
+        const a=Math.round(w*1000), b=Math.round(h*1000);
+        const g=gcd(a,b);
+        return g>0 ? `${a/g}:${b/g}` : `${w.toFixed(2)}:${h.toFixed(2)}`;
+      };
+
+      const calc = () => {
+        let w = parseFloat($('sc-w').value) || 0;
+        let h = parseFloat($('sc-h').value) || 0;
+        let unit = $('sc-unit').value;
+        let ppi = parseFloat($('sc-ppi').value) || 96;
+
+        if(w<=0 || h<=0) {
+          $('sc-box').style.aspectRatio = '16/9';
+          $('sc-prev-info').textContent = 'Enter valid dimensions';
+          return;
+        }
+
+        let w_in, h_in, px_w, px_h;
+        if(unit === 'px'){
+          px_w = w; px_h = h;
+          w_in = w / ppi; h_in = h / ppi;
+        } else {
+          w_in = w * toIn[unit]; h_in = h * toIn[unit];
+          px_w = Math.round(w_in * ppi); px_h = Math.round(h_in * ppi);
+        }
+
+        const diag = Math.hypot(w_in, h_in);
+        const ratio = getRatio(w_in, h_in);
+        const mp = (px_w * px_h) / 1000000;
+        const area_in2 = w_in * h_in;
+        const area_cm2 = area_in2 * 6.4516;
+
+        // Update UI
+        $('sc-diag').textContent = `${diag.toFixed(2)}" (${(diag*2.54).toFixed(1)} cm)`;
+        $('sc-ratio').textContent = ratio;
+        $('sc-px').textContent = `${px_w.toLocaleString()} × ${px_h.toLocaleString()}`;
+        $('sc-mp').textContent = `${mp.toFixed(2)} MP`;
+        $('sc-area').textContent = `${area_in2.toFixed(1)} in² / ${area_cm2.toFixed(1)} cm²`;
+        $('sc-pixel').textContent = `${ppi} PPI`;
+
+        // Preview Box
+        $('sc-box').style.aspectRatio = `${w_in}/${h_in}`;
+        $('sc-prev-info').textContent = `${ratio} (${px_w}×${px_h})`;
+
+        // Device Match
+        let best = devices[0], minDiff = Infinity;
+        for(let d of devices){
+          const ratioDiff = Math.abs(d.ratio - w_in/h_in);
+          const diagDiff = Math.abs(d.diag - diag);
+          const score = (diagDiff * 0.6) + (ratioDiff * 5); // Weight ratio more
+          if(score < minDiff){ minDiff = score; best = d; }
+        }
+        const matchPct = Math.max(0, 100 - minDiff * 20).toFixed(0);
+        $('sc-device').innerHTML = `🔍 Closest Match: <b>${best.name}</b> <span style="color:var(--sc-muted)">(${matchPct}% similar)</span>`;
+      };
+
+      // Real-time Listeners
+      inputs.forEach(el => el.addEventListener('input', calc));
+
+      // Presets
+      document.querySelectorAll('.sc-preset').forEach(btn => {
+        btn.onclick = () => {
+          document.querySelectorAll('.sc-preset').forEach(b=>b.classList.remove('active'));
+          btn.classList.add('active');
+          $('sc-w').value = btn.dataset.w;
+          $('sc-h').value = btn.dataset.h;
+          $('sc-ppi').value = btn.dataset.p || 96;
+          $('sc-unit').value = parseFloat(btn.dataset.w) > 100 ? 'px' : 'in';
+          calc();
+          showToast(`✅ ${btn.textContent.trim()} loaded`);
+        };
+      });
+
+      // Actions
+      $('sc-copy').onclick = () => {
+        const txt = `📐 Screen Specs:\n• Size: ${$('sc-w').value}${$('sc-unit').value} × ${$('sc-h').value}${$('sc-unit').value}\n• Diagonal: ${$('sc-diag').textContent}\n• Aspect Ratio: ${$('sc-ratio').textContent}\n• Resolution: ${$('sc-px').textContent}\n• Density: ${$('sc-pixel').textContent}\n• Area: ${$('sc-area').textContent}`;
+        navigator.clipboard.writeText(txt).then(()=>showToast('📋 Results copied to clipboard'));
+      };
+      $('sc-reset').onclick = () => {
+        $('sc-w').value = '27.5'; $('sc-h').value = '15.5'; $('sc-ppi').value = '96'; $('sc-unit').value = 'in';
+        document.querySelectorAll('.sc-preset').forEach(b=>b.classList.remove('active'));
+        calc(); showToast('↺ Reset to defaults');
+      };
+
+      const showToast = msg => {
+        const t = $('sc-toast'); t.textContent = msg; t.classList.add('show');
+        setTimeout(()=>t.classList.remove('show'), 2200);
+      };
+
+      // Init
+      calc();
+    })();
+  </script>
+</div>

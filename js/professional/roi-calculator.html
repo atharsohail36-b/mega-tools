@@ -1,0 +1,189 @@
+<div class="professional-tool">
+  <style>
+    .professional-tool {
+      --bg: #f8fafc; --card: #ffffff; --border: #e2e8f0;
+      --text: #0f172a; --text-sec: #64748b; --accent: #3b82f6;
+      --success: #10b981; --warning: #f59e0b; --danger: #ef4444;
+      --shadow: 0 4px 12px rgba(0,0,0,0.05); --radius: 12px;
+      font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+      max-width: 750px; margin: 0 auto; padding: 1.8rem;
+      background: var(--bg); border-radius: 16px; box-shadow: var(--shadow);
+      box-sizing: border-box; position: relative;
+    }
+    .professional-tool * { box-sizing: border-box; }
+    .pt-header { margin-bottom: 1.2rem; }
+    .pt-header h3 { margin: 0; font-size: 1.45rem; color: var(--text); }
+    .pt-header p { margin: 0.3rem 0 0; font-size: 0.88rem; color: var(--text-sec); }
+    .pt-controls { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 1rem; margin-bottom: 1.2rem; }
+    .pt-field { display: flex; flex-direction: column; gap: 0.35rem; }
+    .pt-label { font-size: 0.78rem; font-weight: 600; color: var(--text-sec); }
+    .pt-input { padding: 0.8rem; border: 1px solid var(--border); border-radius: var(--radius); background: var(--card); color: var(--text); font-size: 0.95rem; outline: none; transition: all 0.2s; }
+    .pt-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(59,130,246,0.12); }
+    .pt-verdict { padding: 0.6rem 1rem; border-radius: 8px; font-size: 0.88rem; font-weight: 600; text-align: center; margin-bottom: 1.2rem; background: #f1f5f9; color: var(--text-sec); transition: all 0.3s; }
+    .pt-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; margin-bottom: 1.2rem; }
+    .pt-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem; text-align: center; box-shadow: 0 2px 6px rgba(0,0,0,0.03); transition: transform 0.2s; }
+    .pt-card:hover { transform: translateY(-2px); }
+    .pt-val { display: block; font-size: 1.3rem; font-weight: 700; color: var(--text); }
+    .pt-lbl { display: block; font-size: 0.75rem; color: var(--text-sec); margin-top: 0.2rem; }
+    .pt-visual { margin-bottom: 1.2rem; }
+    .pt-bar { height: 16px; background: var(--border); border-radius: 8px; overflow: hidden; display: flex; }
+    .pt-segment { height: 100%; transition: width 0.5s cubic-bezier(0.4,0,0.2,1); }
+    .pt-segment.cost { background: #64748b; }
+    .pt-segment.profit { background: var(--success); }
+    .pt-segment.loss { background: var(--danger); }
+    .pt-legend { display: flex; justify-content: center; gap: 1rem; margin-top: 0.4rem; font-size: 0.82rem; color: var(--text-sec); }
+    .pt-breakdown { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem; margin-bottom: 1.2rem; }
+    .pt-row { display: flex; justify-content: space-between; padding: 0.5rem 0; font-size: 0.9rem; color: var(--text-sec); border-bottom: 1px solid var(--border); }
+    .pt-row:last-child { border: none; font-weight: 600; color: var(--text); }
+    .pt-actions { display: flex; gap: 0.8rem; }
+    .pt-btn { flex: 1; padding: 0.8rem; border: none; border-radius: var(--radius); font-weight: 600; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 0.5rem; }
+    .pt-btn-primary { background: var(--accent); color: #fff; }
+    .pt-btn-primary:hover { background: #2563eb; transform: translateY(-1px); }
+    .pt-btn-secondary { background: var(--card); border: 1px solid var(--border); color: var(--text-sec); }
+    .pt-btn-secondary:hover { background: #f1f5f9; border-color: var(--accent); color: var(--accent); }
+    .pt-toast { position: absolute; bottom: 1.2rem; right: 1.2rem; background: var(--text); color: #fff; padding: 0.7rem 1rem; border-radius: 10px; font-size: 0.85rem; transform: translateY(120%); transition: transform 0.3s cubic-bezier(0.4,0,0.2,1); z-index: 10; pointer-events: none; }
+    .pt-toast.show { transform: translateY(0); }
+    @media (max-width: 650px) {
+      .professional-tool { padding: 1.2rem; }
+      .pt-controls { grid-template-columns: 1fr; }
+      .pt-actions { flex-direction: column; }
+    }
+    @media print {
+      .pt-btn, .pt-toast { display: none !important; }
+      .professional-tool { box-shadow: none; background: #fff; max-width: 100%; border-radius: 0; }
+      .pt-input { border: none; padding: 0.2rem 0; background: transparent; font-weight: 500; }
+      .pt-field label { display: none; }
+      .pt-card { box-shadow: none; border: 1px solid #ddd; }
+    }
+  </style>
+
+  <div class="pt-header">
+    <h3>📈 ROI & Investment Analyzer</h3>
+    <p>Real-time returns, CAGR tracking & smart investment verdicts</p>
+  </div>
+
+  <div class="pt-controls">
+    <div class="pt-field"><label class="pt-label">Initial Investment ($)</label><input class="pt-input" type="number" id="pt-cost" value="10000" min="0" step="100"></div>
+    <div class="pt-field"><label class="pt-label">Final Value / Return ($)</label><input class="pt-input" type="number" id="pt-return" value="15000" min="0" step="100"></div>
+    <div class="pt-field"><label class="pt-label">Time Period (Years)</label><input class="pt-input" type="number" id="pt-years" value="2" min="0.1" step="0.1"></div>
+  </div>
+
+  <div class="pt-verdict" id="pt-verdict">📊 Analyzing investment...</div>
+
+  <div class="pt-cards">
+    <div class="pt-card"><span class="pt-val" id="pt-roi">0%</span><span class="pt-lbl">Total ROI</span></div>
+    <div class="pt-card"><span class="pt-val" id="pt-cagr">0%</span><span class="pt-lbl">CAGR (Annual)</span></div>
+    <div class="pt-card"><span class="pt-val" id="pt-profit">$0</span><span class="pt-lbl">Net Profit/Loss</span></div>
+    <div class="pt-card"><span class="pt-val" id="pt-monthly">0%</span><span class="pt-lbl">Avg Monthly ROI</span></div>
+  </div>
+
+  <div class="pt-visual">
+    <div class="pt-bar">
+      <div class="pt-segment cost" id="seg-cost" style="width:60%"></div>
+      <div class="pt-segment profit" id="seg-profit" style="width:40%"></div>
+    </div>
+    <div class="pt-legend"><span>⚫ Initial Capital</span><span>🟢 Profit / 🔴 Loss</span></div>
+  </div>
+
+  <div class="pt-breakdown" id="pt-table"></div>
+
+  <div class="pt-actions">
+    <button class="pt-btn pt-btn-secondary" id="pt-reset">🔄 Reset</button>
+    <button class="pt-btn pt-btn-secondary" id="pt-copy">📋 Copy Summary</button>
+    <button class="pt-btn pt-btn-primary" id="pt-print">🖨️ Print / PDF</button>
+  </div>
+
+  <div class="pt-toast" id="pt-toast"></div>
+
+  <script>
+    (function(){
+      const els = {
+        cost: document.getElementById('pt-cost'), ret: document.getElementById('pt-return'), yrs: document.getElementById('pt-years'),
+        verdict: document.getElementById('pt-verdict'), roi: document.getElementById('pt-roi'), cagr: document.getElementById('pt-cagr'),
+        profit: document.getElementById('pt-profit'), monthly: document.getElementById('pt-monthly'),
+        segCost: document.getElementById('seg-cost'), segProfit: document.getElementById('seg-profit'),
+        table: document.getElementById('pt-table'), reset: document.getElementById('pt-reset'),
+        copy: document.getElementById('pt-copy'), print: document.getElementById('pt-print'),
+        toast: document.getElementById('pt-toast')
+      };
+
+      const fmtCur = n => new Intl.NumberFormat('en-US', {style:'currency', currency:'USD', maximumFractionDigits:2}).format(n);
+      const fmtPct = n => `${n.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2})}%`;
+      const toast = msg => { els.toast.textContent = msg; els.toast.classList.add('show'); setTimeout(()=>els.toast.classList.remove('show'), 2000); };
+
+      const calculate = () => {
+        const cost = parseFloat(els.cost.value) || 0;
+        const ret = parseFloat(els.ret.value) || 0;
+        const yrs = parseFloat(els.yrs.value) || 0;
+
+        if(cost <= 0 || yrs <= 0) {
+          els.verdict.textContent = '⚠️ Enter valid Investment & Time Period';
+          els.verdict.style.background = '#fef2f2'; els.verdict.style.color = 'var(--danger)';
+          return;
+        }
+
+        const profit = ret - cost;
+        const roi = (profit / cost) * 100;
+        const cagr = ((ret / cost) ** (1/yrs) - 1) * 100;
+        const monthlyRoi = roi / (yrs * 12);
+        const totalMonths = Math.round(yrs * 12);
+
+        // UI Updates
+        els.roi.textContent = fmtPct(roi);
+        els.cagr.textContent = fmtPct(cagr);
+        els.profit.textContent = fmtCur(profit);
+        els.profit.style.color = profit >= 0 ? 'var(--success)' : 'var(--danger)';
+        els.monthly.textContent = fmtPct(monthlyRoi);
+
+        // Visual Bar
+        const total = cost + Math.abs(profit);
+        const costPct = (cost / total) * 100;
+        const profitPct = 100 - costPct;
+        els.segCost.style.width = `${costPct}%`;
+        els.segProfit.style.width = `${profitPct}%`;
+        els.segProfit.className = `pt-segment ${profit >= 0 ? 'profit' : 'loss'}`;
+
+        // Smart Verdict
+        let vText, vBg, vColor;
+        if(roi < 0) { vText = `🔴 Loss: ${fmtCur(Math.abs(profit))} | Avoid or restructure investment`; vBg='#fef2f2'; vColor='var(--danger)'; }
+        else if(roi < 5) { vText = `🟡 Low Return | Below inflation. Consider higher yield options`; vBg='#fffbeb'; vColor='var(--warning)'; }
+        else if(roi < 15) { vText = `🟢 Healthy Return | Solid mid-term investment performance`; vBg='#f0fdf4'; vColor='var(--success)'; }
+        else { vText = `🚀 High Yield | Exceptional performance. Reinvest or scale`; vBg='#eff6ff'; vColor='var(--accent)'; }
+        els.verdict.textContent = vText;
+        els.verdict.style.background = vBg; els.verdict.style.color = vColor;
+
+        // Breakdown Table
+        els.table.innerHTML = `
+          <div class="pt-row"><span>Initial Capital</span><span>${fmtCur(cost)}</span></div>
+          <div class="pt-row"><span>Final Value</span><span>${fmtCur(ret)}</span></div>
+          <div class="pt-row"><span>Absolute Gain/Loss</span><span style="color:${profit>=0?'var(--success)':'var(--danger)'}">${profit>=0?'+':''}${fmtCur(profit)}</span></div>
+          <div class="pt-row"><span>Compounded Annual Growth (CAGR)</span><span>${fmtPct(cagr)}</span></div>
+          <div class="pt-row"><span>Average Monthly Return</span><span>${fmtPct(monthlyRoi)}</span></div>
+          <div class="pt-row"><span>Total Duration</span><span>${totalMonths} months</span></div>
+        `;
+      };
+
+      // Real-time calculation
+      [els.cost, els.ret, els.yrs].forEach(el => el.addEventListener('input', calculate));
+
+      els.reset.addEventListener('click', () => {
+        els.cost.value = 10000; els.ret.value = 15000; els.yrs.value = 2;
+        calculate(); toast('🔄 Defaults restored');
+      });
+
+      els.copy.addEventListener('click', async () => {
+        const summary = `📈 ROI Summary
+Initial: ${fmtCur(els.cost.value)} | Final: ${fmtCur(els.ret.value)} | Time: ${els.yrs.value} yrs
+Total ROI: ${els.roi.textContent} | CAGR: ${els.cagr.textContent}
+Net Profit/Loss: ${els.profit.textContent}
+Avg Monthly ROI: ${els.monthly.textContent}`;
+        try { await navigator.clipboard.writeText(summary); toast('📋 Copied to clipboard'); } catch { toast('❌ Copy failed'); }
+      });
+
+      els.print.addEventListener('click', () => window.print());
+
+      // Init
+      calculate();
+    })();
+  </script>
+</div>

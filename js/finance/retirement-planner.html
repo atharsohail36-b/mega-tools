@@ -1,0 +1,329 @@
+<div class="ret-tool">
+  <style>
+    .ret-tool {
+      --bg: #0f172a; --card: #1e293b; --card-hover: #253347;
+      --text: #f8fafc; --text-muted: #94a3b8; --border: #334155;
+      --accent: #8b5cf6; --success: #10b981; --danger: #ef4444; --warning: #f59e0b;
+      --glow: rgba(139,92,246,0.2);
+      font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+      max-width: 520px; margin: 2rem auto; background: var(--bg);
+      border-radius: 20px; box-shadow: 0 8px 30px rgba(0,0,0,0.35);
+      overflow: hidden; color: var(--text); line-height: 1.4;
+    }
+    .ret-tool * { box-sizing: border-box; }
+    .rt-header { padding: 1.2rem; text-align: center; border-bottom: 1px solid var(--border); background: linear-gradient(180deg, rgba(139,92,246,0.08), transparent); }
+    .rt-header h2 { margin: 0; font-size: 1.3rem; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 0.5rem; }
+    .rt-subtitle { color: var(--text-muted); font-size: 0.85rem; margin: 0.3rem 0 0; }
+    .rt-section { padding: 1rem 1.5rem; background: var(--card); border-bottom: 1px solid var(--border); }
+    .rt-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; }
+    .rt-full { grid-column: span 2; }
+    .rt-input { width: 100%; padding: 0.85rem; border-radius: 10px; border: 1px solid var(--border); background: #0b1120; color: var(--text); font-size: 1rem; outline: none; transition: all 0.2s; }
+    .rt-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--glow); }
+    .rt-label { display: block; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.3rem; }
+    .rt-hint { font-size: 0.7rem; color: var(--text-muted); margin-top: 0.2rem; }
+    .rt-target { display: flex; align-items: center; gap: 0.6rem; padding: 0.6rem 0; }
+    .rt-results { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.8rem; }
+    .rt-card { background: #0b1120; border: 1px solid var(--border); border-radius: 12px; padding: 0.9rem; text-align: center; transition: all 0.2s; }
+    .rt-card:hover { border-color: var(--accent); transform: translateY(-2px); }
+    .rt-val { font-size: 1.2rem; font-weight: 700; margin-bottom: 0.2rem; }
+    .rt-lbl { font-size: 0.75rem; color: var(--text-muted); }
+    .rt-badge { padding: 0.25rem 0.5rem; border-radius: 6px; font-size: 0.75rem; font-weight: 600; margin-top: 0.4rem; display: inline-block; }
+    .rt-badge.ok { background: rgba(16,185,129,0.15); color: var(--success); }
+    .rt-badge.warn { background: rgba(245,158,11,0.15); color: var(--warning); }
+    .rt-badge.err { background: rgba(239,68,68,0.15); color: var(--danger); }
+    .rt-chart { padding: 1.2rem; background: var(--card); border-bottom: 1px solid var(--border); }
+    .rt-chart-title { font-size: 0.9rem; margin-bottom: 0.8rem; display: flex; justify-content: space-between; }
+    .rt-bar-wrap { display: flex; gap: 4px; align-items: flex-end; height: 80px; margin-bottom: 0.4rem; }
+    .rt-bar { flex: 1; background: var(--border); border-radius: 4px 4px 0 0; position: relative; transition: height 0.4s ease; min-width: 12px; }
+    .rt-bar::after { content: attr(data-year); position: absolute; bottom: -16px; left: 50%; transform: translateX(-50%); font-size: 0.6rem; color: var(--text-muted); }
+    .rt-bar.prin { background: linear-gradient(180deg, #6366f1, #8b5cf6); }
+    .rt-bar.int { background: linear-gradient(180deg, #10b981, #34d399); }
+    .rt-legend { display: flex; justify-content: center; gap: 1rem; margin-top: 1rem; font-size: 0.75rem; color: var(--text-muted); }
+    .rt-legend span::before { content: ''; display: inline-block; width: 8px; height: 8px; border-radius: 3px; margin-right: 4px; vertical-align: middle; }
+    .rt-legend span:nth-child(1)::before { background: #8b5cf6; }
+    .rt-legend span:nth-child(2)::before { background: #10b981; }
+    .rt-table-wrap { background: var(--card); max-height: 240px; overflow-y: auto; border-bottom: 1px solid var(--border); }
+    .rt-table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
+    .rt-table th { position: sticky; top: 0; background: #0b1120; padding: 0.6rem; text-align: right; color: var(--text-muted); font-weight: 500; border-bottom: 1px solid var(--border); }
+    .rt-table th:first-child { text-align: left; }
+    .rt-table td { padding: 0.5rem 0.6rem; text-align: right; border-bottom: 1px solid var(--border); }
+    .rt-table td:first-child { text-align: left; color: var(--text-muted); }
+    .rt-table tr:hover td { background: rgba(139,92,246,0.05); }
+    .rt-actions { padding: 1rem 1.5rem; background: var(--card); display: flex; gap: 0.8rem; }
+    .rt-btn { flex: 1; padding: 0.75rem; border: none; border-radius: 10px; font-weight: 500; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 0.4rem; }
+    .rt-btn-primary { background: var(--accent); color: #fff; }
+    .rt-btn-primary:hover { background: #7c3aed; transform: translateY(-1px); }
+    .rt-btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text-muted); }
+    .rt-btn-outline:hover { background: var(--card-hover); color: var(--text); border-color: var(--accent); }
+    .rt-footer { padding: 0.8rem 1.5rem; text-align: center; font-size: 0.75rem; color: var(--text-muted); background: rgba(0,0,0,0.2); }
+    .rt-tip { margin-top: 0.4rem; font-style: italic; color: var(--warning); }
+    .rt-save-ind { position: fixed; bottom: 1rem; right: 1rem; background: var(--accent); color: #fff; padding: 0.4rem 0.8rem; border-radius: 20px; font-size: 0.8rem; opacity: 0; transition: opacity 0.3s; pointer-events: none; z-index: 100; }
+    .rt-save-ind.show { opacity: 1; }
+    @media (max-width: 520px) {
+      .rt-results { grid-template-columns: 1fr; }
+      .ret-tool { margin: 1rem; }
+    }
+  </style>
+
+  <div class="rt-header">
+    <h2>🌟 Retirement Corpus Planner</h2>
+    <p class="rt-subtitle">Inflation-adjusted • Goal tracking • Corpus longevity</p>
+  </div>
+
+  <div class="rt-section">
+    <div class="rt-grid">
+      <div><label class="rt-label">Current Age</label><input type="number" class="rt-input" id="rt-cur-age" placeholder="30" min="18" max="90"></div>
+      <div><label class="rt-label">Retirement Age</label><input type="number" class="rt-input" id="rt-ret-age" placeholder="60" min="30" max="85"></div>
+      <div><label class="rt-label">Current Savings (₹)</label><input type="number" class="rt-input" id="rt-savings" placeholder="200000" min="0"></div>
+      <div><label class="rt-label">Monthly SIP (₹)</label><input type="number" class="rt-input" id="rt-sip" placeholder="10000" min="0"></div>
+      <div><label class="rt-label">Expected Return (%)</label><input type="number" class="rt-input" id="rt-return" placeholder="10" min="1" max="30" step="0.5"></div>
+      <div><label class="rt-label">Inflation Rate (%)</label><input type="number" class="rt-input" id="rt-infl" placeholder="6" min="1" max="15" step="0.5"></div>
+    </div>
+    <div class="rt-target">
+      <label class="rt-label" style="margin:0">🎯 Target Corpus:</label>
+      <input type="number" class="rt-input" id="rt-target" placeholder="e.g. 1,00,00,000" min="0">
+    </div>
+    <div class="rt-hint" id="rt-hint">Assumes end-of-month SIP & constant inflation-adjusted withdrawals</div>
+  </div>
+
+  <div class="rt-results">
+    <div class="rt-card">
+      <div class="rt-val" id="rt-corpus">₹0</div>
+      <div class="rt-lbl">Nominal Corpus</div>
+    </div>
+    <div class="rt-card">
+      <div class="rt-val" id="rt-real">₹0</div>
+      <div class="rt-lbl">Inflation-Adjusted Value</div>
+    </div>
+    <div class="rt-card">
+      <div class="rt-val" id="rt-income">₹0</div>
+      <div class="rt-lbl">Monthly Income (4% Rule)</div>
+    </div>
+    <div class="rt-card">
+      <div class="rt-val" id="rt-gap">₹0</div>
+      <div class="rt-lbl">Goal Status</div>
+      <div class="rt-badge ok" id="rt-badge">On Track</div>
+    </div>
+  </div>
+
+  <div class="rt-chart">
+    <div class="rt-chart-title"><span>📈 Growth Projection</span><span id="rt-chart-end">Year 30: ₹0</span></div>
+    <div class="rt-bar-wrap" id="rt-chart"></div>
+    <div class="rt-legend"><span>Contributions (Principal)</span><span>Compound Returns</span></div>
+  </div>
+
+  <div class="rt-table-wrap">
+    <table class="rt-table">
+      <thead><tr><th>Age</th><th>Start Balance</th><th>Annual SIP</th><th>Returns</th><th>End Balance</th></tr></thead>
+      <tbody id="rt-tbody"></tbody>
+    </table>
+  </div>
+
+  <div class="rt-actions">
+    <button class="rt-btn rt-btn-outline" id="rt-export">📥 Export CSV</button>
+    <button class="rt-btn rt-btn-primary" id="rt-reset">🔄 Reset</button>
+  </div>
+
+  <div class="rt-footer">
+    📊 Based on FV of lumpsum + FV of annuity formula • 4% withdrawal rule assumes 30-year retirement horizon • Data auto-saved
+    <div class="rt-tip" id="rt-tip">💡 Increase SIP by ₹X/month to bridge the goal gap.</div>
+  </div>
+  <div class="rt-save-ind" id="rt-save-ind">✓ Saved</div>
+
+  <script>
+    (function() {
+      const STORAGE_KEY = 'ret_planner_v2';
+      const INR = v => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(v || 0);
+      const PCT = v => v.toFixed(1) + '%';
+
+      const els = {
+        curAge: document.getElementById('rt-cur-age'),
+        retAge: document.getElementById('rt-ret-age'),
+        savings: document.getElementById('rt-savings'),
+        sip: document.getElementById('rt-sip'),
+        ret: document.getElementById('rt-return'),
+        infl: document.getElementById('rt-infl'),
+        target: document.getElementById('rt-target'),
+        hint: document.getElementById('rt-hint'),
+        corpus: document.getElementById('rt-corpus'),
+        real: document.getElementById('rt-real'),
+        income: document.getElementById('rt-income'),
+        gap: document.getElementById('rt-gap'),
+        badge: document.getElementById('rt-badge'),
+        chart: document.getElementById('rt-chart'),
+        chartEnd: document.getElementById('rt-chart-end'),
+        tbody: document.getElementById('rt-tbody'),
+        exportBtn: document.getElementById('rt-export'),
+        resetBtn: document.getElementById('rt-reset'),
+        tip: document.getElementById('rt-tip'),
+        saveInd: document.getElementById('rt-save-ind')
+      };
+
+      let state = { curAge: 30, retAge: 60, savings: 200000, sip: 10000, ret: 10, infl: 6, target: 10000000 };
+      let yearlyData = [], saveTimeout;
+
+      const load = () => {
+        try {
+          const s = localStorage.getItem(STORAGE_KEY);
+          if(s) Object.assign(state, JSON.parse(s));
+        } catch(e) {}
+        els.curAge.value = state.curAge; els.retAge.value = state.retAge;
+        els.savings.value = state.savings; els.sip.value = state.sip;
+        els.ret.value = state.ret; els.infl.value = state.infl; els.target.value = state.target;
+        calculate();
+      };
+
+      const save = () => {
+        try {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+          els.saveInd.classList.add('show');
+          setTimeout(() => els.saveInd.classList.remove('show'), 1500);
+        } catch(e) {}
+      };
+
+      const calculate = () => {
+        const cur = parseInt(els.curAge.value) || 0;
+        const ret = parseInt(els.retAge.value) || 0;
+        const sav = parseFloat(els.savings.value) || 0;
+        const sip = parseFloat(els.sip.value) || 0;
+        const r = parseFloat(els.ret.value) || 0;
+        const inf = parseFloat(els.infl.value) || 0;
+        const target = parseFloat(els.target.value) || 0;
+
+        if(cur <= 0 || ret <= cur || r <= 0) { clearUI(); return; }
+        state = { curAge: cur, retAge: ret, savings: sav, sip, ret: r, infl: inf, target };
+        save();
+
+        const years = ret - cur;
+        const annualRate = r / 100;
+        const months = years * 12;
+        const monthlyRate = annualRate / 12;
+
+        // FV of current savings
+        const fvSav = sav * Math.pow(1 + annualRate, years);
+        // FV of monthly SIP (end of period)
+        const fvSip = sip > 0 ? sip * ((Math.pow(1 + monthlyRate, months) - 1) / monthlyRate) : 0;
+        const nominalCorpus = fvSav + fvSip;
+
+        // Inflation adjusted real value
+        const realCorpus = nominalCorpus / Math.pow(1 + inf/100, years);
+        // 4% rule (monthly)
+        const monthlyIncome = (nominalCorpus * 0.04) / 12;
+        const realMonthlyIncome = monthlyIncome / Math.pow(1 + inf/100, years);
+
+        // Goal tracking
+        let gapVal = 0, badgeClass = 'ok', badgeText = '✅ Goal Met';
+        let tipText = '💡 You\'re on track! Consider increasing SIP to beat inflation.';
+        if(target > 0) {
+          gapVal = Math.max(0, target - nominalCorpus);
+          if(gapVal > 0) {
+            // Required extra SIP
+            const neededExtra = (gapVal * monthlyRate) / (Math.pow(1 + monthlyRate, months) - 1);
+            badgeClass = neededExtra > sip * 0.5 ? 'err' : 'warn';
+            badgeText = gapVal > 0 ? '⚠️ Shortfall' : '✅ Goal Met';
+            els.gap.textContent = `Need +₹${Math.ceil(neededExtra).toLocaleString('en-IN')}/mo`;
+            tipText = `💡 Increase SIP by ~₹${Math.ceil(neededExtra).toLocaleString('en-IN')} to reach ₹${target.toLocaleString('en-IN')} goal.`;
+          } else {
+            els.gap.textContent = `+₹${Math.abs(target - nominalCorpus).toLocaleString('en-IN')} surplus`;
+          }
+        } else {
+          els.gap.textContent = 'No target set';
+        }
+        els.badge.className = `rt-badge ${badgeClass}`;
+        els.badge.textContent = badgeText;
+        els.tip.textContent = tipText;
+
+        // Update UI
+        els.corpus.textContent = INR(nominalCorpus);
+        els.real.textContent = INR(realCorpus);
+        els.income.textContent = `₹${Math.round(realMonthlyIncome).toLocaleString('en-IN')}`;
+        els.chartEnd.textContent = `Age ${ret}: ${INR(nominalCorpus)}`;
+
+        // Yearly data generation
+        yearlyData = [];
+        let balance = sav;
+        for(let y=1; y<=years; y++) {
+          const annualSip = sip * 12;
+          const interest = balance * annualRate + annualSip * annualRate * 0.5; // Approx mid-year SIP
+          balance = (balance + annualSip) * (1 + annualRate);
+          yearlyData.push({
+            age: cur + y,
+            start: balance - annualSip - interest,
+            sip: annualSip,
+            returns: interest,
+            end: balance
+          });
+        }
+
+        renderChart(yearlyData);
+        renderTable(yearlyData);
+      };
+
+      const renderChart = (data) => {
+        els.chart.innerHTML = '';
+        const step = Math.ceil(data.length / 8);
+        for(let i=0; i<data.length; i+=step) {
+          const d = data[i];
+          const total = d.end;
+          const prin = d.start + d.sip;
+          const intPct = (d.returns / total) * 100;
+          const prinPct = 100 - intPct;
+          
+          const bar = document.createElement('div');
+          bar.className = 'rt-bar';
+          bar.style.height = `${Math.max(10, (total / data[data.length-1].end) * 100)}%`;
+          bar.dataset.year = d.age;
+          bar.style.background = `linear-gradient(180deg, #8b5cf6 ${prinPct}%, #10b981 ${prinPct}%)`;
+          els.chart.appendChild(bar);
+        }
+      };
+
+      const renderTable = (data) => {
+        els.tbody.innerHTML = '';
+        const frag = document.createDocumentFragment();
+        const show = data.length <= 12 ? data : [...data.slice(0, 5), {age:'...', start:'...', sip:'...', returns:'...', end:'...'}, data.slice(-3)];
+        show.forEach(d => {
+          const tr = document.createElement('tr');
+          if(typeof d.age === 'string') tr.innerHTML = `<td>...</td><td>...</td><td>...</td><td>...</td><td>...</td>`;
+          else tr.innerHTML = `<td>${d.age}</td><td>${INR(d.start)}</td><td>${INR(d.sip)}</td><td>${INR(d.returns)}</td><td>${INR(d.end)}</td>`;
+          frag.appendChild(tr);
+        });
+        els.tbody.appendChild(frag);
+      };
+
+      const clearUI = () => {
+        els.corpus.textContent = '₹0'; els.real.textContent = '₹0'; els.income.textContent = '₹0';
+        els.gap.textContent = 'Enter valid details'; els.chart.innerHTML = ''; els.tbody.innerHTML = '';
+      };
+
+      // Events
+      [els.curAge, els.retAge, els.savings, els.sip, els.ret, els.infl, els.target].forEach(el => {
+        el.addEventListener('input', () => { clearTimeout(saveTimeout); saveTimeout = setTimeout(calculate, 300); });
+      });
+
+      els.exportBtn.addEventListener('click', () => {
+        if(yearlyData.length === 0) return;
+        let csv = 'Age,Start Balance,Annual SIP,Compound Returns,End Balance,Inflation Adjusted\n';
+        yearlyData.forEach((d,i) => {
+          const realVal = d.end / Math.pow(1 + (state.infl/100), i+1);
+          csv += `${d.age},${d.start.toFixed(2)},${d.sip.toFixed(2)},${d.returns.toFixed(2)},${d.end.toFixed(2)},${realVal.toFixed(2)}\n`;
+        });
+        const blob = new Blob([csv], { type: 'text/csv' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a'); a.href = url; a.download = `retirement_plan_${new Date().toISOString().slice(0,10)}.csv`; a.click(); URL.revokeObjectURL(url);
+      });
+
+      els.resetBtn.addEventListener('click', () => {
+        if(confirm('Reset all to default values?')) {
+          localStorage.removeItem(STORAGE_KEY);
+          state = { curAge: 30, retAge: 60, savings: 200000, sip: 10000, ret: 10, infl: 6, target: 10000000 };
+          els.curAge.value = 30; els.retAge.value = 60; els.savings.value = 200000;
+          els.sip.value = 10000; els.ret.value = 10; els.infl.value = 6; els.target.value = 10000000;
+          calculate();
+        }
+      });
+
+      load();
+    })();
+  </script>
+</div>

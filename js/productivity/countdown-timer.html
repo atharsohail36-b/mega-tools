@@ -1,0 +1,261 @@
+<div class="countdown-pro">
+  <style>
+    .countdown-pro{
+      --cp-bg: #0f1115; --cp-surface: #1a1d24; --cp-border: #2a2d36;
+      --cp-text: #e4e7ec; --cp-muted: #8b949e; --cp-primary: #6366f1;
+      --cp-accent: #10b981; --cp-warn: #ef4444;
+      font-family: system-ui, -apple-system, sans-serif;
+      background: var(--cp-bg); color: var(--cp-text);
+      max-width: 480px; margin: 2rem auto; padding: 1.8rem;
+      border-radius: 24px; border: 1px solid var(--cp-border);
+      box-shadow: 0 10px 40px rgba(0,0,0,0.5); text-align: center;
+      position: relative; overflow: hidden;
+    }
+    .cp-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;}
+    .cp-header h2{margin:0;font-size:1.4rem;background:linear-gradient(135deg,#6366f1,#ec4899);-webkit-background-clip:text;background-clip:text;color:transparent;}
+    .shortcut-hint{font-size:0.75rem;color:var(--cp-muted);background:var(--cp-surface);padding:0.3rem 0.6rem;border-radius:6px;}
+    
+    .timer-wrap{position:relative;width:220px;height:220px;margin:0 auto 1.5rem;}
+    .progress-ring{transform:rotate(-90deg);width:100%;height:100%;}
+    .ring-bg{fill:none;stroke:var(--cp-surface);stroke-width:8;}
+    .ring-progress{fill:none;stroke:var(--cp-primary);stroke-width:8;stroke-linecap:round;transition:stroke-dashoffset 0.1s linear, stroke 0.3s;}
+    .timer-display{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;}
+    .time-text{font-size:2.8rem;font-weight:800;letter-spacing:2px;font-variant-numeric:tabular-nums;line-height:1;}
+    .status-text{font-size:0.75rem;text-transform:uppercase;letter-spacing:2px;color:var(--cp-muted);margin-top:0.3rem;transition:0.2s;}
+    
+    .cp-inputs{display:flex;justify-content:center;gap:0.8rem;margin-bottom:1.2rem;}
+    .cp-inputs label{display:flex;flex-direction:column;align-items:center;gap:0.3rem;}
+    .cp-inputs span{font-size:0.7rem;color:var(--cp-muted);text-transform:uppercase;}
+    .cp-inputs input{
+      width:60px;padding:0.6rem;text-align:center;font-size:1.2rem;font-weight:700;
+      background:var(--cp-surface);border:1px solid var(--cp-border);border-radius:10px;color:var(--cp-text);
+      outline:none;transition:0.2s;
+    }
+    .cp-inputs input:focus{border-color:var(--cp-primary);box-shadow:0 0 0 3px rgba(99,102,241,0.2);}
+    .cp-inputs input:disabled{opacity:0.5;cursor:not-allowed;}
+    input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer-spin-button{display:none;}
+    input[type=number]{-moz-appearance:textfield;}
+
+    .cp-presets{display:flex;justify-content:center;gap:0.6rem;margin-bottom:1.2rem;flex-wrap:wrap;}
+    .preset-btn{
+      padding:0.4rem 0.9rem;background:var(--cp-surface);border:1px solid var(--cp-border);
+      border-radius:8px;color:var(--cp-text);font-size:0.85rem;cursor:pointer;transition:0.2s;
+    }
+    .preset-btn:hover{border-color:var(--cp-primary);background:#23262f;}
+    
+    .cp-controls{display:flex;justify-content:center;gap:0.8rem;}
+    .cp-btn{
+      padding:0.8rem 1.5rem;border:none;border-radius:12px;font-weight:600;cursor:pointer;
+      transition:all 0.2s;display:flex;align-items:center;gap:0.5rem;
+    }
+    .cp-btn.primary{background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;}
+    .cp-btn.primary:hover{transform:translateY(-2px);box-shadow:0 4px 12px rgba(99,102,241,0.4);}
+    .cp-btn.secondary{background:var(--cp-surface);color:var(--cp-text);border:1px solid var(--cp-border);}
+    .cp-btn.secondary:hover{border-color:var(--cp-muted);}
+    .cp-btn:disabled{opacity:0.5;cursor:not-allowed;transform:none !important;box-shadow:none !important;}
+    
+    .toast{
+      position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(20px);
+      background:var(--cp-surface);border:1px solid var(--cp-border);color:var(--cp-text);
+      padding:0.8rem 1.5rem;border-radius:12px;font-weight:500;opacity:0;pointer-events:none;
+      transition:0.3s;z-index:1000;box-shadow:0 4px 12px rgba(0,0,0,0.4);
+    }
+    .toast.show{transform:translateX(-50%) translateY(0);opacity:1;}
+    
+    @media(max-width:500px){
+      .countdown-pro{padding:1.2rem;margin:1rem;}
+      .timer-wrap{width:180px;height:180px;}
+      .time-text{font-size:2.2rem;}
+      .cp-inputs input{width:50px;padding:0.5rem;font-size:1rem;}
+    }
+  </style>
+
+  <div class="cp-header">
+    <h2>⏱️ Pro Countdown</h2>
+    <span class="shortcut-hint">⌨️ Space: Toggle</span>
+  </div>
+
+  <div class="timer-wrap">
+    <svg class="progress-ring" viewBox="0 0 200 200">
+      <circle class="ring-bg" cx="100" cy="100" r="90" />
+      <circle class="ring-progress" cx="100" cy="100" r="90" />
+    </svg>
+    <div class="timer-display">
+      <div class="time-text" id="cp-time">00:00:00</div>
+      <div class="status-text" id="cp-status">Ready</div>
+    </div>
+  </div>
+
+  <div class="cp-inputs">
+    <label><span>Hours</span><input type="number" id="cp-h" value="0" min="0" max="99"></label>
+    <label><span>Min</span><input type="number" id="cp-m" value="5" min="0" max="59"></label>
+    <label><span>Sec</span><input type="number" id="cp-s" value="0" min="0" max="59"></label>
+  </div>
+
+  <div class="cp-presets">
+    <button class="preset-btn" data-sec="300">⏱️ 5m</button>
+    <button class="preset-btn" data-sec="600">⏱️ 10m</button>
+    <button class="preset-btn" data-sec="1500">🍅 25m</button>
+    <button class="preset-btn" data-sec="3600">📚 1h</button>
+  </div>
+
+  <div class="cp-controls">
+    <button id="cp-start" class="cp-btn primary">▶ Start</button>
+    <button id="cp-reset" class="cp-btn secondary">↻ Reset</button>
+    <button id="cp-sound" class="cp-btn secondary" title="Toggle Sound">🔊</button>
+  </div>
+
+  <div class="toast" id="cp-toast"></div>
+</div>
+
+<script>
+  (function(){
+    const $ = id => document.getElementById(id);
+    const els = {
+      h: $('cp-h'), m: $('cp-m'), s: $('cp-s'),
+      time: $('cp-time'), status: $('cp-status'),
+      ring: document.querySelector('.ring-progress'),
+      start: $('cp-start'), reset: $('cp-reset'), sound: $('cp-sound'),
+      toast: $('cp-toast')
+    };
+
+    let duration = 0, remaining = 0, startTime = 0, pausedAt = 0;
+    let timerId = null, running = false, soundOn = true, originalTitle = document.title;
+    const circumference = 2 * Math.PI * 90;
+    els.ring.style.strokeDasharray = circumference;
+    els.ring.style.strokeDashoffset = circumference;
+
+    // Utils
+    const clamp = (val, min, max) => Math.min(Math.max(val, min), max);
+    const fmtTime = sec => {
+      const h = Math.floor(sec / 3600), m = Math.floor((sec % 3600) / 60), s = sec % 60;
+      return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+    };
+    const showToast = msg => {
+      els.toast.textContent = msg;
+      els.toast.classList.add('show');
+      setTimeout(()=>els.toast.classList.remove('show'), 2200);
+    };
+    const playAlarm = () => {
+      if(!soundOn) return;
+      try {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = ctx.createOscillator(), gain = ctx.createGain();
+        osc.connect(gain); gain.connect(ctx.destination);
+        osc.type = 'sine'; osc.frequency.setValueAtTime(880, ctx.currentTime);
+        gain.gain.setValueAtTime(0.3, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 1.5);
+        osc.start(); osc.stop(ctx.currentTime + 1.5);
+      } catch(e){}
+    };
+
+    const updateUI = () => {
+      const sec = Math.ceil(remaining);
+      els.time.textContent = fmtTime(sec);
+      document.title = running ? `⏳ ${fmtTime(sec)}` : originalTitle;
+      const progress = duration > 0 ? 1 - (remaining / duration) : 0;
+      els.ring.style.strokeDashoffset = circumference * progress;
+      
+      if(remaining <= 5 && remaining > 0 && running) els.ring.style.stroke = 'var(--cp-warn)';
+      else els.ring.style.stroke = 'var(--cp-primary)';
+    };
+
+    const tick = () => {
+      const now = Date.now();
+      remaining = Math.max(0, duration - (now - startTime) / 1000 - pausedAt / 1000);
+      updateUI();
+      if(remaining <= 0){
+        stop();
+        playAlarm();
+        showToast('⏰ Time\'s up!');
+        els.status.textContent = 'Finished';
+        els.status.style.color = 'var(--cp-warn)';
+      }
+    };
+
+    const start = () => {
+      if(running) return;
+      if(remaining === 0){
+        const totalSec = parseInt(els.h.value)*3600 + parseInt(els.m.value)*60 + parseInt(els.s.value);
+        if(totalSec <= 0) return showToast('⚠️ Set a valid time first');
+        duration = totalSec; remaining = totalSec;
+      }
+      running = true;
+      pausedAt = 0;
+      startTime = Date.now();
+      els.start.textContent = '⏸ Pause';
+      els.status.textContent = 'Running';
+      els.status.style.color = 'var(--cp-accent)';
+      els.h.disabled = els.m.disabled = els.s.disabled = true;
+      timerId = setInterval(tick, 50);
+      updateUI();
+    };
+
+    const pause = () => {
+      if(!running) return;
+      clearInterval(timerId);
+      running = false;
+      pausedAt += Date.now() - startTime;
+      els.start.textContent = '▶ Resume';
+      els.status.textContent = 'Paused';
+      els.status.style.color = 'var(--cp-warn)';
+    };
+
+    const stop = () => {
+      clearInterval(timerId);
+      running = false;
+      pausedAt = 0;
+      remaining = 0;
+      els.start.textContent = '▶ Start';
+      els.status.textContent = 'Ready';
+      els.status.style.color = 'var(--cp-muted)';
+      els.h.disabled = els.m.disabled = els.s.disabled = false;
+      document.title = originalTitle;
+      els.ring.style.strokeDashoffset = circumference;
+      updateUI();
+    };
+
+    // Events
+    els.start.onclick = running ? pause : start;
+    els.reset.onclick = stop;
+    els.sound.onclick = () => {
+      soundOn = !soundOn;
+      els.sound.textContent = soundOn ? '🔊' : '🔇';
+      showToast(soundOn ? '🔊 Sound On' : '🔇 Sound Muted');
+    };
+
+    [els.h, els.m, els.s].forEach(inp => {
+      inp.addEventListener('input', e => {
+        e.target.value = clamp(parseInt(e.target.value)||0, 0, parseInt(e.target.max));
+        if(!running){
+          const total = parseInt(els.h.value)*3600 + parseInt(els.m.value)*60 + parseInt(els.s.value);
+          duration = total; remaining = total;
+          updateUI();
+        }
+      });
+    });
+
+    document.querySelectorAll('.preset-btn').forEach(btn => {
+      btn.onclick = () => {
+        if(running) pause();
+        const sec = parseInt(btn.dataset.sec);
+        els.h.value = Math.floor(sec/3600);
+        els.m.value = Math.floor((sec%3600)/60);
+        els.s.value = sec%60;
+        duration = sec; remaining = sec;
+        updateUI();
+        showToast(`⏱️ Set to ${btn.textContent.trim()}`);
+      };
+    });
+
+    document.addEventListener('keydown', e => {
+      if(e.code === 'Space' && !['INPUT','TEXTAREA','SELECT'].includes(document.activeElement.tagName)){
+        e.preventDefault(); running ? pause() : start();
+      }
+      if(e.code === 'Escape' && running) pause();
+    });
+
+    updateUI();
+  })();
+</script>
+</div>

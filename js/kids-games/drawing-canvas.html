@@ -1,0 +1,314 @@
+<div class="dp-app">
+  <style>
+    .dp-app {
+      --dp-bg: #0f172a;
+      --dp-panel: #1e293b;
+      --dp-border: #334155;
+      --dp-accent: #3b82f6;
+      --dp-accent-hover: #2563eb;
+      --dp-text: #f8fafc;
+      --dp-muted: #94a3b8;
+      --dp-success: #10b981;
+      --dp-danger: #ef4444;
+      max-width: 700px; margin: 2rem auto; padding: 1.2rem;
+      background: var(--dp-panel); border-radius: 16px;
+      box-shadow: 0 12px 30px rgba(0,0,0,0.3); border: 1px solid var(--dp-border);
+      font-family: system-ui, -apple-system, sans-serif; color: var(--dp-text);
+      position: relative; overflow: hidden;
+    }
+    .dp-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+    .dp-title { font-weight: 800; font-size: 1.3rem; color: var(--dp-accent); margin: 0; }
+    .dp-actions { display: flex; gap: 0.5rem; }
+    
+    .dp-toolbar { display: flex; flex-wrap: wrap; gap: 0.6rem; padding: 0.8rem; background: rgba(15,23,42,0.6); border-radius: 12px; margin-bottom: 1rem; align-items: center; justify-content: center; }
+    .dp-group { display: flex; align-items: center; gap: 0.5rem; background: rgba(255,255,255,0.05); padding: 0.4rem 0.8rem; border-radius: 10px; }
+    .dp-btn { background: var(--dp-bg); border: 1px solid var(--dp-border); color: var(--dp-text); padding: 0.5rem 0.8rem; border-radius: 8px; cursor: pointer; font-size: 0.85rem; font-weight: 600; transition: 0.15s; display: flex; align-items: center; gap: 4px; }
+    .dp-btn:hover { background: #334155; }
+    .dp-btn.active { background: var(--dp-accent); color: #fff; border-color: var(--dp-accent); }
+    .dp-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+    
+    .dp-colors { display: flex; gap: 0.3rem; }
+    .dp-color { width: 24px; height: 24px; border-radius: 50%; cursor: pointer; border: 2px solid transparent; transition: 0.2s; position: relative; }
+    .dp-color:hover { transform: scale(1.2); }
+    .dp-color.active { border-color: #fff; box-shadow: 0 0 8px rgba(255,255,255,0.4); }
+    
+    .dp-slider-wrap { display: flex; align-items: center; gap: 0.4rem; color: var(--dp-muted); font-size: 0.8rem; }
+    .dp-slider-wrap input[type="range"] { width: 80px; accent-color: var(--dp-accent); cursor: pointer; }
+    .dp-slider-wrap input[type="color"] { width: 24px; height: 24px; border: none; padding: 0; cursor: pointer; background: none; }
+
+    .dp-canvas-wrap { position: relative; width: 100%; background: #111827; border-radius: 12px; overflow: hidden; box-shadow: inset 0 0 15px rgba(0,0,0,0.4); border: 1px solid var(--dp-border); }
+    .dp-canvas { display: block; width: 100%; cursor: crosshair; touch-action: none; }
+    
+    .dp-status { display: flex; justify-content: space-between; margin-top: 0.8rem; font-size: 0.8rem; color: var(--dp-muted); padding: 0 0.5rem; }
+    .dp-shortcuts { font-size: 0.75rem; color: var(--dp-muted); margin-top: 0.5rem; text-align: center; opacity: 0.8; }
+  </style>
+
+  <div class="dp-header">
+    <div class="dp-title">🎨 Pro Draw Studio</div>
+    <div class="dp-actions">
+      <button class="dp-btn" id="dp-undo">↩️ Undo</button>
+      <button class="dp-btn" id="dp-redo">↪️ Redo</button>
+      <button class="dp-btn" id="dp-grid">📐 Grid</button>
+      <button class="dp-btn" id="dp-export">💾 Save PNG</button>
+      <button class="dp-btn" id="dp-clear" style="color:var(--dp-danger)">🗑️ Clear</button>
+    </div>
+  </div>
+
+  <div class="dp-toolbar">
+    <div class="dp-group">
+      <button class="dp-btn active" data-tool="pen">✏️ Pen</button>
+      <button class="dp-btn" data-tool="eraser">🧽 Eraser</button>
+      <button class="dp-btn" data-tool="line">📏 Line</button>
+      <button class="dp-btn" data-tool="rect">⬜ Rect</button>
+      <button class="dp-btn" data-tool="circle">⭕ Circle</button>
+    </div>
+    <div class="dp-group">
+      <div class="dp-colors" id="dp-colors"></div>
+      <input type="color" id="dp-custom-color" value="#3b82f6" title="Custom Color">
+    </div>
+    <div class="dp-group dp-slider-wrap">
+      <span>Size:</span><input type="range" id="dp-size" min="1" max="40" value="4">
+      <span id="dp-size-val">4px</span>
+    </div>
+    <div class="dp-group dp-slider-wrap">
+      <span>Opacity:</span><input type="range" id="dp-opacity" min="0.1" max="1" step="0.1" value="1">
+      <span id="dp-opacity-val">100%</span>
+    </div>
+  </div>
+
+  <div class="dp-canvas-wrap">
+    <canvas class="dp-canvas" id="dp-canvas"></canvas>
+  </div>
+
+  <div class="dp-status">
+    <span>Tool: <b id="dp-tool-label">Pen</b></span>
+    <span>History: <b id="dp-hist-label">0/0</b></span>
+    <span id="dp-coord">X: 0 Y: 0</span>
+  </div>
+  <div class="dp-shortcuts">Shortcuts: Ctrl+Z (Undo) | Ctrl+Y (Redo) | B (Brush) | E (Eraser) | G (Grid)</div>
+
+  <script>
+    (function() {
+      'use strict';
+      const canvas = document.getElementById('dp-canvas');
+      const ctx = canvas.getContext('2d');
+      const wrap = canvas.parentElement;
+      
+      // State
+      const state = {
+        tool: 'pen', color: '#3b82f6', size: 4, opacity: 1,
+        drawing: false, startX: 0, startY: 0, points: [],
+        history: [], historyIdx: -1, maxHistory: 30,
+        grid: false, dpr: window.devicePixelRatio || 1
+      };
+
+      // DOM Cache
+      const $ = id => document.getElementById(id);
+      const els = {
+        undo: $('dp-undo'), redo: $('dp-redo'), grid: $('dp-grid'), export: $('dp-export'), clear: $('dp-clear'),
+        colors: $('dp-colors'), customColor: $('dp-custom-color'),
+        size: $('dp-size'), sizeVal: $('dp-size-val'),
+        opacity: $('dp-opacity'), opacityVal: $('dp-opacity-val'),
+        toolLabel: $('dp-tool-label'), histLabel: $('dp-hist-label'), coord: $('dp-coord')
+      };
+
+      // Preset Colors
+      const presets = ['#ef4444','#f97316','#eab308','#22c55e','#06b6d4','#3b82f6','#8b5cf6','#ec4899','#ffffff','#000000'];
+      presets.forEach(c => {
+        const d = document.createElement('div');
+        d.className = 'dp-color' + (c === state.color ? ' active' : '');
+        d.style.background = c;
+        d.onclick = () => selectColor(c);
+        els.colors.appendChild(d);
+      });
+
+      // Init Canvas
+      const initCanvas = () => {
+        const rect = wrap.getBoundingClientRect();
+        canvas.width = rect.width * state.dpr;
+        canvas.height = 350 * state.dpr;
+        canvas.style.height = '350px';
+        ctx.scale(state.dpr, state.dpr);
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+        fillCanvas('#111827');
+        saveState();
+      };
+
+      const fillCanvas = (color) => {
+        ctx.save();
+        ctx.globalAlpha = 1;
+        ctx.fillStyle = color;
+        ctx.fillRect(0, 0, canvas.width/state.dpr, canvas.height/state.dpr);
+        ctx.restore();
+      };
+
+      // State Management
+      const saveState = () => {
+        if (state.historyIdx < state.history.length - 1) state.history.splice(state.historyIdx + 1);
+        state.history.push(ctx.getImageData(0, 0, canvas.width, canvas.height));
+        if (state.history.length > state.maxHistory) state.history.shift();
+        state.historyIdx = state.history.length - 1;
+        updateHistoryUI();
+      };
+
+      const updateHistoryUI = () => {
+        els.histLabel.textContent = `${state.historyIdx + 1}/${state.history.length}`;
+        els.undo.disabled = state.historyIdx <= 0;
+        els.redo.disabled = state.historyIdx >= state.history.length - 1;
+      };
+
+      const undo = () => { if (state.historyIdx > 0) { state.historyIdx--; restoreState(); } };
+      const redo = () => { if (state.historyIdx < state.history.length - 1) { state.historyIdx++; restoreState(); } };
+      
+      const restoreState = () => {
+        ctx.putImageData(state.history[state.historyIdx], 0, 0);
+        if (state.grid) drawGrid();
+        updateHistoryUI();
+      };
+
+      const drawGrid = () => {
+        if (!state.grid) return;
+        const w = canvas.width/state.dpr, h = canvas.height/state.dpr;
+        ctx.save(); ctx.strokeStyle = 'rgba(255,255,255,0.05)'; ctx.lineWidth = 1;
+        for(let x=20; x<w; x+=20) { ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,h); ctx.stroke(); }
+        for(let y=20; y<h; y+=20) { ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(w,y); ctx.stroke(); }
+        ctx.restore();
+      };
+
+      // Tool Logic
+      const selectColor = (c) => {
+        state.color = c;
+        els.customColor.value = c;
+        document.querySelectorAll('.dp-color').forEach(el => el.classList.toggle('active', el.style.background === c || el.style.backgroundColor === c));
+        if (state.tool === 'eraser') setTool('pen');
+      };
+
+      const setTool = (t) => {
+        state.tool = t;
+        document.querySelectorAll('.dp-group button[data-tool]').forEach(b => b.classList.toggle('active', b.dataset.tool === t));
+        canvas.style.cursor = t === 'eraser' ? 'cell' : 'crosshair';
+        els.toolLabel.textContent = t.charAt(0).toUpperCase() + t.slice(1);
+      };
+
+      // Input Handling
+      const getPos = (e) => {
+        const r = canvas.getBoundingClientRect();
+        const t = e.touches ? e.touches[0] : e;
+        return { x: t.clientX - r.left, y: t.clientY - r.top };
+      };
+
+      const applyStyle = () => {
+        ctx.strokeStyle = state.tool === 'eraser' ? '#111827' : state.color;
+        ctx.lineWidth = state.size;
+        ctx.globalAlpha = state.opacity;
+      };
+
+      // Drawing Loop
+      const startDraw = (e) => {
+        if (e.type === 'mousedown' && e.button !== 0) return;
+        state.drawing = true;
+        const p = getPos(e);
+        state.startX = p.x; state.startY = p.y;
+        state.points = [p];
+        applyStyle();
+        ctx.beginPath();
+        ctx.moveTo(p.x, p.y);
+        e.preventDefault();
+      };
+
+      const draw = (e) => {
+        if (!state.drawing) {
+          const p = getPos(e);
+          els.coord.textContent = `X: ${Math.round(p.x)} Y: ${Math.round(p.y)}`;
+          return;
+        }
+        const p = getPos(e);
+        els.coord.textContent = `X: ${Math.round(p.x)} Y: ${Math.round(p.y)}`;
+
+        if (state.tool === 'pen' || state.tool === 'eraser') {
+          state.points.push(p);
+          if (state.points.length < 3) {
+            ctx.beginPath(); ctx.moveTo(state.points[0].x, state.points[0].y); ctx.lineTo(p.x, p.y); ctx.stroke();
+          } else {
+            const last = state.points[state.points.length - 2];
+            const cur = state.points[state.points.length - 1];
+            const mid = { x: (last.x + cur.x)/2, y: (last.y + cur.y)/2 };
+            ctx.beginPath();
+            ctx.quadraticCurveTo(last.x, last.y, mid.x, mid.y);
+            ctx.stroke();
+          }
+        } else {
+          restoreState(); // Clear preview
+          ctx.beginPath(); ctx.moveTo(state.startX, state.startY);
+          if (state.tool === 'line') ctx.lineTo(p.x, p.y);
+          else if (state.tool === 'rect') ctx.strokeRect(state.startX, state.startY, p.x - state.startX, p.y - state.startY);
+          else if (state.tool === 'circle') {
+            const rx = Math.abs(p.x - state.startX)/2, ry = Math.abs(p.y - state.startY)/2;
+            const cx = state.startX + (p.x - state.startX)/2, cy = state.startY + (p.y - state.startY)/2;
+            ctx.ellipse(cx, cy, rx, ry, 0, 0, Math.PI*2);
+          }
+          ctx.stroke();
+        }
+        e.preventDefault();
+      };
+
+      const endDraw = () => {
+        if (!state.drawing) return;
+        state.drawing = false;
+        state.points = [];
+        ctx.globalAlpha = 1;
+        saveState();
+      };
+
+      // Events
+      canvas.addEventListener('mousedown', startDraw);
+      canvas.addEventListener('mousemove', draw);
+      canvas.addEventListener('mouseup', endDraw);
+      canvas.addEventListener('mouseleave', endDraw);
+      
+      canvas.addEventListener('touchstart', startDraw, {passive:false});
+      canvas.addEventListener('touchmove', draw, {passive:false});
+      canvas.addEventListener('touchend', endDraw);
+
+      // UI Bindings
+      document.querySelectorAll('.dp-group button[data-tool]').forEach(b => b.onclick = () => setTool(b.dataset.tool));
+      els.size.oninput = e => { state.size = e.target.value; els.sizeVal.textContent = state.size + 'px'; };
+      els.opacity.oninput = e => { state.opacity = e.target.value; els.opacityVal.textContent = Math.round(state.opacity*100)+'%'; };
+      els.customColor.oninput = e => { selectColor(e.target.value); document.querySelectorAll('.dp-color').forEach(c=>c.classList.remove('active')); };
+      
+      els.undo.onclick = undo;
+      els.redo.onclick = redo;
+      els.clear.onclick = () => { fillCanvas('#111827'); saveState(); };
+      els.export.onclick = () => {
+        const a = document.createElement('a');
+        a.download = `drawing_${Date.now()}.png`;
+        a.href = canvas.toDataURL('image/png');
+        a.click();
+      };
+      els.grid.onclick = () => {
+        state.grid = !state.grid;
+        els.grid.classList.toggle('active', state.grid);
+        restoreState();
+      };
+
+      // Keyboard Shortcuts
+      document.addEventListener('keydown', e => {
+        if (e.ctrlKey && e.key === 'z') { e.preventDefault(); undo(); }
+        if (e.ctrlKey && (e.key === 'y' || (e.shiftKey && e.key === 'Z'))) { e.preventDefault(); redo(); }
+        if (e.key === 'b') setTool('pen');
+        if (e.key === 'e') setTool('eraser');
+        if (e.key === 'g') els.grid.click();
+      });
+
+      // Init
+      window.addEventListener('resize', () => {
+        // Debounced resize to preserve drawing
+        clearTimeout(window.dpResizeTimer);
+        window.dpResizeTimer = setTimeout(initCanvas, 300);
+      });
+      
+      setTimeout(initCanvas, 50);
+    })();
+  </script>
+</div>

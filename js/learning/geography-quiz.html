@@ -1,0 +1,1399 @@
+<div class="geo-quiz-app">
+  <style>
+    .geo-quiz-app {
+      --bg-primary: #0f172a;
+      --bg-card: #1e293b;
+      --bg-input: #334155;
+      --text-primary: #f1f5f9;
+      --text-secondary: #94a3b8;
+      --accent: #3b82f6;
+      --accent-hover: #2563eb;
+      --success: #10b981;
+      --error: #ef4444;
+      --warning: #f59e0b;
+      --info: #06b6d4;
+      --glass: rgba(255,255,255,0.1);
+      --glass-border: rgba(255,255,255,0.2);
+      --gradient-main: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      --gradient-easy: linear-gradient(135deg, #10b981, #059669);
+      --gradient-medium: linear-gradient(135deg, #f59e0b, #d97706);
+      --gradient-hard: linear-gradient(135deg, #ef4444, #dc2626);
+      --transition: all 0.3s ease;
+      
+      max-width: 700px;
+      margin: 0 auto;
+      padding: 1rem;
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      color: var(--text-primary);
+      background: var(--bg-primary);
+      border-radius: 20px;
+      box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .geo-quiz-app::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; height: 4px;
+      background: var(--gradient-main);
+      animation: shimmer 3s infinite linear;
+    }
+    
+    @keyframes shimmer {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(100%); }
+    }
+    
+    /* Header */
+    .gq-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem;
+      background: var(--bg-card);
+      border-radius: 12px;
+      margin-bottom: 1rem;
+      border: 1px solid var(--glass-border);
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+    
+    .gq-title {
+      font-size: 1.3rem;
+      font-weight: 700;
+      background: var(--gradient-main);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .gq-stats {
+      display: flex;
+      gap: 0.8rem;
+      font-size: 0.9rem;
+    }
+    
+    .gq-stat {
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+      background: var(--glass);
+      padding: 0.4rem 0.8rem;
+      border-radius: 8px;
+    }
+    
+    .gq-stat-value {
+      font-weight: 700;
+      color: var(--accent);
+    }
+    
+    .gq-streak {
+      color: var(--warning);
+      animation: pulse 2s infinite;
+    }
+    
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.7; }
+    }
+    
+    /* Progress */
+    .gq-progress-container {
+      margin-bottom: 1rem;
+    }
+    
+    .gq-progress-info {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 0.4rem;
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+    }
+    
+    .gq-progress-bar {
+      height: 8px;
+      background: var(--bg-input);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    
+    .gq-progress-fill {
+      height: 100%;
+      background: var(--gradient-main);
+      border-radius: 4px;
+      transition: width 0.4s ease;
+      width: 0%;
+    }
+    
+    /* Timer */
+    .gq-timer {
+      text-align: center;
+      padding: 0.8rem;
+      background: var(--bg-card);
+      border-radius: 12px;
+      margin-bottom: 1rem;
+      border: 1px solid var(--glass-border);
+      position: relative;
+    }
+    
+    .gq-timer-display {
+      font-size: 1.8rem;
+      font-weight: 700;
+      font-family: monospace;
+    }
+    
+    .gq-timer.warning { color: var(--warning); }
+    .gq-timer.critical { 
+      color: var(--error); 
+      animation: shake 0.5s infinite;
+    }
+    
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-3px); }
+      75% { transform: translateX(3px); }
+    }
+    
+    /* Category Badge */
+    .gq-category {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.4rem 1rem;
+      background: var(--glass);
+      border-radius: 20px;
+      font-size: 0.85rem;
+      margin-bottom: 1rem;
+      border: 1px solid var(--glass-border);
+    }
+    
+    .gq-category.easy { border-color: var(--success); }
+    .gq-category.medium { border-color: var(--warning); }
+    .gq-category.hard { border-color: var(--error); }
+    
+    /* Flag Display */
+    .gq-flag-container {
+      text-align: center;
+      padding: 1.5rem;
+      background: var(--bg-card);
+      border-radius: 16px;
+      margin-bottom: 1rem;
+      border: 2px solid var(--glass-border);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .gq-flag-container::after {
+      content: '';
+      position: absolute;
+      top: -50%; left: -50%;
+      width: 200%; height: 200%;
+      background: radial-gradient(circle, var(--glass) 0%, transparent 70%);
+      animation: float 6s infinite ease-in-out;
+      pointer-events: none;
+    }
+    
+    @keyframes float {
+      0%, 100% { transform: translate(0, 0) rotate(0deg); }
+      33% { transform: translate(30px, -30px) rotate(5deg); }
+      66% { transform: translate(-20px, 20px) rotate(-3deg); }
+    }
+    
+    .gq-flag {
+      font-size: 5rem;
+      margin: 0.5rem 0;
+      display: block;
+      animation: bounce 2s infinite;
+      filter: drop-shadow(0 10px 20px rgba(0,0,0,0.3));
+    }
+    
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+    
+    .gq-flag-info {
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+      margin-top: 0.5rem;
+    }
+    
+    /* Question */
+    .gq-question {
+      font-size: 1.3rem;
+      font-weight: 600;
+      text-align: center;
+      margin: 1rem 0;
+      line-height: 1.4;
+      min-height: 3rem;
+    }
+    
+    /* Options */
+    .gq-options {
+      display: grid;
+      gap: 0.7rem;
+      margin: 1rem 0;
+    }
+    
+    .gq-option {
+      padding: 1rem 1.2rem;
+      background: var(--bg-card);
+      border: 2px solid var(--glass-border);
+      border-radius: 12px;
+      cursor: pointer;
+      transition: var(--transition);
+      font-weight: 500;
+      text-align: left;
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .gq-option::before {
+      content: '';
+      position: absolute;
+      left: 0; top: 0; bottom: 0;
+      width: 4px;
+      background: var(--accent);
+      transform: scaleY(0);
+      transition: transform 0.2s ease;
+    }
+    
+    .gq-option:hover {
+      border-color: var(--accent);
+      background: var(--glass);
+      transform: translateX(5px);
+    }
+    
+    .gq-option:hover::before {
+      transform: scaleY(1);
+    }
+    
+    .gq-option:disabled {
+      cursor: not-allowed;
+      opacity: 0.8;
+    }
+    
+    .gq-option.correct {
+      background: rgba(16, 185, 129, 0.2);
+      border-color: var(--success);
+      animation: correctAnim 0.4s ease;
+    }
+    
+    .gq-option.correct::before {
+      background: var(--success);
+      transform: scaleY(1);
+    }
+    
+    @keyframes correctAnim {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.02); }
+      100% { transform: scale(1); }
+    }
+    
+    .gq-option.wrong {
+      background: rgba(239, 68, 68, 0.2);
+      border-color: var(--error);
+      animation: wrongAnim 0.4s ease;
+    }
+    
+    @keyframes wrongAnim {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-10px); }
+      75% { transform: translateX(10px); }
+    }
+    
+    .gq-option-letter {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: var(--glass);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.9rem;
+      flex-shrink: 0;
+    }
+    
+    .gq-option.correct .gq-option-letter {
+      background: var(--success);
+      color: white;
+    }
+    
+    .gq-option.wrong .gq-option-letter {
+      background: var(--error);
+      color: white;
+    }
+    
+    /* Lifelines */
+    .gq-lifelines {
+      display: flex;
+      justify-content: center;
+      gap: 0.5rem;
+      margin: 1rem 0;
+      flex-wrap: wrap;
+    }
+    
+    .gq-lifeline {
+      padding: 0.5rem 1rem;
+      background: var(--glass);
+      border: 1px solid var(--glass-border);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: var(--transition);
+      font-size: 0.85rem;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    
+    .gq-lifeline:hover:not(:disabled) {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: white;
+    }
+    
+    .gq-lifeline:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    
+    .gq-lifeline.used {
+      text-decoration: line-through;
+      opacity: 0.4;
+    }
+    
+    /* Hint Box */
+    .gq-hint {
+      background: rgba(6, 182, 212, 0.15);
+      border: 1px solid var(--info);
+      border-left: 4px solid var(--info);
+      border-radius: 8px;
+      padding: 0.8rem 1rem;
+      margin: 1rem 0;
+      font-size: 0.95rem;
+      display: none;
+      animation: slideIn 0.3s ease;
+    }
+    
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .gq-hint.show { display: block; }
+    
+    /* Controls */
+    .gq-controls {
+      display: flex;
+      gap: 0.5rem;
+      justify-content: center;
+      margin: 1rem 0;
+      flex-wrap: wrap;
+    }
+    
+    .gq-btn {
+      padding: 0.8rem 1.5rem;
+      background: var(--gradient-main);
+      border: none;
+      border-radius: 10px;
+      color: white;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.95rem;
+    }
+    
+    .gq-btn:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 25px -5px rgba(0,0,0,0.3);
+    }
+    
+    .gq-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+    
+    .gq-btn.secondary {
+      background: var(--glass);
+      color: var(--text-primary);
+      border: 1px solid var(--glass-border);
+    }
+    
+    .gq-btn.secondary:hover:not(:disabled) {
+      background: var(--accent);
+      border-color: var(--accent);
+    }
+    
+    .gq-btn.skip { background: var(--gradient-medium); }
+    .gq-btn.hint-btn { background: var(--gradient-easy); }
+    
+    /* Result Feedback */
+    .gq-feedback {
+      text-align: center;
+      padding: 1rem;
+      margin: 1rem 0;
+      border-radius: 12px;
+      font-weight: 500;
+      display: none;
+    }
+    
+    .gq-feedback.show { display: block; animation: slideIn 0.3s ease; }
+    .gq-feedback.correct { 
+      background: rgba(16, 185, 129, 0.15); 
+      color: var(--success);
+      border: 1px solid var(--success);
+    }
+    .gq-feedback.wrong { 
+      background: rgba(239, 68, 68, 0.15); 
+      color: var(--error);
+      border: 1px solid var(--error);
+    }
+    
+    .gq-feedback-info {
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+      margin-top: 0.5rem;
+      font-weight: 400;
+    }
+    
+    /* Results Screen */
+    .gq-results {
+      text-align: center;
+      padding: 2rem 1rem;
+      display: none;
+    }
+    
+    .gq-results.show { display: block; animation: fadeIn 0.5s ease; }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: scale(0.95); }
+      to { opacity: 1; transform: scale(1); }
+    }
+    
+    .gq-results-flag {
+      font-size: 4rem;
+      margin: 1rem 0;
+      animation: bounce 1s infinite;
+    }
+    
+    .gq-results-title {
+      font-size: 1.8rem;
+      font-weight: 700;
+      margin: 1rem 0;
+      background: var(--gradient-main);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    
+    .gq-results-score {
+      font-size: 3rem;
+      font-weight: 800;
+      margin: 1rem 0;
+      background: var(--gradient-main);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    
+    .gq-results-stats {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 0.8rem;
+      margin: 1.5rem 0;
+      text-align: left;
+    }
+    
+    .gq-result-stat {
+      background: var(--bg-card);
+      padding: 0.8rem 1rem;
+      border-radius: 10px;
+      border: 1px solid var(--glass-border);
+    }
+    
+    .gq-result-stat-label {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      margin-bottom: 0.3rem;
+    }
+    
+    .gq-result-stat-value {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--accent);
+    }
+    
+    .gq-grade {
+      display: inline-block;
+      padding: 0.5rem 1.5rem;
+      border-radius: 30px;
+      font-weight: 700;
+      font-size: 1.1rem;
+      margin: 1rem 0;
+    }
+    
+    .gq-grade.excellent { background: var(--gradient-easy); color: white; }
+    .gq-grade.good { background: var(--gradient-medium); color: white; }
+    .gq-grade.average { background: var(--glass); color: var(--text-primary); }
+    .gq-grade.poor { background: var(--gradient-hard); color: white; }
+    
+    .gq-share-btn {
+      margin-top: 1rem;
+      background: var(--glass);
+      border: 1px solid var(--glass-border);
+    }
+    
+    /* Review Mode */
+    .gq-review {
+      margin-top: 1.5rem;
+      text-align: left;
+      max-height: 300px;
+      overflow-y: auto;
+      padding-right: 0.5rem;
+    }
+    
+    .gq-review-item {
+      padding: 0.8rem;
+      background: var(--bg-card);
+      border-radius: 10px;
+      margin-bottom: 0.5rem;
+      border-left: 4px solid var(--glass-border);
+    }
+    
+    .gq-review-item.correct { border-left-color: var(--success); }
+    .gq-review-item.wrong { border-left-color: var(--error); }
+    
+    .gq-review-q {
+      font-weight: 600;
+      margin-bottom: 0.4rem;
+      font-size: 0.95rem;
+    }
+    
+    .gq-review-a {
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+    }
+    
+    .gq-review-a span {
+      color: var(--success);
+      font-weight: 500;
+    }
+    
+    /* Settings Panel */
+    .gq-settings {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      z-index: 10;
+    }
+    
+    .gq-settings-btn {
+      background: var(--glass);
+      border: 1px solid var(--glass-border);
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: var(--transition);
+      font-size: 1.2rem;
+    }
+    
+    .gq-settings-btn:hover {
+      background: var(--accent);
+      transform: rotate(90deg);
+    }
+    
+    .gq-settings-panel {
+      position: absolute;
+      top: 50px;
+      right: 0;
+      background: var(--bg-card);
+      border: 1px solid var(--glass-border);
+      border-radius: 12px;
+      padding: 1rem;
+      min-width: 200px;
+      display: none;
+      z-index: 20;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+    }
+    
+    .gq-settings-panel.show { display: block; animation: slideIn 0.2s ease; }
+    
+    .gq-setting-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.5rem 0;
+      font-size: 0.9rem;
+    }
+    
+    .gq-toggle {
+      position: relative;
+      width: 44px;
+      height: 24px;
+    }
+    
+    .gq-toggle input { opacity: 0; width: 0; height: 0; }
+    
+    .gq-toggle-slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: var(--bg-input);
+      border-radius: 24px;
+      transition: var(--transition);
+    }
+    
+    .gq-toggle-slider:before {
+      position: absolute;
+      content: "";
+      height: 18px;
+      width: 18px;
+      left: 3px;
+      bottom: 3px;
+      background: white;
+      border-radius: 50%;
+      transition: var(--transition);
+    }
+    
+    input:checked + .gq-toggle-slider {
+      background: var(--accent);
+    }
+    
+    input:checked + .gq-toggle-slider:before {
+      transform: translateX(20px);
+    }
+    
+    /* Animations */
+    @keyframes confetti {
+      0% { transform: translateY(-100%) rotate(0deg); opacity: 1; }
+      100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+    }
+    
+    .gq-confetti {
+      position: fixed;
+      width: 10px;
+      height: 10px;
+      pointer-events: none;
+      animation: confetti 3s ease-out forwards;
+      z-index: 100;
+    }
+    
+    /* Responsive */
+    @media (max-width: 500px) {
+      .geo-quiz-app { 
+        padding: 0.5rem; 
+        border-radius: 16px;
+      }
+      .gq-flag { font-size: 4rem; }
+      .gq-question { font-size: 1.1rem; }
+      .gq-option { padding: 0.9rem 1rem; font-size: 0.95rem; }
+      .gq-results-score { font-size: 2.5rem; }
+      .gq-results-stats { grid-template-columns: 1fr; }
+    }
+    
+    /* Scrollbar */
+    .gq-review::-webkit-scrollbar { width: 6px; }
+    .gq-review::-webkit-scrollbar-track { background: var(--bg-input); border-radius: 3px; }
+    .gq-review::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 3px; }
+  </style>
+
+  <!-- Settings -->
+  <div class="gq-settings">
+    <div class="gq-settings-btn" id="gq-settings-toggle">⚙️</div>
+    <div class="gq-settings-panel" id="gq-settings-panel">
+      <div class="gq-setting-item">
+        <span>🔊 Sound Effects</span>
+        <label class="gq-toggle">
+          <input type="checkbox" id="gq-sound-toggle" checked>
+          <span class="gq-toggle-slider"></span>
+        </label>
+      </div>
+      <div class="gq-setting-item">
+        <span>⏱️ Timer Mode</span>
+        <label class="gq-toggle">
+          <input type="checkbox" id="gq-timer-toggle" checked>
+          <span class="gq-toggle-slider"></span>
+        </label>
+      </div>
+      <div class="gq-setting-item">
+        <span>🎯 Hard Mode</span>
+        <label class="gq-toggle">
+          <input type="checkbox" id="gq-hard-toggle">
+          <span class="gq-toggle-slider"></span>
+        </label>
+      </div>
+      <button class="gq-btn secondary" id="gq-reset-progress" style="width:100%;margin-top:0.5rem;">🗑️ Reset Progress</button>
+    </div>
+  </div>
+
+  <!-- Header -->
+  <div class="gq-header">
+    <div class="gq-title">🌍 GeoQuiz Pro</div>
+    <div class="gq-stats">
+      <div class="gq-stat">🏆 <span class="gq-stat-value" id="gq-score">0</span></div>
+      <div class="gq-stat">🔥 <span class="gq-stat-value gq-streak" id="gq-streak">0</span>x</div>
+      <div class="gq-stat">⭐ <span class="gq-stat-value" id="gq-highscore">0</span></div>
+    </div>
+  </div>
+
+  <!-- Progress -->
+  <div class="gq-progress-container">
+    <div class="gq-progress-info">
+      <span id="gq-progress-text">Question 1/15</span>
+      <span id="gq-category-display">🏁 Flags</span>
+    </div>
+    <div class="gq-progress-bar">
+      <div class="gq-progress-fill" id="gq-progress-fill"></div>
+    </div>
+  </div>
+
+  <!-- Timer -->
+  <div class="gq-timer" id="gq-timer">
+    <div class="gq-timer-display" id="gq-timer-display">30s</div>
+    <div style="font-size:0.85rem;color:var(--text-secondary);margin-top:0.3rem;">Time remaining</div>
+  </div>
+
+  <!-- Quiz Container -->
+  <div id="gq-quiz-container">
+    <!-- Category Badge -->
+    <div class="gq-category easy" id="gq-category-badge">
+      <span id="gq-category-icon">🏁</span>
+      <span id="gq-category-name">Flags</span>
+      <span style="margin-left:auto;font-size:0.8rem;" id="gq-difficulty">Easy</span>
+    </div>
+
+    <!-- Flag Display -->
+    <div class="gq-flag-container">
+      <span class="gq-flag" id="gq-flag">🏳️</span>
+      <div class="gq-flag-info" id="gq-flag-info">Can you identify this country?</div>
+    </div>
+
+    <!-- Question -->
+    <div class="gq-question" id="gq-question">Loading question...</div>
+
+    <!-- Hint Box -->
+    <div class="gq-hint" id="gq-hint-box">💡 <span id="gq-hint-text"></span></div>
+
+    <!-- Options -->
+    <div class="gq-options" id="gq-options"></div>
+
+    <!-- Lifelines -->
+    <div class="gq-lifelines">
+      <div class="gq-lifeline" id="gq-lifeline-5050" title="Remove 2 wrong answers">🎲 50/50</div>
+      <div class="gq-lifeline" id="gq-lifeline-hint" title="Get a helpful hint">💡 Hint</div>
+      <div class="gq-lifeline" id="gq-lifeline-skip" title="Skip this question">⏭️ Skip</div>
+    </div>
+
+    <!-- Feedback -->
+    <div class="gq-feedback" id="gq-feedback">
+      <div id="gq-feedback-msg"></div>
+      <div class="gq-feedback-info" id="gq-feedback-info"></div>
+    </div>
+
+    <!-- Controls -->
+    <div class="gq-controls">
+      <button class="gq-btn hint-btn" id="gq-show-hint">💡 Show Hint</button>
+      <button class="gq-btn secondary skip" id="gq-skip-btn">⏭️ Skip Question</button>
+      <button class="gq-btn" id="gq-next-btn" style="display:none;">Next ➜</button>
+    </div>
+  </div>
+
+  <!-- Results Screen -->
+  <div class="gq-results" id="gq-results">
+    <div class="gq-results-flag">🏆</div>
+    <div class="gq-results-title">Quiz Complete!</div>
+    <div class="gq-results-score" id="gq-final-score">0/15</div>
+    <div class="gq-grade" id="gq-grade">Good Job!</div>
+    
+    <div class="gq-results-stats">
+      <div class="gq-result-stat">
+        <div class="gq-result-stat-label">Correct Answers</div>
+        <div class="gq-result-stat-value" id="gq-correct-count">0</div>
+      </div>
+      <div class="gq-result-stat">
+        <div class="gq-result-stat-label">Best Streak</div>
+        <div class="gq-result-stat-value" id="gq-best-streak">0</div>
+      </div>
+      <div class="gq-result-stat">
+        <div class="gq-result-stat-label">Time Taken</div>
+        <div class="gq-result-stat-value" id="gq-time-taken">0:00</div>
+      </div>
+      <div class="gq-result-stat">
+        <div class="gq-result-stat-label">Accuracy</div>
+        <div class="gq-result-stat-value" id="gq-accuracy">0%</div>
+      </div>
+    </div>
+
+    <div class="gq-controls">
+      <button class="gq-btn" id="gq-replay-btn">🔄 Play Again</button>
+      <button class="gq-btn secondary" id="gq-review-btn">📋 Review Answers</button>
+      <button class="gq-btn secondary gq-share-btn" id="gq-share-btn">📤 Share Score</button>
+    </div>
+
+    <!-- Review Section -->
+    <div class="gq-review" id="gq-review" style="display:none;">
+      <div style="font-weight:600;margin-bottom:0.8rem;text-align:center;">📝 Answer Review</div>
+      <div id="gq-review-list"></div>
+    </div>
+  </div>
+
+  <script>
+    (function(){
+      // ====== QUESTIONS DATABASE (30 Questions) ======
+      const questions = [
+        // Flags - Easy
+        { id:1, category:'flags', difficulty:'easy', flag:'🇫🇷', question:'Which country is this?', options:['France','Spain','Italy','Portugal'], answer:0, hint:'This country is famous for the Eiffel Tower and croissants.', fact:'France is the largest country in the EU by area.' },
+        { id:2, category:'flags', difficulty:'easy', flag:'🇯🇵', question:'Which country does this flag belong to?', options:['China','South Korea','Japan','Thailand'], answer:2, hint:'This island nation is known for sushi and cherry blossoms.', fact:'Japan consists of 6,852 islands!' },
+        { id:3, category:'flags', difficulty:'easy', flag:'🇧🇷', question:'Identify this South American country:', options:['Argentina','Chile','Brazil','Colombia'], answer:2, hint:'This country hosted the 2014 World Cup and speaks Portuguese.', fact:'Brazil is the largest country in South America.' },
+        { id:4, category:'flags', difficulty:'easy', flag:'🇦🇺', question:'Which country has this flag?', options:['New Zealand','Australia','Fiji','UK'], answer:1, hint:'This country is both a continent and an island.', fact:'Australia is home to the Great Barrier Reef.' },
+        { id:5, category:'flags', difficulty:'easy', flag:'🇨🇦', question:'This maple leaf flag represents:', options:['USA','Canada','Mexico','Russia'], answer:1, hint:'This country has two official languages and is north of the USA.', fact:'Canada has the longest coastline in the world.' },
+        
+        // Capitals - Medium
+        { id:6, category:'capitals', difficulty:'medium', flag:'🇩🇪', question:'What is the capital of this country?', options:['Munich','Berlin','Hamburg','Frankfurt'], answer:1, hint:'This city was divided by a wall until 1989.', fact:'Berlin has more bridges than Venice!' },
+        { id:7, category:'capitals', difficulty:'medium', flag:'🇪🇬', question:'Capital city of this ancient land?', options:['Alexandria','Cairo','Luxor','Giza'], answer:1, hint:'This capital is located on the Nile River.', fact:'Cairo is the largest city in the Arab world.' },
+        { id:8, category:'capitals', difficulty:'medium', flag:'🇮🇳', question:'The capital of this country is:', options:['Mumbai','Delhi','Bangalore','Kolkata'], answer:1, hint:'This capital was designed by British architect Edwin Lutyens.', fact:'New Delhi has 11 official languages!' },
+        { id:9, category:'capitals', difficulty:'medium', flag:'🇷🇺', question:'Capital of the world\'s largest country?', options:['St. Petersburg','Moscow','Kiev','Minsk'], answer:1, hint:'This capital has the famous Red Square and Kremlin.', fact:'Moscow has 9 time zones across Russia!' },
+        { id:10, category:'capitals', difficulty:'medium', flag:'🇹🇷', question:'Capital city of this transcontinental country:', options:['Istanbul','Ankara','Izmir','Antalya'], answer:1, hint:'Not Istanbul! This capital was chosen in 1923.', fact:'Turkey spans both Europe and Asia.' },
+        
+        // Landmarks - Medium/Hard
+        { id:11, category:'landmarks', difficulty:'medium', flag:'🇵🇪', question:'Famous ancient city located here:', options:['Machu Picchu','Chichen Itza','Petra','Angkor Wat'], answer:0, hint:'This Incan citadel sits high in the Andes Mountains.', fact:'Machu Picchu was built around 1450 AD.' },
+        { id:12, category:'landmarks', difficulty:'medium', flag:'🇮🇹', question:'This boot-shaped country is home to:', options:['Colosseum','Acropolis','Sagrada Familia','Big Ben'], answer:0, hint:'Ancient amphitheater where gladiators fought.', fact:'The Colosseum could hold 50,000-80,000 spectators.' },
+        { id:13, category:'landmarks', difficulty:'hard', flag:'🇯🇴', question:'Rose-red city carved into rock faces:', options:['Petra','Palmyra','Baalbek','Hatra'], answer:0, hint:'This UNESCO site was featured in Indiana Jones.', fact:'Petra was established around 312 BC.' },
+        { id:14, category:'landmarks', difficulty:'hard', flag:'🇨🇳', question:'Longest wall in the world is located here:', options:['Great Wall','Berlin Wall','Hadrian\'s Wall','Western Wall'], answer:0, hint:'Built over 2,000 years to protect against invasions.', fact:'The Great Wall is over 13,000 miles long!' },
+        { id:15, category:'landmarks', difficulty:'medium', flag:'🇫🇷', question:'Iconic iron lattice tower in this country:', options:['Eiffel Tower','Leaning Tower','CN Tower','Tokyo Tower'], answer:0, hint:'Built for the 1889 World\'s Fair in Paris.', fact:'The Eiffel Tower grows 6 inches in summer due to thermal expansion!' },
+        
+        // Continents & Geography - Easy/Medium
+        { id:16, category:'geography', difficulty:'easy', flag:'🇰🇪', question:'This country is located on which continent?', options:['Asia','Africa','Europe','South America'], answer:1, hint:'Home to the Maasai people and great savannas.', fact:'Kenya is on the equator in East Africa.' },
+        { id:17, category:'geography', difficulty:'easy', flag:'🇦🇷', question:'This country is in which continent?', options:['North America','Africa','South America','Asia'], answer:2, hint:'Home to tango, Patagonia, and Iguazu Falls.', fact:'Argentina is the 8th largest country in the world.' },
+        { id:18, category:'geography', difficulty:'medium', flag:'🇮🇩', question:'This archipelago nation has the most islands in the world:', options:['Philippines','Indonesia','Japan','Maldives'], answer:1, hint:'Over 17,000 islands, located on the equator.', fact:'Indonesia has more active volcanoes than any other country!' },
+        { id:19, category:'geography', difficulty:'hard', flag:'🇲🇳', question:'This landlocked country is between two giants:', options:['Mongolia','Kazakhstan','Nepal','Bhutan'], answer:0, hint:'Famous for Genghis Khan and the Gobi Desert.', fact:'Mongolia has the lowest population density of any sovereign nation.' },
+        { id:20, category:'geography', difficulty:'medium', flag:'🇳🇴', question:'This country is famous for fjords and midnight sun:', options:['Sweden','Norway','Finland','Denmark'], answer:1, hint:'Vikings originated from this Scandinavian nation.', fact:'Norway has over 1,000 fjords!' },
+        
+        // Languages & Culture - Medium
+        { id:21, category:'culture', difficulty:'medium', flag:'🇨🇭', question:'This country has how many official languages?', options:['1','2','3','4'], answer:3, hint:'German, French, Italian, and Romansh.', fact:'Switzerland has 4 national languages!' },
+        { id:22, category:'culture', difficulty:'medium', flag:'🇧🇪', question:'This country is known for:', options:['Chocolate & Waffles','Sushi & Ramen','Tacos & Tequila','Curry & Naan'], answer:0, hint:'Also famous for comics like Tintin and Smurfs.', fact:'Belgium produces over 220,000 tons of chocolate yearly!' },
+        { id:23, category:'culture', difficulty:'hard', flag:'🇪🇹', question:'This is the only African country never colonized:', options:['Ethiopia','Liberia','Morocco','Egypt'], answer:0, hint:'Defeated Italy at the Battle of Adwa in 1896.', fact:'Ethiopia has its own calendar, 7 years behind the Gregorian!' },
+        { id:24, category:'culture', difficulty:'medium', flag:'🇳🇿', question:'Indigenous name for this country:', options:['Maori','Aotearoa','Kiwi','Haka'], answer:1, hint:'Means "Land of the Long White Cloud" in Maori.', fact:'New Zealand was the first country to give women the right to vote (1893).' },
+        { id:25, category:'culture', difficulty:'easy', flag:'🇲🇽', question:'This country celebrates Día de los Muertos:', options:['Spain','Mexico','Colombia','Peru'], answer:1, hint:'Famous for colorful skeletons and marigolds.', fact:'Día de los Muertos is a UNESCO Intangible Cultural Heritage.' },
+        
+        // Currency & Economy - Hard
+        { id:26, category:'economy', difficulty:'hard', flag:'🇯🇵', question:'Currency of this country:', options:['Yuan','Won','Yen','Ringgit'], answer:2, hint:'Symbol: ¥, Code: JPY', fact:'The Japanese yen is the third most traded currency in forex markets.' },
+        { id:27, category:'economy', difficulty:'hard', flag:'🇬🇧', question:'Currency used in this country:', options:['Euro','Pound Sterling','Dollar','Franc'], answer:1, hint:'Symbol: £, Not part of the Eurozone.', fact:'The British pound is the oldest currency still in use.' },
+        { id:28, category:'economy', difficulty:'medium', flag:'🇮🇳', question:'Currency symbol ₹ represents:', options:['Pakistani Rupee','Indian Rupee','Sri Lankan Rupee','Nepalese Rupee'], answer:1, hint:'Adopted in 2010, based on Devanagari letter Ra.', fact:'India has the 5th largest economy by GDP.' },
+        { id:29, category:'economy', difficulty:'hard', flag:'🇨🇭', question:'Currency of this neutral country:', options:['Euro','Swiss Franc','Krone','Guilder'], answer:1, hint:'Code: CHF, known for stability.', fact:'Switzerland is not in the EU but uses its own currency.' },
+        { id:30, category:'economy', difficulty:'medium', flag:'🇦🇪', question:'Currency of this oil-rich nation:', options:['Riyal','Dirham','Dinar','Qatari Riyal'], answer:1, hint:'Code: AED, also called "Emirati Dirham".', fact:'UAE Dirham is pegged to the US Dollar.' },
+        
+        // Bonus - Mixed Hard
+        { id:31, category:'mixed', difficulty:'hard', flag:'🇻🇦', question:'Smallest country in the world by area:', options:['Monaco','Vatican City','San Marino','Liechtenstein'], answer:1, hint:'Located within Rome, Italy. Area: 0.44 km²', fact:'Vatican City has its own post office, radio station, and bank!' },
+        { id:32, category:'mixed', difficulty:'hard', flag:'🇷🇺', question:'This country spans how many time zones?', options:['5','7','9','11'], answer:3, hint:'From Kaliningrad to Kamchatka.', fact:'Russia spans 11 time zones, the most of any country.' },
+        { id:33, category:'mixed', difficulty:'medium', flag:'🇿🇦', question:'This country has how many official capitals?', options:['1','2','3','4'], answer:2, hint:'Pretoria (executive), Cape Town (legislative), Bloemfontein (judicial)', fact:'South Africa is the only country with 3 capital cities!' },
+        { id:34, category:'mixed', difficulty:'hard', flag:'🇰🇮', question:'This island nation was formerly known as:', options:['Gilbert Islands','Ellice Islands','New Hebrides','Sandwich Islands'], answer:0, hint:'Now called Kiribati, pronounced "Kiribas".', fact:'Kiribati is the only country in all four hemispheres!' },
+        { id:35, category:'mixed', difficulty:'medium', flag:'🇧🇴', question:'This country has two capital cities:', options:['La Paz & Sucre','Quito & Guayaquil','Asunción & Encarnación','Lima & Cusco'], answer:0, hint:'Sucre is constitutional, La Paz is administrative.', fact:'La Paz is the highest administrative capital in the world!' }
+      ];
+
+      // ====== STATE MANAGEMENT ======
+      const state = {
+        currentIdx: 0,
+        score: 0,
+        streak: 0,
+        bestStreak: 0,
+        answers: [],
+        startTime: null,
+        timer: null,
+        timeRemaining: 30,
+        lifelines: { '5050': true, hint: true, skip: true },
+        settings: { sound: true, timer: true, hardMode: false },
+        highScore: parseInt(localStorage.getItem('geoquiz-highscore')) || 0,
+        selectedOptions: []
+      };
+
+      // ====== DOM ELEMENTS ======
+      const els = {
+        // Header
+        score: document.getElementById('gq-score'),
+        streak: document.getElementById('gq-streak'),
+        highscore: document.getElementById('gq-highscore'),
+        
+        // Progress
+        progressText: document.getElementById('gq-progress-text'),
+        progressFill: document.getElementById('gq-progress-fill'),
+        categoryDisplay: document.getElementById('gq-category-display'),
+        
+        // Timer
+        timer: document.getElementById('gq-timer'),
+        timerDisplay: document.getElementById('gq-timer-display'),
+        
+        // Quiz
+        categoryBadge: document.getElementById('gq-category-badge'),
+        categoryIcon: document.getElementById('gq-category-icon'),
+        categoryName: document.getElementById('gq-category-name'),
+        difficulty: document.getElementById('gq-difficulty'),
+        flag: document.getElementById('gq-flag'),
+        flagInfo: document.getElementById('gq-flag-info'),
+        question: document.getElementById('gq-question'),
+        hintBox: document.getElementById('gq-hint-box'),
+        hintText: document.getElementById('gq-hint-text'),
+        options: document.getElementById('gq-options'),
+        feedback: document.getElementById('gq-feedback'),
+        feedbackMsg: document.getElementById('gq-feedback-msg'),
+        feedbackInfo: document.getElementById('gq-feedback-info'),
+        
+        // Buttons
+        nextBtn: document.getElementById('gq-next-btn'),
+        skipBtn: document.getElementById('gq-skip-btn'),
+        showHintBtn: document.getElementById('gq-show-hint'),
+        lifelines: {
+          '5050': document.getElementById('gq-lifeline-5050'),
+          hint: document.getElementById('gq-lifeline-hint'),
+          skip: document.getElementById('gq-lifeline-skip')
+        },
+        
+        // Results
+        quizContainer: document.getElementById('gq-quiz-container'),
+        results: document.getElementById('gq-results'),
+        finalScore: document.getElementById('gq-final-score'),
+        grade: document.getElementById('gq-grade'),
+        correctCount: document.getElementById('gq-correct-count'),
+        bestStreakEl: document.getElementById('gq-best-streak'),
+        timeTaken: document.getElementById('gq-time-taken'),
+        accuracy: document.getElementById('gq-accuracy'),
+        review: document.getElementById('gq-review'),
+        reviewList: document.getElementById('gq-review-list'),
+        replayBtn: document.getElementById('gq-replay-btn'),
+        reviewBtn: document.getElementById('gq-review-btn'),
+        shareBtn: document.getElementById('gq-share-btn'),
+        
+        // Settings
+        settingsToggle: document.getElementById('gq-settings-toggle'),
+        settingsPanel: document.getElementById('gq-settings-panel'),
+        soundToggle: document.getElementById('gq-sound-toggle'),
+        timerToggle: document.getElementById('gq-timer-toggle'),
+        hardToggle: document.getElementById('gq-hard-toggle'),
+        resetProgressBtn: document.getElementById('gq-reset-progress')
+      };
+
+      // Category icons and names
+      const categories = {
+        flags: { icon: '🏁', name: 'Flags' },
+        capitals: { icon: '🏙️', name: 'Capitals' },
+        landmarks: { icon: '🗿', name: 'Landmarks' },
+        geography: { icon: '🌐', name: 'Geography' },
+        culture: { icon: '🎭', name: 'Culture' },
+        economy: { icon: '💰', name: 'Economy' },
+        mixed: { icon: '🎲', name: 'Mixed' }
+      };
+
+      // ====== UTILITY FUNCTIONS ======
+      const formatTime = (sec) => {
+        const m = Math.floor(sec / 60);
+        const s = sec % 60;
+        return `${m}:${s.toString().padStart(2, '0')}`;
+      };
+
+      const shuffle = (arr) => {
+        const newArr = [...arr];
+        for(let i = newArr.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [newArr[i], newArr[j]] = [newArr[j], newArr[i]];
+        }
+        return newArr;
+      };
+
+      const updateProgress = () => {
+        const total = 15; // Quiz length
+        const pct = (state.currentIdx / total) * 100;
+        els.progressFill.style.width = `${pct}%`;
+        els.progressText.textContent = `Question ${state.currentIdx + 1}/${total}`;
+        els.score.textContent = state.score;
+        els.streak.textContent = state.streak;
+        els.highscore.textContent = state.highScore;
+      };
+
+      const updateTimerDisplay = () => {
+        els.timerDisplay.textContent = `${state.timeRemaining}s`;
+        els.timer.classList.remove('warning', 'critical');
+        if(state.timeRemaining <= 10) els.timer.classList.add('critical');
+        else if(state.timeRemaining <= 15) els.timer.classList.add('warning');
+      };
+
+      const startTimer = () => {
+        if(!state.settings.timer) return;
+        state.timeRemaining = state.settings.hardMode ? 20 : 30;
+        updateTimerDisplay();
+        
+        clearInterval(state.timer);
+        state.timer = setInterval(() => {
+          state.timeRemaining--;
+          updateTimerDisplay();
+          
+          if(state.timeRemaining <= 0) {
+            clearInterval(state.timer);
+            handleTimeout();
+          }
+        }, 1000);
+      };
+
+      const stopTimer = () => {
+        clearInterval(state.timer);
+      };
+
+      const loadQuestion = (idx) => {
+        // Get question (cycle through if needed)
+        const q = questions[idx % questions.length];
+        
+        // Update category badge
+        const cat = categories[q.category];
+        els.categoryBadge.className = `gq-category ${q.difficulty}`;
+        els.categoryIcon.textContent = cat.icon;
+        els.categoryName.textContent = cat.name;
+        els.difficulty.textContent = q.difficulty.charAt(0).toUpperCase() + q.difficulty.slice(1);
+        els.categoryDisplay.textContent = `${cat.icon} ${cat.name}`;
+        
+        // Update flag and question
+        els.flag.textContent = q.flag;
+        els.flagInfo.textContent = q.difficulty === 'hard' ? 'Expert level question!' : 'Can you identify this country?';
+        els.question.textContent = q.question;
+        
+        // Reset hint
+        els.hintBox.classList.remove('show');
+        els.hintText.textContent = q.hint;
+        
+        // Reset feedback
+        els.feedback.classList.remove('show', 'correct', 'wrong');
+        
+        // Generate options (shuffle but track answer)
+        const shuffled = q.options.map((opt, i) => ({ text: opt, originalIdx: i, isCorrect: i === q.answer }));
+        const displayed = shuffle(shuffled);
+        
+        // Render options
+        els.options.innerHTML = '';
+        const letters = ['A', 'B', 'C', 'D'];
+        displayed.forEach((opt, i) => {
+          const btn = document.createElement('button');
+          btn.className = 'gq-option';
+          btn.innerHTML = `<span class="gq-option-letter">${letters[i]}</span>${opt.text}`;
+          btn.dataset.correct = opt.isCorrect;
+          btn.onclick = () => handleAnswer(btn, opt.isCorrect, q);
+          els.options.appendChild(btn);
+        });
+        
+        // Reset lifelines UI
+        Object.entries(els.lifelines).forEach(([key, el]) => {
+          el.classList.toggle('used', !state.lifelines[key]);
+          el.style.opacity = state.lifelines[key] ? '1' : '0.4';
+        });
+        
+        // Show/hide buttons
+        els.nextBtn.style.display = 'none';
+        els.skipBtn.disabled = false;
+        els.showHintBtn.style.display = 'inline-flex';
+        
+        // Update progress
+        updateProgress();
+        
+        // Start timer
+        startTimer();
+        
+        // Store for review
+        state.selectedOptions[idx] = null;
+      };
+
+      const handleAnswer = (btn, isCorrect, question) => {
+        stopTimer();
+        
+        // Disable all options
+        document.querySelectorAll('.gq-option').forEach(b => {
+          b.disabled = true;
+          if(b.dataset.correct === 'true') b.classList.add('correct');
+        });
+        
+        // Mark selected
+        if(isCorrect) {
+          btn.classList.add('correct');
+          state.score += 10 * (state.streak + 1);
+          state.streak++;
+          if(state.streak > state.bestStreak) state.bestStreak = state.streak;
+          showFeedback(true, '🎉 Correct!', question.fact);
+          createConfetti();
+        } else {
+          btn.classList.add('wrong');
+          state.streak = 0;
+          showFeedback(false, '❌ Not quite!', `Correct answer was highlighted. ${question.fact}`);
+        }
+        
+        // Store answer for review
+        state.answers[state.currentIdx] = {
+          question: question.question,
+          selected: btn.textContent.trim(),
+          correct: question.options[question.answer],
+          isCorrect
+        };
+        
+        // Show next button
+        els.nextBtn.style.display = 'inline-flex';
+        els.skipBtn.disabled = true;
+        els.showHintBtn.style.display = 'none';
+      };
+
+      const handleTimeout = () => {
+        // Auto-select wrong and show correct
+        document.querySelectorAll('.gq-option').forEach(b => {
+          b.disabled = true;
+          if(b.dataset.correct === 'true') b.classList.add('correct');
+        });
+        state.streak = 0;
+        showFeedback(false, '⏰ Time\'s up!', els.hintText.textContent);
+        els.nextBtn.style.display = 'inline-flex';
+        els.skipBtn.disabled = true;
+      };
+
+      const showFeedback = (isCorrect, msg, info) => {
+        els.feedbackMsg.textContent = msg;
+        els.feedbackInfo.textContent = info;
+        els.feedback.className = `gq-feedback show ${isCorrect ? 'correct' : 'wrong'}`;
+      };
+
+      const nextQuestion = () => {
+        state.currentIdx++;
+        if(state.currentIdx >= 15) {
+          showResults();
+        } else {
+          loadQuestion(state.currentIdx);
+        }
+      };
+
+      const showResults = () => {
+        stopTimer();
+        els.quizContainer.style.display = 'none';
+        els.results.classList.add('show');
+        
+        // Calculate stats
+        const correct = state.answers.filter(a => a?.isCorrect).length;
+        const totalTime = Math.floor((Date.now() - state.startTime) / 1000);
+        const accuracy = Math.round((correct / 15) * 100);
+        
+        // Update results
+        els.finalScore.textContent = `${correct}/15`;
+        els.correctCount.textContent = correct;
+        els.bestStreakEl.textContent = state.bestStreak;
+        els.timeTaken.textContent = formatTime(totalTime);
+        els.accuracy.textContent = `${accuracy}%`;
+        
+        // Determine grade
+        if(accuracy >= 90) {
+          els.grade.textContent = '🌟 Geography Expert!';
+          els.grade.className = 'gq-grade excellent';
+        } else if(accuracy >= 70) {
+          els.grade.textContent = '🎓 Well Traveled!';
+          els.grade.className = 'gq-grade good';
+        } else if(accuracy >= 50) {
+          els.grade.textContent = '🗺️ Getting There!';
+          els.grade.className = 'gq-grade average';
+        } else {
+          els.grade.textContent = '🧭 Keep Exploring!';
+          els.grade.className = 'gq-grade poor';
+        }
+        
+        // Update high score
+        if(state.score > state.highScore) {
+          state.highScore = state.score;
+          localStorage.setItem('geoquiz-highscore', state.highScore);
+          els.highscore.textContent = state.highScore;
+        }
+        
+        // Generate review list
+        generateReview();
+      };
+
+      const generateReview = () => {
+        els.reviewList.innerHTML = '';
+        state.answers.forEach((a, i) => {
+          if(!a) return;
+          const item = document.createElement('div');
+          item.className = `gq-review-item ${a.isCorrect ? 'correct' : 'wrong'}`;
+          item.innerHTML = `
+            <div class="gq-review-q">${i+1}. ${a.question}</div>
+            <div class="gq-review-a">Your answer: ${a.selected} | Correct: <span>${a.correct}</span></div>
+          `;
+          els.reviewList.appendChild(item);
+        });
+      };
+
+      // ====== LIFELINES ======
+      const useLifeline5050 = () => {
+        if(!state.lifelines['5050']) return;
+        state.lifelines['5050'] = false;
+        els.lifelines['5050'].classList.add('used');
+        
+        // Remove 2 wrong options
+        const wrongBtns = Array.from(document.querySelectorAll('.gq-option'))
+          .filter(b => b.dataset.correct !== 'true');
+        const toRemove = shuffle(wrongBtns).slice(0, 2);
+        toRemove.forEach(btn => {
+          btn.style.opacity = '0.3';
+          btn.style.pointerEvents = 'none';
+          btn.disabled = true;
+        });
+      };
+
+      const useLifelineHint = () => {
+        if(!state.lifelines.hint) return;
+        state.lifelines.hint = false;
+        els.lifelines.hint.classList.add('used');
+        els.hintBox.classList.add('show');
+      };
+
+      const useLifelineSkip = () => {
+        if(!state.lifelines.skip) return;
+        state.lifelines.skip = false;
+        els.lifelines.skip.classList.add('used');
+        state.streak = 0;
+        state.answers[state.currentIdx] = {
+          question: questions[state.currentIdx % questions.length].question,
+          selected: 'Skipped',
+          correct: questions[state.currentIdx % questions.length].options[questions[state.currentIdx % questions.length].answer],
+          isCorrect: false
+        };
+        nextQuestion();
+      };
+
+      // ====== CONFETTI EFFECT ======
+      const createConfetti = () => {
+        const colors = ['#10b981', '#3b82f6', '#f59e0b', '#ef4444', '#8b5cf6'];
+        for(let i = 0; i < 30; i++) {
+          const conf = document.createElement('div');
+          conf.className = 'gq-confetti';
+          conf.style.left = Math.random() * 100 + 'vw';
+          conf.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+          conf.style.animationDelay = Math.random() * 2 + 's';
+          conf.style.transform = `rotate(${Math.random() * 360}deg)`;
+          document.body.appendChild(conf);
+          setTimeout(() => conf.remove(), 3000);
+        }
+      };
+
+      // ====== SHARE FUNCTION ======
+      const shareResults = async () => {
+        const correct = state.answers.filter(a => a?.isCorrect).length;
+        const text = `🌍 I scored ${correct}/15 on GeoQuiz Pro! 🏆\n\nCan you beat my score? Play now!`;
+        
+        if(navigator.share) {
+          try {
+            await navigator.share({ title: 'GeoQuiz Pro Results', text });
+          } catch(e) {}
+        } else {
+          await navigator.clipboard.writeText(text);
+          els.shareBtn.textContent = '✅ Copied!';
+          setTimeout(() => els.shareBtn.textContent = '📤 Share Score', 2000);
+        }
+      };
+
+      // ====== EVENT LISTENERS ======
+      els.nextBtn.onclick = nextQuestion;
+      els.skipBtn.onclick = () => useLifelineSkip();
+      els.showHintBtn.onclick = useLifelineHint;
+      
+      els.lifelines['5050'].onclick = useLifeline5050;
+      els.lifelines.hint.onclick = useLifelineHint;
+      els.lifelines.skip.onclick = useLifelineSkip;
+      
+      els.replayBtn.onclick = () => {
+        // Reset state
+        state.currentIdx = 0;
+        state.score = 0;
+        state.streak = 0;
+        state.bestStreak = 0;
+        state.answers = [];
+        state.lifelines = { '5050': true, hint: true, skip: true };
+        state.startTime = Date.now();
+        
+        // Reset UI
+        els.results.classList.remove('show');
+        els.quizContainer.style.display = 'block';
+        els.review.style.display = 'none';
+        
+        loadQuestion(0);
+      };
+      
+      els.reviewBtn.onclick = () => {
+        els.review.style.display = els.review.style.display === 'none' ? 'block' : 'none';
+        els.reviewBtn.textContent = els.review.style.display === 'none' ? '📋 Review Answers' : '🔙 Hide Review';
+      };
+      
+      els.shareBtn.onclick = shareResults;
+      
+      // Settings
+      els.settingsToggle.onclick = (e) => {
+        e.stopPropagation();
+        els.settingsPanel.classList.toggle('show');
+      };
+      
+      document.addEventListener('click', (e) => {
+        if(!els.settingsPanel.contains(e.target) && e.target !== els.settingsToggle) {
+          els.settingsPanel.classList.remove('show');
+        }
+      });
+      
+      els.soundToggle.onchange = (e) => state.settings.sound = e.target.checked;
+      els.timerToggle.onchange = (e) => {
+        state.settings.timer = e.target.checked;
+        if(!e.target.checked) stopTimer();
+        else startTimer();
+      };
+      els.hardToggle.onchange = (e) => state.settings.hardMode = e.target.checked;
+      
+      els.resetProgressBtn.onclick = () => {
+        if(confirm('Reset all progress and high scores?')) {
+          localStorage.removeItem('geoquiz-highscore');
+          state.highScore = 0;
+          els.highscore.textContent = '0';
+          alert('Progress reset! 🔄');
+        }
+      };
+      
+      // Keyboard navigation
+      document.addEventListener('keydown', (e) => {
+        if(els.results.classList.contains('show')) return;
+        
+        const options = document.querySelectorAll('.gq-option:not(:disabled)');
+        if(e.key >= '1' && e.key <= '4' && options[e.key - 1]) {
+          options[e.key - 1].click();
+        }
+        if(e.key === 'Enter' && els.nextBtn.style.display !== 'none') {
+          els.nextBtn.click();
+        }
+        if((e.ctrlKey || e.metaKey) && e.key === 'h') {
+          e.preventDefault();
+          useLifelineHint();
+        }
+        if((e.ctrlKey || e.metaKey) && e.key === 's') {
+          e.preventDefault();
+          useLifelineSkip();
+        }
+      });
+
+      // ====== INITIALIZATION ======
+      const init = () => {
+        state.startTime = Date.now();
+        els.highscore.textContent = state.highScore;
+        loadQuestion(0);
+      };
+
+      // Start the quiz
+      init();
+    })();
+  </script>
+</div>

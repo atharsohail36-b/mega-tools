@@ -1,0 +1,376 @@
+<div class="focus-mixer">
+  <style>
+    .focus-mixer{
+      --fm-bg: #0b0f14; --fm-card: #141921; --fm-border: #1e2530;
+      --fm-text: #e2e8f0; --fm-muted: #64748b; --fm-accent: #38bdf8;
+      --fm-primary: #6366f1; --fm-success: #10b981;
+      font-family: system-ui, -apple-system, sans-serif;
+      background: var(--fm-bg); color: var(--fm-text);
+      max-width: 720px; margin: 2rem auto; padding: 1.8rem;
+      border-radius: 24px; border: 1px solid var(--fm-border);
+      box-shadow: 0 10px 40px rgba(0,0,0,0.5); position: relative;
+    }
+    .fm-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:1.2rem;flex-wrap:wrap;gap:0.8rem;}
+    .fm-header h2{margin:0;font-size:1.5rem;background:linear-gradient(135deg,#6366f1,#38bdf8);-webkit-background-clip:text;background-clip:text;color:transparent;}
+    .fm-badge{font-size:0.75rem;background:var(--fm-card);border:1px solid var(--fm-border);padding:0.3rem 0.7rem;border-radius:20px;color:var(--fm-muted);}
+    
+    #fm-canvas{width:100%;height:40px;margin-bottom:1.2rem;border-radius:12px;background:var(--fm-card);}
+    .fm-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:0.8rem;margin-bottom:1.5rem;}
+    .fm-card{
+      background:var(--fm-card);border:1px solid var(--fm-border);border-radius:14px;
+      padding:1rem;text-align:center;cursor:pointer;transition:0.2s;position:relative;overflow:hidden;
+    }
+    .fm-card:hover{transform:translateY(-3px);border-color:var(--fm-accent);}
+    .fm-card.active{border-color:var(--fm-primary);box-shadow:0 0 0 2px rgba(99,102,241,0.2);}
+    .fm-card.active::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--fm-primary);}
+    .fm-icon{font-size:1.8rem;margin-bottom:0.4rem;}
+    .fm-name{font-weight:600;font-size:0.9rem;margin-bottom:0.3rem;}
+    .fm-vol{width:100%;height:5px;border-radius:3px;background:var(--fm-border);appearance:none;-webkit-appearance:none;margin-top:0.5rem;cursor:pointer;}
+    .fm-vol::-webkit-slider-thumb{appearance:none;-webkit-appearance:none;width:12px;height:12px;border-radius:50%;background:var(--fm-accent);margin-top:-4px;}
+    
+    .fm-controls{display:flex;flex-wrap:wrap;gap:0.8rem;justify-content:center;margin-bottom:1.2rem;}
+    .fm-btn{padding:0.6rem 1rem;background:var(--fm-card);border:1px solid var(--fm-border);border-radius:10px;color:var(--fm-text);cursor:pointer;transition:0.2s;font-size:0.9rem;}
+    .fm-btn:hover{border-color:var(--fm-accent);}
+    .fm-btn.primary{background:linear-gradient(135deg,#6366f1,#38bdf8);border:none;color:#fff;font-weight:600;}
+    .fm-btn.primary:hover{transform:translateY(-2px);box-shadow:0 4px 12px rgba(99,102,241,0.4);}
+    
+    .fm-presets{display:flex;gap:0.5rem;justify-content:center;flex-wrap:wrap;margin-bottom:1.2rem;}
+    .fm-preset{padding:0.4rem 0.8rem;background:var(--fm-card);border:1px solid var(--fm-border);border-radius:8px;cursor:pointer;font-size:0.85rem;transition:0.2s;}
+    .fm-preset:hover{border-color:var(--fm-primary);background:#1a202c;}
+
+    .fm-sleep{display:flex;align-items:center;justify-content:center;gap:0.6rem;margin-top:1rem;padding-top:1rem;border-top:1px solid var(--fm-border);}
+    .fm-sleep label{font-size:0.85rem;color:var(--fm-muted);}
+    .fm-sleep select{background:var(--fm-card);border:1px solid var(--fm-border);color:var(--fm-text);padding:0.4rem 0.6rem;border-radius:6px;}
+    
+    .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--fm-card);border:1px solid var(--fm-border);color:var(--fm-text);padding:0.8rem 1.2rem;border-radius:12px;font-size:0.9rem;opacity:0;pointer-events:none;transition:0.3s;z-index:1000;box-shadow:0 4px 12px rgba(0,0,0,0.5);}
+    .toast.show{transform:translateX(-50%) translateY(0);opacity:1;}
+    
+    @media(max-width:600px){
+      .fm-grid{grid-template-columns:repeat(3,1fr);}
+      .fm-card{padding:0.8rem;}
+    }
+  </style>
+
+  <div class="fm-header">
+    <h2>🎧 Focus Sound Mixer</h2>
+    <span class="fm-badge" id="fm-status">Ready</span>
+  </div>
+
+  <canvas id="fm-canvas"></canvas>
+
+  <div class="fm-grid" id="fm-grid"></div>
+
+  <div class="fm-controls">
+    <button class="fm-btn primary" id="fm-play-all">▶ Play All</button>
+    <button class="fm-btn" id="fm-stop-all">⏹ Stop All</button>
+    <button class="fm-btn" id="fm-mute-all">🔇 Mute</button>
+    <button class="fm-btn" id="fm-save">💾 Save Mix</button>
+  </div>
+
+  <div class="fm-presets">
+    <div class="fm-preset" data-preset="deep">🧘 Deep Focus</div>
+    <div class="fm-preset" data-preset="sleep">🌙 Sleep</div>
+    <div class="fm-preset" data-preset="study">📚 Study</div>
+    <div class="fm-preset" data-preset="relax">🍃 Relax</div>
+  </div>
+
+  <div class="fm-sleep">
+    <label>⏲️ Sleep Timer:</label>
+    <select id="fm-sleep-time">
+      <option value="0">Off</option>
+      <option value="300">5 min</option>
+      <option value="900">15 min</option>
+      <option value="1800">30 min</option>
+      <option value="3600">1 hour</option>
+    </select>
+  </div>
+
+  <div class="toast" id="fm-toast"></div>
+
+  <script>
+    (function(){
+      const $ = id => document.getElementById(id);
+      const sounds = [
+        {id:'rain', name:'Rain', icon:'🌧️'},
+        {id:'waves', name:'Ocean', icon:'🌊'},
+        {id:'cafe', name:'Cafe', icon:'☕'},
+        {id:'forest', name:'Forest', icon:'🌲'},
+        {id:'white', name:'White Noise', icon:'🌫️'},
+        {id:'lofi', name:'Lo-Fi Vinyl', icon:'🎧'}
+      ];
+
+      let ctx, masterGain, analyser, nodes = {}, sleepTimer = null;
+      let isMuted = false;
+
+      // 🔊 AUDIO ENGINE (Fixed Routing & Browser Policy)
+      const initAudio = () => {
+        if(!ctx){
+          ctx = new (window.AudioContext || window.webkitAudioContext)();
+          masterGain = ctx.createGain();
+          analyser = ctx.createAnalyser();
+          analyser.fftSize = 256;
+          // Proper routing: master -> analyser -> destination
+          masterGain.connect(analyser).connect(ctx.destination);
+          masterGain.gain.value = 0.6;
+        }
+        // CRITICAL: Browsers block audio until user interaction
+        if(ctx.state === 'suspended'){
+          ctx.resume().catch(()=>{});
+        }
+      };
+
+      const createNoise = type => {
+        const size = ctx.sampleRate * 2;
+        const buf = ctx.createBuffer(1, size, ctx.sampleRate);
+        const d = buf.getChannelData(0);
+        for(let i=0;i<size;i++){
+          d[i] = type==='white' ? Math.random()*2-1 : (Math.random()-0.5)*2;
+        }
+        const src = ctx.createBufferSource();
+        src.buffer = buf; src.loop = true;
+        return src;
+      };
+
+      const generateSound = id => {
+        const now = ctx.currentTime;
+        const gain = ctx.createGain();
+        gain.gain.setValueAtTime(0, now);
+        gain.gain.linearRampToValueAtTime(0.5, now + 0.2);
+        gain.connect(masterGain); // ✅ Fixed: Connect to master output
+
+        const nodesList = [gain];
+        let src;
+
+        switch(id){
+          case 'rain': {
+            src = createNoise('brown');
+            const filt = ctx.createBiquadFilter();
+            filt.type='bandpass'; filt.frequency.value=600; filt.Q.value=0.5;
+            const lfo = ctx.createOscillator(); lfo.frequency.value=8;
+            const lfoG = ctx.createGain(); lfoG.gain.value=200;
+            lfo.connect(lfoG).connect(filt.frequency);
+            src.connect(filt).connect(gain);
+            lfo.start(); src.start();
+            nodesList.push(src, filt, lfo, lfoG);
+            break;
+          }
+          case 'waves': {
+            src = createNoise('pink');
+            const filt = ctx.createBiquadFilter();
+            filt.type='lowpass'; filt.frequency.value=250;
+            const lfo = ctx.createOscillator(); lfo.frequency.value=0.12;
+            const lfoG = ctx.createGain(); lfoG.gain.value=0.4;
+            lfo.connect(lfoG).connect(filt.frequency);
+            src.connect(filt).connect(gain);
+            lfo.start(); src.start();
+            nodesList.push(src, filt, lfo, lfoG);
+            break;
+          }
+          case 'cafe': {
+            src = createNoise('white');
+            const filt = ctx.createBiquadFilter();
+            filt.type='bandpass'; filt.frequency.value=1000; filt.Q.value=0.3;
+            src.connect(filt).connect(gain);
+            src.start();
+            nodesList.push(src, filt);
+            break;
+          }
+          case 'forest': {
+            src = createNoise('brown');
+            const filt = ctx.createBiquadFilter();
+            filt.type='highpass'; filt.frequency.value=900;
+            src.connect(filt).connect(gain);
+            src.start();
+            nodesList.push(src, filt);
+            break;
+          }
+          case 'white': {
+            src = createNoise('white');
+            src.connect(gain); src.start();
+            nodesList.push(src);
+            break;
+          }
+          case 'lofi': {
+            src = createNoise('pink');
+            const filt = ctx.createBiquadFilter();
+            filt.type='lowpass'; filt.frequency.value=400;
+            // Vinyl crackle
+            const cSize = ctx.sampleRate * 0.1;
+            const cBuf = ctx.createBuffer(1, cSize, ctx.sampleRate);
+            const cData = cBuf.getChannelData(0);
+            for(let i=0;i<cSize;i++) cData[i] = Math.random()>0.97 ? (Math.random()-0.5)*0.5 : 0;
+            const crackle = ctx.createBufferSource();
+            crackle.buffer = cBuf; crackle.loop = true;
+            const cGain = ctx.createGain(); cGain.gain.value = 0.15;
+            crackle.connect(cGain).connect(gain);
+            src.connect(filt).connect(gain);
+            crackle.start(); src.start();
+            nodesList.push(src, filt, crackle, cGain);
+            break;
+          }
+        }
+        return { gain, nodes: nodesList };
+      };
+
+      const stopSound = id => {
+        if(!nodes[id]) return;
+        const n = nodes[id];
+        const now = ctx.currentTime;
+        // Smooth fade out to avoid clicks
+        n.gain.gain.cancelScheduledValues(now);
+        n.gain.gain.setValueAtTime(n.gain.gain.value, now);
+        n.gain.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
+        setTimeout(()=>{
+          n.nodes.forEach(nd => { try{ nd.stop(); }catch(e){} });
+          try{ n.gain.disconnect(); }catch(e){}
+          delete nodes[id];
+        }, 200);
+      };
+
+      const toggleSound = id => {
+        initAudio(); // Ensures context is ready & resumed
+        if(nodes[id]){
+          stopSound(id);
+          return false;
+        }
+        nodes[id] = generateSound(id);
+        return true;
+      };
+
+      // UI Rendering
+      const grid = $('fm-grid');
+      sounds.forEach(s => {
+        const card = document.createElement('div');
+        card.className = 'fm-card'; card.dataset.id = s.id;
+        card.innerHTML = `
+          <div class="fm-icon">${s.icon}</div>
+          <div class="fm-name">${s.name}</div>
+          <input type="range" class="fm-vol" min="0" max="100" value="50" disabled>
+        `;
+        card.querySelector('.fm-vol').oninput = e => {
+          if(nodes[s.id]) nodes[s.id].gain.gain.value = e.target.value / 100;
+        };
+        card.onclick = () => {
+          const isActive = toggleSound(s.id);
+          card.classList.toggle('active', isActive);
+          card.querySelector('.fm-vol').disabled = !isActive;
+          updateStatus();
+        };
+        grid.appendChild(card);
+      });
+
+      // Visualizer
+      const drawVisualizer = () => {
+        const cvs = $('fm-canvas'), c = cvs.getContext('2d');
+        if(!cvs.width) { cvs.width = cvs.offsetWidth*2; cvs.height = 80; }
+        const bufferLength = analyser.frequencyBinCount;
+        const data = new Uint8Array(bufferLength);
+        const draw = () => {
+          requestAnimationFrame(draw);
+          analyser.getByteFrequencyData(data);
+          c.clearRect(0,0,cvs.width,cvs.height);
+          const barW = cvs.width / bufferLength;
+          for(let i=0;i<bufferLength;i++){
+            const v = data[i]/255;
+            c.fillStyle = `hsl(${220 + v*40}, 80%, ${40 + v*30}%)`;
+            c.fillRect(i*barW, cvs.height - v*cvs.height*0.8, barW-1, v*cvs.height*0.8);
+          }
+        };
+        draw();
+      };
+
+      // Controls
+      $('fm-play-all').onclick = () => {
+        sounds.forEach(s => toggleSound(s.id));
+        document.querySelectorAll('.fm-card').forEach(c => {c.classList.add('active');c.querySelector('.fm-vol').disabled=false;});
+        updateStatus();
+      };
+      $('fm-stop-all').onclick = () => {
+        Object.keys(nodes).forEach(stopSound);
+        document.querySelectorAll('.fm-card').forEach(c => {c.classList.remove('active');c.querySelector('.fm-vol').disabled=true;});
+        updateStatus();
+      };
+      $('fm-mute-all').onclick = () => {
+        isMuted = !isMuted;
+        masterGain.gain.value = isMuted ? 0 : 0.6;
+        $('fm-mute-all').textContent = isMuted ? '🔊 Unmute' : '🔇 Mute';
+        showToast(isMuted ? 'Muted' : 'Unmuted');
+      };
+
+      // Presets
+      const presets = {
+        deep: {rain:60, waves:30, cafe:0, forest:0, white:0, lofi:20},
+        sleep: {rain:40, waves:70, cafe:0, forest:0, white:10, lofi:0},
+        study: {rain:0, waves:0, cafe:50, forest:30, white:0, lofi:40},
+        relax: {rain:0, waves:50, cafe:0, forest:60, white:0, lofi:10}
+      };
+      document.querySelectorAll('.fm-preset').forEach(btn => {
+        btn.onclick = () => {
+          const p = presets[btn.dataset.preset];
+          $('fm-stop-all').click();
+          Object.entries(p).forEach(([id, vol]) => {
+            if(vol > 0){
+              toggleSound(id);
+              const card = document.querySelector(`.fm-card[data-id="${id}"]`);
+              card.classList.add('active');
+              card.querySelector('.fm-vol').disabled = false;
+              card.querySelector('.fm-vol').value = vol;
+              if(nodes[id]) nodes[id].gain.gain.value = vol/100;
+            }
+          });
+          updateStatus();
+          showToast(`🎛️ ${btn.textContent.trim()} loaded`);
+        };
+      });
+
+      // Sleep Timer
+      $('fm-sleep-time').onchange = e => {
+        const sec = parseInt(e.target.value);
+        if(sleepTimer) clearTimeout(sleepTimer);
+        if(sec > 0){
+          sleepTimer = setTimeout(() => {
+            const start = Date.now();
+            const fade = setInterval(()=>{
+              const prog = (Date.now()-start)/2000;
+              if(prog>=1){clearInterval(fade);$('fm-stop-all').click();$('fm-sleep-time').value=0;showToast('😴 Sleep Timer Ended');return;}
+              masterGain.gain.value = 0.6 * (1-prog);
+            },50);
+          }, sec * 1000);
+          showToast(`⏲️ Sleep timer: ${sec/60} min`);
+        }
+      };
+
+      // Save/Load
+      $('fm-save').onclick = () => {
+        const vols = {};
+        document.querySelectorAll('.fm-card.active').forEach(c => {
+          vols[c.dataset.id] = parseInt(c.querySelector('.fm-vol').value);
+        });
+        localStorage.setItem('focusMixerState', JSON.stringify(vols));
+        showToast('💾 Mix saved');
+      };
+      const loadState = () => {
+        const saved = localStorage.getItem('focusMixerState');
+        if(saved){
+          const vols = JSON.parse(saved);
+          Object.entries(vols).forEach(([id, vol]) => {
+            toggleSound(id);
+            const card = document.querySelector(`.fm-card[data-id="${id}"]`);
+            card.classList.add('active'); card.querySelector('.fm-vol').disabled = false; card.querySelector('.fm-vol').value = vol;
+            if(nodes[id]) nodes[id].gain.gain.value = vol/100;
+          });
+          updateStatus();
+        }
+      };
+
+      const updateStatus = () => $('fm-status').textContent = Object.keys(nodes).length ? 'Playing' : 'Ready';
+      const showToast = msg => {
+        const t = $('fm-toast'); t.textContent = msg; t.classList.add('show');
+        setTimeout(()=>t.classList.remove('show'), 2200);
+      };
+
+      // Init
+      window.addEventListener('load', ()=>{ drawVisualizer(); loadState(); });
+    })();
+  </script>
+</div>

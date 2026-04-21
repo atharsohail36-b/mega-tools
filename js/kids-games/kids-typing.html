@@ -1,0 +1,242 @@
+<div class="kt-app">
+  <style>
+    .kt-app {
+      --kt-bg: #0f172a;
+      --kt-panel: #1e293b;
+      --kt-border: #334155;
+      --kt-accent: #3b82f6;
+      --kt-success: #10b981;
+      --kt-danger: #ef4444;
+      --kt-warning: #f59e0b;
+      --kt-text: #f8fafc;
+      --kt-muted: #94a3b8;
+      max-width: 520px; margin: 2rem auto; padding: 1.5rem;
+      background: var(--kt-panel); border-radius: 16px;
+      box-shadow: 0 12px 30px rgba(0,0,0,0.3); border: 1px solid var(--kt-border);
+      font-family: system-ui, -apple-system, sans-serif; color: var(--kt-text);
+      position: relative; overflow: hidden; text-align: center;
+    }
+    .kt-header { font-size: 1.4rem; font-weight: 800; margin: 0 0 1rem; background: linear-gradient(90deg, var(--kt-accent), #8b5cf6); -webkit-background-clip: text; background-clip: text; color: transparent; }
+    
+    .kt-stats { display: flex; justify-content: space-between; gap: 0.5rem; margin-bottom: 1rem; flex-wrap: wrap; }
+    .kt-stat { background: rgba(255,255,255,0.05); padding: 0.5rem 0.8rem; border-radius: 10px; border: 1px solid var(--kt-border); min-width: 80px; }
+    .kt-stat span { display: block; font-size: 0.7rem; color: var(--kt-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+    .kt-stat b { font-size: 1.1rem; }
+    
+    .kt-progress { height: 6px; background: rgba(255,255,255,0.1); border-radius: 10px; overflow: hidden; margin-bottom: 1.5rem; }
+    .kt-bar { height: 100%; width: 0%; background: linear-gradient(90deg, var(--kt-accent), var(--kt-success)); transition: width 0.4s cubic-bezier(0.4,0,0.2,1); }
+    
+    .kt-word-box { font-size: 2.2rem; font-weight: 800; letter-spacing: 2px; margin: 1rem 0; min-height: 48px; display: flex; justify-content: center; align-items: center; flex-wrap: wrap; gap: 2px; }
+    .kt-char { display: inline-block; transition: all 0.15s; padding: 0 2px; }
+    .kt-char.correct { color: var(--kt-success); transform: scale(1.1); }
+    .kt-char.wrong { color: var(--kt-danger); animation: ktShake 0.3s; }
+    .kt-char.pending { color: var(--kt-muted); opacity: 0.6; }
+    .kt-char.current { border-bottom: 2px solid var(--kt-accent); color: var(--kt-text); opacity: 1; }
+    @keyframes ktShake { 25%,75% { transform: translateX(-3px); } }
+    
+    .kt-input { width: 100%; padding: 1rem; font-size: 1.4rem; text-align: center; border: 2px solid var(--kt-border); background: #111827; color: var(--kt-text); border-radius: 12px; outline: none; transition: border-color 0.2s; margin-bottom: 1.2rem; }
+    .kt-input:focus { border-color: var(--kt-accent); box-shadow: 0 0 0 3px rgba(59,130,246,0.2); }
+    
+    .kt-controls { display: flex; gap: 0.8rem; justify-content: center; flex-wrap: wrap; margin-bottom: 1rem; }
+    .kt-btn { padding: 0.8rem 1.5rem; background: var(--kt-accent); border: none; border-radius: 10px; color: #fff; font-weight: 700; cursor: pointer; transition: 0.2s; font-size: 1rem; }
+    .kt-btn:hover { background: #2563eb; transform: translateY(-2px); }
+    .kt-btn.secondary { background: #334155; }
+    .kt-btn.secondary:hover { background: #475569; }
+    .kt-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+    
+    .kt-select { padding: 0.6rem; border-radius: 8px; background: #334155; color: #fff; border: 1px solid var(--kt-border); cursor: pointer; font-size: 0.9rem; }
+    
+    .kt-overlay { position: absolute; inset: 0; background: rgba(15,23,42,0.92); backdrop-filter: blur(8px); display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 2rem; opacity: 0; pointer-events: none; transition: opacity 0.3s; z-index: 10; border-radius: 16px; }
+    .kt-overlay.active { opacity: 1; pointer-events: auto; }
+    .kt-overlay h3 { font-size: 1.8rem; margin: 0 0 0.5rem; }
+    .kt-overlay p { color: var(--kt-muted); margin: 0 0 1.5rem; line-height: 1.5; }
+    
+    .kt-confetti { position: absolute; width: 6px; height: 6px; border-radius: 2px; pointer-events: none; animation: ktFall linear forwards; }
+    @keyframes ktFall { to { transform: translateY(60vh) rotate(720deg); opacity: 0; } }
+  </style>
+
+  <div class="kt-header">🎮 Kids Typing Pro</div>
+  
+  <div class="kt-controls">
+    <select class="kt-select" id="kt-level">
+      <option value="easy">🟢 Easy (3-4 letters)</option>
+      <option value="medium">🟡 Medium (5-6 letters)</option>
+      <option value="hard">🔴 Hard (7+ letters)</option>
+    </select>
+    <button class="kt-btn secondary" id="kt-reset">↺ Reset</button>
+  </div>
+
+  <div class="kt-stats">
+    <div class="kt-stat"><span>Words</span><b id="kt-words">0</b></div>
+    <div class="kt-stat"><span>WPM</span><b id="kt-wpm">0</b></div>
+    <div class="kt-stat"><span>Accuracy</span><b id="kt-acc">100%</b></div>
+    <div class="kt-stat"><span>Streak</span><b id="kt-streak">0 🔥</b></div>
+  </div>
+
+  <div class="kt-progress"><div class="kt-bar" id="kt-bar"></div></div>
+
+  <div class="kt-word-box" id="kt-word"></div>
+  <input class="kt-input" id="kt-input" type="text" autocomplete="off" autocorrect="off" spellcheck="false" placeholder="Type the word here...">
+  <button class="kt-btn" id="kt-start">▶ Start Game</button>
+
+  <div class="kt-overlay" id="kt-overlay">
+    <h3 id="kt-ov-title">🏆 Round Complete!</h3>
+    <p id="kt-ov-msg">Great job! Check your stats below.</p>
+    <p>WPM: <b id="kt-ov-wpm">0</b> | Accuracy: <b id="kt-ov-acc">0%</b></p>
+    <button class="kt-btn" id="kt-ov-btn">Play Again</button>
+  </div>
+
+  <script>
+    (function() {
+      const WORDS = {
+        easy: ['cat','dog','sun','run','hat','bed','red','cup','map','pen','top','fan','box','key','log','mud','pin','rat','web','zip'],
+        medium: ['apple','train','green','cloud','chair','table','bread','fruit','house','light','music','paper','plant','river','shoes','smile','stone','water','watch','world'],
+        hard: ['elephant','butterfly','chocolate','dinosaur','adventure','beautiful','calendar','delicious','fireworks','gorgeous','happiness','important','kitchen','lemonade','mountain','notebook','orange','picture','rainbow','together']
+      };
+
+      const state = {
+        level: 'easy', words: [], current: 0, playing: false,
+        startTime: 0, correctChars: 0, totalChars: 0, wordsDone: 0, streak: 0,
+        audioCtx: null, confettiBox: null
+      };
+
+      const $ = id => document.getElementById(id);
+      const el = {
+        level: $('kt-level'), reset: $('kt-reset'), start: $('kt-start'),
+        words: $('kt-words'), wpm: $('kt-wpm'), acc: $('kt-acc'), streak: $('kt-streak'),
+        bar: $('kt-bar'), wordBox: $('kt-word'), input: $('kt-input'),
+        overlay: $('kt-overlay'), ovTitle: $('kt-ov-title'), ovMsg: $('kt-ov-msg'),
+        ovWpm: $('kt-ov-wpm'), ovAcc: $('kt-ov-acc'), ovBtn: $('kt-ov-btn')
+      };
+
+      // Audio
+      const initAudio = () => {
+        if(!state.audioCtx) state.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if(state.audioCtx.state==='suspended') state.audioCtx.resume();
+      };
+      const beep = (f,t,d,del=0) => {
+        if(!state.audioCtx) return;
+        const o = state.audioCtx.createOscillator(), g = state.audioCtx.createGain();
+        o.type=t; o.frequency.value=f;
+        g.gain.setValueAtTime(0.08, state.audioCtx.currentTime+del);
+        g.gain.exponentialRampToValueAtTime(0.01, state.audioCtx.currentTime+del+d);
+        o.connect(g).connect(state.audioCtx.destination);
+        o.start(state.audioCtx.currentTime+del); o.stop(state.audioCtx.currentTime+del+d);
+      };
+      const sfx = t => {
+        if(t==='type') beep(400,'sine',0.03);
+        if(t==='ok') { beep(600,'sine',0.08); beep(900,'sine',0.08,0.05); }
+        if(t==='no') beep(200,'sawtooth',0.15);
+        if(t==='win') [400,500,600,800].forEach((f,i)=>beep(f,'sine',0.1,i*0.07));
+      };
+
+      // UI Helpers
+      const renderWord = () => {
+        const target = state.words[state.current];
+        el.wordBox.innerHTML = target.split('').map((c,i)=>`<span class="kt-char pending" data-i="${i}">${c}</span>`).join('');
+        highlightChars('');
+      };
+
+      const highlightChars = (typed) => {
+        const target = state.words[state.current];
+        el.wordBox.querySelectorAll('.kt-char').forEach((span, i) => {
+          span.className = 'kt-char ' + (i < typed.length ? (typed[i] === target[i] ? 'correct' : 'wrong') : (i === typed.length ? 'current' : 'pending'));
+        });
+      };
+
+      const updateStats = () => {
+        el.words.textContent = state.wordsDone;
+        el.streak.textContent = state.streak + ' 🔥';
+        if(state.playing) {
+          const mins = (Date.now() - state.startTime) / 60000;
+          el.wpm.textContent = mins > 0 ? Math.round((state.correctChars/5)/mins) : 0;
+          el.acc.textContent = state.totalChars > 0 ? Math.round((state.correctChars/state.totalChars)*100) + '%' : '100%';
+        }
+        el.bar.style.width = `${(state.current / state.words.length) * 100}%`;
+      };
+
+      const confetti = () => {
+        const cols = ['#f43f5e','#10b981','#3b82f6','#f59e0b','#8b5cf6','#ffffff'];
+        for(let i=0;i<25;i++){
+          const c = document.createElement('div'); c.className='kt-confetti';
+          c.style.left = Math.random()*100+'%'; c.style.top='-10px';
+          c.style.background = cols[Math.floor(Math.random()*cols.length)];
+          c.style.animationDuration = (1+Math.random())+'s';
+          document.body.appendChild(c);
+          setTimeout(()=>c.remove(), 2000);
+        }
+      };
+
+      // Game Logic
+      const startGame = () => {
+        initAudio();
+        state.level = el.level.value;
+        state.words = [...WORDS[state.level]].sort(()=>Math.random()-0.5).slice(0, 10);
+        state.current = 0; state.wordsDone = 0; state.correctChars = 0; state.totalChars = 0; state.streak = 0;
+        state.playing = true; state.startTime = Date.now();
+        el.start.disabled = true; el.start.textContent = 'Playing...';
+        el.input.value = ''; el.input.disabled = false; el.input.focus();
+        el.overlay.classList.remove('active');
+        renderWord(); updateStats();
+      };
+
+      const checkInput = (e) => {
+        if(!state.playing) return;
+        const val = el.input.value.toLowerCase();
+        highlightChars(val);
+        
+        // Correct word completed
+        if(val === state.words[state.current]) {
+          sfx('ok');
+          state.correctChars += val.length;
+          state.wordsDone++; state.current++; state.streak++;
+          confetti(); updateStats();
+          if(state.current >= state.words.length) endRound(true);
+          else { el.input.value = ''; renderWord(); }
+        } 
+        // Wrong but typed longer than target
+        else if(val.length > state.words[state.current].length) {
+          sfx('no');
+          state.totalChars += 1; // penalty char
+          el.input.style.borderColor = 'var(--kt-danger)';
+          setTimeout(()=>{
+            el.input.style.borderColor = '';
+            el.input.value = '';
+            highlightChars('');
+            state.streak = 0; updateStats();
+          }, 300);
+        }
+        // Normal typing
+        else {
+          if(val.length > 0) { sfx('type'); state.totalChars++; }
+          updateStats();
+        }
+      };
+
+      const endRound = (complete) => {
+        state.playing = false;
+        el.input.disabled = true; el.start.disabled = false; el.start.textContent = '▶ Start Game';
+        sfx('win'); confetti();
+        const hs = Math.max(parseInt(localStorage.getItem('kt_hs')||'0'), parseInt(el.wpm.textContent));
+        try{ localStorage.setItem('kt_hs', hs); }catch{}
+        el.ovTitle.textContent = complete ? '🏆 Round Complete!' : '💪 Good Try!';
+        el.ovMsg.textContent = `Level: ${state.level} | Words: ${state.wordsDone}/10 | High WPM: ${hs}`;
+        el.ovWpm.textContent = el.wpm.textContent;
+        el.ovAcc.textContent = el.acc.textContent;
+        el.ovBtn.textContent = 'Play Again';
+        el.overlay.classList.add('active');
+      };
+
+      // Events
+      el.input.addEventListener('input', checkInput);
+      el.input.addEventListener('keydown', e => { if(e.key==='Enter' && state.playing) checkInput(); });
+      el.start.onclick = startGame;
+      el.reset.onclick = () => { state.playing=false; el.start.disabled=false; el.start.textContent='▶ Start Game'; el.input.disabled=true; el.input.value=''; el.overlay.classList.remove('active'); el.bar.style.width='0'; ['kt-words','kt-wpm','kt-acc','kt-streak'].forEach(id=>$(id).textContent=id.includes('streak')?'0 🔥':'0'); };
+      el.ovBtn.onclick = () => { el.overlay.classList.remove('active'); startGame(); };
+
+      // Init
+      el.input.disabled = true;
+      renderWord();
+    })();
+  </script>
+</div>

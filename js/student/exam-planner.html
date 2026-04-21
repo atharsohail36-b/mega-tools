@@ -1,0 +1,629 @@
+<div class="student-tool">
+  <style>
+    .student-tool {
+      --glass-border: rgba(255,255,255,0.15);
+      --bg-card: #1e1e2e;
+      --bg-hover: #2a2a3c;
+      --text-primary: #e2e2e2;
+      --text-secondary: #a0a0b0;
+      --accent: #6366f1;
+      --accent-glow: rgba(99,102,241,0.3);
+      --gradient-main: linear-gradient(135deg, #8b5cf6, #6366f1);
+      --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 1.5rem;
+      font-family: system-ui, -apple-system, sans-serif;
+      color: var(--text-primary);
+    }
+    .ep-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem; }
+    .ep-header h2 { margin: 0; font-size: 1.5rem; background: var(--gradient-main); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .ep-plan-select { padding: 0.5rem 0.8rem; background: var(--bg-card); border: 1px solid var(--glass-border); color: var(--text-primary); border-radius: 8px; outline: none; }
+    .ep-form { display: grid; gap: 1rem; margin-bottom: 1rem; }
+    .ep-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    .ep-input, .ep-select { padding: 0.8rem; border-radius: 10px; border: 1px solid var(--glass-border); background: var(--bg-card); color: var(--text-primary); outline: none; transition: var(--transition); }
+    .ep-input:focus, .ep-select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow); }
+    .ep-textarea { min-height: 70px; resize: vertical; }
+    .ep-options { display: flex; flex-wrap: wrap; gap: 1rem; align-items: center; margin: 0.5rem 0; }
+    .ep-options label { display: flex; align-items: center; gap: 0.4rem; font-size: 0.9rem; color: var(--text-secondary); cursor: pointer; }
+    .ep-btn { padding: 0.9rem; background: var(--gradient-main); border: none; border-radius: 10px; color: #fff; font-weight: 600; cursor: pointer; transition: var(--transition); margin-top: 0.5rem; }
+    .ep-btn:hover { transform: translateY(-2px); box-shadow: 0 4px 12px var(--accent-glow); }
+    .ep-btn-secondary { background: var(--bg-card); border: 1px solid var(--glass-border); color: var(--text-primary); }
+    .ep-btn-secondary:hover { background: var(--bg-hover); border-color: var(--accent); }
+    .ep-progress { width: 100%; height: 8px; background: var(--bg-card); border-radius: 10px; margin: 1rem 0; overflow: hidden; }
+    .ep-progress-bar { height: 100%; background: var(--gradient-main); width: 0%; transition: width 0.4s ease; border-radius: 10px; }
+    .ep-days { display: flex; flex-direction: column; gap: 0.8rem; max-height: 450px; overflow-y: auto; padding-right: 5px; }
+    .ep-day { background: var(--bg-card); border: 1px solid var(--glass-border); border-radius: 12px; overflow: hidden; transition: var(--transition); }
+    .ep-day:hover { border-color: var(--accent); }
+    .ep-day-header { padding: 0.9rem 1rem; display: flex; justify-content: space-between; align-items: center; cursor: pointer; background: var(--bg-hover); }
+    .ep-day-title { font-weight: 600; color: var(--accent); display: flex; align-items: center; gap: 0.5rem; }
+    .ep-day-toggle { transition: var(--transition); font-size: 1.2rem; }
+    .ep-day.collapsed .ep-day-toggle { transform: rotate(-90deg); }
+    .ep-day-content { padding: 0.8rem 1rem; display: grid; gap: 0.6rem; }
+    .ep-session { display: flex; justify-content: space-between; align-items: center; padding: 0.6rem; background: rgba(255,255,255,0.03); border-radius: 8px; font-size: 0.9rem; }
+    .ep-checkbox { width: 18px; height: 18px; cursor: pointer; accent-color: var(--accent); }
+    .ep-controls { display: flex; gap: 0.5rem; margin-top: 1rem; flex-wrap: wrap; }
+    .ep-toast { position: fixed; bottom: 20px; right: 20px; background: var(--bg-card); border: 1px solid var(--glass-border); padding: 0.8rem 1.2rem; border-radius: 8px; color: var(--text-primary); box-shadow: 0 4px 12px rgba(0,0,0,0.3); transform: translateY(100px); opacity: 0; transition: all 0.3s ease; z-index: 1000; font-size: 0.9rem; }
+    .ep-toast.show { transform: translateY(0); opacity: 1; }
+    .ep-empty { text-align: center; padding: 2rem; color: var(--text-secondary); font-style: italic; }
+    @media (max-width: 600px) {
+      .ep-row { grid-template-columns: 1fr; }
+      .ep-day-header { flex-direction: column; align-items: flex-start; gap: 0.3rem; }
+    }
+    @media print {
+      .ep-form, .ep-controls, .ep-header, .ep-options, .ep-day-toggle, .ep-checkbox { display: none !important; }
+      .ep-day-content { display: block !important; }
+      .student-tool { max-width: 100%; padding: 0; color: #000; }
+      .ep-day, .ep-session { background: #fff !important; border: 1px solid #ccc !important; color: #000 !important; }
+    }
+  </style>
+
+  <div class="ep-header">
+    <h2>📅 Exam Planner</h2>
+    <select class="ep-plan-select" id="ep-plan-select"></select>
+  </div>
+
+  <div class="ep-form">
+    <input class="ep-input" id="ep-exam-name" placeholder="Exam Name (e.g., Physics Final)">
+    <div class="ep-row">
+      <input class="ep-input" type="date" id="ep-date">
+      <input class="ep-input" type="number" id="ep-hours" placeholder="Hours/Day" value="3" min="1" max="12">
+    </div>
+    <textarea class="ep-input ep-textarea" id="ep-topics" placeholder="Topics (comma separated) e.g., Thermodynamics, Optics, Electromagnetism"></textarea>
+    <div class="ep-options">
+      <label><input type="checkbox" id="ep-revision" checked> Include Review Days</label>
+      <label><input type="checkbox" id="ep-priority"> Prioritize First Topics</label>
+    </div>
+    <button class="ep-btn" id="ep-generate">⚡ Generate Smart Plan</button>
+  </div>
+
+  <div class="ep-progress"><div class="ep-progress-bar" id="ep-bar"></div></div>
+  <div class="ep-days" id="ep-days"></div>
+
+  <div class="ep-controls">
+    <button class="ep-btn ep-btn-secondary" id="ep-save">💾 Save Plan</button>
+    <button class="ep-btn ep-btn-secondary" id="ep-export">📤 Export/Print</button>
+    <button class="ep-btn ep-btn-secondary" id="ep-clear" style="margin-left:auto; color:#ef4444;">🗑️ Clear Current</button>
+  </div>
+
+  <div class="ep-toast" id="ep-toast"></div>
+
+  <script>
+    (function() {
+      const STORAGE_KEY = 'exam_plans_v2';
+      let plans = [];
+      let activePlan = null;
+
+      const els = {
+        name: document.getElementById('ep-exam-name'),
+        date: document.getElementById('ep-date'),
+        hours: document.getElementById('ep-hours'),
+        topics: document.getElementById('ep-topics'),
+        revision: document.getElementById('ep-revision'),
+        priority: document.getElementById('ep-priority'),
+        generate: document.getElementById('ep-generate'),
+        save: document.getElementById('ep-save'),
+        export: document.getElementById('ep-export'),
+        clear: document.getElementById('ep-clear'),
+        select: document.getElementById('ep-plan-select'),
+        days: document.getElementById('ep-days'),
+        bar: document.getElementById('ep-bar'),
+        toast: document.getElementById('ep-toast')
+      };
+
+      const init = () => {
+        try {
+          const saved = localStorage.getItem(STORAGE_KEY);
+          if (saved) plans = JSON.parse(saved);
+        } catch {}
+        els.date.min = new Date().toISOString().split('T')[0];
+        updatePlanSelector();
+        if (plans.length > 0) loadPlan(plans[0].id);
+        setupEvents();
+      };
+
+      const showToast = (msg) => {
+        els.toast.textContent = msg;
+        els.toast.classList.add('show');
+        setTimeout(() => els.toast.classList.remove('show'), 2000);
+      };
+
+      const updatePlanSelector = () => {
+        els.select.innerHTML = plans.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
+        if (activePlan) els.select.value = activePlan.id;
+      };
+
+      const generateSchedule = () => {
+        const examDate = new Date(els.date.value);
+        const today = new Date();
+        today.setHours(0,0,0,0);
+        if (isNaN(examDate.getTime()) || examDate < today) return showToast('⚠️ Select a valid future exam date');
+        
+        const hours = Math.max(1, Math.min(12, parseInt(els.hours.value) || 3));
+        const topics = els.topics.value.split(',').map(t => t.trim()).filter(t => t);
+        if (topics.length === 0) return showToast('⚠️ Please add at least one topic');
+
+        const daysLeft = Math.ceil((examDate - today) / (1000 * 60 * 60 * 24));
+        const includeRevision = els.revision.checked;
+        const prioritize = els.priority.checked;
+
+        let schedule = [];
+        let topicIdx = 0;
+        const revisionInterval = 3;
+        
+        for (let d = 1; d <= daysLeft; d++) {
+          const currentDate = new Date(today);
+          currentDate.setDate(today.getDate() + d - 1);
+          const dateStr = currentDate.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+          
+          const isReview = includeRevision && d % revisionInterval === 0 && d < daysLeft;
+          let dayTopics = [];
+          
+          if (!isReview) {
+            const remainingDays = daysLeft - d;
+            const remainingTopics = topics.length - topicIdx;
+            const alloc = Math.max(1, Math.ceil(remainingTopics / Math.max(1, remainingDays || 1)));
+            for (let i = 0; i < alloc && topicIdx < topics.length; i++) dayTopics.push(topics[topicIdx++]);
+          } else {
+            dayTopics.push('📖 Review & Practice');
+          }
+
+          // Split hours into sessions
+          const sessions = [
+            { name: 'Morning', time: `${hours * 0.4}h`, topics: dayTopics.slice(0, Math.ceil(dayTopics.length * 0.5)) },
+            { name: 'Afternoon', time: `${hours * 0.3}h`, topics: dayTopics.slice(Math.ceil(dayTopics.length * 0.5), Math.ceil(dayTopics.length * 0.8)) },
+            { name: 'Evening', time: `${hours * 0.3}h`, topics: dayTopics.slice(Math.ceil(dayTopics.length * 0.8)) }
+          ].filter(s => s.topics.length > 0);
+
+          schedule.push({
+            id: `d${d}`,
+            day: d,
+            date: dateStr,
+            hours,
+            topics: dayTopics,
+            sessions,
+            completed: false,
+            checkedTopics: new Array(dayTopics.length).fill(false)
+          });
+        }
+
+        activePlan = {
+          id: Date.now().toString(),
+          name: els.name.value.trim() || `Exam ${new Date().toLocaleDateString()}`,
+          examDate: els.date.value,
+          createdAt: new Date().toISOString(),
+          schedule
+        };
+        renderPlan();
+        showToast('📅 Plan generated successfully!');
+      };
+
+      const renderPlan = () => {
+        if (!activePlan) return;
+        els.bar.style.width = '0%';
+        els.days.innerHTML = '';
+        
+        let totalTasks = 0, doneTasks = 0;
+        activePlan.schedule.forEach(day => {
+          day.topics.forEach((_, i) => {
+            totalTasks++;
+            if (day.checkedTopics[i]) doneTasks++;
+          });
+        });
+        els.bar.style.width = totalTasks ? `${(doneTasks / totalTasks) * 100}%` : '0%';
+
+        if (activePlan.schedule.length === 0) {
+          els.days.innerHTML = '<div class="ep-empty">No days in schedule.</div>';
+          return;
+        }
+
+        activePlan.schedule.forEach((day, idx) => {
+          const el = document.createElement('div');
+          el.className = `ep-day ${idx > 0 ? 'collapsed' : ''}`;
+          const progress = day.checkedTopics.filter(Boolean).length;
+          const isDone = progress === day.topics.length;
+          
+          el.innerHTML = `
+            <div class="ep-day-header" data-idx="${idx}">
+              <div class="ep-day-title">📌 Day ${day.day} (${day.date}) • ${isDone ? '✅ Done' : `${progress}/${day.topics.length}`}</div>
+              <span class="ep-day-toggle">▼</span>
+            </div>
+            <div class="ep-day-content">
+              ${day.sessions.map(s => `
+                <div class="ep-session">
+                  <span>☀️ ${s.name} • ${s.time}</span>
+                  <div>${s.topics.join(' • ')}</div>
+                </div>
+              `).join('')}
+              <div style="margin-top:0.4rem; padding-top:0.4rem; border-top:1px solid var(--glass-border);">
+                ${day.topics.map((t, i) => `
+                  <label style="display:flex; align-items:center; gap:0.5rem; font-size:0.85rem; margin:0.3rem 0; cursor:pointer;">
+                    <input type="checkbox" class="ep-checkbox" data-day="${idx}" data-topic="${i}" ${day.checkedTopics[i] ? 'checked' : ''}>
+                    ${t}
+                  </label>
+                `).join('')}
+              </div>
+            </div>
+          `;
+          els.days.appendChild(el);
+        });
+      };
+
+      const savePlan = () => {
+        if (!activePlan) return showToast('⚠️ Generate a plan first');
+        const exists = plans.findIndex(p => p.id === activePlan.id);
+        if (exists !== -1) plans[exists] = activePlan;
+        else plans.push(activePlan);
+        if (plans.length > 10) plans.shift();
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(plans));
+        updatePlanSelector();
+        showToast('💾 Plan saved to localStorage');
+      };
+
+      const loadPlan = (id) => {
+        activePlan = plans.find(p => p.id === id);
+        if (activePlan) {
+          els.name.value = activePlan.name;
+          renderPlan();
+        }
+      };
+
+      const exportPlan = () => {
+        if (!activePlan) return showToast('⚠️ Nothing to export');
+        const text = activePlan.schedule.map(d => {
+          return `Day ${d.day} (${d.date}) - ${d.hours}h\n${d.sessions.map(s => `  • ${s.name}: ${s.topics.join(', ')}`).join('\n')}`;
+        }).join('\n\n');
+        const blob = new Blob([`Exam: ${activePlan.name}\nDate: ${activePlan.examDate}\n\n${text}`], { type: 'text/plain' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url; a.download = `${activePlan.name.replace(/\s+/g, '_')}_Plan.txt`;
+        a.click(); URL.revokeObjectURL(url);
+        showToast('📤 Exported as TXT');
+      };
+
+      const setupEvents = () => {
+        els.generate.addEventListener('click', generateSchedule);
+        els.save.addEventListener('click', savePlan);
+        els.export.addEventListener('click', exportPlan);
+        els.clear.addEventListener('click', () => {
+          if (!activePlan) return;
+          if (!confirm('Delete this plan?')) return;
+          plans = plans.filter(p => p.id !== activePlan.id);
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(plans));
+          updatePlanSelector();
+          activePlan = null;
+          els.days.innerHTML = '<div class="ep-empty">Generate a new plan to get started.</div>';
+          showToast('🗑️ Plan cleared');
+        });
+        els.select.addEventListener('change', (e) => loadPlan(e.target.value));
+
+        els.days.addEventListener('click', (e) => {
+          if (e.target.type === 'checkbox') {
+            const dayIdx = parseInt(e.target.dataset.day);
+            const topicIdx = parseInt(e.target.dataset.topic);
+            activePlan.schedule[dayIdx].checkedTopics[topicIdx] = e.target.checked;
+            renderPlan();
+          } else if (e.target.closest('.ep-day-header')) {
+            e.target.closest('.ep-day').classList.toggle('collapsed');
+          }
+        });
+      };
+
+      init();
+    })();
+  </script>
+</div><div class="student-tool">
+  <style>
+    .student-tool {
+      --glass-border: rgba(255,255,255,0.15);
+      --bg-card: #1e1e2e;
+      --bg-hover: #2a2a3c;
+      --text-primary: #e2e2e2;
+      --text-secondary: #a0a0b0;
+      --accent: #6366f1;
+      --accent-glow: rgba(99,102,241,0.3);
+      --gradient-main: linear-gradient(135deg, #8b5cf6, #6366f1);
+      --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 1.5rem;
+      font-family: system-ui, -apple-system, sans-serif;
+      color: var(--text-primary);
+    }
+    .ep-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem; }
+    .ep-header h2 { margin: 0; font-size: 1.5rem; background: var(--gradient-main); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .ep-plan-select { padding: 0.5rem 0.8rem; background: var(--bg-card); border: 1px solid var(--glass-border); color: var(--text-primary); border-radius: 8px; outline: none; }
+    .ep-form { display: grid; gap: 1rem; margin-bottom: 1rem; }
+    .ep-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    .ep-input, .ep-select { padding: 0.8rem; border-radius: 10px; border: 1px solid var(--glass-border); background: var(--bg-card); color: var(--text-primary); outline: none; transition: var(--transition); }
+    .ep-input:focus, .ep-select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow); }
+    .ep-textarea { min-height: 70px; resize: vertical; }
+    .ep-options { display: flex; flex-wrap: wrap; gap: 1rem; align-items: center; margin: 0.5rem 0; }
+    .ep-options label { display: flex; align-items: center; gap: 0.4rem; font-size: 0.9rem; color: var(--text-secondary); cursor: pointer; }
+    .ep-btn { padding: 0.9rem; background: var(--gradient-main); border: none; border-radius: 10px; color: #fff; font-weight: 600; cursor: pointer; transition: var(--transition); margin-top: 0.5rem; }
+    .ep-btn:hover { transform: translateY(-2px); box-shadow: 0 4px 12px var(--accent-glow); }
+    .ep-btn-secondary { background: var(--bg-card); border: 1px solid var(--glass-border); color: var(--text-primary); }
+    .ep-btn-secondary:hover { background: var(--bg-hover); border-color: var(--accent); }
+    .ep-progress { width: 100%; height: 8px; background: var(--bg-card); border-radius: 10px; margin: 1rem 0; overflow: hidden; }
+    .ep-progress-bar { height: 100%; background: var(--gradient-main); width: 0%; transition: width 0.4s ease; border-radius: 10px; }
+    .ep-days { display: flex; flex-direction: column; gap: 0.8rem; max-height: 450px; overflow-y: auto; padding-right: 5px; }
+    .ep-day { background: var(--bg-card); border: 1px solid var(--glass-border); border-radius: 12px; overflow: hidden; transition: var(--transition); }
+    .ep-day:hover { border-color: var(--accent); }
+    .ep-day-header { padding: 0.9rem 1rem; display: flex; justify-content: space-between; align-items: center; cursor: pointer; background: var(--bg-hover); }
+    .ep-day-title { font-weight: 600; color: var(--accent); display: flex; align-items: center; gap: 0.5rem; }
+    .ep-day-toggle { transition: var(--transition); font-size: 1.2rem; }
+    .ep-day.collapsed .ep-day-toggle { transform: rotate(-90deg); }
+    .ep-day-content { padding: 0.8rem 1rem; display: grid; gap: 0.6rem; }
+    .ep-session { display: flex; justify-content: space-between; align-items: center; padding: 0.6rem; background: rgba(255,255,255,0.03); border-radius: 8px; font-size: 0.9rem; }
+    .ep-checkbox { width: 18px; height: 18px; cursor: pointer; accent-color: var(--accent); }
+    .ep-controls { display: flex; gap: 0.5rem; margin-top: 1rem; flex-wrap: wrap; }
+    .ep-toast { position: fixed; bottom: 20px; right: 20px; background: var(--bg-card); border: 1px solid var(--glass-border); padding: 0.8rem 1.2rem; border-radius: 8px; color: var(--text-primary); box-shadow: 0 4px 12px rgba(0,0,0,0.3); transform: translateY(100px); opacity: 0; transition: all 0.3s ease; z-index: 1000; font-size: 0.9rem; }
+    .ep-toast.show { transform: translateY(0); opacity: 1; }
+    .ep-empty { text-align: center; padding: 2rem; color: var(--text-secondary); font-style: italic; }
+    @media (max-width: 600px) {
+      .ep-row { grid-template-columns: 1fr; }
+      .ep-day-header { flex-direction: column; align-items: flex-start; gap: 0.3rem; }
+    }
+    @media print {
+      .ep-form, .ep-controls, .ep-header, .ep-options, .ep-day-toggle, .ep-checkbox { display: none !important; }
+      .ep-day-content { display: block !important; }
+      .student-tool { max-width: 100%; padding: 0; color: #000; }
+      .ep-day, .ep-session { background: #fff !important; border: 1px solid #ccc !important; color: #000 !important; }
+    }
+  </style>
+
+  <div class="ep-header">
+    <h2>📅 Exam Planner</h2>
+    <select class="ep-plan-select" id="ep-plan-select"></select>
+  </div>
+
+  <div class="ep-form">
+    <input class="ep-input" id="ep-exam-name" placeholder="Exam Name (e.g., Physics Final)">
+    <div class="ep-row">
+      <input class="ep-input" type="date" id="ep-date">
+      <input class="ep-input" type="number" id="ep-hours" placeholder="Hours/Day" value="3" min="1" max="12">
+    </div>
+    <textarea class="ep-input ep-textarea" id="ep-topics" placeholder="Topics (comma separated) e.g., Thermodynamics, Optics, Electromagnetism"></textarea>
+    <div class="ep-options">
+      <label><input type="checkbox" id="ep-revision" checked> Include Review Days</label>
+      <label><input type="checkbox" id="ep-priority"> Prioritize First Topics</label>
+    </div>
+    <button class="ep-btn" id="ep-generate">⚡ Generate Smart Plan</button>
+  </div>
+
+  <div class="ep-progress"><div class="ep-progress-bar" id="ep-bar"></div></div>
+  <div class="ep-days" id="ep-days"></div>
+
+  <div class="ep-controls">
+    <button class="ep-btn ep-btn-secondary" id="ep-save">💾 Save Plan</button>
+    <button class="ep-btn ep-btn-secondary" id="ep-export">📤 Export/Print</button>
+    <button class="ep-btn ep-btn-secondary" id="ep-clear" style="margin-left:auto; color:#ef4444;">🗑️ Clear Current</button>
+  </div>
+
+  <div class="ep-toast" id="ep-toast"></div>
+
+  <script>
+    (function() {
+      const STORAGE_KEY = 'exam_plans_v2';
+      let plans = [];
+      let activePlan = null;
+
+      const els = {
+        name: document.getElementById('ep-exam-name'),
+        date: document.getElementById('ep-date'),
+        hours: document.getElementById('ep-hours'),
+        topics: document.getElementById('ep-topics'),
+        revision: document.getElementById('ep-revision'),
+        priority: document.getElementById('ep-priority'),
+        generate: document.getElementById('ep-generate'),
+        save: document.getElementById('ep-save'),
+        export: document.getElementById('ep-export'),
+        clear: document.getElementById('ep-clear'),
+        select: document.getElementById('ep-plan-select'),
+        days: document.getElementById('ep-days'),
+        bar: document.getElementById('ep-bar'),
+        toast: document.getElementById('ep-toast')
+      };
+
+      const init = () => {
+        try {
+          const saved = localStorage.getItem(STORAGE_KEY);
+          if (saved) plans = JSON.parse(saved);
+        } catch {}
+        els.date.min = new Date().toISOString().split('T')[0];
+        updatePlanSelector();
+        if (plans.length > 0) loadPlan(plans[0].id);
+        setupEvents();
+      };
+
+      const showToast = (msg) => {
+        els.toast.textContent = msg;
+        els.toast.classList.add('show');
+        setTimeout(() => els.toast.classList.remove('show'), 2000);
+      };
+
+      const updatePlanSelector = () => {
+        els.select.innerHTML = plans.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
+        if (activePlan) els.select.value = activePlan.id;
+      };
+
+      const generateSchedule = () => {
+        const examDate = new Date(els.date.value);
+        const today = new Date();
+        today.setHours(0,0,0,0);
+        if (isNaN(examDate.getTime()) || examDate < today) return showToast('⚠️ Select a valid future exam date');
+        
+        const hours = Math.max(1, Math.min(12, parseInt(els.hours.value) || 3));
+        const topics = els.topics.value.split(',').map(t => t.trim()).filter(t => t);
+        if (topics.length === 0) return showToast('⚠️ Please add at least one topic');
+
+        const daysLeft = Math.ceil((examDate - today) / (1000 * 60 * 60 * 24));
+        const includeRevision = els.revision.checked;
+        const prioritize = els.priority.checked;
+
+        let schedule = [];
+        let topicIdx = 0;
+        const revisionInterval = 3;
+        
+        for (let d = 1; d <= daysLeft; d++) {
+          const currentDate = new Date(today);
+          currentDate.setDate(today.getDate() + d - 1);
+          const dateStr = currentDate.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+          
+          const isReview = includeRevision && d % revisionInterval === 0 && d < daysLeft;
+          let dayTopics = [];
+          
+          if (!isReview) {
+            const remainingDays = daysLeft - d;
+            const remainingTopics = topics.length - topicIdx;
+            const alloc = Math.max(1, Math.ceil(remainingTopics / Math.max(1, remainingDays || 1)));
+            for (let i = 0; i < alloc && topicIdx < topics.length; i++) dayTopics.push(topics[topicIdx++]);
+          } else {
+            dayTopics.push('📖 Review & Practice');
+          }
+
+          // Split hours into sessions
+          const sessions = [
+            { name: 'Morning', time: `${hours * 0.4}h`, topics: dayTopics.slice(0, Math.ceil(dayTopics.length * 0.5)) },
+            { name: 'Afternoon', time: `${hours * 0.3}h`, topics: dayTopics.slice(Math.ceil(dayTopics.length * 0.5), Math.ceil(dayTopics.length * 0.8)) },
+            { name: 'Evening', time: `${hours * 0.3}h`, topics: dayTopics.slice(Math.ceil(dayTopics.length * 0.8)) }
+          ].filter(s => s.topics.length > 0);
+
+          schedule.push({
+            id: `d${d}`,
+            day: d,
+            date: dateStr,
+            hours,
+            topics: dayTopics,
+            sessions,
+            completed: false,
+            checkedTopics: new Array(dayTopics.length).fill(false)
+          });
+        }
+
+        activePlan = {
+          id: Date.now().toString(),
+          name: els.name.value.trim() || `Exam ${new Date().toLocaleDateString()}`,
+          examDate: els.date.value,
+          createdAt: new Date().toISOString(),
+          schedule
+        };
+        renderPlan();
+        showToast('📅 Plan generated successfully!');
+      };
+
+      const renderPlan = () => {
+        if (!activePlan) return;
+        els.bar.style.width = '0%';
+        els.days.innerHTML = '';
+        
+        let totalTasks = 0, doneTasks = 0;
+        activePlan.schedule.forEach(day => {
+          day.topics.forEach((_, i) => {
+            totalTasks++;
+            if (day.checkedTopics[i]) doneTasks++;
+          });
+        });
+        els.bar.style.width = totalTasks ? `${(doneTasks / totalTasks) * 100}%` : '0%';
+
+        if (activePlan.schedule.length === 0) {
+          els.days.innerHTML = '<div class="ep-empty">No days in schedule.</div>';
+          return;
+        }
+
+        activePlan.schedule.forEach((day, idx) => {
+          const el = document.createElement('div');
+          el.className = `ep-day ${idx > 0 ? 'collapsed' : ''}`;
+          const progress = day.checkedTopics.filter(Boolean).length;
+          const isDone = progress === day.topics.length;
+          
+          el.innerHTML = `
+            <div class="ep-day-header" data-idx="${idx}">
+              <div class="ep-day-title">📌 Day ${day.day} (${day.date}) • ${isDone ? '✅ Done' : `${progress}/${day.topics.length}`}</div>
+              <span class="ep-day-toggle">▼</span>
+            </div>
+            <div class="ep-day-content">
+              ${day.sessions.map(s => `
+                <div class="ep-session">
+                  <span>☀️ ${s.name} • ${s.time}</span>
+                  <div>${s.topics.join(' • ')}</div>
+                </div>
+              `).join('')}
+              <div style="margin-top:0.4rem; padding-top:0.4rem; border-top:1px solid var(--glass-border);">
+                ${day.topics.map((t, i) => `
+                  <label style="display:flex; align-items:center; gap:0.5rem; font-size:0.85rem; margin:0.3rem 0; cursor:pointer;">
+                    <input type="checkbox" class="ep-checkbox" data-day="${idx}" data-topic="${i}" ${day.checkedTopics[i] ? 'checked' : ''}>
+                    ${t}
+                  </label>
+                `).join('')}
+              </div>
+            </div>
+          `;
+          els.days.appendChild(el);
+        });
+      };
+
+      const savePlan = () => {
+        if (!activePlan) return showToast('⚠️ Generate a plan first');
+        const exists = plans.findIndex(p => p.id === activePlan.id);
+        if (exists !== -1) plans[exists] = activePlan;
+        else plans.push(activePlan);
+        if (plans.length > 10) plans.shift();
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(plans));
+        updatePlanSelector();
+        showToast('💾 Plan saved to localStorage');
+      };
+
+      const loadPlan = (id) => {
+        activePlan = plans.find(p => p.id === id);
+        if (activePlan) {
+          els.name.value = activePlan.name;
+          renderPlan();
+        }
+      };
+
+      const exportPlan = () => {
+        if (!activePlan) return showToast('⚠️ Nothing to export');
+        const text = activePlan.schedule.map(d => {
+          return `Day ${d.day} (${d.date}) - ${d.hours}h\n${d.sessions.map(s => `  • ${s.name}: ${s.topics.join(', ')}`).join('\n')}`;
+        }).join('\n\n');
+        const blob = new Blob([`Exam: ${activePlan.name}\nDate: ${activePlan.examDate}\n\n${text}`], { type: 'text/plain' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url; a.download = `${activePlan.name.replace(/\s+/g, '_')}_Plan.txt`;
+        a.click(); URL.revokeObjectURL(url);
+        showToast('📤 Exported as TXT');
+      };
+
+      const setupEvents = () => {
+        els.generate.addEventListener('click', generateSchedule);
+        els.save.addEventListener('click', savePlan);
+        els.export.addEventListener('click', exportPlan);
+        els.clear.addEventListener('click', () => {
+          if (!activePlan) return;
+          if (!confirm('Delete this plan?')) return;
+          plans = plans.filter(p => p.id !== activePlan.id);
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(plans));
+          updatePlanSelector();
+          activePlan = null;
+          els.days.innerHTML = '<div class="ep-empty">Generate a new plan to get started.</div>';
+          showToast('🗑️ Plan cleared');
+        });
+        els.select.addEventListener('change', (e) => loadPlan(e.target.value));
+
+        els.days.addEventListener('click', (e) => {
+          if (e.target.type === 'checkbox') {
+            const dayIdx = parseInt(e.target.dataset.day);
+            const topicIdx = parseInt(e.target.dataset.topic);
+            activePlan.schedule[dayIdx].checkedTopics[topicIdx] = e.target.checked;
+            renderPlan();
+          } else if (e.target.closest('.ep-day-header')) {
+            e.target.closest('.ep-day').classList.toggle('collapsed');
+          }
+        });
+      };
+
+      init();
+    })();
+  </script>
+</div>

@@ -1,0 +1,927 @@
+<div class="student-tool">
+  <style>
+    :root {
+      --glass-border: rgba(255,255,255,0.15);
+      --bg-card: #1e1e2e;
+      --bg-hover: #2a2a3c;
+      --text-primary: #e2e2e2;
+      --text-secondary: #a0a0b0;
+      --accent: #6366f1;
+      --accent-glow: rgba(99,102,241,0.3);
+      --gradient-main: linear-gradient(135deg, #8b5cf6, #6366f1);
+      --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      --success: #10b981;
+      --warning: #f59e0b;
+      --error: #ef4444;
+      --info: #38bdf8;
+    }
+    .student-tool[data-theme="light"] {
+      --bg-card: #ffffff;
+      --bg-hover: #f8f9fa;
+      --text-primary: #1f2937;
+      --text-secondary: #6b7280;
+      --glass-border: rgba(0,0,0,0.1);
+      background: linear-gradient(135deg, #f0f4ff 0%, #e8edff 100%);
+    }
+    .student-tool {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 1rem;
+      font-family: system-ui, -apple-system, sans-serif;
+      color: var(--text-primary);
+      background: linear-gradient(135deg, #0f0f1a 0%, #1a1a2e 100%);
+      min-height: 100vh;
+      transition: var(--transition);
+    }
+    /* Header */
+    .wc-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.8rem; padding: 0.8rem 1.2rem; background: var(--bg-card); border-radius: 12px; border: 1px solid var(--glass-border); }
+    .wc-header h2 { margin: 0; font-size: 1.4rem; background: var(--gradient-main); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 700; }
+    .wc-header-actions { display: flex; gap: 0.5rem; align-items: center; }
+    .wc-btn-sm { padding: 0.5rem 0.9rem; background: var(--bg-hover); border: 1px solid var(--glass-border); border-radius: 8px; color: var(--text-primary); cursor: pointer; transition: var(--transition); font-size: 0.85rem; display: flex; align-items: center; gap: 0.3rem; }
+    .wc-btn-sm:hover { background: var(--accent); color: #fff; border-color: var(--accent); }
+    .wc-btn-sm.primary { background: var(--gradient-main); color: #fff; border: none; }
+    .wc-btn-sm.primary:hover { box-shadow: 0 4px 12px var(--accent-glow); }
+    .wc-btn-sm.danger { color: var(--error); border-color: var(--error); }
+    .wc-btn-sm.danger:hover { background: var(--error); color: #fff; }
+    /* Main Layout */
+    .wc-container { display: grid; grid-template-columns: 1fr 320px; gap: 1.2rem; }
+    @media(max-width: 900px){ .wc-container { grid-template-columns: 1fr; } }
+    .wc-editor { background: var(--bg-card); border: 1px solid var(--glass-border); border-radius: 14px; padding: 1.2rem; }
+    .wc-textarea { width: 100%; min-height: 250px; padding: 1rem; border-radius: 10px; border: 1px solid var(--glass-border); background: var(--bg-hover); color: var(--text-primary); outline: none; resize: vertical; font-size: 1rem; line-height: 1.6; font-family: inherit; transition: var(--transition); box-sizing: border-box; }
+    .wc-textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow); }
+    .wc-textarea::placeholder { color: var(--text-secondary); opacity: 0.7; }
+    .wc-toolbar { display: flex; flex-wrap: wrap; gap: 0.5rem; margin: 0.8rem 0; padding: 0.6rem; background: var(--bg-hover); border-radius: 10px; }
+    .wc-tool-btn { padding: 0.4rem 0.7rem; background: var(--bg-card); border: 1px solid var(--glass-border); border-radius: 6px; color: var(--text-secondary); cursor: pointer; transition: var(--transition); font-size: 0.8rem; }
+    .wc-tool-btn:hover { background: var(--accent); color: #fff; border-color: var(--accent); }
+    .wc-target { display: flex; align-items: center; gap: 0.8rem; margin: 0.8rem 0; padding: 0.8rem; background: var(--bg-hover); border-radius: 10px; }
+    .wc-target input { width: 80px; padding: 0.4rem; border-radius: 6px; border: 1px solid var(--glass-border); background: var(--bg-card); color: var(--text-primary); outline: none; }
+    .wc-progress { flex: 1; height: 8px; background: var(--bg-card); border-radius: 4px; overflow: hidden; }
+    .wc-progress-bar { height: 100%; background: var(--gradient-main); width: 0%; transition: width 0.3s ease; border-radius: 4px; }
+    .wc-progress-text { font-size: 0.8rem; color: var(--text-secondary); min-width: 60px; text-align: right; }
+    /* Stats Panel */
+    .wc-panel { background: var(--bg-card); border: 1px solid var(--glass-border); border-radius: 14px; padding: 1.2rem; align-self: start; position: sticky; top: 1rem; max-height: calc(100vh - 2rem); overflow-y: auto; }
+    .wc-panel::-webkit-scrollbar { width: 6px; }
+    .wc-panel::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 3px; }
+    .wc-panel-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; padding-bottom: 0.8rem; border-bottom: 1px solid var(--glass-border); }
+    .wc-panel-header h3 { margin: 0; font-size: 1.1rem; color: var(--text-primary); }
+    .wc-panel-toggle { background: none; border: none; color: var(--text-secondary); cursor: pointer; font-size: 1.2rem; transition: var(--transition); }
+    .wc-panel.collapsed .wc-panel-content { display: none; }
+    .wc-panel.collapsed .wc-panel-toggle { transform: rotate(-90deg); }
+    .wc-stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; margin-bottom: 1.2rem; }
+    .wc-stat-card { background: var(--bg-hover); border-radius: 10px; padding: 0.9rem; text-align: center; border: 1px solid transparent; transition: var(--transition); }
+    .wc-stat-card:hover { border-color: var(--accent); }
+    .wc-stat-num { font-size: 1.4rem; font-weight: 700; color: var(--accent); margin-bottom: 0.2rem; }
+    .wc-stat-lbl { font-size: 0.75rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.4px; }
+    .wc-readability { margin-bottom: 1.2rem; }
+    .wc-readability-title { font-size: 0.9rem; font-weight: 600; color: var(--text-primary); margin-bottom: 0.6rem; }
+    .wc-readability-item { display: flex; justify-content: space-between; padding: 0.4rem 0; border-bottom: 1px dashed var(--glass-border); font-size: 0.85rem; }
+    .wc-readability-item:last-child { border-bottom: none; }
+    .wc-readability-score { font-weight: 600; color: var(--accent); }
+    .wc-readability-grade { font-size: 0.75rem; color: var(--text-secondary); }
+    .wc-frequency { margin-bottom: 1.2rem; }
+    .wc-frequency-title { font-size: 0.9rem; font-weight: 600; color: var(--text-primary); margin-bottom: 0.6rem; display: flex; justify-content: space-between; }
+    .wc-freq-item { display: flex; align-items: center; gap: 0.5rem; padding: 0.3rem 0; font-size: 0.85rem; }
+    .wc-freq-bar { flex: 1; height: 6px; background: var(--bg-card); border-radius: 3px; overflow: hidden; }
+    .wc-freq-fill { height: 100%; background: var(--accent); border-radius: 3px; transition: width 0.3s ease; }
+    .wc-freq-count { font-size: 0.75rem; color: var(--text-secondary); min-width: 30px; text-align: right; }
+    .wc-keywords { margin-bottom: 1.2rem; }
+    .wc-keywords-title { font-size: 0.9rem; font-weight: 600; color: var(--text-primary); margin-bottom: 0.6rem; }
+    .wc-keyword-list { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+    .wc-keyword { background: var(--accent); color: #fff; padding: 0.25rem 0.6rem; border-radius: 20px; font-size: 0.75rem; display: flex; align-items: center; gap: 0.3rem; }
+    .wc-actions { display: flex; flex-direction: column; gap: 0.5rem; }
+    .wc-action-btn { width: 100%; padding: 0.6rem; background: var(--bg-hover); border: 1px solid var(--glass-border); border-radius: 8px; color: var(--text-primary); cursor: pointer; transition: var(--transition); font-size: 0.85rem; text-align: left; display: flex; align-items: center; gap: 0.5rem; }
+    .wc-action-btn:hover { background: var(--accent); color: #fff; border-color: var(--accent); }
+    /* Modal */
+    .wc-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: var(--transition); z-index: 1000; }
+    .wc-modal.open { opacity: 1; pointer-events: auto; }
+    .wc-modal-content { background: var(--bg-card); border: 1px solid var(--glass-border); border-radius: 16px; padding: 1.5rem; width: 90%; max-width: 500px; max-height: 85vh; overflow-y: auto; transform: translateY(20px); transition: var(--transition); }
+    .wc-modal.open .wc-modal-content { transform: translateY(0); }
+    .wc-modal h3 { margin: 0 0 1rem; color: var(--text-primary); }
+    .wc-modal-close { position: absolute; top: 1rem; right: 1rem; background: none; border: none; color: var(--text-secondary); font-size: 1.5rem; cursor: pointer; transition: var(--transition); }
+    .wc-modal-close:hover { color: var(--accent); }
+    .wc-modal-options { display: grid; gap: 0.6rem; margin-bottom: 1rem; }
+    .wc-modal-option { display: flex; align-items: center; gap: 0.6rem; padding: 0.6rem; border-radius: 8px; background: var(--bg-hover); cursor: pointer; transition: var(--transition); }
+    .wc-modal-option:hover { background: var(--accent); color: #fff; }
+    .wc-modal-option input { cursor: pointer; }
+    .wc-modal-btns { display: flex; justify-content: flex-end; gap: 0.8rem; margin-top: 1rem; }
+    .wc-modal-btn { padding: 0.6rem 1.2rem; border-radius: 8px; border: none; cursor: pointer; font-weight: 600; transition: var(--transition); }
+    .wc-modal-btn.cancel { background: var(--bg-hover); color: var(--text-primary); }
+    .wc-modal-btn.cancel:hover { background: var(--accent); color: #fff; }
+    .wc-modal-btn.confirm { background: var(--gradient-main); color: #fff; }
+    .wc-modal-btn.confirm:hover { box-shadow: 0 4px 12px var(--accent-glow); }
+    /* Compare Mode */
+    .wc-compare { display: none; margin-top: 1rem; }
+    .wc-compare.active { display: block; }
+    .wc-compare-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    @media(max-width: 600px){ .wc-compare-grid { grid-template-columns: 1fr; } }
+    .wc-compare-box { background: var(--bg-hover); border-radius: 10px; padding: 1rem; }
+    .wc-compare-box h4 { margin: 0 0 0.5rem; font-size: 0.9rem; color: var(--text-secondary); }
+    .wc-compare-box textarea { width: 100%; min-height: 120px; padding: 0.7rem; border-radius: 8px; border: 1px solid var(--glass-border); background: var(--bg-card); color: var(--text-primary); outline: none; resize: vertical; font-size: 0.9rem; box-sizing: border-box; }
+    .wc-compare-result { margin-top: 1rem; padding: 0.8rem; background: var(--bg-card); border-radius: 10px; font-size: 0.9rem; }
+    .wc-compare-result .match { color: var(--success); font-weight: 600; }
+    .wc-compare-result .diff { color: var(--error); font-weight: 600; }
+    /* Toast */
+    .wc-toast { position: fixed; bottom: 20px; right: 20px; background: var(--bg-card); border: 1px solid var(--glass-border); padding: 0.9rem 1.4rem; border-radius: 10px; color: var(--text-primary); box-shadow: 0 8px 32px rgba(0,0,0,0.3); transform: translateY(100px); opacity: 0; transition: all 0.3s ease; z-index: 2000; font-size: 0.9rem; display: flex; align-items: center; gap: 0.6rem; }
+    .wc-toast.show { transform: translateY(0); opacity: 1; }
+    .wc-toast.success { border-left: 4px solid var(--success); }
+    .wc-toast.error { border-left: 4px solid var(--error); }
+    .wc-toast.info { border-left: 4px solid var(--accent); }
+    /* Utilities */
+    .wc-hidden { display: none !important; }
+    .wc-flex { display: flex; }
+    .wc-items-center { align-items: center; }
+    .wc-justify-between { justify-content: space-between; }
+    .wc-gap-2 { gap: 0.5rem; }
+    .wc-text-center { text-align: center; }
+    .wc-text-accent { color: var(--accent); }
+    .wc-cursor-pointer { cursor: pointer; }
+  </style>
+
+  <!-- Header -->
+  <div class="wc-header">
+    <h2>📝 Word Counter Pro</h2>
+    <div class="wc-header-actions">
+      <button class="wc-btn-sm" id="wc-compare-toggle">🔀 Compare</button>
+      <button class="wc-btn-sm" id="wc-theme-toggle" title="Toggle Theme">🌙</button>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="wc-container">
+    <!-- Editor -->
+    <div class="wc-editor">
+      <textarea class="wc-textarea" id="wc-input" placeholder="Type or paste your text here... Start writing to see live analysis! ✍️"></textarea>
+      
+      <!-- Toolbar -->
+      <div class="wc-toolbar">
+        <button class="wc-tool-btn" data-action="upper">Aa↑</button>
+        <button class="wc-tool-btn" data-action="lower">Aa↓</button>
+        <button class="wc-tool-btn" data-action="title">Aa🔤</button>
+        <button class="wc-tool-btn" data-action="trim">✂️ Trim</button>
+        <button class="wc-tool-btn" data-action="spaces">🗑️ Extra Spaces</button>
+        <button class="wc-tool-btn" data-action="reverse">🔁 Reverse</button>
+        <button class="wc-tool-btn" data-action="copy">📋 Copy</button>
+        <button class="wc-tool-btn" data-action="clear">🗑️ Clear</button>
+      </div>
+      
+      <!-- Target Counter -->
+      <div class="wc-target">
+        <span style="font-size:0.85rem;color:var(--text-secondary)">Target:</span>
+        <input type="number" id="wc-target-input" placeholder="500" min="1" max="10000">
+        <div class="wc-progress"><div class="wc-progress-bar" id="wc-progress-bar"></div></div>
+        <span class="wc-progress-text" id="wc-progress-text">0%</span>
+      </div>
+      
+      <!-- Compare Mode -->
+      <div class="wc-compare" id="wc-compare">
+        <div class="wc-compare-grid">
+          <div class="wc-compare-box">
+            <h4>Text A</h4>
+            <textarea id="wc-compare-a" placeholder="Paste first text..."></textarea>
+          </div>
+          <div class="wc-compare-box">
+            <h4>Text B</h4>
+            <textarea id="wc-compare-b" placeholder="Paste second text..."></textarea>
+          </div>
+        </div>
+        <button class="wc-btn-sm primary" id="wc-compare-run" style="margin-top:0.8rem;width:100%">🔍 Compare Texts</button>
+        <div class="wc-compare-result" id="wc-compare-result"></div>
+      </div>
+    </div>
+    
+    <!-- Stats Panel -->
+    <div class="wc-panel" id="wc-panel">
+      <div class="wc-panel-header">
+        <h3>📊 Analysis</h3>
+        <button class="wc-panel-toggle" title="Collapse">▼</button>
+      </div>
+      <div class="wc-panel-content">
+        <!-- Basic Stats -->
+        <div class="wc-stats-grid">
+          <div class="wc-stat-card"><div class="wc-stat-num" id="wc-words">0</div><div class="wc-stat-lbl">Words</div></div>
+          <div class="wc-stat-card"><div class="wc-stat-num" id="wc-chars">0</div><div class="wc-stat-lbl">Characters</div></div>
+          <div class="wc-stat-card"><div class="wc-stat-num" id="wc-chars-ns">0</div><div class="wc-stat-lbl">No Spaces</div></div>
+          <div class="wc-stat-card"><div class="wc-stat-num" id="wc-sent">0</div><div class="wc-stat-lbl">Sentences</div></div>
+          <div class="wc-stat-card"><div class="wc-stat-num" id="wc-para">0</div><div class="wc-stat-lbl">Paragraphs</div></div>
+          <div class="wc-stat-card"><div class="wc-stat-num" id="wc-syllables">0</div><div class="wc-stat-lbl">Syllables</div></div>
+        </div>
+        
+        <!-- Time Estimates -->
+        <div class="wc-stats-grid" style="margin-bottom:1.2rem">
+          <div class="wc-stat-card"><div class="wc-stat-num" id="wc-read-time">0m</div><div class="wc-stat-lbl">Read Time</div></div>
+          <div class="wc-stat-card"><div class="wc-stat-num" id="wc-speak-time">0m</div><div class="wc-stat-lbl">Speak Time</div></div>
+          <div class="wc-stat-card"><div class="wc-stat-num" id="wc-write-time">0m</div><div class="wc-stat-lbl">Write Time</div></div>
+          <div class="wc-stat-card"><div class="wc-stat-num" id="wc-avg-word">0</div><div class="wc-stat-lbl">Avg Word</div></div>
+        </div>
+        
+        <!-- Readability -->
+        <div class="wc-readability">
+          <div class="wc-readability-title">📈 Readability Scores</div>
+          <div class="wc-readability-item">
+            <span>Flesch-Kincaid</span>
+            <span><span class="wc-readability-score" id="wc-flesch">--</span> <span class="wc-readability-grade" id="wc-flesch-grade"></span></span>
+          </div>
+          <div class="wc-readability-item">
+            <span>Gunning Fog</span>
+            <span><span class="wc-readability-score" id="wc-fog">--</span> <span class="wc-readability-grade" id="wc-fog-grade"></span></span>
+          </div>
+          <div class="wc-readability-item">
+            <span>SMOG Index</span>
+            <span><span class="wc-readability-score" id="wc-smog">--</span> <span class="wc-readability-grade" id="wc-smog-grade"></span></span>
+          </div>
+          <div class="wc-readability-item">
+            <span>Coleman-Liau</span>
+            <span><span class="wc-readability-score" id="wc-coleman">--</span> <span class="wc-readability-grade" id="wc-coleman-grade"></span></span>
+          </div>
+        </div>
+        
+        <!-- Word Frequency -->
+        <div class="wc-frequency">
+          <div class="wc-frequency-title">
+            <span>🔤 Top Words</span>
+            <span style="font-size:0.75rem;color:var(--text-secondary)">Top 10</span>
+          </div>
+          <div id="wc-freq-list"></div>
+        </div>
+        
+        <!-- Keywords -->
+        <div class="wc-keywords">
+          <div class="wc-keywords-title">🔑 Key Terms</div>
+          <div class="wc-keyword-list" id="wc-keyword-list"></div>
+        </div>
+        
+        <!-- Actions -->
+        <div class="wc-actions">
+          <button class="wc-action-btn" id="wc-copy-stats">📋 Copy Stats</button>
+          <button class="wc-action-btn" id="wc-export">📤 Export Data</button>
+          <button class="wc-action-btn" id="wc-save-draft">💾 Save Draft</button>
+          <button class="wc-action-btn" id="wc-load-draft">📂 Load Draft</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Export Modal -->
+  <div class="wc-modal" id="wc-export-modal">
+    <div class="wc-modal-content">
+      <button class="wc-modal-close" id="wc-export-close">×</button>
+      <h3>📤 Export Analysis</h3>
+      <p style="color:var(--text-secondary);margin-bottom:1rem">Choose format:</p>
+      <div class="wc-modal-options">
+        <label class="wc-modal-option">
+          <input type="radio" name="wc-export-format" value="txt" checked>
+          <span>📄 Plain Text</span>
+        </label>
+        <label class="wc-modal-option">
+          <input type="radio" name="wc-export-format" value="json">
+          <span>💾 JSON Data</span>
+        </label>
+        <label class="wc-modal-option">
+          <input type="radio" name="wc-export-format" value="csv">
+          <span>📊 CSV Spreadsheet</span>
+        </label>
+      </div>
+      <div class="wc-modal-btns">
+        <button class="wc-modal-btn cancel" id="wc-export-cancel">Cancel</button>
+        <button class="wc-modal-btn confirm" id="wc-export-confirm">Download</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="wc-toast" id="wc-toast">
+    <span id="wc-toast-icon">✅</span>
+    <span id="wc-toast-msg">Done</span>
+  </div>
+
+  <script>
+    (function() {
+      'use strict';
+      
+      // ===== CONFIG =====
+      const CONFIG = {
+        STORAGE_KEY: 'word_counter_pro_v1',
+        READ_TIME_WPM: 200,
+        SPEAK_TIME_WPM: 150,
+        WRITE_TIME_WPM: 40,
+        STOP_WORDS: ['the','be','to','of','and','a','in','that','have','it','for','not','on','with','he','as','you','do','at','this','but','his','by','from','they','we','say','her','she','or','an','will','my','one','all','would','there','their','what','so','up','out','if','about','who','get','which','go','me','when','make','can','like','time','no','just','him','know','take','people','into','year','your','good','some','could','them','see','other','than','then','now','look','only','come','its','over','think','also','back','after','use','two','how','our','work','first','well','way','even','new','want','because','any','these','give','day','most','us','is','was','are','were','been','has','had','have','did','does','doing','done','am','i','you','he','she','it','we','they','what','which','who','whom','this','that','these','those','am','is','are','was','were','be','been','being','have','has','had','having','do','does','did','doing','a','an','the','and','but','if','or','because','as','until','while','of','at','by','for','with','about','against','between','into','through','during','before','after','above','below','to','from','up','down','in','out','on','off','over','under','again','further','then','once','here','there','when','where','why','how','all','any','both','each','few','more','most','other','some','such','no','nor','not','only','own','same','so','than','too','very','s','t','can','will','just','don','should','now','d','ll','m','o','re','ve','y','ain','aren','couldn','didn','doesn','hadn','hasn','haven','isn','ma','mightn','mustn','needn','shan','shouldn','wasn','weren','won','wouldn']
+      };
+
+      // ===== STATE =====
+      let state = {
+        text: '',
+        target: null,
+        theme: 'dark',
+        drafts: {}
+      };
+
+      // ===== DOM ELEMENTS =====
+      const getEl = (id) => document.getElementById(id);
+      const els = {
+        input: getEl('wc-input'),
+        // Stats
+        words: getEl('wc-words'),
+        chars: getEl('wc-chars'),
+        charsNs: getEl('wc-chars-ns'),
+        sent: getEl('wc-sent'),
+        para: getEl('wc-para'),
+        syllables: getEl('wc-syllables'),
+        readTime: getEl('wc-read-time'),
+        speakTime: getEl('wc-speak-time'),
+        writeTime: getEl('wc-write-time'),
+        avgWord: getEl('wc-avg-word'),
+        // Readability
+        flesch: getEl('wc-flesch'),
+        fleschGrade: getEl('wc-flesch-grade'),
+        fog: getEl('wc-fog'),
+        fogGrade: getEl('wc-fog-grade'),
+        smog: getEl('wc-smog'),
+        smogGrade: getEl('wc-smog-grade'),
+        coleman: getEl('wc-coleman'),
+        colemanGrade: getEl('wc-coleman-grade'),
+        // Frequency & Keywords
+        freqList: getEl('wc-freq-list'),
+        keywordList: getEl('wc-keyword-list'),
+        // Target
+        targetInput: getEl('wc-target-input'),
+        progressBar: getEl('wc-progress-bar'),
+        progressText: getEl('wc-progress-text'),
+        // Tools
+        toolbar: getEl('wc-toolbar'),
+        // Compare
+        compareToggle: getEl('wc-compare-toggle'),
+        compare: getEl('wc-compare'),
+        compareA: getEl('wc-compare-a'),
+        compareB: getEl('wc-compare-b'),
+        compareRun: getEl('wc-compare-run'),
+        compareResult: getEl('wc-compare-result'),
+        // Actions
+        copyStats: getEl('wc-copy-stats'),
+        export: getEl('wc-export'),
+        saveDraft: getEl('wc-save-draft'),
+        loadDraft: getEl('wc-load-draft'),
+        // Modal
+        exportModal: getEl('wc-export-modal'),
+        exportClose: getEl('wc-export-close'),
+        exportCancel: getEl('wc-export-cancel'),
+        exportConfirm: getEl('wc-export-confirm'),
+        // Panel
+        panel: getEl('wc-panel'),
+        panelToggle: getEl('wc-panel').querySelector('.wc-panel-toggle'),
+        // Theme
+        themeToggle: getEl('wc-theme-toggle'),
+        // Toast
+        toast: getEl('wc-toast'),
+        toastIcon: getEl('wc-toast-icon'),
+        toastMsg: getEl('wc-toast-msg')
+      };
+
+      // ===== INIT =====
+      function init() {
+        loadFromStorage();
+        bindEvents();
+        updateTheme();
+        analyze();
+        showToast('📝 Word Counter Pro Ready!', 'info');
+      }
+
+      // ===== UTILS =====
+      function showToast(msg, type) {
+        if (!els.toast) return;
+        els.toastIcon.textContent = type === 'success' ? '✅' : type === 'error' ? '❌' : 'ℹ️';
+        els.toastMsg.textContent = msg;
+        els.toast.className = 'wc-toast ' + type + ' show';
+        setTimeout(function() { if (els.toast) els.toast.classList.remove('show'); }, 2000);
+      }
+
+      function saveToStorage() {
+        try {
+          localStorage.setItem(CONFIG.STORAGE_KEY, JSON.stringify({
+            drafts: state.drafts,
+            theme: state.theme
+          }));
+        } catch(e) { console.warn('Save failed:', e); }
+      }
+
+      function loadFromStorage() {
+        try {
+          var saved = localStorage.getItem(CONFIG.STORAGE_KEY);
+          if (saved) {
+            var parsed = JSON.parse(saved);
+            if (parsed.drafts) state.drafts = parsed.drafts;
+            if (parsed.theme) state.theme = parsed.theme;
+          }
+        } catch(e) { console.warn('Load failed:', e); }
+      }
+
+      function updateTheme() {
+        document.documentElement.setAttribute('data-theme', state.theme);
+        if (els.themeToggle) {
+          els.themeToggle.textContent = state.theme === 'dark' ? '☀️' : '🌙';
+        }
+      }
+
+      // ===== TEXT ANALYSIS =====
+      function countSyllables(word) {
+        word = word.toLowerCase().replace(/[^a-z]/g, '');
+        if (word.length <= 3) return 1;
+        word = word.replace(/(?:[^laeiouy]es|ed|[^laeiouy]e)$/, '');
+        word = word.replace(/^y/, '');
+        var matches = word.match(/[aeiouy]{1,2}/g);
+        return matches ? matches.length : 1;
+      }
+
+      function analyze() {
+        if (!els.input) return;
+        var text = els.input.value;
+        state.text = text;
+        
+        // Basic counts
+        var chars = text.length;
+        var charsNs = text.replace(/\s/g, '').length;
+        var wordsArr = text.trim() ? text.trim().split(/\s+/).filter(function(w){return w;}) : [];
+        var words = wordsArr.length;
+        var sentences = text.split(/[.!?]+/).filter(function(s){return s.trim();}).length || (words > 0 ? 1 : 0);
+        var paragraphs = text.split(/\n\s*\n/).filter(function(p){return p.trim();}).length || (text.trim() ? 1 : 0);
+        
+        // Syllables & averages
+        var totalSyllables = 0;
+        var totalWordLen = 0;
+        wordsArr.forEach(function(w) {
+          totalSyllables += countSyllables(w);
+          totalWordLen += w.replace(/[^a-z]/gi, '').length;
+        });
+        var avgWordLen = words > 0 ? Math.round(totalWordLen / words * 10) / 10 : 0;
+        var avgSentLen = sentences > 0 ? Math.round(words / sentences * 10) / 10 : 0;
+        
+        // Time estimates
+        var readTime = Math.ceil(words / CONFIG.READ_TIME_WPM);
+        var speakTime = Math.ceil(words / CONFIG.SPEAK_TIME_WPM);
+        var writeTime = Math.ceil(words / CONFIG.WRITE_TIME_WPM);
+        
+        // Update DOM
+        if (els.words) els.words.textContent = words;
+        if (els.chars) els.chars.textContent = chars;
+        if (els.charsNs) els.charsNs.textContent = charsNs;
+        if (els.sent) els.sent.textContent = sentences;
+        if (els.para) els.para.textContent = paragraphs;
+        if (els.syllables) els.syllables.textContent = totalSyllables;
+        if (els.readTime) els.readTime.textContent = readTime + 'm';
+        if (els.speakTime) els.speakTime.textContent = speakTime + 'm';
+        if (els.writeTime) els.writeTime.textContent = writeTime + 'm';
+        if (els.avgWord) els.avgWord.textContent = avgWordLen;
+        
+        // Readability scores
+        calculateReadability(words, sentences, totalSyllables, charsNs);
+        
+        // Word frequency
+        renderWordFrequency(wordsArr);
+        
+        // Keywords
+        renderKeywords(wordsArr);
+        
+        // Target progress
+        updateTargetProgress(words);
+      }
+
+      function calculateReadability(words, sentences, syllables, chars) {
+        if (words < 10 || sentences < 1) {
+          setReadability('--', '--', '--', '--', '--', '--', '--', '--');
+          return;
+        }
+        
+        var ASL = words / sentences; // Avg sentence length
+        var ASW = syllables / words; // Avg syllables per word
+        
+        // Flesch-Kincaid Grade Level
+        var fk = 0.39 * ASL + 11.8 * ASW - 15.59;
+        var fkGrade = getGradeLevel(Math.round(fk));
+        
+        // Gunning Fog
+        // (Simplified: assuming 15% complex words for demo)
+        var complexWords = Math.round(words * 0.15);
+        var fog = 0.4 * (ASL + 100 * (complexWords / words));
+        var fogGrade = getGradeLevel(Math.round(fog));
+        
+        // SMOG
+        var smog = 1.043 * Math.sqrt(complexWords * 30 / sentences) + 3.1291;
+        var smogGrade = getGradeLevel(Math.round(smog));
+        
+        // Coleman-Liau
+        var L = (chars / words) * 100;
+        var S = (sentences / words) * 100;
+        var coleman = 0.0588 * L - 0.296 * S - 15.8;
+        var colemanGrade = getGradeLevel(Math.round(coleman));
+        
+        setReadability(
+          fk.toFixed(1), fkGrade,
+          fog.toFixed(1), fogGrade,
+          smog.toFixed(1), smogGrade,
+          coleman.toFixed(1), colemanGrade
+        );
+      }
+
+      function getGradeLevel(score) {
+        if (score < 0) return '(Below 1st)';
+        if (score <= 1) return '(1st)';
+        if (score <= 2) return '(2nd)';
+        if (score <= 3) return '(3rd)';
+        if (score <= 4) return '(4th)';
+        if (score <= 5) return '(5th)';
+        if (score <= 6) return '(6th)';
+        if (score <= 8) return '(7th-8th)';
+        if (score <= 10) return '(9th-10th)';
+        if (score <= 12) return '(11th-12th)';
+        if (score <= 14) return '(College)';
+        return '(Graduate+)';
+      }
+
+      function setReadability(fk, fkG, fog, fogG, smog, smogG, col, colG) {
+        if (els.flesch) els.flesch.textContent = fk;
+        if (els.fleschGrade) els.fleschGrade.textContent = fkG;
+        if (els.fog) els.fog.textContent = fog;
+        if (els.fogGrade) els.fogGrade.textContent = fogG;
+        if (els.smog) els.smog.textContent = smog;
+        if (els.smogGrade) els.smogGrade.textContent = smogG;
+        if (els.coleman) els.coleman.textContent = col;
+        if (els.colemanGrade) els.colemanGrade.textContent = colG;
+      }
+
+      function renderWordFrequency(wordsArr) {
+        if (!els.freqList) return;
+        
+        // Count words (case-insensitive, letters only)
+        var freq = {};
+        wordsArr.forEach(function(w) {
+          var clean = w.toLowerCase().replace(/[^a-z]/g, '');
+          if (clean.length > 2 && CONFIG.STOP_WORDS.indexOf(clean) === -1) {
+            freq[clean] = (freq[clean] || 0) + 1;
+          }
+        });
+        
+        // Sort & get top 10
+        var sorted = Object.entries(freq).sort(function(a,b){return b[1]-a[1];}).slice(0,10);
+        var max = sorted[0] ? sorted[0][1] : 1;
+        
+        els.freqList.innerHTML = sorted.map(function(item) {
+          var pct = Math.round((item[1] / max) * 100);
+          return '<div class="wc-freq-item">' +
+            '<span style="min-width:80px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + item[0] + '</span>' +
+            '<div class="wc-freq-bar"><div class="wc-freq-fill" style="width:' + pct + '%"></div></div>' +
+            '<span class="wc-freq-count">' + item[1] + '</span>' +
+          '</div>';
+        }).join('') || '<div style="font-size:0.8rem;color:var(--text-secondary);text-align:center;padding:0.5rem">Add more text to see word frequency</div>';
+      }
+
+      function renderKeywords(wordsArr) {
+        if (!els.keywordList) return;
+        
+        // Simple keyword extraction: top 5 non-stop words by frequency
+        var freq = {};
+        wordsArr.forEach(function(w) {
+          var clean = w.toLowerCase().replace(/[^a-z]/g, '');
+          if (clean.length > 3 && CONFIG.STOP_WORDS.indexOf(clean) === -1) {
+            freq[clean] = (freq[clean] || 0) + 1;
+          }
+        });
+        
+        var sorted = Object.entries(freq).sort(function(a,b){return b[1]-a[1];}).slice(0,5);
+        var total = wordsArr.length || 1;
+        
+        els.keywordList.innerHTML = sorted.map(function(item) {
+          var density = ((item[1] / total) * 100).toFixed(1);
+          return '<span class="wc-keyword">' + item[0] + ' <span style="opacity:0.8">(' + density + '%)</span></span>';
+        }).join('') || '<span style="font-size:0.75rem;color:var(--text-secondary)">Add text to extract keywords</span>';
+      }
+
+      function updateTargetProgress(words) {
+        if (!els.targetInput || !els.progressBar || !els.progressText) return;
+        var target = parseInt(els.targetInput.value);
+        if (!target || target <= 0) {
+          els.progressBar.style.width = '0%';
+          els.progressText.textContent = '0%';
+          return;
+        }
+        var pct = Math.min(100, Math.round((words / target) * 100));
+        els.progressBar.style.width = pct + '%';
+        els.progressText.textContent = pct + '%';
+        
+        // Color feedback
+        if (pct >= 100) {
+          els.progressBar.style.background = 'var(--success)';
+          if (pct === 100) showToast('🎯 Target reached!', 'success');
+        } else if (pct >= 75) {
+          els.progressBar.style.background = 'var(--warning)';
+        } else {
+          els.progressBar.style.background = 'var(--gradient-main)';
+        }
+      }
+
+      // ===== TEXT TOOLS =====
+      function applyTool(action) {
+        if (!els.input) return;
+        var text = els.input.value;
+        
+        switch(action) {
+          case 'upper': els.input.value = text.toUpperCase(); break;
+          case 'lower': els.input.value = text.toLowerCase(); break;
+          case 'title': 
+            els.input.value = text.replace(/\w\S*/g, function(txt) {
+              return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
+            });
+            break;
+          case 'trim': els.input.value = text.trim(); break;
+          case 'spaces': els.input.value = text.replace(/\s+/g, ' ').trim(); break;
+          case 'reverse': els.input.value = text.split('').reverse().join(''); break;
+          case 'copy': copyText(text, 'Text copied!'); break;
+          case 'clear': 
+            if (confirm('Clear all text?')) {
+              els.input.value = '';
+              analyze();
+              showToast('🗑️ Cleared', 'info');
+            }
+            return;
+        }
+        analyze();
+        showToast('✅ Applied: ' + action, 'success');
+      }
+
+      function copyText(text, msg) {
+        if (!text) { showToast('⚠️ Nothing to copy', 'error'); return; }
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(text).then(function() {
+            showToast(msg || '📋 Copied!', 'success');
+          }).catch(fallbackCopy);
+        } else {
+          fallbackCopy();
+        }
+        
+        function fallbackCopy() {
+          var ta = document.createElement('textarea');
+          ta.value = text;
+          ta.style.position = 'fixed';
+          ta.style.opacity = '0';
+          document.body.appendChild(ta);
+          ta.select();
+          try {
+            document.execCommand('copy');
+            showToast(msg || '📋 Copied!', 'success');
+          } catch(e) {
+            showToast('❌ Copy failed', 'error');
+          }
+          document.body.removeChild(ta);
+        }
+      }
+
+      // ===== COMPARE =====
+      function compareTexts() {
+        var a = els.compareA ? els.compareA.value.trim() : '';
+        var b = els.compareB ? els.compareB.value.trim() : '';
+        if (!a || !b) { showToast('⚠️ Enter both texts', 'error'); return; }
+        
+        var wordsA = a.toLowerCase().split(/\s+/).filter(function(w){return w;});
+        var wordsB = b.toLowerCase().split(/\s+/).filter(function(w){return w;});
+        
+        // Simple similarity: Jaccard index
+        var setA = new Set(wordsA);
+        var setB = new Set(wordsB);
+        var intersection = new Set([...setA].filter(x => setB.has(x)));
+        var union = new Set([...setA, ...setB]);
+        var similarity = union.size > 0 ? Math.round((intersection.size / union.size) * 100) : 0;
+        
+        // Differences
+        var onlyA = [...setA].filter(x => !setB.has(x)).slice(0,10);
+        var onlyB = [...setB].filter(x => !setA.has(x)).slice(0,10);
+        
+        if (els.compareResult) {
+          els.compareResult.innerHTML = 
+            '<div><span class="match">✓ Similarity: ' + similarity + '%</span></div>' +
+            (onlyA.length ? '<div style="margin-top:0.5rem"><strong>Only in Text A:</strong> ' + onlyA.join(', ') + '</div>' : '') +
+            (onlyB.length ? '<div style="margin-top:0.3rem"><strong>Only in Text B:</strong> ' + onlyB.join(', ') + '</div>' : '');
+        }
+        showToast('🔍 Comparison complete', 'success');
+      }
+
+      // ===== EXPORT =====
+      function exportData(format) {
+        var stats = collectStats();
+        var content = '', filename = '', type = '';
+        var ts = new Date().toISOString().slice(0,10);
+        
+        if (format === 'txt') {
+          content = 'Word Counter Analysis - ' + ts + '\n' + '='.repeat(40) + '\n\n';
+          content += 'TEXT PREVIEW: ' + (state.text.substring(0,200) + (state.text.length>200?'...':'')) + '\n\n';
+          content += 'BASIC STATS:\n';
+          Object.keys(stats.basic).forEach(function(k) {
+            content += '  ' + k + ': ' + stats.basic[k] + '\n';
+          });
+          content += '\nREADABILITY:\n';
+          Object.keys(stats.readability).forEach(function(k) {
+            content += '  ' + k + ': ' + stats.readability[k] + '\n';
+          });
+          content += '\nTOP WORDS:\n';
+          stats.topWords.forEach(function(w) {
+            content += '  ' + w.word + ': ' + w.count + '\n';
+          });
+          filename = 'analysis_' + ts + '.txt';
+          type = 'text/plain';
+        } else if (format === 'json') {
+          content = JSON.stringify({ timestamp: ts, text: state.text.substring(0,5000), stats: stats }, null, 2);
+          filename = 'analysis_' + ts + '.json';
+          type = 'application/json';
+        } else if (format === 'csv') {
+          content = 'Metric,Value\n';
+          Object.keys(stats.basic).forEach(function(k) {
+            content += '"' + k + '","' + stats.basic[k] + '"\n';
+          });
+          filename = 'analysis_' + ts + '.csv';
+          type = 'text/csv';
+        }
+        
+        downloadFile(content, filename, type);
+        showToast('📤 Exported as ' + format.toUpperCase(), 'success');
+      }
+
+      function collectStats() {
+        return {
+          basic: {
+            words: els.words ? els.words.textContent : 0,
+            characters: els.chars ? els.chars.textContent : 0,
+            charactersNoSpaces: els.charsNs ? els.charsNs.textContent : 0,
+            sentences: els.sent ? els.sent.textContent : 0,
+            paragraphs: els.para ? els.para.textContent : 0,
+            syllables: els.syllables ? els.syllables.textContent : 0
+          },
+          readability: {
+            fleschKincaid: els.flesch ? els.flesch.textContent : '--',
+            gunningFog: els.fog ? els.fog.textContent : '--',
+            smog: els.smog ? els.smog.textContent : '--',
+            colemanLiau: els.coleman ? els.coleman.textContent : '--'
+          },
+          time: {
+            readTime: els.readTime ? els.readTime.textContent : '0m',
+            speakTime: els.speakTime ? els.speakTime.textContent : '0m',
+            writeTime: els.writeTime ? els.writeTime.textContent : '0m'
+          },
+          topWords: [] // Would parse from freqList in real implementation
+        };
+      }
+
+      function downloadFile(content, filename, type) {
+        var blob = new Blob([content], { type: type });
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      }
+
+      // ===== DRAFTS =====
+      function saveDraft() {
+        var name = prompt('Draft name:', 'Draft ' + (Object.keys(state.drafts).length + 1));
+        if (!name) return;
+        state.drafts[name] = {
+          text: els.input ? els.input.value : '',
+          target: els.targetInput ? els.targetInput.value : '',
+          saved: new Date().toISOString()
+        };
+        saveToStorage();
+        showToast('💾 Draft saved: ' + name, 'success');
+      }
+
+      function loadDraft() {
+        var names = Object.keys(state.drafts);
+        if (names.length === 0) { showToast('⚠️ No drafts saved', 'error'); return; }
+        
+        var selected = prompt('Enter draft name to load:\n\n' + names.join('\n'));
+        if (!selected || !state.drafts[selected]) { showToast('⚠️ Draft not found', 'error'); return; }
+        
+        var draft = state.drafts[selected];
+        if (els.input) els.input.value = draft.text || '';
+        if (els.targetInput && draft.target) els.targetInput.value = draft.target;
+        analyze();
+        showToast('📂 Loaded: ' + selected, 'success');
+      }
+
+      // ===== EVENT BINDINGS =====
+      function bindEvents() {
+        // Input analysis
+        if (els.input) {
+          els.input.addEventListener('input', function() {
+            // Debounce for performance
+            clearTimeout(window.wcTimer);
+            window.wcTimer = setTimeout(analyze, 100);
+          });
+        }
+        
+        // Target input
+        if (els.targetInput) {
+          els.targetInput.addEventListener('change', function() {
+            analyze();
+            showToast('🎯 Target updated', 'info');
+          });
+        }
+        
+        // Toolbar buttons
+        if (els.toolbar) {
+          els.toolbar.addEventListener('click', function(e) {
+            var btn = e.target.closest('.wc-tool-btn');
+            if (btn) applyTool(btn.dataset.action);
+          });
+        }
+        
+        // Compare toggle
+        if (els.compareToggle) {
+          els.compareToggle.addEventListener('click', function() {
+            if (els.compare) els.compare.classList.toggle('active');
+            els.compareToggle.textContent = els.compare.classList.contains('active') ? '✏️ Edit' : '🔀 Compare';
+          });
+        }
+        
+        // Compare run
+        if (els.compareRun) els.compareRun.addEventListener('click', compareTexts);
+        
+        // Copy stats
+        if (els.copyStats) {
+          els.copyStats.addEventListener('click', function() {
+            var stats = 'Words: ' + (els.words?els.words.textContent:'0') + 
+                       '\nCharacters: ' + (els.chars?els.chars.textContent:'0') +
+                       '\nSentences: ' + (els.sent?els.sent.textContent:'0') +
+                       '\nRead Time: ' + (els.readTime?els.readTime.textContent:'0m');
+            copyText(stats, '📊 Stats copied!');
+          });
+        }
+        
+        // Export
+        if (els.export) els.export.addEventListener('click', function() {
+          if (els.exportModal) els.exportModal.classList.add('open');
+        });
+        if (els.exportClose) els.exportClose.addEventListener('click', closeModal);
+        if (els.exportCancel) els.exportCancel.addEventListener('click', closeModal);
+        if (els.exportConfirm) {
+          els.exportConfirm.addEventListener('click', function() {
+            var format = document.querySelector('input[name="wc-export-format"]:checked');
+            if (format) exportData(format.value);
+            closeModal();
+          });
+        }
+        if (els.exportModal) {
+          els.exportModal.addEventListener('click', function(e) {
+            if (e.target === els.exportModal) closeModal();
+          });
+        }
+        
+        // Drafts
+        if (els.saveDraft) els.saveDraft.addEventListener('click', saveDraft);
+        if (els.loadDraft) els.loadDraft.addEventListener('click', loadDraft);
+        
+        // Panel toggle
+        if (els.panelToggle) {
+          els.panelToggle.addEventListener('click', function() {
+            if (els.panel) els.panel.classList.toggle('collapsed');
+          });
+        }
+        
+        // Theme
+        if (els.themeToggle) {
+          els.themeToggle.addEventListener('click', function() {
+            state.theme = state.theme === 'dark' ? 'light' : 'dark';
+            updateTheme();
+            saveToStorage();
+            showToast(state.theme === 'dark' ? '🌙 Dark mode' : '☀️ Light mode', 'info');
+          });
+        }
+        
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+          if (['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName) && !e.ctrlKey) return;
+          
+          if (e.ctrlKey || e.metaKey) {
+            if (e.key === 's') { e.preventDefault(); saveDraft(); }
+            else if (e.key === 'l') { e.preventDefault(); loadDraft(); }
+            else if (e.key === 'e') { e.preventDefault(); if (els.exportModal) els.exportModal.classList.add('open'); }
+            else if (e.key === 't') { e.preventDefault(); if (els.compare) els.compare.classList.toggle('active'); }
+          }
+          if (e.key === 'Escape') {
+            if (els.input) els.input.blur();
+            closeModal();
+          }
+        });
+      }
+
+      function closeModal() {
+        if (els.exportModal) els.exportModal.classList.remove('open');
+      }
+
+      // ===== START =====
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init);
+      } else {
+        init();
+      }
+    })();
+  </script>
+</div>

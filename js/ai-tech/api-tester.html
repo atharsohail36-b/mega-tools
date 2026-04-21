@@ -1,0 +1,637 @@
+<div class="api-pro-tool">
+  <style>
+    .api-pro-tool {
+      --apt-primary: #6366f1; --apt-primary-hover: #4f46e5; --apt-accent: #8b5cf6;
+      --apt-bg: #0f0f1a; --apt-card: #1a1a2e; --apt-input: #1e1e3f;
+      --apt-border: #334155; --apt-text: #f1f5f9; --apt-text-muted: #94a3b8;
+      --apt-success: #10b981; --apt-error: #ef4444; --apt-warning: #f59e0b;
+      --apt-radius: 12px; --apt-shadow: 0 4px 20px rgba(0,0,0,0.4);
+      --apt-transition: all 0.25s cubic-bezier(0.4,0,0.2,1);
+      
+      max-width: 1000px; margin: 1.5rem auto; padding: 1.2rem;
+      background: var(--apt-card); border: 1px solid var(--apt-border);
+      border-radius: var(--apt-radius); box-shadow: var(--apt-shadow);
+      font-family: system-ui, -apple-system, 'Segoe UI', sans-serif; color: var(--apt-text);
+    }
+    
+    /* Header */
+    .apt-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; padding-bottom: 1rem; border-bottom: 1px solid var(--apt-border); flex-wrap: wrap; gap: 0.5rem; }
+    .apt-title { font-size: 1.4rem; font-weight: 700; display: flex; align-items: center; gap: 0.5rem; }
+    .apt-title i { color: var(--apt-primary); }
+    .apt-actions { display: flex; gap: 0.5rem; }
+    .apt-btn-sm { padding: 0.4rem 0.8rem; background: var(--apt-input); border: 1px solid var(--apt-border); border-radius: 8px; color: var(--apt-text); font-size: 0.8rem; cursor: pointer; transition: var(--apt-transition); display: flex; align-items: center; gap: 0.3rem; }
+    .apt-btn-sm:hover { background: var(--apt-primary); border-color: transparent; color: white; }
+    
+    /* URL Bar */
+    .apt-url-bar { display: flex; gap: 0.5rem; margin-bottom: 1rem; flex-wrap: wrap; }
+    .apt-method { padding: 0.7rem 1rem; border-radius: 8px; border: 2px solid var(--apt-border); background: var(--apt-input); color: var(--apt-text); font-weight: 600; font-size: 0.9rem; cursor: pointer; min-width: 90px; text-align: center; transition: var(--apt-transition); }
+    .apt-method:hover, .apt-method:focus { border-color: var(--apt-primary); outline: none; }
+    .apt-method.GET { color: #10b981; } .apt-method.POST { color: #3b82f6; } .apt-method.PUT { color: #f59e0b; } .apt-method.DELETE { color: #ef4444; } .apt-method.PATCH { color: #8b5cf6; }
+    .apt-url-input { flex: 1; min-width: 200px; padding: 0.7rem 1rem; border-radius: 8px; border: 2px solid var(--apt-border); background: var(--apt-input); color: var(--apt-text); font-size: 0.95rem; outline: none; transition: var(--apt-transition); }
+    .apt-url-input:focus { border-color: var(--apt-primary); box-shadow: 0 0 0 3px rgba(99,102,241,0.2); }
+    .apt-send-btn { padding: 0.7rem 1.5rem; background: linear-gradient(135deg, var(--apt-primary), var(--apt-accent)); border: none; border-radius: 8px; color: white; font-weight: 600; cursor: pointer; transition: var(--apt-transition); display: flex; align-items: center; gap: 0.4rem; white-space: nowrap; }
+    .apt-send-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 15px rgba(99,102,241,0.3); }
+    .apt-send-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+    .apt-spinner { width: 16px; height: 16px; border: 2px solid transparent; border-top-color: currentColor; border-radius: 50%; animation: apt-spin 0.7s linear infinite; display: none; }
+    .apt-send-btn.loading .apt-spinner { display: block; }
+    .apt-send-btn.loading .apt-btn-text { opacity: 0; }
+    @keyframes apt-spin { to { transform: rotate(360deg); } }
+    
+    /* Tabs */
+    .apt-tabs { display: flex; gap: 0.3rem; margin-bottom: 0.8rem; border-bottom: 1px solid var(--apt-border); padding-bottom: 0.3rem; flex-wrap: wrap; }
+    .apt-tab { padding: 0.5rem 1rem; border-radius: 8px 8px 0 0; cursor: pointer; color: var(--apt-text-muted); font-size: 0.85rem; transition: var(--apt-transition); border: 1px solid transparent; }
+    .apt-tab:hover { color: var(--apt-text); background: var(--apt-input); }
+    .apt-tab.active { background: var(--apt-input); color: var(--apt-primary); border-color: var(--apt-border); border-bottom-color: var(--apt-input); font-weight: 500; }
+    
+    /* Panels */
+    .apt-panel { display: none; animation: apt-fade 0.2s ease; }
+    .apt-panel.active { display: block; }
+    @keyframes apt-fade { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+    
+    /* Form Fields */
+    .apt-field { margin-bottom: 0.8rem; }
+    .apt-label { display: block; font-size: 0.8rem; color: var(--apt-text-muted); margin-bottom: 0.4rem; font-weight: 500; }
+    .apt-input, .apt-select, .apt-textarea { width: 100%; padding: 0.6rem 0.9rem; background: var(--apt-input); border: 1px solid var(--apt-border); border-radius: 8px; color: var(--apt-text); font-size: 0.9rem; outline: none; transition: var(--apt-transition); font-family: inherit; }
+    .apt-input:focus, .apt-select:focus, .apt-textarea:focus { border-color: var(--apt-primary); box-shadow: 0 0 0 2px rgba(99,102,241,0.2); }
+    .apt-textarea { min-height: 100px; font-family: 'Courier New', monospace; font-size: 0.85rem; line-height: 1.5; resize: vertical; }
+    
+    /* Auth Types */
+    .apt-auth-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 0.8rem; }
+    .apt-auth-card { padding: 0.8rem; background: var(--apt-input); border-radius: 8px; border: 1px solid var(--apt-border); cursor: pointer; transition: var(--apt-transition); }
+    .apt-auth-card:hover { border-color: var(--apt-primary); }
+    .apt-auth-card.active { border-color: var(--apt-primary); background: rgba(99,102,241,0.1); }
+    .apt-auth-card-title { font-size: 0.85rem; font-weight: 600; margin-bottom: 0.3rem; display: flex; align-items: center; gap: 0.4rem; }
+    .apt-auth-card-desc { font-size: 0.75rem; color: var(--apt-text-muted); }
+    
+    /* Query Params Builder */
+    .apt-qp-row { display: flex; gap: 0.4rem; margin-bottom: 0.4rem; align-items: center; }
+    .apt-qp-row input { flex: 1; }
+    .apt-qp-add { padding: 0.3rem 0.7rem; background: var(--apt-primary); border: none; border-radius: 6px; color: white; font-size: 0.8rem; cursor: pointer; margin-top: 0.4rem; }
+    .apt-qp-remove { padding: 0.3rem 0.6rem; background: var(--apt-error); border: none; border-radius: 6px; color: white; font-size: 0.8rem; cursor: pointer; }
+    
+    /* Response Area */
+    .apt-response { margin-top: 1rem; }
+    .apt-meta { display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 0.6rem; font-size: 0.8rem; }
+    .apt-meta span { display: flex; align-items: center; gap: 0.3rem; }
+    .apt-meta .status { font-weight: 600; }
+    .apt-meta .status-2xx { color: var(--apt-success); }
+    .apt-meta .status-4xx { color: var(--apt-warning); }
+    .apt-meta .status-5xx { color: var(--apt-error); }
+    
+    .apt-res-box { background: #0a0a14; border: 1px solid var(--apt-border); border-radius: 10px; padding: 1rem; min-height: 180px; max-height: 400px; overflow: auto; font-family: 'Courier New', monospace; font-size: 0.85rem; line-height: 1.6; position: relative; }
+    .apt-res-placeholder { color: var(--apt-text-muted); font-style: italic; }
+    
+    /* Response Actions */
+    .apt-res-actions { display: flex; justify-content: space-between; align-items: center; margin-top: 0.6rem; padding-top: 0.6rem; border-top: 1px solid var(--apt-border); flex-wrap: wrap; gap: 0.5rem; }
+    .apt-res-format { display: flex; gap: 0.3rem; }
+    .apt-format-btn { padding: 0.3rem 0.7rem; background: var(--apt-input); border: 1px solid var(--apt-border); border-radius: 6px; color: var(--apt-text-muted); font-size: 0.75rem; cursor: pointer; transition: var(--apt-transition); }
+    .apt-format-btn:hover, .apt-format-btn.active { background: var(--apt-primary); color: white; border-color: transparent; }
+    .apt-res-buttons { display: flex; gap: 0.4rem; }
+    
+    /* History */
+    .apt-history { margin-top: 1.2rem; padding-top: 1rem; border-top: 1px solid var(--apt-border); }
+    .apt-history-header { display: flex; justify-content: space-between; align-items: center; cursor: pointer; margin-bottom: 0.6rem; }
+    .apt-history-title { font-size: 0.95rem; font-weight: 600; display: flex; align-items: center; gap: 0.4rem; }
+    .apt-history-toggle { color: var(--apt-text-muted); transition: var(--apt-transition); }
+    .apt-history-toggle.collapsed { transform: rotate(-90deg); }
+    .apt-history-list { display: grid; gap: 0.4rem; max-height: 180px; overflow-y: auto; transition: var(--apt-transition); }
+    .apt-history-list.collapsed { display: none; }
+    .apt-history-item { padding: 0.6rem 0.8rem; background: var(--apt-input); border-radius: 8px; cursor: pointer; border-left: 3px solid var(--apt-primary); transition: var(--apt-transition); display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; }
+    .apt-history-item:hover { background: #252545; }
+    .apt-history-info { display: flex; flex-direction: column; gap: 0.2rem; }
+    .apt-history-method { font-weight: 600; font-size: 0.8rem; }
+    .apt-history-method.GET { color: var(--apt-success); } .apt-history-method.POST { color: var(--apt-primary); } .apt-history-method.PUT { color: var(--apt-warning); } .apt-history-method.DELETE { color: var(--apt-error); }
+    .apt-history-url { color: var(--apt-text-muted); font-size: 0.75rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 250px; }
+    .apt-history-time { font-size: 0.7rem; color: var(--apt-text-muted); }
+    .apt-history-del { padding: 0.2rem 0.5rem; background: transparent; border: none; color: var(--apt-error); cursor: pointer; border-radius: 4px; font-size: 0.75rem; }
+    .apt-history-del:hover { background: rgba(239,68,68,0.15); }
+    
+    /* Toast */
+    .apt-toast { position: fixed; bottom: 1.2rem; right: 1.2rem; padding: 0.7rem 1.1rem; background: var(--apt-card); border-left: 4px solid var(--apt-success); border-radius: 10px; box-shadow: var(--apt-shadow); display: flex; align-items: center; gap: 0.5rem; z-index: 9999; transform: translateY(150%); transition: transform 0.35s cubic-bezier(0.68,-0.55,0.265,1.55); font-size: 0.9rem; }
+    .apt-toast.show { transform: translateY(0); }
+    .apt-toast.error { border-left-color: var(--apt-error); }
+    .apt-toast i { font-size: 1rem; }
+    
+    /* Responsive */
+    @media (max-width: 700px) {
+      .apt-url-bar { flex-direction: column; }
+      .apt-method { width: 100%; }
+      .apt-auth-grid { grid-template-columns: 1fr; }
+      .apt-res-actions { flex-direction: column; align-items: flex-start; }
+      .apt-history-url { max-width: 150px; }
+    }
+  </style>
+
+  <!-- Header -->
+  <div class="apt-header">
+    <div class="apt-title"><i class="fas fa-bolt"></i> API Pro Tester</div>
+    <div class="apt-actions">
+      <button class="apt-btn-sm" id="apt-clear-all" title="Clear History"><i class="fas fa-trash"></i> Clear All</button>
+      <button class="apt-btn-sm" id="apt-export" title="Export Collection"><i class="fas fa-download"></i> Export</button>
+    </div>
+  </div>
+
+  <!-- URL Bar -->
+  <div class="apt-url-bar">
+    <select class="apt-method" id="apt-method">
+      <option class="GET">GET</option>
+      <option class="POST">POST</option>
+      <option class="PUT">PUT</option>
+      <option class="DELETE">DELETE</option>
+      <option class="PATCH">PATCH</option>
+    </select>
+    <input type="text" class="apt-url-input" id="apt-url" placeholder="https://api.example.com/v1/endpoint" value="https://jsonplaceholder.typicode.com/posts/1">
+    <button class="apt-send-btn" id="apt-send">
+      <div class="apt-spinner"></div>
+      <span class="apt-btn-text">⚡ Send</span>
+    </button>
+  </div>
+
+  <!-- Tabs -->
+  <div class="apt-tabs">
+    <div class="apt-tab active" data-panel="params">🔗 Params</div>
+    <div class="apt-tab" data-panel="headers">📋 Headers</div>
+    <div class="apt-tab" data-panel="auth">🔐 Authorization</div>
+    <div class="apt-tab" data-panel="body">📦 Body</div>
+    <div class="apt-tab" data-panel="settings">⚙️ Settings</div>
+  </div>
+
+  <!-- Params Panel -->
+  <div class="apt-panel active" id="params">
+    <div class="apt-field">
+      <label class="apt-label">Query Parameters</label>
+      <div id="apt-qp-list"></div>
+      <button class="apt-qp-add" id="apt-qp-add">+ Add Param</button>
+    </div>
+  </div>
+
+  <!-- Headers Panel -->
+  <div class="apt-panel" id="headers">
+    <div class="apt-field">
+      <label class="apt-label">Request Headers (JSON)</label>
+      <textarea class="apt-textarea" id="apt-headers" placeholder='{"Content-Type": "application/json", "Authorization": "Bearer token"}'>{
+  "Content-Type": "application/json"
+}</textarea>
+    </div>
+  </div>
+
+  <!-- Auth Panel -->
+  <div class="apt-panel" id="auth">
+    <div class="apt-field">
+      <label class="apt-label">Authentication Type</label>
+      <div class="apt-auth-grid">
+        <div class="apt-auth-card active" data-auth="none">
+          <div class="apt-auth-card-title"><i class="fas fa-ban"></i> None</div>
+          <div class="apt-auth-card-desc">No authentication</div>
+        </div>
+        <div class="apt-auth-card" data-auth="bearer">
+          <div class="apt-auth-card-title"><i class="fas fa-key"></i> Bearer Token</div>
+          <div class="apt-auth-card-desc">API token in header</div>
+        </div>
+        <div class="apt-auth-card" data-auth="basic">
+          <div class="apt-auth-card-title"><i class="fas fa-user-lock"></i> Basic Auth</div>
+          <div class="apt-auth-card-desc">Username & password</div>
+        </div>
+        <div class="apt-auth-card" data-auth="apikey">
+          <div class="apt-auth-card-title"><i class="fas fa-shield-alt"></i> API Key</div>
+          <div class="apt-auth-card-desc">Key in header/query</div>
+        </div>
+      </div>
+    </div>
+    <div id="apt-auth-inputs"></div>
+  </div>
+
+  <!-- Body Panel -->
+  <div class="apt-panel" id="body">
+    <div class="apt-field">
+      <label class="apt-label">Content Type</label>
+      <select class="apt-select" id="apt-body-type">
+        <option value="json">JSON</option>
+        <option value="form">Form Data</option>
+        <option value="text">Plain Text</option>
+        <option value="xml">XML</option>
+      </select>
+    </div>
+    <div class="apt-field">
+      <label class="apt-label">Request Body</label>
+      <textarea class="apt-textarea" id="apt-body" placeholder='{"key": "value"}'>{
+  "title": "Sample Post",
+  "body": "This is the content",
+  "userId": 1
+}</textarea>
+    </div>
+  </div>
+
+  <!-- Settings Panel -->
+  <div class="apt-panel" id="settings">
+    <div class="apt-field">
+      <label class="apt-label">Request Timeout (ms)</label>
+      <input type="number" class="apt-input" id="apt-timeout" value="10000" min="1000" max="60000">
+    </div>
+    <div class="apt-field">
+      <label class="apt-label">CORS Proxy (if needed)</label>
+      <select class="apt-select" id="apt-proxy">
+        <option value="">None (Direct Request)</option>
+        <option value="https://api.allorigins.win/raw?url=">AllOrigins</option>
+        <option value="https://corsproxy.io/?">CORS Proxy</option>
+        <option value="https://thingproxy.freeboard.io/fetch/">FreeBoard</option>
+      </select>
+    </div>
+    <div class="apt-field">
+      <label class="apt-label">Environment Variables</label>
+      <textarea class="apt-textarea" id="apt-env" placeholder='{"baseUrl": "https://api.example.com", "token": "your_token"}' style="min-height: 70px;">{
+  "baseUrl": "https://jsonplaceholder.typicode.com"
+}</textarea>
+    </div>
+  </div>
+
+  <!-- Response -->
+  <div class="apt-response">
+    <div class="apt-meta" id="apt-meta">
+      <span>Make a request to see response</span>
+    </div>
+    <div class="apt-res-box" id="apt-res">
+      <span class="apt-res-placeholder">Response will appear here...</span>
+    </div>
+    <div class="apt-res-actions">
+      <div class="apt-res-format">
+        <button class="apt-format-btn active" data-format="pretty">Pretty</button>
+        <button class="apt-format-btn" data-format="raw">Raw</button>
+        <button class="apt-format-btn" data-format="preview">Preview</button>
+      </div>
+      <div class="apt-res-buttons">
+        <button class="apt-btn-sm" id="apt-copy-res"><i class="fas fa-copy"></i> Copy</button>
+        <button class="apt-btn-sm" id="apt-download"><i class="fas fa-download"></i> Download</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- History -->
+  <div class="apt-history">
+    <div class="apt-history-header" id="apt-history-toggle">
+      <div class="apt-history-title"><i class="fas fa-history"></i> Request History</div>
+      <span class="apt-history-toggle">▼</span>
+    </div>
+    <div class="apt-history-list" id="apt-history-list"></div>
+  </div>
+
+  <!-- Toast -->
+  <div class="apt-toast" id="apt-toast"><i class="fas fa-check-circle"></i><span id="apt-toast-msg"></span></div>
+
+  <script>
+    (function() {
+      'use strict';
+      
+      // DOM Cache
+      const $ = (id) => document.getElementById(id);
+      const $$ = (sel) => document.querySelectorAll(sel);
+      
+      const els = {
+        method: $('apt-method'), url: $('apt-url'), send: $('apt-send'),
+        tabs: $$('.apt-tab'), panels: $$('.apt-panel'),
+        headers: $('apt-headers'), body: $('apt-body'), bodyType: $('apt-body-type'),
+        authCards: $$('.apt-auth-card'), authInputs: $('apt-auth-inputs'),
+        qpList: $('apt-qp-list'), qpAdd: $('apt-qp-add'),
+        timeout: $('apt-timeout'), proxy: $('apt-proxy'), env: $('apt-env'),
+        meta: $('apt-meta'), res: $('apt-res'),
+        formatBtns: $$('.apt-format-btn'), copyRes: $('apt-copy-res'), download: $('apt-download'),
+        historyToggle: $('apt-history-toggle'), historyList: $('apt-history-list'),
+        clearAll: $('apt-clear-all'), exportBtn: $('apt-export'),
+        toast: $('apt-toast'), toastMsg: $('apt-toast-msg')
+      };
+
+      // State
+      const state = {
+        currentAuth: 'none',
+        queryParams: [],
+        response: { raw: '', pretty: '', format: 'pretty' },
+        history: JSON.parse(localStorage.getItem('apt_history') || '[]'),
+        historyCollapsed: false,
+        envVars: {}
+      };
+
+      // Toast
+      function toast(msg, type = 'success') {
+        els.toastMsg.textContent = msg;
+        els.toast.className = `apt-toast ${type} show`;
+        setTimeout(() => els.toast.classList.remove('show'), 2500);
+      }
+
+      // Tab Switching
+      els.tabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+          els.tabs.forEach(t => t.classList.remove('active'));
+          els.panels.forEach(p => p.classList.remove('active'));
+          tab.classList.add('active');
+          $(tab.dataset.panel).classList.add('active');
+        });
+      });
+
+      // Query Params Builder
+      function renderQP() {
+        els.qpList.innerHTML = state.queryParams.map((p, i) => `
+          <div class="apt-qp-row">
+            <input type="text" class="apt-input" placeholder="key" value="${p.k}" data-idx="${i}" data-field="k">
+            <input type="text" class="apt-input" placeholder="value" value="${p.v}" data-idx="${i}" data-field="v">
+            <button class="apt-qp-remove" data-idx="${i}">×</button>
+          </div>
+        `).join('') || '<span style="color:var(--apt-text-muted);font-size:0.85rem">No query parameters</span>';
+        
+        els.qpList.querySelectorAll('.apt-qp-remove').forEach(btn => {
+          btn.onclick = (e) => { state.queryParams.splice(e.target.dataset.idx, 1); renderQP(); };
+        });
+        els.qpList.querySelectorAll('input').forEach(inp => {
+          inp.oninput = (e) => { state.queryParams[e.target.dataset.idx][e.target.dataset.field] = e.target.value; };
+        });
+      }
+      els.qpAdd.onclick = () => { state.queryParams.push({k:'',v:''}); renderQP(); };
+
+      // Auth Selection
+      els.authCards.forEach(card => {
+        card.onclick = () => {
+          els.authCards.forEach(c => c.classList.remove('active'));
+          card.classList.add('active');
+          state.currentAuth = card.dataset.auth;
+          renderAuthInputs();
+        };
+      });
+      function renderAuthInputs() {
+        const auth = state.currentAuth;
+        if (auth === 'none') { els.authInputs.innerHTML = ''; return; }
+        if (auth === 'bearer') {
+          els.authInputs.innerHTML = `<div class="apt-field"><label class="apt-label">Bearer Token</label><input type="text" class="apt-input" id="apt-bearer" placeholder="your_token_here"></div>`;
+        } else if (auth === 'basic') {
+          els.authInputs.innerHTML = `<div style="display:grid;grid-template-columns:1fr 1fr;gap:0.5rem"><div class="apt-field"><label class="apt-label">Username</label><input type="text" class="apt-input" id="apt-basic-user"></div><div class="apt-field"><label class="apt-label">Password</label><input type="password" class="apt-input" id="apt-basic-pass"></div></div>`;
+        } else if (auth === 'apikey') {
+          els.authInputs.innerHTML = `<div style="display:grid;grid-template-columns:1fr 1fr;gap:0.5rem"><div class="apt-field"><label class="apt-label">Key Name</label><input type="text" class="apt-input" id="apt-api-key-name" value="X-API-Key"></div><div class="apt-field"><label class="apt-label">Key Value</label><input type="text" class="apt-input" id="apt-api-key-value"></div></div><div class="apt-field"><label class="apt-label">Location</label><select class="apt-select" id="apt-api-loc"><option value="header">Header</option><option value="query">Query Parameter</option></select></div>`;
+        }
+      }
+
+      // Build Request
+      function buildRequest() {
+        let url = els.url.value.trim();
+        if (!url) throw new Error('URL is required');
+        
+        // Apply env vars
+        Object.entries(state.envVars).forEach(([k,v]) => { url = url.replace(`{{${k}}}`, v); });
+        
+        // Add query params
+        const params = state.queryParams.filter(p => p.k).map(p => `${encodeURIComponent(p.k)}=${encodeURIComponent(p.v)}`).join('&');
+        if (params) url += (url.includes('?') ? '&' : '?') + params;
+        
+        // Apply proxy
+        const proxy = els.proxy.value;
+        if (proxy) url = proxy + encodeURIComponent(url);
+        
+        // Headers
+        let headers = {};
+        try {
+          if (els.headers.value.trim()) headers = JSON.parse(els.headers.value);
+        } catch(e) { throw new Error('Invalid headers JSON'); }
+        
+        // Auth
+        if (state.currentAuth === 'bearer') {
+          const token = $('apt-bearer')?.value;
+          if (token) headers['Authorization'] = `Bearer ${token}`;
+        } else if (state.currentAuth === 'basic') {
+          const u = $('apt-basic-user')?.value, p = $('apt-basic-pass')?.value;
+          if (u && p) headers['Authorization'] = 'Basic ' + btoa(`${u}:${p}`);
+        } else if (state.currentAuth === 'apikey') {
+          const name = $('apt-api-key-name')?.value || 'X-API-Key';
+          const val = $('apt-api-key-value')?.value;
+          const loc = $('apt-api-loc')?.value || 'header';
+          if (val) { if (loc === 'header') headers[name] = val; else url += (url.includes('?')?'&':'?') + `${name}=${val}`; }
+        }
+        
+        // Body
+        let body = null;
+        const method = els.method.value;
+        if (['POST','PUT','PATCH'].includes(method) && els.body.value.trim()) {
+          const type = els.bodyType.value;
+          if (type === 'json') {
+            try { body = JSON.stringify(JSON.parse(els.body.value)); headers['Content-Type'] = 'application/json'; }
+            catch(e) { throw new Error('Invalid JSON body'); }
+          } else if (type === 'form') {
+            const fd = new FormData();
+            els.body.value.split('\n').forEach(line => {
+              const [k,v] = line.split('=').map(s => s?.trim());
+              if (k && v) fd.append(k, v);
+            });
+            body = fd; delete headers['Content-Type'];
+          } else { body = els.body.value; }
+        }
+        
+        return { url, method, headers, body, timeout: parseInt(els.timeout.value) || 10000 };
+      }
+
+      // Send Request
+      async function sendRequest() {
+        els.send.classList.add('loading');
+        els.send.disabled = true;
+        els.meta.innerHTML = '<span>Sending request...</span>';
+        els.res.innerHTML = '<span class="apt-res-placeholder">Loading...</span>';
+        
+        const t0 = performance.now();
+        let reqInfo = null;
+        
+        try {
+          // Parse env vars
+          try { state.envVars = JSON.parse(els.env.value || '{}'); } catch { state.envVars = {}; }
+          
+          const req = buildRequest();
+          reqInfo = { method: req.method, url: els.url.value, time: new Date().toLocaleTimeString() };
+          
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), req.timeout);
+          
+          const res = await fetch(req.url, {
+            method: req.method,
+            headers: req.headers,
+            body: req.body,
+            signal: controller.signal
+          });
+          clearTimeout(timeoutId);
+          
+          const t1 = performance.now();
+          const raw = await res.text();
+          const size = new Blob([raw]).size;
+          
+          // Format response
+          let pretty = raw;
+          try { pretty = JSON.stringify(JSON.parse(raw), null, 2); } catch {}
+          
+          state.response = { raw, pretty, format: 'pretty' };
+          renderResponse();
+          
+          // Meta
+          const statusClass = res.status >= 500 ? 'status-5xx' : res.status >= 400 ? 'status-4xx' : 'status-2xx';
+          els.meta.innerHTML = `
+            <span class="status ${statusClass}">● ${res.status} ${res.statusText}</span>
+            <span>⏱ ${Math.round(t1-t0)}ms</span>
+            <span>📦 ${(size/1024).toFixed(2)} KB</span>
+            <span>🌐 ${new URL(req.url).hostname}</span>
+          `;
+          
+          // Save to history
+          saveHistory({ ...reqInfo, status: res.status, duration: Math.round(t1-t0) });
+          toast('✅ Response received');
+          
+        } catch (err) {
+          const msg = err.name === 'AbortError' ? '⏰ Request timeout' : err.message;
+          els.meta.innerHTML = `<span style="color:var(--apt-error)">❌ ${msg}</span>`;
+          els.res.innerHTML = `<span style="color:var(--apt-error)">Error: ${msg}\n\n💡 Tips:\n• Check URL is correct\n• Enable CORS proxy in Settings\n• Verify network connection</span>`;
+          if (reqInfo) saveHistory({ ...reqInfo, status: 'Error', duration: 0, error: msg });
+          toast(err.name === 'AbortError' ? '⏰ Timeout' : '❌ ' + msg, 'error');
+        } finally {
+          els.send.classList.remove('loading');
+          els.send.disabled = false;
+        }
+      }
+
+      // Render Response
+      function renderResponse() {
+        const { raw, pretty, format } = state.response;
+        if (format === 'pretty') {
+          els.res.innerHTML = `<pre style="margin:0;white-space:pre-wrap">${escapeHtml(pretty)}</pre>`;
+        } else if (format === 'raw') {
+          els.res.innerHTML = `<pre style="margin:0;white-space:pre-wrap;font-size:0.8rem">${escapeHtml(raw)}</pre>`;
+        } else {
+          els.res.innerHTML = `<div style="min-height:150px">${raw}</div>`;
+        }
+        els.res.innerHTML += `<button class="apt-btn-sm" id="apt-copy-inline" style="position:absolute;top:0.5rem;right:0.5rem;z-index:2">📋</button>`;
+        $('apt-copy-inline').onclick = copyResponse;
+      }
+
+      // Format Buttons
+      els.formatBtns.forEach(btn => {
+        btn.onclick = () => {
+          els.formatBtns.forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          state.response.format = btn.dataset.format;
+          renderResponse();
+        };
+      });
+
+      // Copy Response
+      function copyResponse() {
+        const text = state.response.format === 'pretty' ? state.response.pretty : state.response.raw;
+        navigator.clipboard.writeText(text).then(() => {
+          toast('📋 Copied to clipboard');
+        }).catch(() => toast('❌ Copy failed', 'error'));
+      }
+      els.copyRes.onclick = copyResponse;
+
+      // Download Response
+      els.download.onclick = () => {
+        const blob = new Blob([state.response.raw], { type: 'application/json' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = `response_${Date.now()}.json`;
+        a.click();
+        URL.revokeObjectURL(a.href);
+        toast('💾 Downloaded');
+      };
+
+      // History
+      function saveHistory(item) {
+        state.history.unshift(item);
+        if (state.history.length > 20) state.history.pop();
+        localStorage.setItem('apt_history', JSON.stringify(state.history));
+        renderHistory();
+      }
+      function renderHistory() {
+        if (state.history.length === 0) {
+          els.historyList.innerHTML = '<span style="color:var(--apt-text-muted);font-size:0.85rem;padding:0.5rem">No history yet</span>';
+          return;
+        }
+        els.historyList.innerHTML = state.history.map((h, i) => `
+          <div class="apt-history-item" onclick="window._aptLoadHist(${i})">
+            <div class="apt-history-info">
+              <span class="apt-history-method ${h.method}">${h.method}</span>
+              <span class="apt-history-url" title="${h.url}">${h.url}</span>
+            </div>
+            <div style="text-align:right">
+              <span class="apt-history-time">${h.time}</span><br>
+              <small style="color:${h.status==='Error'?'var(--apt-error)':h.status>=400?'var(--apt-warning)':'var(--apt-success)'}">${h.status} • ${h.duration}ms</small>
+            </div>
+            <button class="apt-history-del" onclick="window._aptDelHist(${i});event.stopPropagation()">✕</button>
+          </div>
+        `).join('');
+      }
+      window._aptLoadHist = (i) => {
+        const h = state.history[i];
+        els.method.value = h.method;
+        els.url.value = h.url;
+        toast('📜 Request loaded');
+        els.url.scrollIntoView({ behavior: 'smooth' });
+      };
+      window._aptDelHist = (i) => {
+        state.history.splice(i, 1);
+        localStorage.setItem('apt_history', JSON.stringify(state.history));
+        renderHistory();
+        toast('🗑️ Deleted');
+      };
+      
+      els.historyToggle.onclick = () => {
+        state.historyCollapsed = !state.historyCollapsed;
+        els.historyList.classList.toggle('collapsed', state.historyCollapsed);
+        els.historyToggle.classList.toggle('collapsed', state.historyCollapsed);
+      };
+
+      // Clear All History
+      els.clearAll.onclick = () => {
+        if (confirm('Clear all request history?')) {
+          state.history = [];
+          localStorage.removeItem('apt_history');
+          renderHistory();
+          toast('🗑️ History cleared');
+        }
+      };
+
+      // Export Collection
+      els.exportBtn.onclick = () => {
+        const collection = {
+          name: 'API Pro Collection',
+          requests: state.history.map(h => ({ method: h.method, url: h.url })),
+          exported: new Date().toISOString()
+        };
+        const blob = new Blob([JSON.stringify(collection, null, 2)], { type: 'application/json' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = `api_collection_${Date.now()}.json`;
+        a.click();
+        URL.revokeObjectURL(a.href);
+        toast('📦 Collection exported');
+      };
+
+      // Utility: Escape HTML
+      function escapeHtml(str) {
+        const div = document.createElement('div');
+        div.textContent = str;
+        return div.innerHTML;
+      }
+
+      // Keyboard Shortcuts
+      document.addEventListener('keydown', (e) => {
+        if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { e.preventDefault(); sendRequest(); }
+        if (e.key === '/' && document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'TEXTAREA') {
+          e.preventDefault(); els.url.focus();
+        }
+      });
+
+      // Init
+      els.send.onclick = sendRequest;
+      renderQP();
+      renderAuthInputs();
+      renderHistory();
+      
+      // Auto-resize body textarea
+      els.body.addEventListener('input', function() {
+        this.style.height = 'auto';
+        this.style.height = Math.min(this.scrollHeight, 300) + 'px';
+      });
+      
+      console.log('✅ API Pro Tester Ready');
+    })();
+  </script>
+</div>

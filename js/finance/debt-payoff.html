@@ -1,0 +1,259 @@
+<div class="debt-tool">
+  <style>
+    .debt-tool {
+      --bg: #0f172a; --card: #1e293b; --card-hover: #253347;
+      --text: #f8fafc; --text-muted: #94a3b8; --border: #334155;
+      --accent: #3b82f6; --success: #10b981; --danger: #ef4444; --warning: #f59e0b;
+      --glow: rgba(59,130,246,0.2);
+      font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+      max-width: 480px; margin: 2rem auto; background: var(--bg);
+      border-radius: 20px; box-shadow: 0 8px 30px rgba(0,0,0,0.35);
+      overflow: hidden; color: var(--text); line-height: 1.4;
+    }
+    .debt-tool * { box-sizing: border-box; }
+    .dt-header { padding: 1.2rem; text-align: center; border-bottom: 1px solid var(--border); background: linear-gradient(180deg, rgba(239,68,68,0.08), transparent); }
+    .dt-header h2 { margin: 0; font-size: 1.3rem; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 0.5rem; }
+    .dt-section { padding: 1rem 1.5rem; background: var(--card); border-bottom: 1px solid var(--border); }
+    .dt-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; }
+    .dt-input, .dt-select { width: 100%; padding: 0.85rem; border-radius: 10px; border: 1px solid var(--border); background: #0b1120; color: var(--text); font-size: 1rem; outline: none; transition: all 0.2s; }
+    .dt-input:focus, .dt-select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--glow); }
+    .dt-label { display: block; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.3rem; }
+    .dt-results { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.8rem; }
+    .dt-card { background: #0b1120; border: 1px solid var(--border); border-radius: 12px; padding: 0.9rem; text-align: center; transition: all 0.2s; }
+    .dt-card:hover { border-color: var(--accent); transform: translateY(-2px); }
+    .dt-val { font-size: 1.2rem; font-weight: 700; margin-bottom: 0.2rem; }
+    .dt-lbl { font-size: 0.75rem; color: var(--text-muted); }
+    .dt-warning { grid-column: span 3; background: rgba(239,68,68,0.1); border-color: var(--danger); color: var(--danger); font-size: 0.85rem; padding: 0.6rem; border-radius: 8px; display: none; }
+    .dt-slider-wrap { padding: 0 1.5rem; background: var(--card); border-bottom: 1px solid var(--border); }
+    .dt-slider { width: 100%; margin: 0.8rem 0; accent-color: var(--accent); }
+    .dt-slider-label { display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--text-muted); }
+    .dt-chart { padding: 1.5rem; background: var(--card); border-bottom: 1px solid var(--border); }
+    .dt-chart-title { font-size: 0.9rem; margin-bottom: 0.8rem; display: flex; justify-content: space-between; }
+    .dt-bar { display: flex; height: 12px; background: var(--border); border-radius: 6px; overflow: hidden; }
+    .dt-bar-fill { height: 100%; background: linear-gradient(90deg, var(--danger), var(--warning), var(--success)); transition: width 0.5s ease; }
+    .dt-bar-remain { height: 100%; background: #334155; transition: width 0.5s ease; }
+    .dt-legend { display: flex; gap: 1rem; margin-top: 0.6rem; font-size: 0.75rem; color: var(--text-muted); justify-content: center; }
+    .dt-legend span::before { content: ''; display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 4px; vertical-align: middle; }
+    .dt-legend span:nth-child(1)::before { background: var(--danger); }
+    .dt-legend span:nth-child(2)::before { background: var(--success); }
+    .dt-amort { background: var(--card); max-height: 280px; overflow-y: auto; }
+    .dt-table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
+    .dt-table th { position: sticky; top: 0; background: #0b1120; padding: 0.6rem; text-align: right; color: var(--text-muted); font-weight: 500; border-bottom: 1px solid var(--border); }
+    .dt-table th:first-child { text-align: left; }
+    .dt-table td { padding: 0.5rem 0.6rem; text-align: right; border-bottom: 1px solid var(--border); }
+    .dt-table td:first-child { text-align: left; color: var(--text-muted); }
+    .dt-table tr:hover td { background: rgba(59,130,246,0.05); }
+    .dt-actions { padding: 1rem 1.5rem; background: var(--card); display: flex; gap: 0.8rem; }
+    .dt-btn { flex: 1; padding: 0.75rem; border: none; border-radius: 10px; font-weight: 500; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 0.4rem; }
+    .dt-btn-primary { background: var(--accent); color: #fff; }
+    .dt-btn-primary:hover { background: #2563eb; transform: translateY(-1px); }
+    .dt-btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text-muted); }
+    .dt-btn-outline:hover { background: var(--card-hover); color: var(--text); border-color: var(--accent); }
+    .dt-footer { padding: 0.8rem 1.5rem; text-align: center; font-size: 0.75rem; color: var(--text-muted); background: rgba(0,0,0,0.2); }
+    .dt-tip { margin-top: 0.4rem; font-style: italic; color: var(--warning); }
+    @media (max-width: 480px) {
+      .dt-results { grid-template-columns: 1fr; }
+      .dt-warning { grid-column: span 1; }
+    }
+  </style>
+
+  <div class="dt-header">
+    <h2>📉 Debt Payoff Planner</h2>
+    <p style="color:var(--text-muted); margin:0.3rem 0 0; font-size:0.85rem;">Amortization • Savings Tracker • Smart Simulator</p>
+  </div>
+
+  <div class="dt-section">
+    <div class="dt-grid">
+      <div><label class="dt-label">Total Debt (₹)</label><input type="number" class="dt-input" id="dt-principal" placeholder="500000" min="0"></div>
+      <div><label class="dt-label">Annual Interest (%)</label><input type="number" class="dt-input" id="dt-rate" placeholder="9.5" min="0" step="0.1"></div>
+      <div style="grid-column: span 2;"><label class="dt-label">Monthly Payment (₹)</label><input type="number" class="dt-input" id="dt-payment" placeholder="15000" min="0"></div>
+    </div>
+    <div class="dt-warning" id="dt-warn">⚠️ Payment is too low to cover monthly interest. Debt will grow!</div>
+  </div>
+
+  <div class="dt-results">
+    <div class="dt-card"><div class="dt-val" id="dt-months">--</div><div class="dt-lbl">Months to Payoff</div></div>
+    <div class="dt-card"><div class="dt-val" id="dt-interest">₹0</div><div class="dt-lbl">Total Interest</div></div>
+    <div class="dt-card"><div class="dt-val" id="dt-save" style="color:var(--success)">₹0</div><div class="dt-lbl">Interest Saved</div></div>
+  </div>
+
+  <div class="dt-slider-wrap">
+    <div class="dt-slider-label"><span>💡 Pay Extra</span><span id="dt-extra-val">+₹0/mo</span></div>
+    <input type="range" class="dt-slider" id="dt-extra" min="0" max="50000" step="500" value="0">
+  </div>
+
+  <div class="dt-chart">
+    <div class="dt-chart-title"><span>Payoff Progress</span><span id="dt-percent">0%</span></div>
+    <div class="dt-bar"><div class="dt-bar-remain" id="dt-remain-bar" style="width:100%"></div><div class="dt-bar-fill" id="dt-progress-bar" style="width:0%"></div></div>
+    <div class="dt-legend"><span>Principal</span><span>Paid Off</span></div>
+  </div>
+
+  <div class="dt-amort">
+    <table class="dt-table">
+      <thead><tr><th>Month</th><th>Payment</th><th>Interest</th><th>Principal</th><th>Balance</th></tr></thead>
+      <tbody id="dt-tbody"></tbody>
+    </table>
+  </div>
+
+  <div class="dt-actions">
+    <button class="dt-btn dt-btn-outline" id="dt-export">📥 Export CSV</button>
+    <button class="dt-btn dt-btn-primary" id="dt-reset">🔄 Reset</button>
+  </div>
+
+  <div class="dt-footer">
+    📊 Calculated using standard amortization formula • Data auto-saved locally
+    <div class="dt-tip" id="dt-tip">Adjust extra payment to see interest savings instantly.</div>
+  </div>
+
+  <script>
+    (function() {
+      const STORAGE_KEY = 'debt_tool_v2';
+      const INR = v => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(v || 0);
+      const fmtNum = v => new Intl.NumberFormat('en-IN').format(v || 0);
+
+      const els = {
+        p: document.getElementById('dt-principal'),
+        r: document.getElementById('dt-rate'),
+        m: document.getElementById('dt-payment'),
+        warn: document.getElementById('dt-warn'),
+        months: document.getElementById('dt-months'),
+        interest: document.getElementById('dt-interest'),
+        save: document.getElementById('dt-save'),
+        extra: document.getElementById('dt-extra'),
+        extraVal: document.getElementById('dt-extra-val'),
+        percent: document.getElementById('dt-percent'),
+        progress: document.getElementById('dt-progress-bar'),
+        remain: document.getElementById('dt-remain-bar'),
+        tbody: document.getElementById('dt-tbody'),
+        exportBtn: document.getElementById('dt-export'),
+        resetBtn: document.getElementById('dt-reset'),
+        tip: document.getElementById('dt-tip')
+      };
+
+      let state = { p: 500000, r: 9.5, m: 15000, extra: 0 };
+      let schedule = [];
+
+      const load = () => {
+        try {
+          const s = localStorage.getItem(STORAGE_KEY);
+          if(s) Object.assign(state, JSON.parse(s));
+        } catch(e) {}
+        els.p.value = state.p; els.r.value = state.r; els.m.value = state.m; els.extra.value = state.extra;
+        calculate();
+      };
+
+      const save = () => {
+        try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch(e) {}
+      };
+
+      const calculate = () => {
+        const P = parseFloat(els.p.value) || 0;
+        const R = parseFloat(els.r.value) || 0;
+        const M = parseFloat(els.m.value) || 0;
+        const E = parseFloat(els.extra.value) || 0;
+        const totalM = M + E;
+        const r = R / 1200;
+
+        // Validation
+        if(P <= 0 || M <= 0) { clearUI(); return; }
+        const minInterest = P * r;
+        const isInvalid = totalM <= minInterest;
+        els.warn.style.display = isInvalid ? 'block' : 'none';
+        if(isInvalid) { els.tip.textContent = '💡 Increase payment above ₹' + fmtNum(Math.ceil(minInterest)) + ' to start reducing debt.'; clearUI(); return; }
+
+        // Core Amortization
+        schedule = [];
+        let balance = P;
+        let totalInterest = 0;
+        let month = 0;
+        const MAX_MONTHS = 600; // 50 years safety cap
+
+        while(balance > 0 && month < MAX_MONTHS) {
+          month++;
+          const interest = balance * r;
+          let principal = totalM - interest;
+          if(principal >= balance) { principal = balance; }
+          balance -= principal;
+          totalInterest += interest;
+          if(balance < 0.01) balance = 0;
+          schedule.push({ m: month, pay: totalM, int: interest, princ: principal, bal: balance });
+          if(balance === 0) break;
+        }
+
+        const minTotalM = minInterest + 1;
+        const minMonths = Math.ceil(-Math.log(1 - (P * r) / minTotalM) / Math.log(1 + r));
+        const minInterestTotal = (minTotalM * minMonths) - P;
+
+        // Update UI
+        els.months.textContent = month;
+        els.interest.textContent = INR(totalInterest);
+        els.save.textContent = INR(minInterestTotal - totalInterest);
+        els.percent.textContent = `${Math.round((1 - balance/P)*100)}%`;
+        els.progress.style.width = `${(1 - balance/P)*100}%`;
+        els.remain.style.width = `${(balance/P)*100}%`;
+        els.extraVal.textContent = `+₹${fmtNum(E)}/mo`;
+
+        // Render Table (Optimized: show first 6, ellipsis, last 3)
+        renderTable(schedule);
+
+        // Smart Tips
+        if(month < 12) els.tip.textContent = '🔥 You can clear this debt in under a year! Great job.';
+        else if(month < 36) els.tip.textContent = '⚡ Steady progress. Paying ₹' + fmtNum(E) + ' extra saves ₹' + fmtNum(minInterestTotal - totalInterest) + ' in interest.';
+        else els.tip.textContent = '📉 Consider refinancing or increasing payment to reduce long-term interest burden.';
+
+        save();
+      };
+
+      const renderTable = (data) => {
+        els.tbody.innerHTML = '';
+        if(data.length === 0) return;
+        const frag = document.createDocumentFragment();
+        const show = data.length <= 12 ? data : [...data.slice(0, 6), {m:'...', pay:'...', int:'...', princ:'...', bal:'...'}, ...data.slice(-3)];
+        show.forEach(r => {
+          const tr = document.createElement('tr');
+          tr.innerHTML = `<td>${typeof r.m === 'string' ? r.m : r.m}</td><td>${typeof r.pay === 'string' ? '...' : INR(r.pay)}</td><td style="color:var(--danger)">${typeof r.int === 'string' ? '...' : INR(r.int)}</td><td style="color:var(--success)">${typeof r.princ === 'string' ? '...' : INR(r.princ)}</td><td>${typeof r.bal === 'string' ? '...' : INR(r.bal)}</td>`;
+          frag.appendChild(tr);
+        });
+        els.tbody.appendChild(frag);
+      };
+
+      const clearUI = () => {
+        els.months.textContent = '--'; els.interest.textContent = '₹0'; els.save.textContent = '₹0';
+        els.percent.textContent = '0%'; els.progress.style.width = '0%'; els.remain.style.width = '100%';
+        els.tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:1rem;color:var(--text-muted)">Enter valid details</td></tr>';
+      };
+
+      // Events
+      [els.p, els.r, els.m].forEach(el => {
+        el.addEventListener('input', () => {
+          state[el === els.p ? 'p' : el === els.r ? 'r' : 'm'] = parseFloat(el.value) || 0;
+          calculate();
+        });
+      });
+      els.extra.addEventListener('input', () => {
+        state.extra = parseFloat(els.extra.value) || 0;
+        calculate();
+      });
+
+      els.exportBtn.addEventListener('click', () => {
+        if(schedule.length === 0) return;
+        let csv = 'Month,Payment,Interest,Principal,Remaining Balance\n';
+        schedule.forEach(r => csv += `${r.m},${r.pay.toFixed(2)},${r.int.toFixed(2)},${r.princ.toFixed(2)},${r.bal.toFixed(2)}\n`);
+        const blob = new Blob([csv], { type: 'text/csv' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a'); a.href = url; a.download = `debt_schedule_${new Date().toISOString().slice(0,10)}.csv`; a.click(); URL.revokeObjectURL(url);
+      });
+
+      els.resetBtn.addEventListener('click', () => {
+        if(confirm('Reset all data to default?')) {
+          localStorage.removeItem(STORAGE_KEY);
+          state = { p: 500000, r: 9.5, m: 15000, extra: 0 };
+          els.p.value = state.p; els.r.value = state.r; els.m.value = state.m; els.extra.value = state.extra;
+          calculate();
+        }
+      });
+
+      load();
+    })();
+  </script>
+</div>

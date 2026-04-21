@@ -1,0 +1,574 @@
+<div class="privacy-widget">
+  <style>
+    .privacy-widget {
+      --pw-bg: var(--bg-card, #111827);
+      --pw-border: var(--glass-border, #374151);
+      --pw-text: var(--text-primary, #f9fafb);
+      --pw-muted: var(--text-secondary, #9ca3af);
+      --pw-accent: #3b82f6;
+      --pw-success: #10b981;
+      --pw-warning: #f59e0b;
+      --pw-danger: #ef4444;
+      --pw-radius: 16px;
+      --pw-transition: 0.25s ease;
+      
+      background: var(--pw-bg);
+      border: 1px solid var(--pw-border);
+      border-radius: var(--pw-radius);
+      padding: 1.5rem;
+      max-width: 720px;
+      margin: 2rem auto;
+      font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+      color: var(--pw-text);
+      box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+      line-height: 1.6;
+    }
+    .privacy-widget * { box-sizing: border-box; }
+    
+    /* Header */
+    .pw-header { text-align: center; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid var(--pw-border); }
+    .pw-title { font-size: 1.5rem; font-weight: 700; margin: 0 0 0.3rem; display: flex; align-items: center; justify-content: center; gap: 0.5rem; }
+    .pw-meta { display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap; font-size: 0.85rem; color: var(--pw-muted); }
+    .pw-meta span { display: flex; align-items: center; gap: 0.3rem; }
+    
+    /* Language & Actions */
+    .pw-actions { display: flex; justify-content: flex-end; gap: 0.5rem; margin-bottom: 1rem; flex-wrap: wrap; }
+    .pw-select { padding: 0.4rem 0.7rem; border-radius: 6px; border: 1px solid var(--pw-border); background: rgba(255,255,255,0.05); color: var(--pw-text); font-size: 0.85rem; cursor: pointer; }
+    .pw-btn-sm { padding: 0.4rem 0.7rem; border-radius: 6px; border: 1px solid var(--pw-border); background: rgba(255,255,255,0.05); color: var(--pw-text); font-size: 0.8rem; cursor: pointer; transition: var(--pw-transition); display: flex; align-items: center; gap: 0.3rem; }
+    .pw-btn-sm:hover { background: var(--pw-accent); color: #fff; border-color: var(--pw-accent); }
+    
+    /* Accordion Sections */
+    .pw-section { margin-bottom: 0.8rem; border: 1px solid var(--pw-border); border-radius: 10px; overflow: hidden; }
+    .pw-section-header {
+      padding: 0.9rem 1.2rem; background: rgba(255,255,255,0.03); cursor: pointer;
+      display: flex; justify-content: space-between; align-items: center; font-weight: 600;
+      transition: var(--pw-transition);
+    }
+    .pw-section-header:hover { background: rgba(59,130,246,0.1); }
+    .pw-section-header .pw-toggle { font-size: 1.2rem; transition: transform 0.2s; }
+    .pw-section-header.active .pw-toggle { transform: rotate(180deg); }
+    .pw-section-content { padding: 0 1.2rem 1.2rem; display: none; color: var(--pw-muted); font-size: 0.95rem; }
+    .pw-section-content.show { display: block; animation: pw-slideDown 0.2s ease; }
+    @keyframes pw-slideDown { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
+    
+    /* Lists & Links */
+    .pw-list { margin: 0.5rem 0 0 1.3rem; padding-left: 0.5rem; }
+    .pw-list li { margin-bottom: 0.3rem; }
+    .pw-link { color: var(--pw-accent); text-decoration: none; }
+    .pw-link:hover { text-decoration: underline; }
+    
+    /* Consent Manager */
+    .pw-consent { background: rgba(59,130,246,0.08); border: 1px solid var(--pw-accent); border-radius: 10px; padding: 1rem; margin: 1rem 0; }
+    .pw-consent-title { font-weight: 600; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.4rem; }
+    .pw-consent-item { display: flex; align-items: center; justify-content: space-between; padding: 0.5rem 0; border-bottom: 1px solid var(--pw-border); }
+    .pw-consent-item:last-child { border: none; }
+    .pw-consent-label { display: flex; align-items: center; gap: 0.5rem; font-size: 0.9rem; }
+    .pw-consent-label input { accent-color: var(--pw-accent); width: 18px; height: 18px; }
+    .pw-consent-status { font-size: 0.8rem; padding: 0.2rem 0.5rem; border-radius: 4px; }
+    .pw-consent-status.on { background: rgba(16,185,129,0.2); color: var(--pw-success); }
+    .pw-consent-status.off { background: rgba(107,114,128,0.2); color: var(--pw-muted); }
+    
+    /* Data Controls */
+    .pw-controls { display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem; margin: 1rem 0; }
+    .pw-control-btn {
+      padding: 0.7rem; border: none; border-radius: 8px; font-weight: 500; font-size: 0.9rem;
+      cursor: pointer; transition: var(--pw-transition); display: flex; align-items: center; justify-content: center; gap: 0.4rem;
+    }
+    .pw-control-btn.primary { background: var(--pw-accent); color: #fff; }
+    .pw-control-btn.primary:hover { filter: brightness(1.1); }
+    .pw-control-btn.danger { background: rgba(239,68,68,0.1); color: var(--pw-danger); border: 1px solid var(--pw-danger); }
+    .pw-control-btn.danger:hover { background: var(--pw-danger); color: #fff; }
+    .pw-control-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    
+    /* Third-Party Table */
+    .pw-table { width: 100%; border-collapse: collapse; margin: 0.5rem 0; font-size: 0.9rem; }
+    .pw-table th, .pw-table td { padding: 0.6rem; border-bottom: 1px solid var(--pw-border); text-align: left; }
+    .pw-table th { color: var(--pw-text); font-weight: 600; }
+    .pw-table td { color: var(--pw-muted); }
+    .pw-table .pw-badge { display: inline-block; padding: 0.2rem 0.5rem; border-radius: 4px; font-size: 0.75rem; background: rgba(59,130,246,0.15); color: var(--pw-accent); }
+    
+    /* Version History */
+    .pw-version { margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--pw-border); }
+    .pw-version-item { display: flex; justify-content: space-between; padding: 0.4rem 0; font-size: 0.85rem; color: var(--pw-muted); }
+    .pw-version-item .pw-tag { background: rgba(59,130,246,0.15); color: var(--pw-accent); padding: 0.15rem 0.5rem; border-radius: 4px; font-size: 0.75rem; }
+    
+    /* Consent Log */
+    .pw-log { margin-top: 0.8rem; padding: 0.6rem; background: rgba(255,255,255,0.03); border-radius: 6px; font-size: 0.8rem; color: var(--pw-muted); }
+    .pw-log-entry { display: flex; justify-content: space-between; padding: 0.2rem 0; border-bottom: 1px dashed var(--pw-border); }
+    .pw-log-entry:last-child { border: none; }
+    
+    /* Toast */
+    .pw-toast { position: fixed; bottom: 24px; right: 24px; padding: 0.75rem 1rem; border-radius: 8px; font-weight: 500; transform: translateY(120%); opacity: 0; transition: 0.3s; z-index: 9999; box-shadow: 0 8px 20px rgba(0,0,0,0.25); pointer-events: none; }
+    .pw-toast.success { background: var(--pw-success); color: #fff; }
+    .pw-toast.error { background: var(--pw-danger); color: #fff; }
+    .pw-toast.info { background: var(--pw-accent); color: #fff; }
+    .pw-toast.show { transform: translateY(0); opacity: 1; }
+    
+    /* Print Styles */
+    @media print {
+      .pw-actions, .pw-consent, .pw-controls, .pw-version, .pw-toast { display: none !important; }
+      .pw-section-content { display: block !important; }
+      .pw-section-header { background: none !important; border: none !important; }
+      body { background: #fff !important; color: #000 !important; }
+      .privacy-widget { box-shadow: none !important; border: none !important; }
+    }
+    
+    /* Light Mode */
+    :root.light-mode .privacy-widget { --pw-bg: #ffffff; --pw-border: #e5e7eb; --pw-text: #111827; --pw-muted: #6b7280; }
+    :root.light-mode .pw-section-header { background: #f9fafb; }
+    :root.light-mode .pw-consent { background: #eff6ff; border-color: #93c5fd; }
+    :root.light-mode .pw-btn-sm, :root.light-mode .pw-select { background: #f3f4f6; color: #374151; }
+  </style>
+
+  <!-- Header -->
+  <div class="pw-header">
+    <h1 class="pw-title">🔒 Privacy Policy</h1>
+    <div class="pw-meta">
+      <span>📅 Last Updated: <time datetime="2026-04-01">April 2026</time></span>
+      <span>🌍 Version: <strong>2.1</strong></span>
+      <span id="pw-last-viewed"></span>
+    </div>
+  </div>
+  
+  <!-- Actions -->
+  <div class="pw-actions">
+    <select class="pw-select" id="pw-lang">
+      <option value="en">🇬🇧 English</option>
+      <option value="hi">🇮🇳 हिंदी</option>
+      <option value="es">🇪🇸 Español</option>
+    </select>
+    <button class="pw-btn-sm" id="pw-copy">📋 Copy Policy</button>
+    <button class="pw-btn-sm" id="pw-print">🖨️ Print</button>
+  </div>
+  
+  <!-- Data Collection -->
+  <div class="pw-section">
+    <div class="pw-section-header" role="button" tabindex="0">
+      <span>📦 Data Collection & Storage</span>
+      <span class="pw-toggle">▼</span>
+    </div>
+    <div class="pw-section-content">
+      <p><strong>AbOmniTools operates entirely in your browser.</strong> No personal data is sent to external servers by default.</p>
+      <ul class="pw-list">
+        <li>All calculations happen locally on your device</li>
+        <li>History, favorites & preferences stored via <code>localStorage</code></li>
+        <li>No account registration required</li>
+        <li>No IP logging or fingerprinting</li>
+      </ul>
+      <p style="margin-top:0.8rem"><em>Exception: Optional features like Weather or QR Generator may send minimal query data to third-party APIs (see below).</em></p>
+    </div>
+  </div>
+  
+  <!-- Cookies & Tracking -->
+  <div class="pw-section">
+    <div class="pw-section-header" role="button" tabindex="0">
+      <span>🍪 Cookies & Tracking</span>
+      <span class="pw-toggle">▼</span>
+    </div>
+    <div class="pw-section-content">
+      <p>We do <strong>not</strong> use:</p>
+      <ul class="pw-list">
+        <li>❌ Tracking cookies or pixels</li>
+        <li>❌ Google Analytics, Meta Pixel, or similar</li>
+        <li>❌ Third-party advertising networks</li>
+        <li>❌ Cross-site tracking scripts</li>
+      </ul>
+      <p style="margin-top:0.8rem">The only storage used is <code>localStorage</code> for your preferences, which you can clear anytime via browser settings or our <strong>Settings > Clear Data</strong> option.</p>
+    </div>
+  </div>
+  
+  <!-- Consent Manager -->
+  <div class="pw-section">
+    <div class="pw-section-header" role="button" tabindex="0">
+      <span>⚙️ Consent Preferences</span>
+      <span class="pw-toggle">▼</span>
+    </div>
+    <div class="pw-section-content">
+      <div class="pw-consent">
+        <div class="pw-consent-title">🔐 Manage Your Permissions</div>
+        <div class="pw-consent-item">
+          <label class="pw-consent-label"><input type="checkbox" id="consent-essential" checked disabled> Essential Features</label>
+          <span class="pw-consent-status on">Required</span>
+        </div>
+        <div class="pw-consent-item">
+          <label class="pw-consent-label"><input type="checkbox" id="consent-apis"> External APIs (Weather, QR)</label>
+          <span class="pw-consent-status off" id="status-apis">Disabled</span>
+        </div>
+        <div class="pw-consent-item">
+          <label class="pw-consent-label"><input type="checkbox" id="consent-newsletter"> Newsletter Updates</label>
+          <span class="pw-consent-status off" id="status-newsletter">Disabled</span>
+        </div>
+        <div class="pw-consent-item">
+          <label class="pw-consent-label"><input type="checkbox" id="consent-analytics"> Anonymous Usage Stats</label>
+          <span class="pw-consent-status off" id="status-analytics">Disabled</span>
+        </div>
+      </div>
+      <button class="pw-control-btn primary" id="pw-save-consent" style="width:100%">💾 Save Preferences</button>
+      <div class="pw-log" id="pw-consent-log">
+        <div style="font-weight:500;margin-bottom:0.3rem">📜 Consent Log</div>
+        <div id="pw-log-entries"></div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Third-Party APIs -->
+  <div class="pw-section">
+    <div class="pw-section-header" role="button" tabindex="0">
+      <span>🔗 Third-Party Services</span>
+      <span class="pw-toggle">▼</span>
+    </div>
+    <div class="pw-section-content">
+      <p>Optional tools may connect to these privacy-respecting APIs:</p>
+      <table class="pw-table">
+        <thead><tr><th>Service</th><th>Purpose</th><th>Data Sent</th><th>Privacy</th></tr></thead>
+        <tbody>
+          <tr><td>Open-Meteo</td><td>Weather forecasts</td><td>City name, coords</td><td><span class="pw-badge">No tracking</span></td></tr>
+          <tr><td>QRServer</td><td>QR code generation</td><td>Text/URL to encode</td><td><span class="pw-badge">No logs</span></td></tr>
+          <tr><td>ExchangeRate-API</td><td>Currency conversion</td><td>Currency codes</td><td><span class="pw-badge">GDPR compliant</span></td></tr>
+          <tr><td>GitHub API</td><td>Tool updates check</td><td>Current version</td><td><span class="pw-badge">Public only</span></td></tr>
+        </tbody>
+      </table>
+      <p style="font-size:0.85rem;margin-top:0.5rem"><em>💡 Tip: Disable "External APIs" in Consent Preferences to block all third-party connections.</em></p>
+    </div>
+  </div>
+  
+  <!-- Your Rights (GDPR) -->
+  <div class="pw-section">
+    <div class="pw-section-header" role="button" tabindex="0">
+      <span>🛡️ Your Data Rights (GDPR/CCPA)</span>
+      <span class="pw-toggle">▼</span>
+    </div>
+    <div class="pw-section-content">
+      <p>You have full control over your data:</p>
+      <ul class="pw-list">
+        <li><strong>Access:</strong> Export all your stored data anytime</li>
+        <li><strong>Delete:</strong> Permanently remove all local data with one click</li>
+        <li><strong>Portability:</strong> Download your data in machine-readable JSON format</li>
+        <li><strong>Withdraw Consent:</strong> Change preferences anytime via Consent Manager</li>
+      </ul>
+      <div class="pw-controls">
+        <button class="pw-control-btn primary" id="pw-export-data">📥 Export My Data</button>
+        <button class="pw-control-btn danger" id="pw-delete-data">🗑️ Delete All Data</button>
+      </div>
+      <p style="font-size:0.85rem;color:var(--pw-muted)"><em>⚠️ Deleting data is permanent and cannot be undone. Export first if you want a backup.</em></p>
+    </div>
+  </div>
+  
+  <!-- Contact & Updates -->
+  <div class="pw-section">
+    <div class="pw-section-header" role="button" tabindex="0">
+      <span>📞 Contact & Policy Updates</span>
+      <span class="pw-toggle">▼</span>
+    </div>
+    <div class="pw-section-content">
+      <p><strong>Privacy Questions?</strong> Contact us at:<br>
+      <a href="mailto:privacy@abomnitools.dev" class="pw-link">privacy@abomnitools.dev</a></p>
+      
+      <div class="pw-version">
+        <div style="font-weight:600;margin-bottom:0.5rem">📜 Version History</div>
+        <div class="pw-version-item"><span>v2.1 • April 2026</span><span class="pw-tag">Current</span></div>
+        <div class="pw-version-item"><span>v2.0 • Jan 2026</span><span>Added consent manager</span></div>
+        <div class="pw-version-item"><span>v1.0 • Aug 2025</span><span>Initial policy</span></div>
+      </div>
+      
+      <p style="margin-top:1rem;font-size:0.9rem">We'll notify you of material changes via in-app banner. Continued use after updates constitutes acceptance.</p>
+    </div>
+  </div>
+  
+  <div class="pw-toast" id="pw-toast"></div>
+  
+  <!-- Hidden export container -->
+  <div id="pw-export-data-container" style="display:none"></div>
+
+  <script>
+    (function() {
+      const CONFIG = {
+        CONSENT_KEY: 'pw_consent',
+        LOG_KEY: 'pw_consent_log',
+        PREFIX: 'ab_'
+      };
+      
+      const CONTENT = {
+        en: {
+          title: "🔒 Privacy Policy",
+          sections: {
+            data: { title: "📦 Data Collection & Storage", content: `<p><strong>AbOmniTools operates entirely in your browser.</strong> No personal data is sent to external servers by default.</p><ul class="pw-list"><li>All calculations happen locally on your device</li><li>History, favorites & preferences stored via <code>localStorage</code></li><li>No account registration required</li><li>No IP logging or fingerprinting</li></ul><p style="margin-top:0.8rem"><em>Exception: Optional features like Weather or QR Generator may send minimal query data to third-party APIs (see below).</em></p>` },
+            cookies: { title: "🍪 Cookies & Tracking", content: `<p>We do <strong>not</strong> use:</p><ul class="pw-list"><li>❌ Tracking cookies or pixels</li><li>❌ Google Analytics, Meta Pixel, or similar</li><li>❌ Third-party advertising networks</li><li>❌ Cross-site tracking scripts</li></ul><p style="margin-top:0.8rem">The only storage used is <code>localStorage</code> for your preferences, which you can clear anytime via browser settings or our <strong>Settings > Clear Data</strong> option.</p>` },
+            consent: { title: "⚙️ Consent Preferences", content: '' }, // Dynamic
+            apis: { title: "🔗 Third-Party Services", content: `<p>Optional tools may connect to these privacy-respecting APIs:</p><table class="pw-table"><thead><tr><th>Service</th><th>Purpose</th><th>Data Sent</th><th>Privacy</th></tr></thead><tbody><tr><td>Open-Meteo</td><td>Weather forecasts</td><td>City name, coords</td><td><span class="pw-badge">No tracking</span></td></tr><tr><td>QRServer</td><td>QR code generation</td><td>Text/URL to encode</td><td><span class="pw-badge">No logs</span></td></tr><tr><td>ExchangeRate-API</td><td>Currency conversion</td><td>Currency codes</td><td><span class="pw-badge">GDPR compliant</span></td></tr><tr><td>GitHub API</td><td>Tool updates check</td><td>Current version</td><td><span class="pw-badge">Public only</span></td></tr></tbody></table><p style="font-size:0.85rem;margin-top:0.5rem"><em>💡 Tip: Disable "External APIs" in Consent Preferences to block all third-party connections.</em></p>` },
+            rights: { title: "🛡️ Your Data Rights (GDPR/CCPA)", content: `<p>You have full control over your data:</p><ul class="pw-list"><li><strong>Access:</strong> Export all your stored data anytime</li><li><strong>Delete:</strong> Permanently remove all local data with one click</li><li><strong>Portability:</strong> Download your data in machine-readable JSON format</li><li><strong>Withdraw Consent:</strong> Change preferences anytime via Consent Manager</li></ul><div class="pw-controls"><button class="pw-control-btn primary" id="pw-export-data">📥 Export My Data</button><button class="pw-control-btn danger" id="pw-delete-data">🗑️ Delete All Data</button></div><p style="font-size:0.85rem;color:var(--pw-muted)"><em>⚠️ Deleting data is permanent and cannot be undone. Export first if you want a backup.</em></p>` },
+            contact: { title: "📞 Contact & Policy Updates", content: `<p><strong>Privacy Questions?</strong> Contact us at:<br><a href="mailto:privacy@abomnitools.dev" class="pw-link">privacy@abomnitools.dev</a></p><div class="pw-version"><div style="font-weight:600;margin-bottom:0.5rem">📜 Version History</div><div class="pw-version-item"><span>v2.1 • April 2026</span><span class="pw-tag">Current</span></div><div class="pw-version-item"><span>v2.0 • Jan 2026</span><span>Added consent manager</span></div><div class="pw-version-item"><span>v1.0 • Aug 2025</span><span>Initial policy</span></div></div><p style="margin-top:1rem;font-size:0.9rem">We'll notify you of material changes via in-app banner. Continued use after updates constitutes acceptance.</p>` }
+          }
+        },
+        hi: {
+          title: "🔒 गोपनीयता नीति",
+          sections: {
+            data: { title: "📦 डेटा संग्रह और स्टोरेज", content: `<p><strong>AbOmniTools पूरी तरह आपके ब्राउज़र में चलता है।</strong> डिफ़ॉल्ट रूप से कोई व्यक्तिगत डेटा बाहरी सर्वर पर नहीं भेजा जाता।</p><ul class="pw-list"><li>सभी गणनाएं आपके डिवाइस पर स्थानीय रूप से होती हैं</li><li>इतिहास, पसंदीदा और प्राथमिकताएं <code>localStorage</code> में स्टोर होती हैं</li><li>कोई खाता पंजीकरण आवश्यक नहीं</li><li>कोई IP लॉगिंग या फिंगरप्रिंटिंग नहीं</li></ul>` },
+            cookies: { title: "🍪 कुकीज़ और ट्रैकिंग", content: `<p>हम उपयोग <strong>नहीं</strong> करते:</p><ul class="pw-list"><li>❌ ट्रैकिंग कुकीज़ या पिक्सेल</li><li>❌ Google Analytics, Meta Pixel, या समान</li><li>❌ तृतीय-पक्ष विज्ञापन नेटवर्क</li><li>❌ क्रॉस-साइट ट्रैकिंग स्क्रिप्ट</li></ul>` },
+            consent: { title: "⚙️ सहमति प्राथमिकताएं", content: '' },
+            apis: { title: "🔗 तृतीय-पक्ष सेवाएं", content: `<p>वैकल्पिक टूल्स इन गोपनीयता-सम्मानित APIs से जुड़ सकते हैं:</p><table class="pw-table"><thead><tr><th>सेवा</th><th>उद्देश्य</th><th>भेजा गया डेटा</th><th>गोपनीयता</th></tr></thead><tbody><tr><td>Open-Meteo</td><td>मौसम पूर्वानुमान</td><td>शहर का नाम, निर्देशांक</td><td><span class="pw-badge">कोई ट्रैकिंग नहीं</span></td></tr><tr><td>QRServer</td><td>QR कोड जनरेशन</td><td>टेक्स्ट/URL एन्कोड करने के लिए</td><td><span class="pw-badge">कोई लॉग नहीं</span></td></tr></tbody></table>` },
+            rights: { title: "🛡️ आपके डेटा अधिकार (GDPR/CCPA)", content: `<p>आपके डेटा पर आपका पूर्ण नियंत्रण है:</p><ul class="pw-list"><li><strong>एक्सेस:</strong> अपना सभी स्टोर किया गया डेटा कभी भी एक्सपोर्ट करें</li><li><strong>डिलीट:</strong> एक क्लिक में सभी स्थानीय डेटा स्थायी रूप से हटाएं</li><li><strong>पोर्टेबिलिटी:</strong> मशीन-रीडेबल JSON फॉर्मेट में अपना डेटा डाउनलोड करें</li><li><strong>सहमति वापस लें:</strong> Consent Manager के माध्यम से कभी भी प्राथमिकताएं बदलें</li></ul><div class="pw-controls"><button class="pw-control-btn primary" id="pw-export-data">📥 मेरा डेटा एक्सपोर्ट करें</button><button class="pw-control-btn danger" id="pw-delete-data">🗑️ सभी डेटा हटाएं</button></div>` },
+            contact: { title: "📞 संपर्क और नीति अपडेट", content: `<p><strong>गोपनीयता प्रश्न?</strong> हमसे संपर्क करें:<br><a href="mailto:privacy@abomnitools.dev" class="pw-link">privacy@abomnitools.dev</a></p><div class="pw-version"><div style="font-weight:600;margin-bottom:0.5rem">📜 संस्करण इतिहास</div><div class="pw-version-item"><span>v2.1 • अप्रैल 2026</span><span class="pw-tag">वर्तमान</span></div><div class="pw-version-item"><span>v2.0 • जन 2026</span><span>Consent manager जोड़ा गया</span></div><div class="pw-version-item"><span>v1.0 • अग 2025</span><span>प्रारंभिक नीति</span></div></div>` }
+          }
+        },
+        es: {
+          title: "🔒 Política de Privacidad",
+          sections: {
+            data: { title: "📦 Recopilación y Almacenamiento de Datos", content: `<p><strong>AbOmniTools funciona completamente en tu navegador.</strong> Por defecto, no se envían datos personales a servidores externos.</p><ul class="pw-list"><li>Todos los cálculos se realizan localmente en tu dispositivo</li><li>Historial, favoritos y preferencias se guardan vía <code>localStorage</code></li><li>No se requiere registro de cuenta</li><li>Sin registro de IP ni fingerprinting</li></ul>` },
+            cookies: { title: "🍪 Cookies y Rastreo", content: `<p><strong>No</strong> utilizamos:</p><ul class="pw-list"><li>❌ Cookies de rastreo o píxeles</li><li>❌ Google Analytics, Meta Pixel, o similares</li><li>❌ Redes publicitarias de terceros</li><li>❌ Scripts de rastreo entre sitios</li></ul>` },
+            consent: { title: "⚙️ Preferencias de Consentimiento", content: '' },
+            apis: { title: "🔗 Servicios de Terceros", content: `<p>Las herramientas opcionales pueden conectarse a estas APIs respetuosas con la privacidad:</p><table class="pw-table"><thead><tr><th>Servicio</th><th>Propósito</th><th>Datos Enviados</th><th>Privacidad</th></tr></thead><tbody><tr><td>Open-Meteo</td><td>Pronósticos del clima</td><td>Nombre de ciudad, coordenadas</td><td><span class="pw-badge">Sin rastreo</span></td></tr><tr><td>QRServer</td><td>Generación de códigos QR</td><td>Texto/URL a codificar</td><td><span class="pw-badge">Sin registros</span></td></tr></tbody></table>` },
+            rights: { title: "🛡️ Tus Derechos de Datos (GDPR/CCPA)", content: `<p>Tienes control total sobre tus datos:</p><ul class="pw-list"><li><strong>Acceso:</strong> Exporta todos tus datos almacenados en cualquier momento</li><li><strong>Eliminación:</strong> Elimina permanentemente todos los datos locales con un clic</li><li><strong>Portabilidad:</strong> Descarga tus datos en formato JSON legible por máquina</li><li><strong>Retirar Consentimiento:</strong> Cambia preferencias en cualquier momento vía Consent Manager</li></ul><div class="pw-controls"><button class="pw-control-btn primary" id="pw-export-data">📥 Exportar Mis Datos</button><button class="pw-control-btn danger" id="pw-delete-data">🗑️ Eliminar Todos los Datos</button></div>` },
+            contact: { title: "📞 Contacto y Actualizaciones", content: `<p><strong>¿Preguntas de privacidad?</strong> Contáctanos en:<br><a href="mailto:privacy@abomnitools.dev" class="pw-link">privacy@abomnitools.dev</a></p><div class="pw-version"><div style="font-weight:600;margin-bottom:0.5rem">📜 Historial de Versiones</div><div class="pw-version-item"><span>v2.1 • Abril 2026</span><span class="pw-tag">Actual</span></div><div class="pw-version-item"><span>v2.0 • Ene 2026</span><span>Añadido consent manager</span></div><div class="pw-version-item"><span>v1.0 • Ago 2025</span><span>Política inicial</span></div></div>` }
+          }
+        }
+      };
+      
+      const els = {
+        lang: document.getElementById('pw-lang'),
+        copyBtn: document.getElementById('pw-copy'),
+        printBtn: document.getElementById('pw-print'),
+        sections: document.querySelectorAll('.pw-section-header'),
+        consentApis: document.getElementById('consent-apis'),
+        consentNewsletter: document.getElementById('consent-newsletter'),
+        consentAnalytics: document.getElementById('consent-analytics'),
+        statusApis: document.getElementById('status-apis'),
+        statusNewsletter: document.getElementById('status-newsletter'),
+        statusAnalytics: document.getElementById('status-analytics'),
+        saveConsent: document.getElementById('pw-save-consent'),
+        logEntries: document.getElementById('pw-log-entries'),
+        exportBtn: document.getElementById('pw-export-data'),
+        deleteBtn: document.getElementById('pw-delete-data'),
+        lastViewed: document.getElementById('pw-last-viewed'),
+        toast: document.getElementById('pw-toast'),
+        exportContainer: document.getElementById('pw-export-data-container')
+      };
+      
+      let currentLang = localStorage.getItem('pw_lang') || 'en';
+      let consent = JSON.parse(localStorage.getItem(CONFIG.CONSENT_KEY) || '{"apis":false,"newsletter":false,"analytics":false}');
+      let consentLog = JSON.parse(localStorage.getItem(CONFIG.LOG_KEY) || '[]');
+      
+      // Toast
+      const toast = (msg, type = 'info') => {
+        els.toast.textContent = msg;
+        els.toast.className = `pw-toast ${type} show`;
+        setTimeout(() => els.toast.classList.remove('show'), 2500);
+      };
+      
+      // Render content by language
+      const renderContent = (lang) => {
+        const t = CONTENT[lang] || CONTENT.en;
+        document.querySelector('.pw-title').innerHTML = t.title;
+        
+        // Map section keys to DOM
+        const sections = {
+          'Data Collection & Storage': 'data',
+          'Cookies & Tracking': 'cookies',
+          'Consent Preferences': 'consent',
+          'Third-Party Services': 'apis',
+          'Your Data Rights (GDPR/CCPA)': 'rights',
+          'Contact & Policy Updates': 'contact'
+        };
+        
+        document.querySelectorAll('.pw-section').forEach(sec => {
+          const header = sec.querySelector('.pw-section-header span:first-child');
+          const content = sec.querySelector('.pw-section-content');
+          const key = Object.keys(sections).find(k => header.textContent.includes(k.split(' ')[0]));
+          const sectionKey = key ? sections[key] : null;
+          
+          if (sectionKey && t.sections[sectionKey]) {
+            header.textContent = t.sections[sectionKey].title;
+            if (sectionKey !== 'consent') content.innerHTML = t.sections[sectionKey].content;
+          }
+        });
+        
+        // Re-bind dynamic buttons
+        bindDynamicButtons();
+      };
+      
+      // Render consent UI
+      const renderConsent = () => {
+        els.consentApis.checked = consent.apis;
+        els.consentNewsletter.checked = consent.newsletter;
+        els.consentAnalytics.checked = consent.analytics;
+        
+        els.statusApis.textContent = consent.apis ? 'Enabled' : 'Disabled';
+        els.statusApis.className = `pw-consent-status ${consent.apis ? 'on' : 'off'}`;
+        els.statusNewsletter.textContent = consent.newsletter ? 'Enabled' : 'Disabled';
+        els.statusNewsletter.className = `pw-consent-status ${consent.newsletter ? 'on' : 'off'}`;
+        els.statusAnalytics.textContent = consent.analytics ? 'Enabled' : 'Disabled';
+        els.statusAnalytics.className = `pw-consent-status ${consent.analytics ? 'on' : 'off'}`;
+      };
+      
+      // Render consent log
+      const renderLog = () => {
+        if (consentLog.length === 0) {
+          els.logEntries.innerHTML = '<div style="font-style:italic">No consent changes yet</div>';
+          return;
+        }
+        els.logEntries.innerHTML = consentLog.slice(-5).reverse().map(entry => `
+          <div class="pw-log-entry">
+            <span>${entry.action}</span>
+            <span style="color:var(--pw-muted)">${new Date(entry.ts).toLocaleString()}</span>
+          </div>
+        `).join('');
+      };
+      
+      // Log consent change
+      const logConsent = (action) => {
+        consentLog.push({ action, ts: Date.now(), consent: {...consent} });
+        if (consentLog.length > 10) consentLog.shift();
+        localStorage.setItem(CONFIG.LOG_KEY, JSON.stringify(consentLog));
+        renderLog();
+      };
+      
+      // Save consent
+      const saveConsent = () => {
+        consent = {
+          apis: els.consentApis.checked,
+          newsletter: els.consentNewsletter.checked,
+          analytics: els.consentAnalytics.checked
+        };
+        localStorage.setItem(CONFIG.CONSENT_KEY, JSON.stringify(consent));
+        logConsent('Preferences saved');
+        renderConsent();
+        toast('✅ Preferences saved', 'success');
+        window.dispatchEvent(new CustomEvent('consent:updated', { detail: consent }));
+      };
+      
+      // Export user data (GDPR)
+      const exportData = () => {
+        const data = {
+          exported_at: new Date().toISOString(),
+          source: window.location.href,
+          data: {}
+        };
+        const keys = ['favorites', 'recent', 'settings', 'feedback', 'newsletter', 'tools'];
+        const prefix = CONFIG.PREFIX;
+        
+        keys.forEach(key => {
+          try {
+            const raw = localStorage.getItem(prefix + key);
+            data.data[key] = raw ? JSON.parse(raw) : null;
+          } catch { data.data[key] = null; }
+        });
+        
+        // Add consent log
+        data.consent_history = consentLog;
+        
+        const content = JSON.stringify(data, null, 2);
+        const blob = new Blob([content], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url; a.download = `ab-privacy-export-${new Date().toISOString().slice(0,10)}.json`;
+        document.body.appendChild(a); a.click();
+        document.body.removeChild(a); URL.revokeObjectURL(url);
+        
+        logConsent('Data exported');
+        toast('📥 Data exported successfully', 'success');
+        window.dispatchEvent(new CustomEvent('privacy:dataExported', { detail: { size: content.length } }));
+      };
+      
+      // Delete all user data (GDPR Right to Erasure)
+      const deleteData = () => {
+        if (!confirm('⚠️ This will permanently delete ALL your local data:\n\n• Favorites & recent tools\n• Settings & preferences\n• Feedback history\n• Newsletter subscription\n\nThis cannot be undone. Continue?')) return;
+        
+        const prefix = CONFIG.PREFIX;
+        const keys = Object.keys(localStorage).filter(k => k.startsWith(prefix) || k === 'fb_submissions' || k === 'nw_subscribers' || k === CONFIG.CONSENT_KEY || k === CONFIG.LOG_KEY);
+        keys.forEach(k => localStorage.removeItem(k));
+        
+        // Reset consent
+        consent = { apis: false, newsletter: false, analytics: false };
+        consentLog = [];
+        localStorage.setItem(CONFIG.CONSENT_KEY, JSON.stringify(consent));
+        localStorage.setItem(CONFIG.LOG_KEY, JSON.stringify(consentLog));
+        
+        logConsent('All data deleted (GDPR erasure)');
+        renderConsent();
+        renderLog();
+        toast('🗑️ All data deleted successfully', 'success');
+        window.dispatchEvent(new CustomEvent('privacy:dataDeleted'));
+        
+        // Optional: reload to reflect changes
+        setTimeout(() => { if(confirm('Reload page to apply changes?')) window.location.reload(); }, 500);
+      };
+      
+      // Copy policy text
+      const copyPolicy = async () => {
+        const text = document.querySelector('.privacy-widget').innerText;
+        try {
+          await navigator.clipboard.writeText(text);
+          toast('📋 Policy copied to clipboard', 'success');
+        } catch { toast('❌ Copy failed', 'error'); }
+      };
+      
+      // Bind dynamic buttons (for re-render)
+      const bindDynamicButtons = () => {
+        const exportBtns = document.querySelectorAll('#pw-export-data');
+        const deleteBtns = document.querySelectorAll('#pw-delete-data');
+        exportBtns.forEach(btn => { btn.onclick = exportData; });
+        deleteBtns.forEach(btn => { btn.onclick = deleteData; });
+      };
+      
+      // Accordion toggle
+      els.sections.forEach(header => {
+        const toggle = () => {
+          const content = header.nextElementSibling;
+          const isActive = header.classList.toggle('active');
+          content.classList.toggle('show', isActive);
+        };
+        header.onclick = toggle;
+        header.onkeydown = (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(); } };
+      });
+      
+      // Language change
+      els.lang.onchange = (e) => {
+        currentLang = e.target.value;
+        localStorage.setItem('pw_lang', currentLang);
+        renderContent(currentLang);
+        toast(`🌍 Language: ${e.target.options[e.target.selectedIndex].text}`, 'info');
+      };
+      
+      // Consent toggles
+      [els.consentApis, els.consentNewsletter, els.consentAnalytics].forEach(cb => {
+        cb.onchange = () => {
+          const key = cb.id.replace('consent-', '');
+          const statusEl = document.getElementById(`status-${key}`);
+          statusEl.textContent = cb.checked ? 'Enabled' : 'Disabled';
+          statusEl.className = `pw-consent-status ${cb.checked ? 'on' : 'off'}`;
+        };
+      });
+      
+      els.saveConsent.onclick = saveConsent;
+      els.copyBtn.onclick = copyPolicy;
+      els.printBtn.onclick = () => window.print();
+      
+      // Last viewed timestamp
+      const now = new Date();
+      const lastViewed = localStorage.getItem('pw_last_viewed');
+      if (lastViewed) {
+        const diff = Math.floor((now - new Date(lastViewed)) / (1000*60*60*24));
+        els.lastViewed.innerHTML = `👁️ Last viewed: ${diff === 0 ? 'Today' : diff + 'd ago'}`;
+      } else {
+        els.lastViewed.innerHTML = `👁️ First visit`;
+      }
+      localStorage.setItem('pw_last_viewed', now.toISOString());
+      
+      // Init
+      els.lang.value = currentLang;
+      renderContent(currentLang);
+      renderConsent();
+      renderLog();
+      bindDynamicButtons();
+      
+      // Expose API
+      window.PrivacyWidget = {
+        exportData,
+        deleteData,
+        saveConsent,
+        getConsent: () => ({...consent}),
+        logConsent
+      };
+    })();
+  </script>
+</div>

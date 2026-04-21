@@ -1,0 +1,274 @@
+<div class="crypto-tool">
+  <style>
+    .crypto-tool {
+      --bg: #0f172a;
+      --card: #1e293b;
+      --card-hover: #253347;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --border: #334155;
+      --accent: #3b82f6;
+      --success: #10b981;
+      --danger: #ef4444;
+      --warning: #f59e0b;
+      --glow: rgba(59,130,246,0.25);
+      font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+      max-width: 420px;
+      margin: 2rem auto;
+      background: var(--bg);
+      border-radius: 20px;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.35);
+      overflow: hidden;
+      color: var(--text);
+      line-height: 1.4;
+      position: relative;
+    }
+    .crypto-tool * { box-sizing: border-box; }
+    .ct-header { padding: 1.2rem; text-align: center; border-bottom: 1px solid var(--border); background: linear-gradient(180deg, rgba(59,130,246,0.08), transparent); }
+    .ct-header h2 { margin: 0; font-size: 1.3rem; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 0.5rem; }
+    .ct-live-dot { width: 8px; height: 8px; background: var(--success); border-radius: 50%; animation: pulse 1.5s infinite; }
+    @keyframes pulse { 0%,100% { opacity:1; transform:scale(1) } 50% { opacity:0.5; transform:scale(1.2) } }
+    .ct-grid { display: grid; grid-template-columns: 1fr auto 1fr; gap: 0.8rem; align-items: end; padding: 1.2rem 1.5rem 0.5rem; }
+    .ct-select { width: 100%; padding: 0.8rem; border-radius: 12px; border: 1px solid var(--border); background: var(--card); color: var(--text); font-size: 1rem; cursor: pointer; outline: none; transition: all 0.2s; }
+    .ct-select:hover, .ct-select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--glow); }
+    .ct-swap { width: 42px; height: 42px; border-radius: 50%; background: var(--card); border: 1px solid var(--border); color: var(--text); font-size: 1.2rem; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.3s; margin: 0 auto 0.5rem; }
+    .ct-swap:hover { background: var(--accent); color: #fff; transform: rotate(180deg); border-color: var(--accent); }
+    .ct-amount-wrap { padding: 0.5rem 1.5rem; position: relative; }
+    .ct-input { width: 100%; padding: 1rem; border-radius: 12px; border: 1px solid var(--border); background: var(--card); color: var(--text); font-size: 1.3rem; font-weight: 600; text-align: right; outline: none; transition: all 0.2s; }
+    .ct-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--glow); }
+    .ct-presets { display: flex; gap: 0.5rem; margin-top: 0.6rem; justify-content: center; }
+    .ct-preset-btn { padding: 0.4rem 0.8rem; border-radius: 8px; border: 1px solid var(--border); background: transparent; color: var(--text-muted); font-size: 0.8rem; cursor: pointer; transition: all 0.2s; }
+    .ct-preset-btn:hover { background: var(--card-hover); border-color: var(--accent); color: var(--text); }
+    .ct-result { margin: 1rem 1.5rem; padding: 1.2rem; background: linear-gradient(135deg, var(--card), var(--card-hover)); border: 1px solid var(--border); border-radius: 16px; text-align: center; position: relative; }
+    .ct-main-res { font-size: 1.8rem; font-weight: 800; color: var(--text); margin: 0.5rem 0; word-break: break-all; }
+    .ct-meta { display: flex; justify-content: space-between; align-items: center; margin-top: 0.8rem; font-size: 0.85rem; color: var(--text-muted); }
+    .ct-badge { padding: 0.25rem 0.6rem; border-radius: 6px; font-weight: 600; font-size: 0.8rem; }
+    .ct-badge.pos { background: rgba(16,185,129,0.15); color: var(--success); }
+    .ct-badge.neg { background: rgba(239,68,68,0.15); color: var(--danger); }
+    .ct-actions { display: flex; gap: 0.6rem; margin-top: 1rem; justify-content: center; }
+    .ct-btn { padding: 0.6rem 1rem; border-radius: 8px; border: none; font-weight: 500; cursor: pointer; transition: all 0.2s; font-size: 0.9rem; display: flex; align-items: center; gap: 0.4rem; }
+    .ct-btn-primary { background: var(--accent); color: #fff; }
+    .ct-btn-primary:hover { background: #2563eb; transform: translateY(-1px); }
+    .ct-btn-ghost { background: transparent; border: 1px solid var(--border); color: var(--text-muted); }
+    .ct-btn-ghost:hover { background: var(--card); color: var(--text); }
+    .ct-footer { padding: 1rem 1.5rem; border-top: 1px solid var(--border); text-align: center; color: var(--text-muted); font-size: 0.75rem; background: rgba(0,0,0,0.2); }
+    .ct-spinner { width: 20px; height: 20px; border: 2px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; display: none; margin: 0 auto; }
+    @keyframes spin { to { transform: rotate(360deg) } }
+    .ct-loading .ct-spinner { display: block; }
+    .ct-loading .ct-main-res, .ct-loading .ct-meta { opacity: 0.3; }
+    @media (max-width: 450px) {
+      .crypto-tool { margin: 1rem; }
+      .ct-grid { padding: 1rem 1rem 0.5rem; }
+      .ct-amount-wrap { padding: 0.5rem 1rem; }
+      .ct-result { margin: 1rem; }
+    }
+  </style>
+
+  <div class="ct-header">
+    <h2><span class="ct-live-dot"></span> Live Crypto Converter</h2>
+    <p style="color:var(--text-muted); margin:0.3rem 0 0; font-size:0.85rem;">Real-time rates • 24h trends • Smart cache</p>
+  </div>
+
+  <div class="ct-grid">
+    <select class="ct-select" id="ct-from"></select>
+    <button class="ct-swap" id="ct-swap" aria-label="Swap currencies">⇄</button>
+    <select class="ct-select" id="ct-to"></select>
+  </div>
+
+  <div class="ct-amount-wrap">
+    <input type="number" class="ct-input" id="ct-amount" placeholder="0.00" min="0" step="any" value="1000">
+    <div class="ct-presets">
+      <button class="ct-preset-btn" data-val="100">+100</button>
+      <button class="ct-preset-btn" data-val="1000">+1K</button>
+      <button class="ct-preset-btn" data-val="5000">+5K</button>
+      <button class="ct-preset-btn" data-val="10000">+10K</button>
+    </div>
+  </div>
+
+  <div class="ct-result" id="ct-result-box">
+    <div class="ct-spinner"></div>
+    <div class="ct-main-res" id="ct-res">--</div>
+    <div class="ct-meta">
+      <span id="ct-rate">Rate: --</span>
+      <span id="ct-change">24h: --</span>
+    </div>
+  </div>
+
+  <div class="ct-actions">
+    <button class="ct-btn ct-btn-ghost" id="ct-refresh">🔄 Refresh Rates</button>
+    <button class="ct-btn ct-btn-primary" id="ct-copy">📋 Copy Result</button>
+  </div>
+
+  <div class="ct-footer">
+    📡 Data sourced from CoinGecko API • Updates every 60s • <span id="ct-updated">Fetching...</span>
+  </div>
+
+  <script>
+    (function() {
+      const COINS = [
+        { id: 'bitcoin', sym: 'BTC', name: 'Bitcoin', icon: '₿' },
+        { id: 'ethereum', sym: 'ETH', name: 'Ethereum', icon: 'Ξ' },
+        { id: 'solana', sym: 'SOL', name: 'Solana', icon: '◎' },
+        { id: 'tether', sym: 'USDT', name: 'Tether', icon: '₮' },
+        { id: 'usd', sym: 'USD', name: 'US Dollar', icon: '$' },
+        { id: 'inr', sym: 'INR', name: 'Indian Rupee', icon: '₹' }
+      ];
+
+      const FALLBACK_RATES = {
+        bitcoin: 98500, ethereum: 3820, solana: 185, tether: 1.0002, usd: 1, inr: 84.65
+      };
+
+      const CACHE_KEY = 'ct_data_v1';
+      const CACHE_TTL = 60 * 1000; // 60s
+
+      const els = {
+        from: document.getElementById('ct-from'),
+        to: document.getElementById('ct-to'),
+        amount: document.getElementById('ct-amount'),
+        res: document.getElementById('ct-res'),
+        rate: document.getElementById('ct-rate'),
+        change: document.getElementById('ct-change'),
+        swap: document.getElementById('ct-swap'),
+        refresh: document.getElementById('ct-refresh'),
+        copy: document.getElementById('ct-copy'),
+        box: document.getElementById('ct-result-box'),
+        updated: document.getElementById('ct-updated'),
+        presets: document.querySelectorAll('.ct-preset-btn')
+      };
+
+      let cache = null;
+      let fetchTimeout = null;
+      let abortController = null;
+
+      const fmt = (n, sym, isFiat) => {
+        if(n === null || n === undefined) return '--';
+        const opts = isFiat ? { style: 'currency', currency: sym, maximumFractionDigits: 2 } : { style: 'decimal', maximumFractionDigits: 6 };
+        return new Intl.NumberFormat('en-US', opts).format(n);
+      };
+
+      const loadCache = () => {
+        try {
+          const d = localStorage.getItem(CACHE_KEY);
+          if(!d) return null;
+          const p = JSON.parse(d);
+          if(Date.now() - p.ts < CACHE_TTL) return p.data;
+        } catch(e) {}
+        return null;
+      };
+
+      const saveCache = (data) => {
+        try { localStorage.setItem(CACHE_KEY, JSON.stringify({ ts: Date.now(), data })); } catch(e) {}
+      };
+
+      const populateSelects = () => {
+        const fragFrom = document.createDocumentFragment();
+        const fragTo = document.createDocumentFragment();
+        COINS.forEach(c => {
+          const o1 = new Option(`${c.icon} ${c.sym}`, c.sym);
+          const o2 = new Option(`${c.icon} ${c.sym}`, c.sym);
+          fragFrom.appendChild(o1);
+          fragTo.appendChild(o2);
+        });
+        els.from.appendChild(fragFrom);
+        els.to.appendChild(fragTo);
+        els.from.value = 'INR';
+        els.to.value = 'BTC';
+      };
+
+      const fetchRates = async (force = false) => {
+        if(!force && cache) return;
+        const cached = loadCache();
+        if(!force && cached) { cache = cached; updateUI(); return; }
+
+        els.box.classList.add('ct-loading');
+        if(abortController) abortController.abort();
+        abortController = new AbortController();
+
+        try {
+          const ids = COINS.filter(c => !['usd','inr'].includes(c.id)).map(c => c.id).join(',');
+          const res = await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=usd&include_24hr_change=true`, { signal: abortController.signal });
+          if(!res.ok) throw new Error('API limit or network error');
+          const data = await res.json();
+
+          cache = {
+            rates: { usd: 1, inr: data.bitcoin?.inr_price || FALLBACK_RATES.inr },
+            change: {}
+          };
+          COINS.forEach(c => {
+            if(['usd','inr'].includes(c.id)) return;
+            cache.rates[c.sym] = data[c.id]?.usd || FALLBACK_RATES[c.id] || 1;
+            cache.change[c.id] = data[c.id]?.usd_24h_change || 0;
+          });
+          saveCache(cache);
+          updateUI(true);
+        } catch(e) {
+          console.warn('Fetch failed, using fallback:', e);
+          cache = { rates: FALLBACK_RATES, change: {} };
+          updateUI(false);
+        } finally {
+          els.box.classList.remove('ct-loading');
+          els.updated.textContent = `Updated: ${new Date().toLocaleTimeString()}`;
+        }
+      };
+
+      const updateUI = (isNew = false) => {
+        const from = els.from.value;
+        const to = els.to.value;
+        const amt = parseFloat(els.amount.value) || 0;
+        const fromRate = cache.rates[from] || 1;
+        const toRate = cache.rates[to] || 1;
+        const rate = toRate / fromRate;
+        const result = amt * rate;
+
+        const fromCoin = COINS.find(c => c.sym === from);
+        const toCoin = COINS.find(c => c.sym === to);
+
+        els.res.textContent = fmt(result, toCoin?.id === 'inr' ? 'INR' : toCoin?.sym, ['USD','INR'].includes(to));
+        els.rate.textContent = `1 ${from} ≈ ${rate.toFixed(rate > 100 ? 2 : 6)} ${to}`;
+
+        const changeId = toCoin?.id || 'usd';
+        const changeVal = cache.change[changeId] ?? 0;
+        const sign = changeVal >= 0 ? '+' : '';
+        els.change.innerHTML = `<span class="ct-badge ${changeVal >= 0 ? 'pos' : 'neg'}">${sign}${changeVal.toFixed(2)}% 24h</span>`;
+
+        if(isNew) els.box.style.animation = 'pulse 0.5s ease';
+        setTimeout(() => els.box.style.animation = '', 500);
+      };
+
+      const swap = () => {
+        const temp = els.from.value;
+        els.from.value = els.to.value;
+        els.to.value = temp;
+        updateUI();
+      };
+
+      const copyResult = () => {
+        const text = `${els.res.textContent} (${els.from.value} → ${els.to.value})`;
+        navigator.clipboard.writeText(text).then(() => {
+          const orig = els.copy.textContent;
+          els.copy.textContent = '✅ Copied!';
+          setTimeout(() => els.copy.textContent = orig, 1500);
+        });
+      };
+
+      // Event Listeners
+      [els.from, els.to, els.amount].forEach(el => {
+        el.addEventListener('input', () => { clearTimeout(fetchTimeout); fetchTimeout = setTimeout(() => updateUI(), 300); });
+        el.addEventListener('change', () => updateUI());
+      });
+
+      els.swap.addEventListener('click', swap);
+      els.refresh.addEventListener('click', () => fetchRates(true));
+      els.copy.addEventListener('click', copyResult);
+      els.presets.forEach(btn => btn.addEventListener('click', () => {
+        const val = parseFloat(els.amount.value) || 0;
+        els.amount.value = val + parseFloat(btn.dataset.val);
+        updateUI();
+      }));
+
+      // Init
+      populateSelects();
+      fetchRates();
+    })();
+  </script>
+</div>

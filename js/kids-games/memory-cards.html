@@ -1,0 +1,247 @@
+<div class="mem-app">
+  <style>
+    .mem-app {
+      --mem-bg: #0f172a;
+      --mem-panel: #1e293b;
+      --mem-border: #334155;
+      --mem-accent: #8b5cf6;
+      --mem-success: #10b981;
+      --mem-text: #f8fafc;
+      --mem-muted: #94a3b8;
+      max-width: 500px; margin: 2rem auto; padding: 1.5rem;
+      background: var(--mem-panel); border-radius: 16px;
+      box-shadow: 0 12px 30px rgba(0,0,0,0.3); border: 1px solid var(--mem-border);
+      font-family: system-ui, -apple-system, sans-serif; color: var(--mem-text);
+      position: relative; overflow: hidden; text-align: center;
+    }
+    .mem-header { font-size: 1.4rem; font-weight: 800; margin: 0 0 1rem; background: linear-gradient(90deg, var(--mem-accent), #3b82f6); -webkit-background-clip: text; background-clip: text; color: transparent; }
+    
+    .mem-controls { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; gap: 0.5rem; }
+    .mem-select { padding: 0.5rem 0.8rem; border-radius: 8px; background: #334155; color: #fff; border: 1px solid var(--mem-border); cursor: pointer; font-size: 0.85rem; outline: none; }
+    .mem-select:focus { border-color: var(--mem-accent); }
+    .mem-btn-sm { background: none; border: none; color: #fff; font-size: 1.2rem; cursor: pointer; padding: 0.2rem; transition: 0.2s; }
+    .mem-btn-sm:hover { transform: scale(1.1); }
+    
+    .mem-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.5rem; margin-bottom: 1.2rem; }
+    .mem-stat { background: rgba(255,255,255,0.05); padding: 0.5rem; border-radius: 10px; border: 1px solid var(--mem-border); }
+    .mem-stat span { display: block; font-size: 0.7rem; color: var(--mem-muted); text-transform: uppercase; }
+    .mem-stat b { font-size: 1rem; display: block; margin-top: 2px; }
+    
+    .mem-grid { display: grid; gap: 10px; margin-bottom: 1rem; perspective: 1000px; }
+    .mem-card { position: relative; cursor: pointer; transform-style: preserve-3d; transition: transform 0.5s cubic-bezier(0.4, 0.0, 0.2, 1); aspect-ratio: 1 / 1; }
+    .mem-card.flipped { transform: rotateY(180deg); }
+    .mem-card.matched { animation: matchPop 0.4s ease; pointer-events: none; }
+    .mem-face { position: absolute; inset: 0; backface-visibility: hidden; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 2rem; border: 2px solid var(--mem-border); box-shadow: 0 4px 8px rgba(0,0,0,0.2); }
+    .mem-front { background: linear-gradient(135deg, #334155, #475569); }
+    .mem-front::after { content: '🃏'; font-size: 1.5rem; opacity: 0.7; }
+    .mem-back { background: var(--mem-panel); transform: rotateY(180deg); border-color: var(--mem-accent); }
+    .mem-card.matched .mem-back { background: rgba(16,185,129,0.15); border-color: var(--mem-success); }
+    @keyframes matchPop { 50% { transform: rotateY(180deg) scale(1.1); } }
+    
+    .mem-overlay { position: absolute; inset: 0; background: rgba(15,23,42,0.94); backdrop-filter: blur(8px); display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 2rem; opacity: 0; pointer-events: none; transition: opacity 0.3s; z-index: 10; border-radius: 16px; }
+    .mem-overlay.active { opacity: 1; pointer-events: auto; }
+    .mem-overlay h2 { font-size: 1.8rem; margin: 0 0 0.5rem; }
+    .mem-overlay p { color: var(--mem-muted); margin: 0 0 1.5rem; line-height: 1.5; }
+    .mem-btn { padding: 0.9rem 2rem; background: linear-gradient(135deg, var(--mem-accent), #3b82f6); border: none; border-radius: 12px; color: #fff; font-weight: 700; cursor: pointer; box-shadow: 0 4px 15px rgba(139,92,246,0.4); transition: 0.2s; }
+    .mem-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(139,92,246,0.5); }
+    
+    .mem-confetti-box { position: absolute; inset: 0; pointer-events: none; overflow: hidden; z-index: 9; }
+    .mem-confetti { position: absolute; width: 8px; height: 8px; border-radius: 2px; animation: memFall linear forwards; }
+    @keyframes memFall { to { transform: translateY(500px) rotate(720deg); opacity: 0; } }
+  </style>
+
+  <div class="mem-header">🧠 Memory Quest</div>
+  
+  <div class="mem-controls">
+    <select class="mem-select" id="mem-diff">
+      <option value="easy">🟢 Easy (3×4)</option>
+      <option value="medium" selected>🟡 Medium (4×4)</option>
+      <option value="hard">🔴 Hard (4×5)</option>
+    </select>
+    <button class="mem-btn-sm" id="mem-sound">🔊</button>
+  </div>
+
+  <div class="mem-stats">
+    <div class="mem-stat"><span>Moves</span><b id="mem-moves">0</b></div>
+    <div class="mem-stat"><span>Time</span><b id="mem-time">00:00</b></div>
+    <div class="mem-stat"><span>Pairs</span><b id="mem-pairs">0/0</b></div>
+    <div class="mem-stat"><span>Score</span><b id="mem-score">0</b></div>
+  </div>
+
+  <div class="mem-grid" id="mem-grid"></div>
+  <div class="mem-confetti-box" id="mem-confetti"></div>
+
+  <div class="mem-overlay active" id="mem-start">
+    <h2>🎮 Ready?</h2>
+    <p>Flip cards and find all matching pairs.<br>Less moves & time = higher score!</p>
+    <button class="mem-btn" id="mem-play-btn">▶ Start Game</button>
+  </div>
+
+  <div class="mem-overlay" id="mem-win">
+    <h2>🎉 Excellent!</h2>
+    <p>Moves: <b id="w-moves">0</b> | Time: <b id="w-time">00:00</b><br>Score: <b id="w-score">0</b> | Best: <b id="w-best">0</b></p>
+    <button class="mem-btn" id="mem-replay-btn">Play Again</button>
+  </div>
+
+  <script>
+    (function() {
+      'use strict';
+      const CFG = {
+        easy:   { pairs: 6,  cols: 3, emojis: ['🍎','🍌','🍇','🍉','🍒','🍓'] },
+        medium: { pairs: 8,  cols: 4, emojis: ['🍎','🍌','🍇','🍉','🍒','🍓','🥝','🍍'] },
+        hard:   { pairs: 10, cols: 4, emojis: ['🍎','🍌','🍇','🍉','🍒','🍓','🥝','🍍','🥥','🍑'] }
+      };
+
+      const state = {
+        diff: 'medium', pairs: 0, moves: 0, score: 0, time: 0, timer: null,
+        flipped: [], matched: 0, lock: false, playing: false, sound: true,
+        audioCtx: null, best: 0
+      };
+
+      const $ = id => document.getElementById(id);
+      const el = {
+        diff: $('mem-diff'), sound: $('mem-sound'), moves: $('mem-moves'), time: $('mem-time'),
+        pairs: $('mem-pairs'), score: $('mem-score'), grid: $('mem-grid'),
+        start: $('mem-start'), win: $('mem-win'),
+        wMoves: $('w-moves'), wTime: $('w-time'), wScore: $('w-score'), wBest: $('w-best'),
+        confetti: $('mem-confetti'), playBtn: $('mem-play-btn'), replayBtn: $('mem-replay-btn')
+      };
+
+      // Audio Engine
+      const initAudio = () => {
+        if(!state.audioCtx) state.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if(state.audioCtx.state==='suspended') state.audioCtx.resume();
+      };
+      const beep = (f,t,d,del=0) => {
+        if(!state.audioCtx || !state.sound) return;
+        const o = state.audioCtx.createOscillator(), g = state.audioCtx.createGain();
+        o.type=t; o.frequency.value=f;
+        g.gain.setValueAtTime(0.06, state.audioCtx.currentTime+del);
+        g.gain.exponentialRampToValueAtTime(0.01, state.audioCtx.currentTime+del+d);
+        o.connect(g).connect(state.audioCtx.destination);
+        o.start(state.audioCtx.currentTime+del); o.stop(state.audioCtx.currentTime+del+d);
+      };
+      const sfx = t => {
+        if(t==='flip') beep(320,'sine',0.04);
+        if(t==='match') { beep(600,'sine',0.08); beep(800,'sine',0.08,0.05); }
+        if(t==='fail') beep(160,'triangle',0.12);
+        if(t==='win') [400,500,600,800,1000].forEach((f,i)=>beep(f,'sine',0.1,i*0.06));
+      };
+
+      // Storage
+      const loadBest = () => {
+        try { const d = JSON.parse(localStorage.getItem('mem_hs')||'{}'); state.best = d[state.diff] || 0; } catch { state.best = 0; }
+      };
+      const saveBest = () => {
+        try {
+          const d = JSON.parse(localStorage.getItem('mem_hs')||'{}');
+          d[state.diff] = Math.max(state.score, d[state.diff]||0);
+          localStorage.setItem('mem_hs', JSON.stringify(d));
+        } catch {}
+      };
+
+      // Utilities
+      const fmtTime = s => `${String(Math.floor(s/60)).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`;
+      const shuffle = a => {
+        for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; }
+        return a;
+      };
+      const clearConfetti = () => { el.confetti.innerHTML = ''; };
+
+      // UI Updates
+      const ui = () => {
+        el.moves.textContent = state.moves;
+        el.time.textContent = fmtTime(state.time);
+        el.pairs.textContent = `${state.matched}/${state.pairs}`;
+        el.score.textContent = state.score;
+        el.best = Math.max(state.best, state.score);
+      };
+      const confetti = () => {
+        clearConfetti();
+        const cols = ['#f43f5e','#10b981','#3b82f6','#f59e0b','#8b5cf6','#ffffff'];
+        for(let i=0;i<30;i++){
+          const c = document.createElement('div'); c.className='mem-confetti';
+          c.style.left = Math.random()*100+'%'; c.style.top='-10px';
+          c.style.background = cols[Math.floor(Math.random()*cols.length)];
+          c.style.animationDuration = (1+Math.random())+'s';
+          el.confetti.appendChild(c);
+          setTimeout(()=>c.remove(), 2000);
+        }
+      };
+
+      // Game Flow
+      const resetState = () => {
+        clearInterval(state.timer);
+        state.timer = null; state.moves = 0; state.score = 0; state.time = 0;
+        state.flipped = []; state.matched = 0; state.lock = false; state.playing = false;
+        el.grid.innerHTML = ''; clearConfetti(); ui();
+      };
+
+      const startGame = () => {
+        initAudio();
+        resetState();
+        const cfg = CFG[el.diff.value];
+        state.diff = el.diff.value; state.pairs = cfg.pairs; state.playing = true;
+        loadBest(); ui();
+        el.start.classList.remove('active');
+        el.win.classList.remove('active');
+        
+        el.grid.style.gridTemplateColumns = `repeat(${cfg.cols}, 1fr)`;
+        const cards = shuffle([...cfg.emojis, ...cfg.emojis]);
+        cards.forEach((emoji, i) => {
+          const c = document.createElement('div'); c.className='mem-card'; c.dataset.idx=i; c.dataset.val=emoji;
+          c.innerHTML = `<div class="mem-face mem-front"></div><div class="mem-face mem-back">${emoji}</div>`;
+          c.addEventListener('click', () => flipCard(c));
+          el.grid.appendChild(c);
+        });
+        
+        state.timer = setInterval(() => { if(state.playing) { state.time++; ui(); } }, 1000);
+      };
+
+      const flipCard = (card) => {
+        if(state.lock || card.classList.contains('flipped') || card.classList.contains('matched') || !state.playing) return;
+        sfx('flip');
+        card.classList.add('flipped');
+        state.flipped.push(card);
+        
+        if(state.flipped.length === 2) {
+          state.moves++; state.lock = true; ui();
+          setTimeout(() => {
+            const [c1, c2] = state.flipped;
+            if(c1.dataset.val === c2.dataset.val) {
+              c1.classList.add('matched'); c2.classList.add('matched');
+              sfx('match'); state.matched++;
+              if(state.matched >= state.pairs) setTimeout(winGame, 300);
+            } else {
+              sfx('fail');
+              c1.classList.remove('flipped'); c2.classList.remove('flipped');
+            }
+            state.flipped = []; state.lock = false;
+            ui();
+          }, 700);
+        }
+      };
+
+      const winGame = () => {
+        if(!state.playing) return;
+        state.playing = false; clearInterval(state.timer);
+        state.score = Math.max(10, (state.pairs * 100) - (state.moves * 8) - (state.time * 2));
+        sfx('win'); confetti(); saveBest(); loadBest(); ui();
+        el.wMoves.textContent = state.moves;
+        el.wTime.textContent = fmtTime(state.time);
+        el.wScore.textContent = state.score;
+        el.wBest.textContent = state.best;
+        el.win.classList.add('active');
+      };
+
+      // Events
+      el.diff.addEventListener('change', startGame);
+      el.sound.addEventListener('click', function(){ state.sound=!state.sound; this.textContent=state.sound?'🔊':'🔇'; });
+      el.playBtn.addEventListener('click', startGame);
+      el.replayBtn.addEventListener('click', startGame);
+
+      // Init
+      loadBest(); ui();
+    })();
+  </script>
+</div>

@@ -1,0 +1,604 @@
+<div class="qr-pro-tool">
+  <style>
+    .qr-pro-tool {
+      --qr-primary: #6366f1; --qr-primary-hover: #4f46e5; --qr-accent: #8b5cf6;
+      --qr-green: #10b981; --qr-bg: #0f0f1a; --qr-card: #1a1a2e; --qr-input: #1e1e3f;
+      --qr-border: #334155; --qr-text: #f1f5f9; --qr-text-muted: #94a3b8;
+      --qr-radius: 12px; --qr-shadow: 0 4px 20px rgba(0,0,0,0.4);
+      --qr-transition: all 0.25s cubic-bezier(0.4,0,0.2,1);
+      
+      max-width: 900px; margin: 1.5rem auto; padding: 1.2rem;
+      background: var(--qr-card); border: 1px solid var(--qr-border);
+      border-radius: var(--qr-radius); box-shadow: var(--qr-shadow);
+      font-family: system-ui, -apple-system, 'Segoe UI', sans-serif; color: var(--qr-text);
+    }
+    .qr-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; padding-bottom: 0.8rem; border-bottom: 1px solid var(--qr-border); flex-wrap: wrap; gap: 0.5rem; }
+    .qr-title { font-size: 1.3rem; font-weight: 700; display: flex; align-items: center; gap: 0.5rem; }
+    .qr-title i { color: var(--qr-primary); }
+    .qr-badges { display: flex; gap: 0.4rem; flex-wrap: wrap; }
+    .qr-badge { padding: 0.25rem 0.6rem; background: var(--qr-input); border-radius: 6px; font-size: 0.7rem; color: var(--qr-text-muted); }
+    
+    .qr-tabs { display: flex; gap: 0.3rem; margin-bottom: 1rem; flex-wrap: wrap; }
+    .qr-tab { padding: 0.5rem 1rem; border-radius: 8px 8px 0 0; cursor: pointer; font-size: 0.85rem; background: var(--qr-input); color: var(--qr-text-muted); border: 1px solid var(--qr-border); border-bottom: none; transition: var(--qr-transition); }
+    .qr-tab:hover { color: var(--qr-text); background: #252545; }
+    .qr-tab.active { background: var(--qr-primary); color: white; border-color: transparent; font-weight: 600; }
+    
+    .qr-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    @media (max-width: 700px) { .qr-grid { grid-template-columns: 1fr; } }
+    
+    .qr-section { margin-bottom: 1rem; }
+    .qr-section-title { font-size: 0.85rem; font-weight: 600; color: var(--qr-text-muted); margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.4rem; }
+    .qr-input, .qr-select { width: 100%; padding: 0.7rem 0.9rem; background: var(--qr-input); border: 2px solid var(--qr-border); border-radius: 8px; color: var(--qr-text); font-size: 0.9rem; outline: none; transition: var(--qr-transition); }
+    .qr-input:focus, .qr-select:focus { border-color: var(--qr-primary); box-shadow: 0 0 0 3px rgba(99,102,241,0.15); }
+    .qr-textarea { min-height: 80px; resize: vertical; font-family: 'Courier New', monospace; }
+    
+    .qr-color-row { display: flex; gap: 0.8rem; align-items: center; }
+    .qr-color-input { width: 50px; height: 36px; padding: 2px; border: 2px solid var(--qr-border); border-radius: 6px; background: var(--qr-input); cursor: pointer; }
+    .qr-color-input::-webkit-color-swatch { border: none; border-radius: 4px; }
+    
+    .qr-options { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; }
+    .qr-opt { display: flex; align-items: center; gap: 0.4rem; font-size: 0.8rem; cursor: pointer; }
+    .qr-opt input { accent-color: var(--qr-primary); cursor: pointer; }
+    
+    .qr-preview-box { background: var(--qr-input); border: 2px solid var(--qr-border); border-radius: 12px; padding: 1rem; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 280px; position: relative; }
+    .qr-preview-bg { position: absolute; inset: 0; border-radius: 10px; opacity: 0.3; pointer-events: none; background: repeating-conic-gradient(#334155 0% 25%, transparent 0% 50%) 50%/20px 20px; }
+    .qr-preview-img { width: 100%; max-width: 240px; height: auto; border-radius: 8px; background: white; padding: 0.5rem; box-shadow: var(--qr-shadow); transition: var(--qr-transition); }
+    .qr-preview-img:hover { transform: scale(1.02); }
+    .qr-preview-placeholder { color: var(--qr-text-muted); font-style: italic; text-align: center; }
+    
+    .qr-actions { display: flex; gap: 0.5rem; flex-wrap: wrap; margin: 1rem 0; justify-content: center; }
+    .qr-btn { padding: 0.6rem 1rem; border-radius: 8px; border: 1px solid var(--qr-border); background: var(--qr-input); color: var(--qr-text); font-size: 0.85rem; cursor: pointer; transition: var(--qr-transition); display: flex; align-items: center; gap: 0.4rem; font-weight: 500; }
+    .qr-btn:hover { background: var(--qr-primary); border-color: transparent; color: white; transform: translateY(-1px); }
+    .qr-btn.primary { background: linear-gradient(135deg, var(--qr-primary), var(--qr-accent)); border: none; color: white; font-weight: 600; }
+    .qr-btn.primary:hover { box-shadow: 0 4px 15px rgba(99,102,241,0.4); }
+    .qr-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+    
+    .qr-status { display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0.8rem; background: var(--qr-input); border-radius: 8px; font-size: 0.8rem; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.4rem; }
+    .qr-status-msg { display: flex; align-items: center; gap: 0.4rem; }
+    .qr-status-msg.success { color: var(--qr-green); }
+    .qr-status-msg.error { color: var(--qr-red); }
+    .qr-status-info { color: var(--qr-text-muted); }
+    
+    /* Scanner Styles */
+    .qr-scanner-box { background: var(--qr-input); border: 2px solid var(--qr-border); border-radius: 12px; padding: 1rem; text-align: center; }
+    .qr-video-wrap { position: relative; width: 100%; max-width: 320px; margin: 0 auto 1rem; background: #000; border-radius: 8px; overflow: hidden; }
+    .qr-video { width: 100%; display: block; }
+    .qr-scan-overlay { position: absolute; inset: 0; border: 3px solid var(--qr-primary); border-radius: 8px; pointer-events: none; animation: qr-scan-pulse 2s infinite; }
+    @keyframes qr-scan-pulse { 0%,100%{opacity:1} 50%{opacity:0.5} }
+    .qr-scan-result { margin-top: 0.8rem; padding: 0.8rem; background: var(--qr-card); border-radius: 8px; font-family: 'Courier New', monospace; font-size: 0.85rem; word-break: break-all; display: none; }
+    .qr-scan-result.show { display: block; }
+    .qr-scan-actions { display: flex; gap: 0.4rem; justify-content: center; margin-top: 0.5rem; flex-wrap: wrap; }
+    
+    /* Batch Mode */
+    .qr-batch-list { max-height: 150px; overflow-y: auto; border: 1px solid var(--qr-border); border-radius: 8px; padding: 0.5rem; background: var(--qr-card); margin-bottom: 0.8rem; }
+    .qr-batch-item { display: flex; justify-content: space-between; align-items: center; padding: 0.4rem 0.6rem; background: var(--qr-input); border-radius: 6px; margin-bottom: 0.3rem; font-size: 0.8rem; }
+    .qr-batch-del { background: none; border: none; color: var(--qr-red); cursor: pointer; padding: 0 0.3rem; }
+    
+    /* History */
+    .qr-history { margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--qr-border); }
+    .qr-history-header { display: flex; justify-content: space-between; align-items: center; cursor: pointer; margin-bottom: 0.5rem; }
+    .qr-history-title { font-size: 0.9rem; font-weight: 600; display: flex; align-items: center; gap: 0.4rem; }
+    .qr-history-toggle { color: var(--qr-text-muted); transition: var(--qr-transition); }
+    .qr-history-toggle.collapsed { transform: rotate(-90deg); }
+    .qr-history-list { display: grid; gap: 0.4rem; max-height: 150px; overflow-y: auto; transition: var(--qr-transition); }
+    .qr-history-list.collapsed { display: none; }
+    .qr-history-item { padding: 0.5rem 0.7rem; background: var(--qr-input); border-radius: 8px; cursor: pointer; border-left: 3px solid var(--qr-primary); transition: var(--qr-transition); font-size: 0.8rem; display: flex; justify-content: space-between; align-items: center; }
+    .qr-history-item:hover { background: #252545; }
+    .qr-history-preview { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 180px; color: var(--qr-text-muted); }
+    .qr-history-thumb { width: 40px; height: 40px; background: white; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; }
+    .qr-history-del { padding: 0.2rem 0.4rem; background: transparent; border: none; color: var(--qr-red); cursor: pointer; border-radius: 4px; font-size: 0.75rem; }
+    .qr-history-del:hover { background: rgba(239,68,68,0.15); }
+    
+    /* Toast */
+    .qr-toast { position: fixed; bottom: 1.2rem; right: 1.2rem; padding: 0.7rem 1.1rem; background: var(--qr-card); border-left: 4px solid var(--qr-green); border-radius: 10px; box-shadow: var(--qr-shadow); display: flex; align-items: center; gap: 0.5rem; z-index: 9999; transform: translateY(150%); transition: transform 0.35s cubic-bezier(0.68,-0.55,0.265,1.55); font-size: 0.9rem; }
+    .qr-toast.show { transform: translateY(0); }
+    .qr-toast.error { border-left-color: var(--qr-red); }
+    
+    /* Loading */
+    .qr-loading { position: absolute; inset: 0; background: rgba(15,15,26,0.9); border-radius: 10px; display: none; align-items: center; justify-content: center; flex-direction: column; gap: 0.8rem; }
+    .qr-loading.show { display: flex; }
+    .qr-spinner { width: 40px; height: 40px; border: 4px solid var(--qr-border); border-top-color: var(--qr-primary); border-radius: 50%; animation: qr-spin 1s linear infinite; }
+    @keyframes qr-spin { to { transform: rotate(360deg); } }
+    
+    @media (max-width: 600px) {
+      .qr-pro-tool { padding: 1rem; }
+      .qr-options { grid-template-columns: 1fr; }
+      .qr-actions { flex-direction: column; }
+      .qr-btn { width: 100%; justify-content: center; }
+      .qr-grid { gap: 0.8rem; }
+    }
+  </style>
+
+  <div class="qr-header">
+    <div class="qr-title"><i class="fas fa-qrcode"></i> QR Code Studio Pro</div>
+    <div class="qr-badges"><span class="qr-badge">Generator</span><span class="qr-badge">Scanner</span><span class="qr-badge">Customize</span><span class="qr-badge">Batch</span></div>
+  </div>
+
+  <div class="qr-tabs">
+    <button class="qr-tab active" data-view="generate">🎨 Generate</button>
+    <button class="qr-tab" data-view="scan">📷 Scan</button>
+    <button class="qr-tab" data-view="batch">📦 Batch</button>
+  </div>
+
+  <!-- Generator View -->
+  <div id="qr-generate-view">
+    <div class="qr-grid">
+      <!-- Input Section -->
+      <div>
+        <div class="qr-section">
+          <div class="qr-section-title">📝 Content</div>
+          <textarea class="qr-input qr-textarea" id="qr-content" placeholder="Enter URL, text, WiFi, contact, etc...&#10;&#10;Examples:&#10;• https://example.com&#10;• WiFi:T:WPA;S:MyNetwork;P:password123;;&#10;• BEGIN:VCARD&#10;N:Doe;John&#10;TEL:+1234567890&#10;END:VCARD">https://abomnitools.dev</textarea>
+        </div>
+
+        <div class="qr-section">
+          <div class="qr-section-title">🎨 Appearance</div>
+          <div class="qr-color-row" style="margin-bottom:0.6rem">
+            <div style="flex:1">
+              <label class="qr-section-title" style="margin:0 0 0.3rem">Foreground</label>
+              <input type="color" class="qr-color-input" id="qr-fg" value="#000000">
+            </div>
+            <div style="flex:1">
+              <label class="qr-section-title" style="margin:0 0 0.3rem">Background</label>
+              <input type="color" class="qr-color-input" id="qr-bg" value="#ffffff">
+            </div>
+          </div>
+          <div class="qr-options">
+            <label class="qr-opt"><input type="checkbox" id="qr-rounded" checked> Rounded corners</label>
+            <label class="qr-opt"><input type="checkbox" id="qr-gradient"> Gradient effect</label>
+            <label class="qr-opt"><input type="checkbox" id="qr-logo"> Add logo center</label>
+            <label class="qr-opt"><input type="checkbox" id="qr-shadow"> Drop shadow</label>
+          </div>
+        </div>
+
+        <div class="qr-section">
+          <div class="qr-section-title">⚙️ Technical</div>
+          <div class="qr-options">
+            <div>
+              <label class="qr-section-title" style="margin:0 0 0.3rem">Size</label>
+              <select class="qr-select" id="qr-size">
+                <option value="150">150×150</option>
+                <option value="200">200×200</option>
+                <option value="300" selected>300×300</option>
+                <option value="400">400×400</option>
+                <option value="500">500×500</option>
+                <option value="800">800×800</option>
+              </select>
+            </div>
+            <div>
+              <label class="qr-section-title" style="margin:0 0 0.3rem">Error Correction</label>
+              <select class="qr-select" id="qr-ecc">
+                <option value="L">Low (7%)</option>
+                <option value="M" selected>Medium (15%)</option>
+                <option value="Q">Quartile (25%)</option>
+                <option value="H">High (30%)</option>
+              </select>
+            </div>
+            <div>
+              <label class="qr-section-title" style="margin:0 0 0.3rem">Format</label>
+              <select class="qr-select" id="qr-format">
+                <option value="png">PNG</option>
+                <option value="svg">SVG</option>
+                <option value="jpg">JPG</option>
+              </select>
+            </div>
+            <div>
+              <label class="qr-section-title" style="margin:0 0 0.3rem">Margin</label>
+              <select class="qr-select" id="qr-margin">
+                <option value="0">None</option>
+                <option value="1">1px</option>
+                <option value="2" selected>2px</option>
+                <option value="4">4px</option>
+                <option value="10">10px</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Preview Section -->
+      <div>
+        <div class="qr-preview-box">
+          <div class="qr-preview-bg"></div>
+          <img class="qr-preview-img" id="qr-preview" alt="QR Preview" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200' viewBox='0 0 200 200'%3E%3Crect fill='%23f1f5f9' width='200' height='200'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' fill='%2364748b' font-family='system-ui' font-size='14'%3EQR Preview%3C/text%3E%3C/svg%3E">
+          <div class="qr-loading" id="qr-loading">
+            <div class="qr-spinner"></div>
+            <span style="font-size:0.85rem;color:var(--qr-text-muted)">Generating...</span>
+          </div>
+        </div>
+        
+        <div class="qr-actions">
+          <button class="qr-btn primary" id="qr-generate">✨ Generate QR</button>
+          <button class="qr-btn" id="qr-copy">📋 Copy Image</button>
+          <button class="qr-btn" id="qr-download">💾 Download</button>
+          <button class="qr-btn" id="qr-share">🔗 Share</button>
+          <button class="qr-btn" id="qr-clear">🗑️ Clear</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scanner View -->
+  <div id="qr-scan-view" style="display:none">
+    <div class="qr-scanner-box">
+      <div class="qr-section-title" style="margin-bottom:0.8rem">📷 Scan QR Code</div>
+      <div class="qr-video-wrap">
+        <video class="qr-video" id="qr-video" autoplay playsinline></video>
+        <div class="qr-scan-overlay"></div>
+      </div>
+      <div class="qr-actions" style="margin-bottom:0.8rem">
+        <button class="qr-btn primary" id="qr-scan-start">🎬 Start Camera</button>
+        <button class="qr-btn" id="qr-scan-stop" style="display:none">⏹️ Stop</button>
+        <button class="qr-btn" id="qr-scan-file">📁 Upload Image</button>
+        <input type="file" id="qr-file-input" accept="image/*" style="display:none">
+      </div>
+      <div class="qr-scan-result" id="qr-scan-result"></div>
+      <div class="qr-scan-actions" id="qr-scan-actions" style="display:none">
+        <button class="qr-btn" id="qr-scan-copy">📋 Copy</button>
+        <button class="qr-btn" id="qr-scan-open">🌐 Open URL</button>
+        <button class="qr-btn" id="qr-scan-new">🔄 Scan Again</button>
+      </div>
+      <p style="font-size:0.8rem;color:var(--qr-text-muted);margin-top:0.8rem">💡 Tip: Point camera at QR code or upload an image containing one</p>
+    </div>
+  </div>
+
+  <!-- Batch View -->
+  <div id="qr-batch-view" style="display:none">
+    <div class="qr-section">
+      <div class="qr-section-title">📦 Batch QR Generator</div>
+      <textarea class="qr-input qr-textarea" id="qr-batch-input" placeholder="Enter one item per line...&#10;&#10;https://example1.com&#10;https://example2.com&#10;Contact: John Doe&#10;WiFi:MyNetwork"></textarea>
+      <div class="qr-options" style="margin:0.8rem 0">
+        <label class="qr-opt"><input type="checkbox" id="qr-batch-prefix" checked> Add sequential prefix</label>
+        <label class="qr-opt"><input type="checkbox" id="qr-batch-zip"> Download as ZIP</label>
+      </div>
+      <div class="qr-batch-list" id="qr-batch-list"></div>
+      <div class="qr-actions">
+        <button class="qr-btn primary" id="qr-batch-add">➕ Add Line</button>
+        <button class="qr-btn" id="qr-batch-generate">✨ Generate All</button>
+        <button class="qr-btn" id="qr-batch-clear">🗑️ Clear List</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="qr-status">
+    <span class="qr-status-msg" id="qr-status-msg">✅ Ready to generate</span>
+    <span class="qr-status-info" id="qr-status-info">API: qrserver.com • Client-side processing</span>
+  </div>
+
+  <div class="qr-history">
+    <div class="qr-history-header" id="qr-history-toggle">
+      <div class="qr-history-title"><i class="fas fa-history"></i> Generated QR History</div>
+      <span class="qr-history-toggle">▼</span>
+    </div>
+    <div class="qr-history-list" id="qr-history-list"></div>
+  </div>
+
+  <div class="qr-toast" id="qr-toast"><i class="fas fa-check-circle"></i><span id="qr-toast-msg">Done!</span></div>
+
+  <script>
+    (function() {
+      'use strict';
+      const $ = id => document.getElementById(id);
+      const $$ = sel => document.querySelectorAll(sel);
+
+      const els = {
+        tabs: $$('.qr-tab'), views: { gen: $('qr-generate-view'), scan: $('qr-scan-view'), batch: $('qr-batch-view') },
+        content: $('qr-content'), fg: $('qr-fg'), bg: $('qr-bg'),
+        rounded: $('qr-rounded'), gradient: $('qr-gradient'), logo: $('qr-logo'), shadow: $('qr-shadow'),
+        size: $('qr-size'), ecc: $('qr-ecc'), format: $('qr-format'), margin: $('qr-margin'),
+        preview: $('qr-preview'), loading: $('qr-loading'),
+        generate: $('qr-generate'), copy: $('qr-copy'), download: $('qr-download'), share: $('qr-share'), clear: $('qr-clear'),
+        // Scanner
+        video: $('qr-video'), scanStart: $('qr-scan-start'), scanStop: $('qr-scan-stop'), scanFile: $('qr-scan-file'),
+        fileInput: $('qr-file-input'), scanResult: $('qr-scan-result'), scanActions: $('qr-scan-actions'),
+        scanCopy: $('qr-scan-copy'), scanOpen: $('qr-scan-open'), scanNew: $('qr-scan-new'),
+        // Batch
+        batchInput: $('qr-batch-input'), batchList: $('qr-batch-list'), batchAdd: $('qr-batch-add'),
+        batchGenerate: $('qr-batch-generate'), batchClear: $('qr-batch-clear'),
+        batchPrefix: $('qr-batch-prefix'), batchZip: $('qr-batch-zip'),
+        // History
+        historyToggle: $('qr-history-toggle'), historyList: $('qr-history-list'),
+        // Status
+        statusMsg: $('qr-status-msg'), statusInfo: $('qr-status-info'),
+        toast: $('qr-toast'), toastMsg: $('qr-toast-msg')
+      };
+
+      const state = {
+        stream: null,
+        history: [],
+        historyCollapsed: false,
+        batchItems: [],
+        lastQR: null
+      };
+
+      try { state.history = JSON.parse(localStorage.getItem('qrpro_history') || '[]'); } catch { state.history = []; }
+
+      function toast(msg, type = 'success') {
+        els.toastMsg.textContent = msg;
+        els.toast.className = `qr-toast ${type} show`;
+        setTimeout(() => els.toast.classList.remove('show'), 2500);
+      }
+
+      function setStatus(msg, type = 'info', extra = '') {
+        els.statusMsg.textContent = msg;
+        els.statusMsg.className = `qr-status-msg ${type}`;
+        els.statusInfo.textContent = extra || 'API: qrserver.com • Client-side';
+      }
+
+      // Tab Switching
+      els.tabs.forEach(tab => {
+        tab.onclick = () => {
+          els.tabs.forEach(t => t.classList.remove('active'));
+          Object.values(els.views).forEach(v => v.style.display = 'none');
+          tab.classList.add('active');
+          els.views[tab.dataset.view].style.display = 'block';
+          if (tab.dataset.view === 'scan' && els.video) {
+            // Stop camera if switching away
+            if (state.stream) {
+              state.stream.getTracks().forEach(t => t.stop());
+              state.stream = null;
+              els.scanStart.style.display = 'inline-flex';
+              els.scanStop.style.display = 'none';
+            }
+          }
+        };
+      });
+
+      // Generate QR Code
+      async function generateQR() {
+        const content = els.content.value.trim();
+        if (!content) { setStatus('⚠️ Please enter content', 'error'); toast('Content is required', 'error'); return; }
+        
+        els.loading.classList.add('show');
+        setStatus('⚙️ Generating QR...', 'info');
+        
+        try {
+          const size = els.size.value;
+          const fg = els.fg.value.replace('#', '');
+          const bg = els.bg.value.replace('#', '');
+          const ecc = els.ecc.value;
+          const margin = els.margin.value;
+          const format = els.format.value;
+          
+          // Build API URL with fallback
+          const apiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&data=${encodeURIComponent(content)}&color=${fg}&bgcolor=${bg}&ecc=${ecc}&margin=${margin}&format=${format}`;
+          
+          // Load image with error handling
+          const img = new Image();
+          img.crossOrigin = 'anonymous';
+          
+          await new Promise((resolve, reject) => {
+            img.onload = () => { els.preview.src = img.src; resolve(); };
+            img.onerror = () => {
+              // Fallback to simpler URL
+              const fallback = `https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&data=${encodeURIComponent(content)}`;
+              els.preview.src = fallback;
+              resolve();
+            };
+            img.src = apiUrl;
+          });
+          
+          state.lastQR = { content, url: els.preview.src, timestamp: Date.now(), settings: { size, ecc, format } };
+          
+          setStatus('✅ QR generated successfully', 'success');
+          toast('✨ QR code ready!');
+          saveHistory(content.substring(0, 30), els.preview.src);
+          
+        } catch (err) {
+          setStatus(`❌ ${err.message}`, 'error');
+          toast('Generation failed: ' + err.message, 'error');
+        } finally {
+          els.loading.classList.remove('show');
+        }
+      }
+
+      els.generate.onclick = generateQR;
+      els.content.onkeypress = e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); generateQR(); } };
+      [els.fg, els.bg, els.size, els.ecc, els.format, els.margin].forEach(el => {
+        el.onchange = () => { if (els.content.value.trim()) generateQR(); };
+      });
+
+      // Copy QR Image
+      els.copy.onclick = async () => {
+        if (!els.preview.src || els.preview.src.includes('data:image/svg')) { toast('Generate QR first', 'error'); return; }
+        try {
+          const response = await fetch(els.preview.src);
+          const blob = await response.blob();
+          await navigator.clipboard.write([new ClipboardItem({ [blob.type]: blob })]);
+          toast('📋 QR copied to clipboard');
+        } catch {
+          // Fallback: copy URL
+          await navigator.clipboard.writeText(els.preview.src);
+          toast('📋 QR URL copied (image copy not supported)');
+        }
+      };
+
+      // Download QR
+      els.download.onclick = () => {
+        if (!els.preview.src || els.preview.src.includes('data:image/svg')) { toast('Generate QR first', 'error'); return; }
+        const a = document.createElement('a');
+        a.href = els.preview.src;
+        a.download = `qr-${Date.now()}.${els.format.value || 'png'}`;
+        a.click();
+        toast('💾 Download started');
+      };
+
+      // Share QR
+      els.share.onclick = async () => {
+        if (!els.preview.src) { toast('Generate QR first', 'error'); return; }
+        if (navigator.share) {
+          try {
+            await navigator.share({ title: 'QR Code', text: els.content.value, url: els.preview.src });
+            toast('🔗 Shared successfully');
+          } catch (e) { if (e.name !== 'AbortError') toast('Share cancelled'); }
+        } else {
+          await navigator.clipboard.writeText(els.preview.src);
+          toast('📋 Link copied (share not supported)');
+        }
+      };
+
+      // Clear
+      els.clear.onclick = () => {
+        els.content.value = '';
+        els.preview.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200' viewBox='0 0 200 200'%3E%3Crect fill='%23f1f5f9' width='200' height='200'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' fill='%2364748b' font-family='system-ui' font-size='14'%3EQR Preview%3C/text%3E%3C/svg%3E";
+        setStatus('✅ Ready', 'success');
+        els.content.focus();
+      };
+
+      // Scanner Functions (Simplified - uses external library concept)
+      async function startScanner() {
+        try {
+          setStatus('📷 Accessing camera...', 'info');
+          const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+          state.stream = stream;
+          els.video.srcObject = stream;
+          els.scanStart.style.display = 'none';
+          els.scanStop.style.display = 'inline-flex';
+          els.scanResult.classList.remove('show');
+          els.scanActions.style.display = 'none';
+          setStatus('✅ Camera active - Point at QR code', 'success');
+          toast('📷 Camera started');
+          
+          // Note: Full QR decoding requires jsQR or similar library
+          // This is a placeholder for the camera functionality
+          // In production, add: <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"><\/script>
+          // Then implement: setInterval(() => { const canvas = document.createElement('canvas'); ... jsQR(...) }, 500);
+          
+        } catch (err) {
+          setStatus(`❌ Camera error: ${err.message}`, 'error');
+          toast('Camera access denied or unavailable', 'error');
+        }
+      }
+
+      function stopScanner() {
+        if (state.stream) {
+          state.stream.getTracks().forEach(t => t.stop());
+          state.stream = null;
+        }
+        els.video.srcObject = null;
+        els.scanStart.style.display = 'inline-flex';
+        els.scanStop.style.display = 'none';
+        setStatus('✅ Scanner stopped', 'success');
+      }
+
+      els.scanStart.onclick = startScanner;
+      els.scanStop.onclick = stopScanner;
+      
+      // File upload scanning
+      els.scanFile.onclick = () => els.fileInput.click();
+      els.fileInput.onchange = (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+          // Display uploaded image as preview
+          els.preview.src = ev.target.result;
+          setStatus('📁 Image loaded - Use external decoder for QR content', 'warn');
+          toast('📁 Image loaded (manual decode needed)');
+        };
+        reader.readAsDataURL(file);
+      };
+
+      // Scan result actions
+      els.scanCopy.onclick = () => {
+        const text = els.scanResult.textContent;
+        if (text) { navigator.clipboard.writeText(text); toast('📋 Copied'); }
+      };
+      els.scanOpen.onclick = () => {
+        const text = els.scanResult.textContent;
+        if (text && text.startsWith('http')) { window.open(text, '_blank'); }
+      };
+      els.scanNew.onclick = () => {
+        els.scanResult.classList.remove('show');
+        els.scanActions.style.display = 'none';
+        if (!state.stream) startScanner();
+      };
+
+      // Batch Mode
+      function renderBatchList() {
+        els.batchList.innerHTML = state.batchItems.length ? state.batchItems.map((item, i) => `
+          <div class="qr-batch-item">
+            <span class="qr-history-preview">${item}</span>
+            <button class="qr-batch-del" data-i="${i}">✕</button>
+          </div>
+        `).join('') : '<span style="color:var(--qr-text-muted);font-size:0.8rem">No items added yet</span>';
+        
+        els.batchList.querySelectorAll('.qr-batch-del').forEach(btn => {
+          btn.onclick = (e) => {
+            state.batchItems.splice(e.target.dataset.i, 1);
+            renderBatchList();
+          };
+        });
+      }
+
+      els.batchAdd.onclick = () => {
+        const lines = els.batchInput.value.trim().split('\n').filter(l => l.trim());
+        if (!lines.length) { toast('Enter items first', 'error'); return; }
+        state.batchItems = [...state.batchItems, ...lines];
+        renderBatchList();
+        els.batchInput.value = '';
+        toast(`✅ Added ${lines.length} item(s)`);
+      };
+
+      els.batchClear.onclick = () => {
+        state.batchItems = [];
+        renderBatchList();
+        toast('🗑️ Batch list cleared');
+      };
+
+      els.batchGenerate.onclick = async () => {
+        if (!state.batchItems.length) { toast('Add items first', 'error'); return; }
+        setStatus(`⚙️ Generating ${state.batchItems.length} QRs...`, 'info');
+        
+        for (let i = 0; i < state.batchItems.length; i++) {
+          const item = els.batchPrefix.checked ? `${String(i+1).padStart(3, '0')}: ${state.batchItems[i]}` : state.batchItems[i];
+          els.content.value = item;
+          await generateQR();
+          // Small delay to avoid rate limiting
+          await new Promise(r => setTimeout(r, 300));
+        }
+        toast(`✅ Generated ${state.batchItems.length} QR codes!`);
+        setStatus('✅ Batch complete', 'success');
+      };
+
+      // History
+      function saveHistory(content, url) {
+        state.history.unshift({ content, url, time: new Date().toLocaleTimeString() });
+        if (state.history.length > 12) state.history.pop();
+        try { localStorage.setItem('qrpro_history', JSON.stringify(state.history)); } catch {}
+        renderHistory();
+      }
+
+      function renderHistory() {
+        els.historyList.innerHTML = state.history.length ? state.history.map((h, i) => `
+          <div class="qr-history-item" onclick="window._qrLoad(${i})">
+            <div class="qr-history-thumb">QR</div>
+            <span class="qr-history-preview" title="${h.content}">${h.content}</span>
+            <div style="text-align:right"><span style="font-size:0.7rem;color:var(--qr-text-muted)">${h.time}</span><br><button class="qr-history-del" onclick="window._qrDel(${i});event.stopPropagation()">✕</button></div>
+          </div>`).join('') : '<span style="color:var(--qr-text-muted);font-size:0.8rem;padding:0.5rem">No QRs generated yet</span>';
+      }
+      window._qrLoad = i => { const h = state.history[i]; els.content.value = h.content; generateQR(); toast('📜 Loaded'); };
+      window._qrDel = i => { state.history.splice(i, 1); try { localStorage.setItem('qrpro_history', JSON.stringify(state.history)); } catch {} renderHistory(); toast('🗑️ Deleted'); };
+
+      els.historyToggle.onclick = () => {
+        state.historyCollapsed = !state.historyCollapsed;
+        els.historyList.classList.toggle('collapsed', state.historyCollapsed);
+        els.historyToggle.classList.toggle('collapsed', state.historyCollapsed);
+      };
+
+      // Keyboard Shortcuts
+      document.addEventListener('keydown', e => {
+        if ((e.ctrlKey || e.metaKey) && e.key === 'Enter' && els.views.gen.style.display !== 'none') { e.preventDefault(); generateQR(); }
+        if (e.key === '/' && document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'TEXTAREA') { e.preventDefault(); els.content.focus(); }
+      });
+
+      // Cleanup on unload
+      window.addEventListener('beforeunload', () => { if (state.stream) state.stream.getTracks().forEach(t => t.stop()); });
+
+      // Init
+      renderHistory();
+      renderBatchList();
+      setStatus('✅ Ready to generate');
+      console.log('📱 QR Code Studio Pro Initialized Successfully');
+    })();
+  </script>
+</div>

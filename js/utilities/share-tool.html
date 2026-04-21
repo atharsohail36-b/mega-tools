@@ -1,0 +1,499 @@
+<div class="share-widget">
+  <style>
+    .share-widget {
+      --sw-bg: var(--bg-card, #111827);
+      --sw-border: var(--glass-border, #374151);
+      --sw-text: var(--text-primary, #f9fafb);
+      --sw-muted: var(--text-secondary, #9ca3af);
+      --sw-accent: #3b82f6;
+      --sw-success: #10b981;
+      --sw-warning: #f59e0b;
+      --sw-danger: #ef4444;
+      --sw-radius: 16px;
+      --sw-transition: 0.25s ease;
+      
+      background: var(--sw-bg);
+      border: 1px solid var(--sw-border);
+      border-radius: var(--sw-radius);
+      padding: 1.5rem;
+      max-width: 640px;
+      margin: 2rem auto;
+      font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+      color: var(--sw-text);
+      box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+    }
+    .share-widget * { box-sizing: border-box; }
+    
+    /* Header */
+    .sw-header { text-align: center; margin-bottom: 1.2rem; }
+    .sw-title { font-size: 1.35rem; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 0.5rem; margin-bottom: 0.3rem; }
+    .sw-desc { color: var(--sw-muted); font-size: 0.9rem; }
+    
+    /* URL Display */
+    .sw-url-box {
+      background: rgba(255,255,255,0.03); border: 1px solid var(--sw-border);
+      border-radius: 10px; padding: 0.8rem; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;
+    }
+    .sw-url {
+      flex: 1; min-width: 0; font-family: monospace; font-size: 0.85rem; color: var(--sw-accent);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: pointer;
+    }
+    .sw-url:hover { text-decoration: underline; }
+    .sw-url-actions { display: flex; gap: 0.3rem; }
+    .sw-icon-btn {
+      width: 32px; height: 32px; border: none; border-radius: 6px;
+      background: rgba(255,255,255,0.1); color: var(--sw-text); cursor: pointer;
+      display: flex; align-items: center; justify-content: center; font-size: 1rem;
+      transition: var(--sw-transition);
+    }
+    .sw-icon-btn:hover { background: var(--sw-accent); color: #fff; }
+    
+    /* Message Template */
+    .sw-message { margin-bottom: 1rem; }
+    .sw-message-label { font-size: 0.85rem; font-weight: 500; margin-bottom: 0.4rem; display: block; }
+    .sw-message-input {
+      width: 100%; padding: 0.6rem 0.8rem; border-radius: 8px; border: 1px solid var(--sw-border);
+      background: rgba(255,255,255,0.05); color: var(--sw-text); font-size: 0.9rem;
+      outline: none; transition: var(--sw-transition); resize: none;
+    }
+    .sw-message-input:focus { border-color: var(--sw-accent); box-shadow: 0 0 0 3px rgba(59,130,246,0.2); }
+    .sw-message-hint { font-size: 0.75rem; color: var(--sw-muted); margin-top: 0.3rem; }
+    
+    /* UTM Builder */
+    .sw-utm { margin-bottom: 1rem; }
+    .sw-utm-toggle {
+      background: none; border: none; color: var(--sw-accent); cursor: pointer;
+      font-size: 0.85rem; display: flex; align-items: center; gap: 0.3rem; width: 100%; text-align: left;
+    }
+    .sw-utm-panel { display: none; margin-top: 0.8rem; padding: 0.8rem; background: rgba(255,255,255,0.03); border-radius: 8px; }
+    .sw-utm-panel.show { display: block; }
+    .sw-utm-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; }
+    .sw-utm-input {
+      padding: 0.5rem; border-radius: 6px; border: 1px solid var(--sw-border);
+      background: rgba(255,255,255,0.05); color: var(--sw-text); font-size: 0.85rem;
+    }
+    .sw-utm-preview { font-family: monospace; font-size: 0.8rem; color: var(--sw-muted); margin-top: 0.5rem; word-break: break-all; }
+    
+    /* Share Methods Grid */
+    .sw-methods { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.6rem; margin-bottom: 1rem; }
+    .sw-method {
+      display: flex; flex-direction: column; align-items: center; gap: 0.4rem; padding: 0.7rem;
+      background: rgba(255,255,255,0.03); border: 1px solid var(--sw-border); border-radius: 10px;
+      cursor: pointer; transition: var(--sw-transition); text-align: center; font-size: 0.75rem;
+    }
+    .sw-method:hover { border-color: var(--sw-accent); transform: translateY(-2px); background: rgba(59,130,246,0.1); }
+    .sw-method-icon { font-size: 1.5rem; }
+    
+    /* QR Code */
+    .sw-qr { display: none; margin: 1rem 0; padding: 1rem; background: rgba(255,255,255,0.03); border-radius: 10px; text-align: center; }
+    .sw-qr.show { display: block; animation: sw-fadeIn 0.2s; }
+    @keyframes sw-fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+    .sw-qr-canvas { background: #fff; padding: 0.5rem; border-radius: 8px; display: inline-block; margin-bottom: 0.5rem; }
+    .sw-qr-download { font-size: 0.8rem; color: var(--sw-accent); cursor: pointer; text-decoration: none; }
+    
+    /* Embed Codes */
+    .sw-embed { margin: 1rem 0; }
+    .sw-embed-toggle {
+      background: none; border: none; color: var(--sw-accent); cursor: pointer;
+      font-size: 0.85rem; display: flex; align-items: center; gap: 0.3rem; width: 100%; text-align: left;
+    }
+    .sw-embed-panel { display: none; margin-top: 0.8rem; }
+    .sw-embed-panel.show { display: block; }
+    .sw-embed-code {
+      width: 100%; padding: 0.6rem; border-radius: 6px; border: 1px solid var(--sw-border);
+      background: rgba(0,0,0,0.2); color: var(--sw-success); font-family: monospace; font-size: 0.8rem;
+      resize: none; outline: none;
+    }
+    .sw-embed-tabs { display: flex; gap: 0.3rem; margin-bottom: 0.5rem; }
+    .sw-embed-tab {
+      padding: 0.3rem 0.6rem; border-radius: 4px; font-size: 0.75rem; cursor: pointer;
+      background: rgba(255,255,255,0.05); border: 1px solid var(--sw-border);
+    }
+    .sw-embed-tab.active { background: var(--sw-accent); color: #fff; border-color: var(--sw-accent); }
+    
+    /* History */
+    .sw-history { margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--sw-border); }
+    .sw-history-toggle {
+      background: none; border: none; color: var(--sw-muted); cursor: pointer;
+      font-size: 0.85rem; display: flex; align-items: center; gap: 0.3rem; width: 100%; text-align: left;
+    }
+    .sw-history-list { display: none; margin-top: 0.5rem; max-height: 120px; overflow-y: auto; }
+    .sw-history-list.show { display: block; }
+    .sw-history-item { display: flex; justify-content: space-between; padding: 0.4rem 0; border-bottom: 1px solid var(--sw-border); font-size: 0.8rem; }
+    .sw-history-item:last-child { border: none; }
+    .sw-history-meta { color: var(--sw-muted); font-size: 0.75rem; }
+    
+    /* Toast */
+    .sw-toast { position: fixed; bottom: 24px; right: 24px; padding: 0.75rem 1rem; border-radius: 8px; font-weight: 500; transform: translateY(120%); opacity: 0; transition: 0.3s; z-index: 9999; box-shadow: 0 8px 20px rgba(0,0,0,0.25); pointer-events: none; }
+    .sw-toast.success { background: var(--sw-success); color: #fff; }
+    .sw-toast.error { background: var(--sw-danger); color: #fff; }
+    .sw-toast.info { background: var(--sw-accent); color: #fff; }
+    .sw-toast.show { transform: translateY(0); opacity: 1; }
+    
+    /* Light Mode */
+    :root.light-mode .share-widget { --sw-bg: #ffffff; --sw-border: #e5e7eb; --sw-text: #111827; --sw-muted: #6b7280; }
+    :root.light-mode .sw-url-box, :root.light-mode .sw-method, :root.light-mode .sw-utm-panel { background: #f9fafb; }
+    :root.light-mode .sw-embed-code { background: #f3f4f6; color: #059669; }
+    :root.light-mode .sw-icon-btn { background: #f3f4f6; color: #374151; }
+    
+    /* Print */
+    @media print {
+      .sw-methods, .sw-utm, .sw-embed, .sw-history, .sw-toast { display: none !important; }
+      .sw-qr { display: block !important; }
+    }
+  </style>
+
+  <!-- Header -->
+  <div class="sw-header">
+    <h3 class="sw-title">🔗 Share AbOmniTools</h3>
+    <p class="sw-desc">Spread the word about 100+ free, ad-free, offline tools.</p>
+  </div>
+  
+  <!-- URL Display -->
+  <div class="sw-url-box">
+    <span class="sw-url" id="sw-url" title="Click to copy">https://abomnitools.dev</span>
+    <div class="sw-url-actions">
+      <button class="sw-icon-btn" id="sw-copy" title="Copy URL">📋</button>
+      <button class="sw-icon-btn" id="sw-refresh" title="Refresh URL">🔄</button>
+    </div>
+  </div>
+  
+  <!-- Message Template -->
+  <div class="sw-message">
+    <label class="sw-message-label">✏️ Custom Message (Optional)</label>
+    <textarea class="sw-message-input" id="sw-message" rows="2" placeholder="Add a personal note...">Check out AbOmniTools – 100+ free finance & utility tools that work offline! ✨</textarea>
+    <div class="sw-message-hint">Tip: Use {'{url}'} to auto-insert the link</div>
+  </div>
+  
+  <!-- UTM Builder -->
+  <div class="sw-utm">
+    <button class="sw-utm-toggle" id="sw-utm-toggle">📊 Add UTM Parameters <span>▼</span></button>
+    <div class="sw-utm-panel" id="sw-utm-panel">
+      <div class="sw-utm-grid">
+        <input class="sw-utm-input" id="utm-source" placeholder="Source (e.g., twitter)">
+        <input class="sw-utm-input" id="utm-medium" placeholder="Medium (e.g., social)">
+        <input class="sw-utm-input" id="utm-campaign" placeholder="Campaign (e.g., launch)">
+        <input class="sw-utm-input" id="utm-content" placeholder="Content (optional)">
+      </div>
+      <div class="sw-utm-preview" id="sw-utm-preview"></div>
+    </div>
+  </div>
+  
+  <!-- Share Methods -->
+  <div class="sw-methods">
+    <div class="sw-method" data-method="native"><span class="sw-method-icon">📱</span><span>Native Share</span></div>
+    <div class="sw-method" data-method="copy"><span class="sw-method-icon">📋</span><span>Copy Link</span></div>
+    <div class="sw-method" data-method="twitter"><span class="sw-method-icon">🐦</span><span>Twitter</span></div>
+    <div class="sw-method" data-method="whatsapp"><span class="sw-method-icon">💬</span><span>WhatsApp</span></div>
+    <div class="sw-method" data-method="telegram"><span class="sw-method-icon">✈️</span><span>Telegram</span></div>
+    <div class="sw-method" data-method="email"><span class="sw-method-icon">📧</span><span>Email</span></div>
+    <div class="sw-method" data-method="qr"><span class="sw-method-icon">📷</span><span>QR Code</span></div>
+    <div class="sw-method" data-method="embed"><span class="sw-method-icon">🔗</span><span>Embed Code</span></div>
+  </div>
+  
+  <!-- QR Code Panel -->
+  <div class="sw-qr" id="sw-qr">
+    <div class="sw-qr-canvas" id="sw-qr-canvas"></div>
+    <div style="font-size:0.85rem;margin-bottom:0.5rem">Scan to open on mobile</div>
+    <a class="sw-qr-download" id="sw-qr-download" download="abomnitools-qr.png">⬇️ Download PNG</a>
+  </div>
+  
+  <!-- Embed Codes -->
+  <div class="sw-embed">
+    <button class="sw-embed-toggle" id="sw-embed-toggle">💻 Get Embed Code <span>▼</span></button>
+    <div class="sw-embed-panel" id="sw-embed-panel">
+      <div class="sw-embed-tabs">
+        <span class="sw-embed-tab active" data-type="iframe">Iframe</span>
+        <span class="sw-embed-tab" data-type="badge">Badge</span>
+        <span class="sw-embed-tab" data-type="button">Button</span>
+      </div>
+      <textarea class="sw-embed-code" id="sw-embed-code" rows="3" readonly></textarea>
+      <button class="sw-icon-btn" id="sw-embed-copy" style="margin-top:0.5rem;width:auto;padding:0.4rem 0.8rem">📋 Copy Code</button>
+    </div>
+  </div>
+  
+  <!-- History -->
+  <div class="sw-history">
+    <button class="sw-history-toggle" id="sw-history-toggle">📜 Share History (<span id="sw-history-count">0</span>)</button>
+    <div class="sw-history-list" id="sw-history-list"></div>
+  </div>
+  
+  <div class="sw-toast" id="sw-toast"></div>
+
+  <script>
+    (function() {
+      const CONFIG = {
+        HISTORY_KEY: 'sw_share_history',
+        MAX_HISTORY: 15,
+        QR_SIZE: 200
+      };
+      
+      const SOCIAL_URLS = {
+        twitter: (url, text) => `https://twitter.com/intent/tweet?url=${encodeURIComponent(url)}&text=${encodeURIComponent(text)}`,
+        whatsapp: (url, text) => `https://wa.me/?text=${encodeURIComponent(text + ' ' + url)}`,
+        telegram: (url, text) => `https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(text)}`,
+        email: (url, text) => `mailto:?subject=Check out AbOmniTools&body=${encodeURIComponent(text + '\n\n' + url)}`,
+        facebook: (url) => `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`,
+        linkedin: (url) => `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`
+      };
+      
+      const EMBED_CODES = {
+        iframe: (url) => `<iframe src="${url}" width="100%" height="600" frameborder="0" allowfullscreen></iframe>`,
+        badge: (url) => `<a href="${url}" target="_blank" style="display:inline-block;padding:8px 16px;background:#3b82f6;color:#fff;text-decoration:none;border-radius:8px;font-weight:500">🛠️ AbOmniTools</a>`,
+        button: (url) => `<button onclick="window.open('${url}','_blank')" style="padding:10px 20px;background:linear-gradient(135deg,#3b82f6,#8b5cf6);border:none;border-radius:10px;color:#fff;font-weight:600;cursor:pointer">✨ Try AbOmniTools Free</button>`
+      };
+      
+      const els = {
+        url: document.getElementById('sw-url'),
+        copyBtn: document.getElementById('sw-copy'),
+        refreshBtn: document.getElementById('sw-refresh'),
+        message: document.getElementById('sw-message'),
+        utmToggle: document.getElementById('sw-utm-toggle'),
+        utmPanel: document.getElementById('sw-utm-panel'),
+        utmSource: document.getElementById('utm-source'),
+        utmMedium: document.getElementById('utm-medium'),
+        utmCampaign: document.getElementById('utm-campaign'),
+        utmContent: document.getElementById('utm-content'),
+        utmPreview: document.getElementById('sw-utm-preview'),
+        methods: document.querySelectorAll('.sw-method'),
+        qrPanel: document.getElementById('sw-qr'),
+        qrCanvas: document.getElementById('sw-qr-canvas'),
+        qrDownload: document.getElementById('sw-qr-download'),
+        embedToggle: document.getElementById('sw-embed-toggle'),
+        embedPanel: document.getElementById('sw-embed-panel'),
+        embedTabs: document.querySelectorAll('.sw-embed-tab'),
+        embedCode: document.getElementById('sw-embed-code'),
+        embedCopy: document.getElementById('sw-embed-copy'),
+        historyToggle: document.getElementById('sw-history-toggle'),
+        historyList: document.getElementById('sw-history-list'),
+        historyCount: document.getElementById('sw-history-count'),
+        toast: document.getElementById('sw-toast')
+      };
+      
+      let shareHistory = JSON.parse(localStorage.getItem(CONFIG.HISTORY_KEY) || '[]');
+      let currentUrl = window.location.href.split('#')[0];
+      let currentEmbedType = 'iframe';
+      
+      // Toast
+      const toast = (msg, type = 'info') => {
+        els.toast.textContent = msg;
+        els.toast.className = `sw-toast ${type} show`;
+        setTimeout(() => els.toast.classList.remove('show'), 2500);
+      };
+      
+      // Build final URL with UTM
+      const buildUrl = () => {
+        let url = currentUrl;
+        const params = [];
+        if (els.utmSource.value) params.push(`utm_source=${encodeURIComponent(els.utmSource.value)}`);
+        if (els.utmMedium.value) params.push(`utm_medium=${encodeURIComponent(els.utmMedium.value)}`);
+        if (els.utmCampaign.value) params.push(`utm_campaign=${encodeURIComponent(els.utmCampaign.value)}`);
+        if (els.utmContent.value) params.push(`utm_content=${encodeURIComponent(els.utmContent.value)}`);
+        if (params.length) url += (url.includes('?') ? '&' : '?') + params.join('&');
+        return url;
+      };
+      
+      // Build share message
+      const buildMessage = () => {
+        let msg = els.message.value.trim();
+        return msg.replace('{url}', buildUrl());
+      };
+      
+      // Update UTM preview
+      const updateUtmPreview = () => {
+        els.utmPreview.textContent = buildUrl();
+      };
+      
+      // Copy to clipboard
+      const copyToClipboard = async (text) => {
+        try {
+          await navigator.clipboard.writeText(text);
+          return true;
+        } catch {
+          // Fallback
+          const ta = document.createElement('textarea');
+          ta.value = text;
+          document.body.appendChild(ta);
+          ta.select();
+          document.execCommand('copy');
+          document.body.removeChild(ta);
+          return true;
+        }
+      };
+      
+      // Log share to history
+      const logShare = (method) => {
+        const entry = { method, url: buildUrl(), ts: Date.now() };
+        shareHistory.unshift(entry);
+        if (shareHistory.length > CONFIG.MAX_HISTORY) shareHistory.pop();
+        localStorage.setItem(CONFIG.HISTORY_KEY, JSON.stringify(shareHistory));
+        renderHistory();
+      };
+      
+      // Render history
+      const renderHistory = () => {
+        els.historyCount.textContent = shareHistory.length;
+        if (shareHistory.length === 0) {
+          els.historyList.innerHTML = '<div style="color:var(--sw-muted);padding:0.5rem;text-align:center">No shares yet</div>';
+          return;
+        }
+        els.historyList.innerHTML = shareHistory.map(h => `
+          <div class="sw-history-item">
+            <span>${h.method.toUpperCase()}</span>
+            <span class="sw-history-meta">${new Date(h.ts).toLocaleDateString()}</span>
+          </div>
+        `).join('');
+      };
+      
+      // Generate QR Code (simple canvas-based)
+      const generateQR = (url, size = CONFIG.QR_SIZE) => {
+        // Simple QR using canvas (for production, use a library like qrcode.js)
+        const canvas = document.createElement('canvas');
+        canvas.width = canvas.height = size;
+        const ctx = canvas.getContext('2d');
+        
+        // Background
+        ctx.fillStyle = '#fff';
+        ctx.fillRect(0, 0, size, size);
+        
+        // Simple pattern (placeholder - replace with real QR library)
+        ctx.fillStyle = '#000';
+        const cell = size / 21;
+        // Draw finder patterns
+        [[2,2],[2,17],[17,2]].forEach(([x,y]) => {
+          ctx.fillRect(x*cell, y*cell, 7*cell, 7*cell);
+          ctx.fillStyle = '#fff';
+          ctx.fillRect((x+1)*cell, (y+1)*cell, 5*cell, 5*cell);
+          ctx.fillStyle = '#000';
+          ctx.fillRect((x+2)*cell, (y+2)*cell, 3*cell, 3*cell);
+        });
+        // Random data pattern
+        ctx.fillStyle = '#000';
+        for (let i = 0; i < 100; i++) {
+          const x = Math.floor(Math.random() * 21);
+          const y = Math.floor(Math.random() * 21);
+          if (x < 9 && y < 9) continue; // Skip finder areas
+          ctx.fillRect(x * cell, y * cell, cell - 1, cell - 1);
+        }
+        
+        // Add logo hint
+        ctx.fillStyle = '#3b82f6';
+        ctx.font = `${size/8}px system-ui`;
+        ctx.textAlign = 'center';
+        ctx.fillText('🛠️', size/2, size/2 + size/16);
+        
+        return canvas;
+      };
+      
+      // Show QR
+      const showQR = () => {
+        const url = buildUrl();
+        const qr = generateQR(url);
+        els.qrCanvas.innerHTML = '';
+        els.qrCanvas.appendChild(qr);
+        els.qrDownload.href = qr.toDataURL('image/png');
+        els.qrPanel.classList.add('show');
+        logShare('qr');
+        toast('📷 QR Code generated', 'success');
+      };
+      
+      // Show Embed Code
+      const showEmbed = (type) => {
+        currentEmbedType = type;
+        els.embedTabs.forEach(t => t.classList.toggle('active', t.dataset.type === type));
+        els.embedCode.value = EMBED_CODES[type](buildUrl());
+        els.embedPanel.classList.add('show');
+        logShare(`embed-${type}`);
+      };
+      
+      // Handle share method
+      const handleShare = (method) => {
+        const url = buildUrl();
+        const message = buildMessage();
+        
+        if (method === 'native' && navigator.share) {
+          navigator.share({ title: 'AbOmniTools', text: message, url }).then(() => {
+            logShare('native');
+            toast('📱 Shared successfully!', 'success');
+          }).catch(() => {});
+        } else if (method === 'copy') {
+          copyToClipboard(url).then(() => {
+            logShare('copy');
+            toast('📋 Link copied!', 'success');
+          });
+        } else if (SOCIAL_URLS[method]) {
+          const shareUrl = SOCIAL_URLS[method](url, message);
+          window.open(shareUrl, '_blank', 'width=600,height=400');
+          logShare(method);
+          toast(`🚀 Opening ${method}...`, 'info');
+        } else if (method === 'qr') {
+          showQR();
+        } else if (method === 'embed') {
+          showEmbed('iframe');
+        }
+        
+        // Global event
+        window.dispatchEvent(new CustomEvent('share:completed', { detail: { method, url, message } }));
+      };
+      
+      // Event Listeners
+      els.url.onclick = () => { copyToClipboard(currentUrl); toast('📋 URL copied', 'success'); };
+      els.copyBtn.onclick = () => { copyToClipboard(buildUrl()); toast('📋 Link copied!', 'success'); };
+      els.refreshBtn.onclick = () => { currentUrl = window.location.href.split('#')[0]; els.url.textContent = currentUrl; toast('🔄 URL refreshed', 'info'); };
+      
+      els.message.oninput = updateUtmPreview;
+      [els.utmSource, els.utmMedium, els.utmCampaign, els.utmContent].forEach(inp => {
+        inp.oninput = updateUtmPreview;
+      });
+      
+      els.utmToggle.onclick = () => {
+        els.utmPanel.classList.toggle('show');
+        if (els.utmPanel.classList.contains('show')) updateUtmPreview();
+      };
+      
+      els.methods.forEach(method => {
+        method.onclick = () => handleShare(method.dataset.method);
+      });
+      
+      els.embedToggle.onclick = () => els.embedPanel.classList.toggle('show');
+      els.embedTabs.forEach(tab => {
+        tab.onclick = () => showEmbed(tab.dataset.type);
+      });
+      els.embedCopy.onclick = () => {
+        copyToClipboard(els.embedCode.value);
+        toast('📋 Embed code copied!', 'success');
+      };
+      
+      els.historyToggle.onclick = () => els.historyList.classList.toggle('show');
+      els.qrDownload.onclick = () => logShare('qr-download');
+      
+      // Keyboard shortcuts
+      document.addEventListener('keydown', (e) => {
+        if (e.ctrlKey && e.key === 'c' && document.activeElement !== els.message) {
+          e.preventDefault();
+          copyToClipboard(buildUrl());
+          toast('📋 Link copied!', 'success');
+        }
+      });
+      
+      // Init
+      els.url.textContent = currentUrl;
+      updateUtmPreview();
+      renderHistory();
+      
+      // Expose API
+      window.ShareWidget = {
+        share: handleShare,
+        getUrl: buildUrl,
+        getMessage: buildMessage,
+        copy: copyToClipboard,
+        getHistory: () => [...shareHistory]
+      };
+      
+      // Demo mode: auto-detect page title for message
+      if (document.title && !els.message.value.includes('AbOmniTools')) {
+        els.message.value = `Check out ${document.title} on AbOmniTools – free & offline! ✨ {url}`;
+      }
+    })();
+  </script>
+</div>

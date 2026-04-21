@@ -1,0 +1,272 @@
+<div class="pct-tool" lang="en">
+  <style>
+    :root {
+      --bg-main: #0b0e11; --bg-card: #161a21; --bg-input: #1e232c;
+      --border: rgba(255,255,255,0.08); --text: #f1f5f9; --text-sec: #94a3b8;
+      --accent: #38bdf8; --accent-glow: rgba(56,189,248,0.2);
+      --success: #22c55e; --danger: #ef4444; --warning: #f59e0b;
+      --grad: linear-gradient(135deg, #38bdf8, #818cf8); --radius: 14px;
+      --trans: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .pct-tool { max-width: 680px; margin: 0 auto; padding: 1.5rem; font-family: system-ui, -apple-system, sans-serif; color: var(--text); }
+    .pct-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.8rem; }
+    .pct-header h3 { margin: 0; font-size: 1.3rem; font-weight: 700; background: var(--grad); -webkit-background-clip: text; color: transparent; }
+    
+    .pct-tabs { display: flex; gap: 0.4rem; flex-wrap: wrap; overflow-x: auto; padding-bottom: 4px; }
+    .pct-tab { padding: 0.45rem 0.9rem; background: var(--bg-input); border: 1px solid var(--border); border-radius: 20px; color: var(--text-sec); cursor: pointer; transition: var(--trans); font-size: 0.85rem; white-space: nowrap; }
+    .pct-tab:hover { border-color: var(--accent); color: var(--text); }
+    .pct-tab.active { background: var(--accent); color: #0b0e11; border-color: var(--accent); }
+
+    .pct-panel { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.2rem; margin-bottom: 1rem; display: none; animation: slideIn 0.3s ease-out forwards; }
+    .pct-panel.active { display: block; }
+    @keyframes slideIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+    .pct-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 0.9rem; margin-bottom: 1rem; }
+    .input-wrap { position: relative; }
+    .pct-label { display: block; margin-bottom: 0.4rem; color: var(--text-sec); font-size: 0.85rem; font-weight: 500; }
+    .pct-input { width: 100%; padding: 0.85rem; border-radius: 10px; border: 1px solid var(--border); background: var(--bg-input); color: var(--text); font-size: 1rem; outline: none; transition: var(--trans); }
+    .pct-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow); }
+    .pct-input::-webkit-outer-spin-button, .pct-input::-webkit-inner-spin-button { -webkit-appearance: none; }
+
+    .pct-formula { font-size: 0.8rem; color: var(--text-sec); background: rgba(255,255,255,0.03); padding: 0.4rem 0.6rem; border-radius: 6px; margin-bottom: 0.8rem; font-family: monospace; }
+    
+    .pct-res-wrap { display: flex; align-items: center; justify-content: space-between; background: var(--bg-input); border: 1px solid var(--border); border-radius: 12px; padding: 1rem; margin-top: 0.5rem; }
+    .pct-res-val { font-size: 1.8rem; font-weight: 800; color: var(--accent); transition: var(--trans); }
+    .pct-res-badge { font-size: 0.75rem; padding: 3px 8px; border-radius: 6px; background: rgba(56,189,248,0.15); color: var(--accent); margin-top: 4px; }
+    .copy-btn { background: transparent; border: 1px solid var(--border); border-radius: 8px; padding: 0.5rem 0.8rem; color: var(--text-sec); cursor: pointer; transition: var(--trans); font-size: 0.85rem; }
+    .copy-btn:hover { background: rgba(255,255,255,0.05); color: var(--text); }
+    .copy-btn.copied { background: var(--success); color: #fff; border-color: var(--success); }
+
+    .toggle-wrap { display: flex; gap: 0.5rem; margin-bottom: 0.8rem; }
+    .toggle-btn { padding: 0.4rem 0.8rem; background: var(--bg-input); border: 1px solid var(--border); border-radius: 8px; color: var(--text-sec); cursor: pointer; font-size: 0.8rem; transition: var(--trans); }
+    .toggle-btn.active { background: var(--accent); color: #0b0e11; border-color: var(--accent); }
+
+    .pct-actions { display: flex; justify-content: flex-end; gap: 0.6rem; margin-bottom: 0.8rem; flex-wrap: wrap; }
+    .action-btn { padding: 0.5rem 0.9rem; background: var(--bg-input); border: 1px solid var(--border); border-radius: 8px; color: var(--text-sec); cursor: pointer; transition: var(--trans); font-size: 0.85rem; display: flex; align-items: center; gap: 6px; }
+    .action-btn:hover { background: rgba(255,255,255,0.05); color: var(--text); }
+
+    .hist-panel { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); max-height: 0; overflow: hidden; transition: max-height 0.3s ease, padding 0.3s ease; }
+    .hist-panel.open { max-height: 160px; padding: 0.7rem; overflow-y: auto; }
+    .hist-item { display: flex; justify-content: space-between; padding: 0.5rem; border-radius: 8px; cursor: pointer; transition: var(--trans); font-size: 0.85rem; color: var(--text-sec); border-bottom: 1px solid var(--border); }
+    .hist-item:last-child { border-bottom: none; }
+    .hist-item:hover { background: rgba(255,255,255,0.05); color: var(--text); }
+    .empty-hist { text-align: center; color: var(--text-sec); padding: 0.8rem 0; font-size: 0.8rem; }
+
+    @media (max-width: 520px) {
+      .pct-tool { padding: 1rem 0.8rem; }
+      .pct-grid { grid-template-columns: 1fr; }
+      .pct-res-wrap { flex-direction: column; align-items: flex-start; gap: 0.8rem; }
+    }
+  </style>
+
+  <div class="pct-header">
+    <h3>📊 Percentage Calculator</h3>
+    <div class="pct-tabs">
+      <button class="pct-tab active" data-tab="pct-of">% of Value</button>
+      <button class="pct-tab" data-tab="is-pct">X is % of Y</button>
+      <button class="pct-tab" data-tab="pct-change">% Change</button>
+      <button class="pct-tab" data-tab="reverse">Reverse %</button>
+      <button class="pct-tab" data-tab="diff">% Difference</button>
+    </div>
+  </div>
+
+  <div class="pct-panels">
+    <!-- % of Value -->
+    <div class="pct-panel active" id="pct-of">
+      <div class="pct-grid">
+        <div class="input-wrap"><label class="pct-label">Percentage</label><input class="pct-input" type="number" id="of-x" placeholder="25"></div>
+        <div class="input-wrap"><label class="pct-label">of Value</label><input class="pct-input" type="number" id="of-y" placeholder="200"></div>
+      </div>
+      <div class="pct-formula">Formula: (X ÷ 100) × Y</div>
+      <div class="pct-res-wrap">
+        <div><div class="pct-res-val" id="res-of">0</div><div class="pct-res-badge" id="badge-of">Result</div></div>
+        <button class="copy-btn" data-target="res-of">📋 Copy</button>
+      </div>
+    </div>
+
+    <!-- X is % of Y -->
+    <div class="pct-panel" id="is-pct">
+      <div class="pct-grid">
+        <div class="input-wrap"><label class="pct-label">X Value</label><input class="pct-input" type="number" id="isp-x" placeholder="50"></div>
+        <div class="input-wrap"><label class="pct-label">of Y Total</label><input class="pct-input" type="number" id="isp-y" placeholder="200"></div>
+      </div>
+      <div class="pct-formula">Formula: (X ÷ Y) × 100</div>
+      <div class="pct-res-wrap">
+        <div><div class="pct-res-val" id="res-isp">0%</div><div class="pct-res-badge">Portion of Total</div></div>
+        <button class="copy-btn" data-target="res-isp">📋 Copy</button>
+      </div>
+    </div>
+
+    <!-- % Change -->
+    <div class="pct-panel" id="pct-change">
+      <div class="pct-grid">
+        <div class="input-wrap"><label class="pct-label">Old Value</label><input class="pct-input" type="number" id="ch-old" placeholder="80"></div>
+        <div class="input-wrap"><label class="pct-label">New Value</label><input class="pct-input" type="number" id="ch-new" placeholder="100"></div>
+      </div>
+      <div class="pct-formula">Formula: ((New - Old) ÷ Old) × 100</div>
+      <div class="pct-res-wrap">
+        <div><div class="pct-res-val" id="res-ch">0%</div><div class="pct-res-badge" id="badge-ch">Change</div></div>
+        <button class="copy-btn" data-target="res-ch">📋 Copy</button>
+      </div>
+    </div>
+
+    <!-- Reverse % -->
+    <div class="pct-panel" id="reverse">
+      <div class="toggle-wrap">
+        <button class="toggle-btn active" data-type="inc">After Increase (+)</button>
+        <button class="toggle-btn" data-type="dec">After Decrease (-)</button>
+      </div>
+      <div class="pct-grid">
+        <div class="input-wrap"><label class="pct-label">Final Value</label><input class="pct-input" type="number" id="rev-fin" placeholder="120"></div>
+        <div class="input-wrap"><label class="pct-label">Percentage</label><input class="pct-input" type="number" id="rev-rate" placeholder="20"></div>
+      </div>
+      <div class="pct-formula">Formula: Final ÷ (1 ± Rate/100)</div>
+      <div class="pct-res-wrap">
+        <div><div class="pct-res-val" id="res-rev">0</div><div class="pct-res-badge">Original Value</div></div>
+        <button class="copy-btn" data-target="res-rev">📋 Copy</button>
+      </div>
+    </div>
+
+    <!-- % Difference -->
+    <div class="pct-panel" id="diff">
+      <div class="pct-grid">
+        <div class="input-wrap"><label class="pct-label">Value A</label><input class="pct-input" type="number" id="diff-a" placeholder="40"></div>
+        <div class="input-wrap"><label class="pct-label">Value B</label><input class="pct-input" type="number" id="diff-b" placeholder="50"></div>
+      </div>
+      <div class="pct-formula">Formula: \|A - B\| ÷ ((A + B) ÷ 2) × 100</div>
+      <div class="pct-res-wrap">
+        <div><div class="pct-res-val" id="res-diff">0%</div><div class="pct-res-badge">Symmetric Difference</div></div>
+        <button class="copy-btn" data-target="res-diff">📋 Copy</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="pct-actions">
+    <button class="action-btn" id="clear-btn">🗑️ Clear All</button>
+    <button class="action-btn" id="save-btn">💾 Save</button>
+    <button class="action-btn" id="hist-btn">📜 History</button>
+  </div>
+
+  <div class="hist-panel" id="hist-panel">
+    <div class="empty-hist">No calculations saved</div>
+  </div>
+
+  <script>
+    (function(){
+      const $ = id => document.getElementById(id);
+      const v = id => parseFloat($(id).value) || 0;
+      const fmt = n => {
+        if(!isFinite(n)) return '0';
+        return parseFloat(n.toFixed(4)).toLocaleString('en-US', {maximumFractionDigits:4});
+      };
+      const set = (id, val) => $(id).textContent = val;
+      
+      let history = JSON.parse(localStorage.getItem('pct_history') || '[]');
+      let revType = 'inc';
+
+      const calcAll = () => {
+        // % of Value
+        const ofRes = (v('of-x')/100)*v('of-y');
+        set('res-of', fmt(ofRes));
+
+        // X is % of Y
+        const ispY = v('isp-y');
+        const ispRes = ispY !== 0 ? (v('isp-x')/ispY)*100 : 0;
+        set('res-isp', fmt(ispRes)+'%');
+
+        // % Change
+        const chOld = v('ch-old'), chNew = v('ch-new');
+        let chRes = 0, chBadge = 'No Change';
+        if(chOld !== 0) {
+          chRes = ((chNew - chOld)/chOld)*100;
+          chBadge = chRes > 0 ? '📈 Increased' : chRes < 0 ? '📉 Decreased' : '➡️ Unchanged';
+        }
+        set('res-ch', (chRes>0?'+':'')+fmt(chRes)+'%');
+        $('badge-ch').textContent = chBadge;
+        $('badge-ch').style.background = chRes>0?'rgba(34,197,94,0.15)':chRes<0?'rgba(239,68,68,0.15)':'rgba(148,163,184,0.15)';
+        $('badge-ch').style.color = chRes>0?'var(--success)':chRes<0?'var(--danger)':'var(--text-sec)';
+
+        // Reverse %
+        const revFin = v('rev-fin'), revRate = v('rev-rate');
+        const revDiv = revType==='inc' ? (1 + revRate/100) : (1 - revRate/100);
+        const revRes = revDiv !== 0 ? revFin/revDiv : 0;
+        set('res-rev', fmt(revRes));
+
+        // % Difference
+        const a = v('diff-a'), b = v('diff-b');
+        const avg = (a+b)/2;
+        const diffRes = avg !== 0 ? Math.abs(a-b)/avg*100 : 0;
+        set('res-diff', fmt(diffRes)+'%');
+      };
+
+      const saveCalc = () => {
+        const activeTab = document.querySelector('.pct-tab.active').dataset.tab;
+        history.unshift({ type: activeTab, ts: new Date().toLocaleString() });
+        if(history.length > 12) history.pop();
+        localStorage.setItem('pct_history', JSON.stringify(history));
+        renderHistory();
+        $('save-btn').innerHTML = '✅ Saved!'; setTimeout(() => $('save-btn').innerHTML = '💾 Save', 1500);
+      };
+
+      const renderHistory = () => {
+        $('hist-panel').innerHTML = history.length ? history.map(h => 
+          `<div class="hist-item"><span>${h.type.toUpperCase()}</span><span style="color:var(--text-sec)">${h.ts}</span></div>`
+        ).join('') : '<div class="empty-hist">No calculations saved</div>';
+      };
+
+      // Tab Switching
+      document.querySelectorAll('.pct-tab').forEach(tab => tab.addEventListener('click', () => {
+        document.querySelectorAll('.pct-tab').forEach(t=>t.classList.remove('active'));
+        document.querySelectorAll('.pct-panel').forEach(p=>p.classList.remove('active'));
+        tab.classList.add('active');
+        $(tab.dataset.tab).classList.add('active');
+        calcAll();
+      }));
+
+      // Reverse Toggle
+      document.querySelectorAll('.toggle-btn').forEach(btn => btn.addEventListener('click', () => {
+        document.querySelectorAll('.toggle-btn').forEach(b=>b.classList.remove('active'));
+        btn.classList.add('active');
+        revType = btn.dataset.type;
+        calcAll();
+      }));
+
+      // Copy Buttons
+      document.querySelectorAll('.copy-btn').forEach(btn => btn.addEventListener('click', async () => {
+        const txt = $(btn.dataset.target).textContent;
+        try {
+          await navigator.clipboard.writeText(txt.replace('%',''));
+          btn.classList.add('copied'); btn.textContent = '✅ Copied!';
+          setTimeout(() => { btn.classList.remove('copied'); btn.textContent = '📋 Copy'; }, 1500);
+        } catch(e){}
+      }));
+
+      // Auto Calculate (Debounced)
+      let timeout;
+      document.querySelectorAll('.pct-input').forEach(inp => inp.addEventListener('input', () => {
+        clearTimeout(timeout);
+        timeout = setTimeout(calcAll, 150);
+      }));
+
+      // Actions
+      $('clear-btn').addEventListener('click', () => {
+        document.querySelectorAll('.pct-input').forEach(i => i.value = '');
+        calcAll();
+      });
+      $('save-btn').addEventListener('click', saveCalc);
+      $('hist-btn').addEventListener('click', () => {
+        $('hist-panel').classList.toggle('open');
+        $('hist-btn').innerHTML = $('hist-panel').classList.contains('open') ? '🔽 Close' : '📜 History';
+      });
+
+      // Keyboard Support
+      document.addEventListener('keydown', e => {
+        if(e.key === 'Enter') { e.preventDefault(); calcAll(); }
+      });
+
+      // Init
+      renderHistory();
+      calcAll();
+    })();
+  </script>
+</div>

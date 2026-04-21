@@ -1,0 +1,326 @@
+<div class="sip-tool">
+  <style>
+    .sip-tool {
+      --bg: #0f172a; --card: #1e293b; --card-hover: #253347;
+      --text: #f8fafc; --text-muted: #94a3b8; --border: #334155;
+      --accent: #8b5cf6; --success: #10b981; --warning: #f59e0b; --danger: #ef4444;
+      --glow: rgba(139,92,246,0.2);
+      font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+      max-width: 520px; margin: 2rem auto; background: var(--bg);
+      border-radius: 20px; box-shadow: 0 8px 30px rgba(0,0,0,0.35);
+      overflow: hidden; color: var(--text); line-height: 1.4;
+    }
+    .sip-tool * { box-sizing: border-box; }
+    .st-header { padding: 1.2rem; text-align: center; border-bottom: 1px solid var(--border); background: linear-gradient(180deg, rgba(139,92,246,0.08), transparent); }
+    .st-header h2 { margin: 0; font-size: 1.3rem; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 0.5rem; }
+    .st-subtitle { color: var(--text-muted); font-size: 0.85rem; margin: 0.3rem 0 0; }
+    .st-section { padding: 1rem 1.5rem; background: var(--card); border-bottom: 1px solid var(--border); }
+    .st-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; }
+    .st-full { grid-column: span 2; }
+    .st-input { width: 100%; padding: 0.85rem; border-radius: 10px; border: 1px solid var(--border); background: #0b1120; color: var(--text); font-size: 1rem; outline: none; transition: all 0.2s; }
+    .st-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--glow); }
+    .st-label { display: block; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.3rem; }
+    .st-hint { font-size: 0.7rem; color: var(--text-muted); margin-top: 0.2rem; }
+    .st-toggle-wrap { display: flex; align-items: center; gap: 0.6rem; padding: 0.6rem 0; }
+    .st-toggle { position: relative; width: 40px; height: 22px; background: var(--border); border-radius: 11px; cursor: pointer; transition: 0.3s; }
+    .st-toggle::after { content: ''; position: absolute; left: 2px; top: 2px; width: 18px; height: 18px; background: #fff; border-radius: 50%; transition: 0.3s; }
+    .st-toggle.active { background: var(--accent); }
+    .st-toggle.active::after { left: 20px; }
+    .st-results { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.8rem; }
+    .st-card { background: #0b1120; border: 1px solid var(--border); border-radius: 12px; padding: 0.9rem; text-align: center; transition: all 0.2s; }
+    .st-card:hover { border-color: var(--accent); transform: translateY(-2px); }
+    .st-val { font-size: 1.2rem; font-weight: 700; margin-bottom: 0.2rem; }
+    .st-lbl { font-size: 0.75rem; color: var(--text-muted); }
+    .st-badge { padding: 0.2rem 0.5rem; border-radius: 6px; font-size: 0.75rem; font-weight: 600; margin-top: 0.4rem; display: inline-block; }
+    .st-badge.ok { background: rgba(16,185,129,0.15); color: var(--success); }
+    .st-badge.warn { background: rgba(245,158,11,0.15); color: var(--warning); }
+    .st-badge.err { background: rgba(239,68,68,0.15); color: var(--danger); }
+    .st-chart { padding: 1rem 1.5rem; background: var(--card); border-bottom: 1px solid var(--border); }
+    .st-chart-title { font-size: 0.9rem; margin-bottom: 0.8rem; display: flex; justify-content: space-between; }
+    .st-bar-wrap { display: flex; gap: 3px; align-items: flex-end; height: 70px; margin-bottom: 0.4rem; }
+    .st-bar { flex: 1; background: var(--border); border-radius: 3px 3px 0 0; position: relative; transition: height 0.4s ease; min-width: 10px; }
+    .st-bar::after { content: attr(data-year); position: absolute; bottom: -16px; left: 50%; transform: translateX(-50%); font-size: 0.6rem; color: var(--text-muted); }
+    .st-legend { display: flex; justify-content: center; gap: 1rem; margin-top: 1rem; font-size: 0.75rem; color: var(--text-muted); }
+    .st-legend span::before { content: ''; display: inline-block; width: 8px; height: 8px; border-radius: 3px; margin-right: 4px; vertical-align: middle; }
+    .st-legend span:nth-child(1)::before { background: #6366f1; }
+    .st-legend span:nth-child(2)::before { background: #10b981; }
+    .st-table-wrap { background: var(--card); max-height: 240px; overflow-y: auto; border-bottom: 1px solid var(--border); }
+    .st-table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
+    .st-table th { position: sticky; top: 0; background: #0b1120; padding: 0.6rem; text-align: right; color: var(--text-muted); font-weight: 500; border-bottom: 1px solid var(--border); }
+    .st-table th:first-child { text-align: left; }
+    .st-table td { padding: 0.5rem 0.6rem; text-align: right; border-bottom: 1px solid var(--border); }
+    .st-table td:first-child { text-align: left; color: var(--text-muted); }
+    .st-table tr:hover td { background: rgba(139,92,246,0.05); }
+    .st-actions { padding: 1rem 1.5rem; background: var(--card); display: flex; gap: 0.8rem; }
+    .st-btn { flex: 1; padding: 0.75rem; border: none; border-radius: 10px; font-weight: 500; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 0.4rem; }
+    .st-btn-primary { background: var(--accent); color: #fff; }
+    .st-btn-primary:hover { background: #7c3aed; transform: translateY(-1px); }
+    .st-btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text-muted); }
+    .st-btn-outline:hover { background: var(--card-hover); color: var(--text); border-color: var(--accent); }
+    .st-footer { padding: 0.8rem 1.5rem; text-align: center; font-size: 0.75rem; color: var(--text-muted); background: rgba(0,0,0,0.2); }
+    .st-tip { margin-top: 0.4rem; font-style: italic; color: var(--warning); }
+    .st-save-ind { position: fixed; bottom: 1rem; right: 1rem; background: var(--accent); color: #fff; padding: 0.4rem 0.8rem; border-radius: 20px; font-size: 0.8rem; opacity: 0; transition: opacity 0.3s; pointer-events: none; z-index: 100; }
+    .st-save-ind.show { opacity: 1; }
+    @media (max-width: 520px) {
+      .st-results { grid-template-columns: 1fr; }
+      .sip-tool { margin: 1rem; }
+    }
+  </style>
+
+  <div class="st-header">
+    <h2>📈 SIP & Wealth Planner</h2>
+    <p class="st-subtitle">Step-up tracking • Inflation-adjusted • Goal analysis</p>
+  </div>
+
+  <div class="st-section">
+    <div class="st-grid">
+      <div><label class="st-label">Monthly SIP (₹)</label><input type="number" class="st-input" id="st-amount" placeholder="5000" min="0"></div>
+      <div><label class="st-label">Expected Return (%)</label><input type="number" class="st-input" id="st-rate" placeholder="12" min="1" max="30" step="0.5"></div>
+      <div><label class="st-label">Time Period (Years)</label><input type="number" class="st-input" id="st-years" placeholder="10" min="1" max="50"></div>
+      <div><label class="st-label">Step-Up SIP (%)</label><input type="number" class="st-input" id="st-stepup" placeholder="0" min="0" max="30" step="0.5"></div>
+      <div class="st-full"><label class="st-label">Target Corpus (₹) <span style="color:var(--accent)">(Optional)</span></label><input type="number" class="st-input" id="st-target" placeholder="e.g. 50,00,000" min="0"></div>
+    </div>
+    <div class="st-toggle-wrap">
+      <div class="st-toggle active" id="st-infl-toggle"></div>
+      <span style="font-size:0.85rem;color:var(--text-muted)">Adjust for Inflation (6%)</span>
+    </div>
+    <div class="st-hint">Calculates end-of-month compounding. Step-up applies annually to SIP amount.</div>
+  </div>
+
+  <div class="st-results">
+    <div class="st-card">
+      <div class="st-val" id="st-total">₹0</div>
+      <div class="st-lbl">Future Value</div>
+    </div>
+    <div class="st-card">
+      <div class="st-val" id="st-invested">₹0</div>
+      <div class="st-lbl">Total Invested</div>
+    </div>
+    <div class="st-card">
+      <div class="st-val" id="st-returns">₹0</div>
+      <div class="st-lbl">Wealth Gained</div>
+    </div>
+    <div class="st-card">
+      <div class="st-val" id="st-real">₹0</div>
+      <div class="st-lbl">Inflation-Adjusted</div>
+      <div class="st-badge ok" id="st-badge">On Track</div>
+    </div>
+  </div>
+
+  <div class="st-chart">
+    <div class="st-chart-title"><span>📊 Wealth Growth Projection</span><span id="st-chart-end">Year 10: ₹0</span></div>
+    <div class="st-bar-wrap" id="st-chart"></div>
+    <div class="st-legend"><span>Contributed Capital</span><span>Compound Returns</span></div>
+  </div>
+
+  <div class="st-table-wrap">
+    <table class="st-table">
+      <thead><tr><th>Year</th><th>SIP/Mo</th><th>Invested</th><th>Returns</th><th>Total Corpus</th></tr></thead>
+      <tbody id="st-tbody"></tbody>
+    </table>
+  </div>
+
+  <div class="st-actions">
+    <button class="st-btn st-btn-outline" id="st-export">📥 Export CSV</button>
+    <button class="st-btn st-btn-primary" id="st-reset">🔄 Reset</button>
+  </div>
+
+  <div class="st-footer">
+    📊 Based on FV of annuity & yearly step-up compounding • India historical equity avg: ~12-14% • Data auto-saved
+    <div class="st-tip" id="st-tip">💡 Step-up SIP by 10% yearly can double your final corpus.</div>
+  </div>
+  <div class="st-save-ind" id="st-save-ind">✓ Saved</div>
+
+  <script>
+    (function() {
+      const STORAGE_KEY = 'sip_calc_v2';
+      const INR = v => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(v || 0);
+      const PCT = v => v.toFixed(1) + '%';
+
+      const els = {
+        amount: document.getElementById('st-amount'),
+        rate: document.getElementById('st-rate'),
+        years: document.getElementById('st-years'),
+        stepup: document.getElementById('st-stepup'),
+        target: document.getElementById('st-target'),
+        inflToggle: document.getElementById('st-infl-toggle'),
+        total: document.getElementById('st-total'),
+        invested: document.getElementById('st-invested'),
+        returns: document.getElementById('st-returns'),
+        real: document.getElementById('st-real'),
+        badge: document.getElementById('st-badge'),
+        chart: document.getElementById('st-chart'),
+        chartEnd: document.getElementById('st-chart-end'),
+        tbody: document.getElementById('st-tbody'),
+        exportBtn: document.getElementById('st-export'),
+        resetBtn: document.getElementById('st-reset'),
+        tip: document.getElementById('st-tip'),
+        saveInd: document.getElementById('st-save-ind')
+      };
+
+      let state = { amount: 5000, rate: 12, years: 10, stepup: 0, target: 0, inflation: 6 };
+      let yearlyData = [], saveTimeout;
+
+      const load = () => {
+        try {
+          const s = localStorage.getItem(STORAGE_KEY);
+          if(s) Object.assign(state, JSON.parse(s));
+        } catch(e) {}
+        els.amount.value = state.amount; els.rate.value = state.rate; els.years.value = state.years;
+        els.stepup.value = state.stepup; els.target.value = state.target || '';
+        if(state.inflation > 0) els.inflToggle.classList.add('active');
+        calculate();
+      };
+
+      const save = () => {
+        try {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+          els.saveInd.classList.add('show');
+          setTimeout(() => els.saveInd.classList.remove('show'), 1500);
+        } catch(e) {}
+      };
+
+      const calculate = () => {
+        const P = parseFloat(els.amount.value) || 0;
+        const R = parseFloat(els.rate.value) || 0;
+        const Y = parseInt(els.years.value) || 1;
+        const SU = parseFloat(els.stepup.value) || 0;
+        const T = parseFloat(els.target.value) || 0;
+        const inflActive = els.inflToggle.classList.contains('active');
+        const INF = inflActive ? 6 : 0;
+
+        if(P <= 0 || R <= 0 || Y <= 0) { clearUI(); return; }
+        state = { amount: P, rate: R, years: Y, stepup: SU, target: T, inflation: INF };
+        save();
+
+        const monthlyRate = R / 1200;
+        let currentSIP = P;
+        let totalInvested = 0;
+        let corpus = 0;
+        yearlyData = [];
+
+        for(let y=1; y<=Y; y++) {
+          let yearInvested = 0;
+          for(let m=1; m<=12; m++) {
+            corpus = corpus * (1 + monthlyRate) + currentSIP;
+            yearInvested += currentSIP;
+          }
+          totalInvested += yearInvested;
+          yearlyData.push({ year: y, sip: currentSIP, invested: totalInvested, returns: corpus - totalInvested, total: corpus });
+          
+          // Apply step-up for next year
+          currentSIP = currentSIP * (1 + SU/100);
+        }
+
+        const finalTotal = yearlyData[Y-1].total;
+        const finalInvested = yearlyData[Y-1].invested;
+        const finalReturns = finalTotal - finalInvested;
+        const realValue = finalTotal / Math.pow(1 + INF/100, Y);
+
+        // Goal analysis
+        let badgeClass = 'ok', badgeText = '✅ Wealth Growing';
+        if(T > 0) {
+          const gap = T - finalTotal;
+          if(gap > 0) {
+            // Approx required SIP increase using iterative hint
+            const neededSIP = Math.ceil((gap * monthlyRate) / (Math.pow(1 + monthlyRate, Y*12) - 1));
+            badgeClass = neededSIP > P * 0.5 ? 'err' : 'warn';
+            badgeText = `Need +₹${neededSIP.toLocaleString('en-IN')}/mo`;
+            els.real.textContent = `Shortfall: ₹${Math.abs(gap).toLocaleString('en-IN')}`;
+          } else {
+            badgeClass = 'ok'; badgeText = '✅ Target Met';
+            els.real.textContent = `Surplus: ₹${Math.abs(gap).toLocaleString('en-IN')}`;
+          }
+        } else {
+          els.real.textContent = inflActive ? INR(realValue) : 'Not set';
+        }
+        els.badge.className = `st-badge ${badgeClass}`;
+        els.badge.textContent = badgeText;
+
+        // Update UI
+        els.total.textContent = INR(finalTotal);
+        els.invested.textContent = INR(finalInvested);
+        els.returns.textContent = INR(finalReturns);
+        els.chartEnd.textContent = `Year ${Y}: ${INR(finalTotal)}`;
+
+        renderChart(yearlyData, Y);
+        renderTable(yearlyData);
+        updateTip(SU, R, INF, Y);
+      };
+
+      const renderChart = (data, Y) => {
+        els.chart.innerHTML = '';
+        const step = Math.ceil(data.length / 8);
+        for(let i=0; i<data.length; i+=step) {
+          const d = data[i];
+          const total = d.total;
+          const maxTotal = data[Y-1].total;
+          const prinPct = (d.invested / total) * 100;
+          
+          const bar = document.createElement('div');
+          bar.className = 'st-bar';
+          bar.style.height = `${Math.max(8, (total / maxTotal) * 100)}%`;
+          bar.dataset.year = d.year;
+          bar.style.background = `linear-gradient(180deg, #6366f1 ${prinPct}%, #10b981 ${prinPct}%)`;
+          els.chart.appendChild(bar);
+        }
+      };
+
+      const renderTable = (data) => {
+        els.tbody.innerHTML = '';
+        const frag = document.createDocumentFragment();
+        const show = data.length <= 12 ? data : [...data.slice(0, 5), {year:'...', sip:'...', invested:'...', returns:'...', total:'...'}, data.slice(-3)];
+        show.forEach(d => {
+          const tr = document.createElement('tr');
+          if(typeof d.year === 'string') tr.innerHTML = `<td>...</td><td>...</td><td>...</td><td>...</td><td>...</td>`;
+          else tr.innerHTML = `<td>${d.year}</td><td>${INR(d.sip)}</td><td>${INR(d.invested)}</td><td>${INR(d.returns)}</td><td>${INR(d.total)}</td>`;
+          frag.appendChild(tr);
+        });
+        els.tbody.appendChild(frag);
+      };
+
+      const updateTip = (su, r, infl, y) => {
+        if(su >= 10) els.tip.textContent = '🔥 Excellent! Step-up SIP will massively accelerate wealth creation via compounding.';
+        else if(su > 0) els.tip.textContent = '💡 Good start. Try increasing step-up to 10-12% for faster goal achievement.';
+        else if(r >= 12 && y >= 10) els.tip.textContent = '📈 Strong equity returns + long horizon = power of compounding in your favor.';
+        else if(infl > 0) els.tip.textContent = '⚠️ Inflation erodes purchasing power. Aim for returns > 12% to stay ahead.';
+        else els.tip.textContent = '💡 Add a 10% yearly step-up SIP to see your corpus multiply significantly.';
+      };
+
+      const clearUI = () => {
+        els.total.textContent = '₹0'; els.invested.textContent = '₹0'; els.returns.textContent = '₹0';
+        els.real.textContent = '--'; els.chart.innerHTML = ''; els.tbody.innerHTML = '';
+      };
+
+      // Events
+      [els.amount, els.rate, els.years, els.stepup, els.target].forEach(el => {
+        el.addEventListener('input', () => { clearTimeout(saveTimeout); saveTimeout = setTimeout(calculate, 300); });
+      });
+      els.inflToggle.addEventListener('click', () => { els.inflToggle.classList.toggle('active'); calculate(); });
+
+      els.exportBtn.addEventListener('click', () => {
+        if(yearlyData.length === 0) return;
+        let csv = 'Year,Monthly SIP,Total Invested,Compound Returns,Total Corpus,Inflation Adjusted\n';
+        yearlyData.forEach(d => {
+          const real = d.total / Math.pow(1 + (state.inflation/100), d.year);
+          csv += `${d.year},${d.sip.toFixed(2)},${d.invested.toFixed(2)},${d.returns.toFixed(2)},${d.total.toFixed(2)},${real.toFixed(2)}\n`;
+        });
+        const blob = new Blob([csv], { type: 'text/csv' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a'); a.href = url; a.download = `sip_projection_${new Date().toISOString().slice(0,10)}.csv`; a.click(); URL.revokeObjectURL(url);
+      });
+
+      els.resetBtn.addEventListener('click', () => {
+        if(confirm('Reset all to default values?')) {
+          localStorage.removeItem(STORAGE_KEY);
+          state = { amount: 5000, rate: 12, years: 10, stepup: 0, target: 0, inflation: 6 };
+          els.amount.value = 5000; els.rate.value = 12; els.years.value = 10; els.stepup.value = 0; els.target.value = '';
+          els.inflToggle.classList.add('active');
+          calculate();
+        }
+      });
+
+      load();
+    })();
+  </script>
+</div>

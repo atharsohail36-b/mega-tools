@@ -1,0 +1,1396 @@
+<div class="gk-quiz-arena">
+  <style>
+    .gk-quiz-arena {
+      --bg-primary: #0f172a;
+      --bg-card: #1e293b;
+      --bg-input: #334155;
+      --text-primary: #f1f5f9;
+      --text-secondary: #94a3b8;
+      --accent: #3b82f6;
+      --accent-hover: #2563eb;
+      --success: #10b981;
+      --error: #ef4444;
+      --warning: #f59e0b;
+      --info: #06b6d4;
+      --purple: #8b5cf6;
+      --pink: #ec4899;
+      --glass: rgba(255,255,255,0.1);
+      --glass-border: rgba(255,255,255,0.2);
+      --gradient-main: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      --gradient-science: linear-gradient(135deg, #10b981, #059669);
+      --gradient-history: linear-gradient(135deg, #f59e0b, #d97706);
+      --gradient-geo: linear-gradient(135deg, #3b82f6, #2563eb);
+      --gradient-arts: linear-gradient(135deg, #ec4899, #db2777);
+      --gradient-sports: linear-gradient(135deg, #ef4444, #dc2626);
+      --gradient-tech: linear-gradient(135deg, #8b5cf6, #7c3aed);
+      --transition: all 0.3s ease;
+      
+      max-width: 750px;
+      margin: 0 auto;
+      padding: 1rem;
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      color: var(--text-primary);
+      background: var(--bg-primary);
+      border-radius: 20px;
+      box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .gk-quiz-arena::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; height: 4px;
+      background: var(--gradient-main);
+      animation: shimmer 3s infinite linear;
+    }
+    
+    @keyframes shimmer {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(100%); }
+    }
+    
+    /* Header */
+    .gk-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem;
+      background: var(--bg-card);
+      border-radius: 12px;
+      margin-bottom: 1rem;
+      border: 1px solid var(--glass-border);
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+    
+    .gk-title {
+      font-size: 1.4rem;
+      font-weight: 700;
+      background: var(--gradient-main);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .gk-stats {
+      display: flex;
+      gap: 0.8rem;
+      font-size: 0.9rem;
+    }
+    
+    .gk-stat {
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+      background: var(--glass);
+      padding: 0.4rem 0.8rem;
+      border-radius: 8px;
+    }
+    
+    .gk-stat-value {
+      font-weight: 700;
+      color: var(--accent);
+    }
+    
+    .gk-streak {
+      color: var(--warning);
+      animation: pulse 2s infinite;
+    }
+    
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.7; }
+    }
+    
+    /* Progress */
+    .gk-progress-container {
+      margin-bottom: 1rem;
+    }
+    
+    .gk-progress-info {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 0.4rem;
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+    }
+    
+    .gk-progress-bar {
+      height: 8px;
+      background: var(--bg-input);
+      border-radius: 4px;
+      overflow: hidden;
+      position: relative;
+    }
+    
+    .gk-progress-fill {
+      height: 100%;
+      background: var(--gradient-main);
+      border-radius: 4px;
+      transition: width 0.4s ease;
+      width: 0%;
+    }
+    
+    .gk-progress-fill::after {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+      animation: progressShine 2s infinite;
+    }
+    
+    @keyframes progressShine {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(100%); }
+    }
+    
+    /* Category Badge */
+    .gk-category {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1.2rem;
+      background: var(--glass);
+      border-radius: 25px;
+      font-size: 0.9rem;
+      margin: 0.5rem 0 1rem;
+      border: 1px solid var(--glass-border);
+      font-weight: 500;
+    }
+    
+    .gk-category.science { background: rgba(16, 185, 129, 0.15); border-color: var(--success); }
+    .gk-category.history { background: rgba(245, 158, 11, 0.15); border-color: var(--warning); }
+    .gk-category.geography { background: rgba(59, 130, 246, 0.15); border-color: var(--accent); }
+    .gk-category.arts { background: rgba(236, 72, 153, 0.15); border-color: var(--pink); }
+    .gk-category.sports { background: rgba(239, 68, 68, 0.15); border-color: var(--error); }
+    .gk-category.technology { background: rgba(139, 92, 246, 0.15); border-color: var(--purple); }
+    
+    /* Timer */
+    .gk-timer {
+      text-align: center;
+      padding: 0.8rem;
+      background: var(--bg-card);
+      border-radius: 12px;
+      margin-bottom: 1rem;
+      border: 1px solid var(--glass-border);
+    }
+    
+    .gk-timer-display {
+      font-size: 2rem;
+      font-weight: 700;
+      font-family: monospace;
+      color: var(--accent);
+    }
+    
+    .gk-timer.warning { color: var(--warning); }
+    .gk-timer.critical { 
+      color: var(--error); 
+      animation: shake 0.5s infinite;
+    }
+    
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-3px); }
+      75% { transform: translateX(3px); }
+    }
+    
+    /* Question */
+    .gk-question-box {
+      background: var(--bg-card);
+      border: 1px solid var(--glass-border);
+      border-radius: 16px;
+      padding: 1.5rem;
+      margin: 1rem 0;
+      text-align: center;
+    }
+    
+    .gk-question {
+      font-size: 1.4rem;
+      font-weight: 600;
+      line-height: 1.4;
+      min-height: 3.5rem;
+    }
+    
+    .gk-difficulty {
+      display: inline-block;
+      padding: 0.3rem 0.8rem;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      margin-top: 0.5rem;
+      text-transform: uppercase;
+    }
+    
+    .gk-difficulty.easy { background: rgba(16, 185, 129, 0.2); color: var(--success); }
+    .gk-difficulty.medium { background: rgba(245, 158, 11, 0.2); color: var(--warning); }
+    .gk-difficulty.hard { background: rgba(239, 68, 68, 0.2); color: var(--error); }
+    
+    /* Options */
+    .gk-options {
+      display: grid;
+      gap: 0.8rem;
+      margin: 1rem 0;
+    }
+    
+    .gk-option {
+      padding: 1rem 1.3rem;
+      background: var(--bg-card);
+      border: 2px solid var(--glass-border);
+      border-radius: 12px;
+      cursor: pointer;
+      transition: var(--transition);
+      font-weight: 500;
+      text-align: left;
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .gk-option::before {
+      content: '';
+      position: absolute;
+      left: 0; top: 0; bottom: 0;
+      width: 4px;
+      background: var(--accent);
+      transform: scaleY(0);
+      transition: transform 0.2s ease;
+    }
+    
+    .gk-option:hover:not(:disabled) {
+      border-color: var(--accent);
+      background: var(--glass);
+      transform: translateX(5px);
+    }
+    
+    .gk-option:hover:not(:disabled)::before {
+      transform: scaleY(1);
+    }
+    
+    .gk-option:disabled {
+      cursor: not-allowed;
+      opacity: 0.8;
+    }
+    
+    .gk-option.correct {
+      background: rgba(16, 185, 129, 0.25);
+      border-color: var(--success);
+      animation: correctAnim 0.4s ease;
+    }
+    
+    .gk-option.correct::before {
+      background: var(--success);
+      transform: scaleY(1);
+    }
+    
+    @keyframes correctAnim {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.02); }
+      100% { transform: scale(1); }
+    }
+    
+    .gk-option.wrong {
+      background: rgba(239, 68, 68, 0.2);
+      border-color: var(--error);
+      animation: wrongAnim 0.4s ease;
+    }
+    
+    @keyframes wrongAnim {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-10px); }
+      75% { transform: translateX(10px); }
+    }
+    
+    .gk-option-letter {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background: var(--glass);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.95rem;
+      flex-shrink: 0;
+    }
+    
+    .gk-option.correct .gk-option-letter {
+      background: var(--success);
+      color: white;
+    }
+    
+    .gk-option.wrong .gk-option-letter {
+      background: var(--error);
+      color: white;
+    }
+    
+    /* Lifelines */
+    .gk-lifelines {
+      display: flex;
+      justify-content: center;
+      gap: 0.5rem;
+      margin: 1rem 0;
+      flex-wrap: wrap;
+    }
+    
+    .gk-lifeline {
+      padding: 0.5rem 1rem;
+      background: var(--glass);
+      border: 1px solid var(--glass-border);
+      border-radius: 10px;
+      cursor: pointer;
+      transition: var(--transition);
+      font-size: 0.85rem;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      min-width: 80px;
+      justify-content: center;
+    }
+    
+    .gk-lifeline:hover:not(:disabled) {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: white;
+      transform: translateY(-2px);
+    }
+    
+    .gk-lifeline:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    
+    .gk-lifeline.used {
+      text-decoration: line-through;
+      opacity: 0.4;
+      pointer-events: none;
+    }
+    
+    /* Hint Box */
+    .gk-hint {
+      background: rgba(6, 182, 212, 0.15);
+      border: 1px solid var(--info);
+      border-left: 4px solid var(--info);
+      border-radius: 10px;
+      padding: 1rem;
+      margin: 1rem 0;
+      font-size: 0.95rem;
+      display: none;
+      animation: slideIn 0.3s ease;
+    }
+    
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .gk-hint.show { display: block; }
+    
+    /* Feedback */
+    .gk-feedback {
+      text-align: center;
+      padding: 1rem;
+      margin: 1rem 0;
+      border-radius: 12px;
+      font-weight: 500;
+      display: none;
+    }
+    
+    .gk-feedback.show { display: block; animation: slideIn 0.3s ease; }
+    .gk-feedback.correct { 
+      background: rgba(16, 185, 129, 0.15); 
+      color: var(--success);
+      border: 1px solid var(--success);
+    }
+    .gk-feedback.wrong { 
+      background: rgba(239, 68, 68, 0.15); 
+      color: var(--error);
+      border: 1px solid var(--error);
+    }
+    
+    .gk-fact {
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+      margin-top: 0.5rem;
+      font-style: italic;
+      font-weight: 400;
+    }
+    
+    /* Controls */
+    .gk-controls {
+      display: flex;
+      gap: 0.5rem;
+      justify-content: center;
+      margin: 1rem 0;
+      flex-wrap: wrap;
+    }
+    
+    .gk-btn {
+      padding: 0.8rem 1.5rem;
+      background: var(--gradient-main);
+      border: none;
+      border-radius: 10px;
+      color: white;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.95rem;
+    }
+    
+    .gk-btn:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 25px -5px rgba(0,0,0,0.3);
+    }
+    
+    .gk-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+    
+    .gk-btn.secondary {
+      background: var(--glass);
+      color: var(--text-primary);
+      border: 1px solid var(--glass-border);
+    }
+    
+    .gk-btn.secondary:hover:not(:disabled) {
+      background: var(--accent);
+      border-color: var(--accent);
+    }
+    
+    /* Results Screen */
+    .gk-results {
+      text-align: center;
+      padding: 2rem 1rem;
+      display: none;
+    }
+    
+    .gk-results.show { display: block; animation: fadeIn 0.5s ease; }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: scale(0.95); }
+      to { opacity: 1; transform: scale(1); }
+    }
+    
+    .gk-results-trophy {
+      font-size: 4rem;
+      margin: 1rem 0;
+      animation: bounce 1s infinite;
+    }
+    
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-15px); }
+    }
+    
+    .gk-results-title {
+      font-size: 1.8rem;
+      font-weight: 700;
+      margin: 1rem 0;
+      background: var(--gradient-main);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    
+    .gk-results-score {
+      font-size: 3.5rem;
+      font-weight: 800;
+      margin: 0.5rem 0;
+      background: var(--gradient-main);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    
+    .gk-results-stats {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 0.8rem;
+      margin: 1.5rem 0;
+      text-align: left;
+    }
+    
+    .gk-result-stat {
+      background: var(--bg-card);
+      padding: 1rem;
+      border-radius: 12px;
+      border: 1px solid var(--glass-border);
+    }
+    
+    .gk-result-stat-label {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      margin-bottom: 0.3rem;
+    }
+    
+    .gk-result-stat-value {
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: var(--accent);
+    }
+    
+    .gk-grade {
+      display: inline-block;
+      padding: 0.6rem 2rem;
+      border-radius: 30px;
+      font-weight: 700;
+      font-size: 1.2rem;
+      margin: 1rem 0;
+    }
+    
+    .gk-grade.excellent { background: var(--gradient-science); color: white; }
+    .gk-grade.good { background: var(--gradient-history); color: white; }
+    .gk-grade.average { background: var(--glass); color: var(--text-primary); }
+    .gk-grade.poor { background: var(--gradient-sports); color: white; }
+    
+    /* Review Mode */
+    .gk-review {
+      margin-top: 1.5rem;
+      text-align: left;
+      max-height: 350px;
+      overflow-y: auto;
+      padding-right: 0.5rem;
+    }
+    
+    .gk-review-item {
+      padding: 1rem;
+      background: var(--bg-card);
+      border-radius: 12px;
+      margin-bottom: 0.8rem;
+      border-left: 4px solid var(--glass-border);
+    }
+    
+    .gk-review-item.correct { border-left-color: var(--success); }
+    .gk-review-item.wrong { border-left-color: var(--error); }
+    
+    .gk-review-q {
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      font-size: 1rem;
+    }
+    
+    .gk-review-a {
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+    }
+    
+    .gk-review-a span {
+      color: var(--success);
+      font-weight: 600;
+    }
+    
+    /* Settings Panel */
+    .gk-settings {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      z-index: 10;
+    }
+    
+    .gk-settings-btn {
+      background: var(--glass);
+      border: 1px solid var(--glass-border);
+      border-radius: 50%;
+      width: 42px;
+      height: 42px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: var(--transition);
+      font-size: 1.2rem;
+    }
+    
+    .gk-settings-btn:hover {
+      background: var(--accent);
+      transform: rotate(90deg);
+    }
+    
+    .gk-settings-panel {
+      position: absolute;
+      top: 52px;
+      right: 0;
+      background: var(--bg-card);
+      border: 1px solid var(--glass-border);
+      border-radius: 14px;
+      padding: 1rem;
+      min-width: 220px;
+      display: none;
+      z-index: 20;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.4);
+    }
+    
+    .gk-settings-panel.show { display: block; animation: slideIn 0.2s ease; }
+    
+    .gk-setting-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.6rem 0;
+      font-size: 0.9rem;
+      border-bottom: 1px solid var(--glass-border);
+    }
+    
+    .gk-setting-item:last-child { border-bottom: none; }
+    
+    .gk-toggle {
+      position: relative;
+      width: 46px;
+      height: 26px;
+    }
+    
+    .gk-toggle input { opacity: 0; width: 0; height: 0; }
+    
+    .gk-toggle-slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: var(--bg-input);
+      border-radius: 26px;
+      transition: var(--transition);
+    }
+    
+    .gk-toggle-slider:before {
+      position: absolute;
+      content: "";
+      height: 20px;
+      width: 20px;
+      left: 3px;
+      bottom: 3px;
+      background: white;
+      border-radius: 50%;
+      transition: var(--transition);
+    }
+    
+    input:checked + .gk-toggle-slider {
+      background: var(--accent);
+    }
+    
+    input:checked + .gk-toggle-slider:before {
+      transform: translateX(20px);
+    }
+    
+    /* Category Selection */
+    .gk-category-select {
+      display: flex;
+      gap: 0.4rem;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin: 1rem 0;
+    }
+    
+    .gk-cat-btn {
+      padding: 0.4rem 0.9rem;
+      background: var(--glass);
+      border: 1px solid var(--glass-border);
+      border-radius: 20px;
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+    
+    .gk-cat-btn:hover, .gk-cat-btn.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: white;
+    }
+    
+    /* Confetti */
+    @keyframes confetti {
+      0% { transform: translateY(-100%) rotate(0deg); opacity: 1; }
+      100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+    }
+    
+    .gk-confetti {
+      position: fixed;
+      width: 10px;
+      height: 10px;
+      pointer-events: none;
+      animation: confetti 3s ease-out forwards;
+      z-index: 100;
+    }
+    
+    /* Responsive */
+    @media (max-width: 550px) {
+      .gk-quiz-arena { padding: 0.5rem; border-radius: 16px; }
+      .gk-question { font-size: 1.2rem; }
+      .gk-option { padding: 0.9rem 1rem; font-size: 0.95rem; }
+      .gk-results-score { font-size: 2.8rem; }
+      .gk-results-stats { grid-template-columns: 1fr; }
+      .gk-header { flex-direction: column; align-items: flex-start; }
+    }
+    
+    /* Scrollbar */
+    .gk-review::-webkit-scrollbar { width: 6px; }
+    .gk-review::-webkit-scrollbar-track { background: var(--bg-input); border-radius: 3px; }
+    .gk-review::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 3px; }
+  </style>
+
+  <!-- Settings -->
+  <div class="gk-settings">
+    <div class="gk-settings-btn" id="gk-settings-toggle">⚙️</div>
+    <div class="gk-settings-panel" id="gk-settings-panel">
+      <div class="gk-setting-item">
+        <span>🔊 Sound Effects</span>
+        <label class="gk-toggle">
+          <input type="checkbox" id="gk-sound-toggle" checked>
+          <span class="gk-toggle-slider"></span>
+        </label>
+      </div>
+      <div class="gk-setting-item">
+        <span>⏱️ Timer Mode</span>
+        <label class="gk-toggle">
+          <input type="checkbox" id="gk-timer-toggle" checked>
+          <span class="gk-toggle-slider"></span>
+        </label>
+      </div>
+      <div class="gk-setting-item">
+        <span>🎯 Hard Mode</span>
+        <label class="gk-toggle">
+          <input type="checkbox" id="gk-hard-toggle">
+          <span class="gk-toggle-slider"></span>
+        </label>
+      </div>
+      <div class="gk-setting-item">
+        <span>📚 Question Count</span>
+        <select id="gk-qty-select" style="background:var(--bg-input);border:none;border-radius:6px;padding:0.3rem;color:var(--text-primary);">
+          <option value="10">10 Questions</option>
+          <option value="20" selected>20 Questions</option>
+          <option value="30">30 Questions</option>
+        </select>
+      </div>
+      <button class="gk-btn secondary" id="gk-reset-progress" style="width:100%;margin-top:0.8rem;font-size:0.85rem;">🗑️ Reset All Progress</button>
+    </div>
+  </div>
+
+  <!-- Header -->
+  <div class="gk-header">
+    <div class="gk-title">🧠 GK Quiz Arena</div>
+    <div class="gk-stats">
+      <div class="gk-stat">🏆 <span class="gk-stat-value" id="gk-score">0</span></div>
+      <div class="gk-stat">🔥 <span class="gk-stat-value gk-streak" id="gk-streak">0</span>x</div>
+      <div class="gk-stat">⭐ <span class="gk-stat-value" id="gk-highscore">0</span></div>
+    </div>
+  </div>
+
+  <!-- Progress -->
+  <div class="gk-progress-container">
+    <div class="gk-progress-info">
+      <span id="gk-progress-text">Question 1/20</span>
+      <span id="gk-category-display">🎲 Mixed</span>
+    </div>
+    <div class="gk-progress-bar">
+      <div class="gk-progress-fill" id="gk-progress-fill"></div>
+    </div>
+  </div>
+
+  <!-- Timer -->
+  <div class="gk-timer" id="gk-timer">
+    <div class="gk-timer-display" id="gk-timer-display">30s</div>
+    <div style="font-size:0.85rem;color:var(--text-secondary);margin-top:0.3rem;">Time remaining</div>
+  </div>
+
+  <!-- Quiz Container -->
+  <div id="gk-quiz-container">
+    <!-- Category Filter -->
+    <div class="gk-category-select">
+      <button class="gk-cat-btn active" data-cat="all">🎲 All</button>
+      <button class="gk-cat-btn" data-cat="science">🔬 Science</button>
+      <button class="gk-cat-btn" data-cat="history">📜 History</button>
+      <button class="gk-cat-btn" data-cat="geography">🌍 Geography</button>
+      <button class="gk-cat-btn" data-cat="arts">🎨 Arts</button>
+      <button class="gk-cat-btn" data-cat="sports">⚽ Sports</button>
+      <button class="gk-cat-btn" data-cat="technology">💻 Tech</button>
+    </div>
+
+    <!-- Category Badge -->
+    <div class="gk-category science" id="gk-category-badge">
+      <span id="gk-category-icon">🔬</span>
+      <span id="gk-category-name">Science</span>
+      <span style="margin-left:auto;" class="gk-difficulty easy" id="gk-difficulty">Easy</span>
+    </div>
+
+    <!-- Question Box -->
+    <div class="gk-question-box">
+      <div class="gk-question" id="gk-question">Loading question...</div>
+    </div>
+
+    <!-- Hint Box -->
+    <div class="gk-hint" id="gk-hint-box">💡 <span id="gk-hint-text"></span></div>
+
+    <!-- Options -->
+    <div class="gk-options" id="gk-options"></div>
+
+    <!-- Lifelines -->
+    <div class="gk-lifelines">
+      <div class="gk-lifeline" id="gk-lifeline-5050" title="Remove 2 wrong answers">🎲 50/50</div>
+      <div class="gk-lifeline" id="gk-lifeline-hint" title="Get a helpful hint">💡 Hint</div>
+      <div class="gk-lifeline" id="gk-lifeline-double" title="Double points for this question">✨ 2x Points</div>
+      <div class="gk-lifeline" id="gk-lifeline-skip" title="Skip this question">⏭️ Skip</div>
+    </div>
+
+    <!-- Feedback -->
+    <div class="gk-feedback" id="gk-feedback">
+      <div id="gk-feedback-msg"></div>
+      <div class="gk-fact" id="gk-fact"></div>
+    </div>
+
+    <!-- Controls -->
+    <div class="gk-controls">
+      <button class="gk-btn secondary" id="gk-show-hint">💡 Show Hint</button>
+      <button class="gk-btn secondary" id="gk-skip-btn">⏭️ Skip</button>
+      <button class="gk-btn" id="gk-next-btn" style="display:none;">Next ➜</button>
+    </div>
+  </div>
+
+  <!-- Results Screen -->
+  <div class="gk-results" id="gk-results">
+    <div class="gk-results-trophy">🏆</div>
+    <div class="gk-results-title">Quiz Complete!</div>
+    <div class="gk-results-score" id="gk-final-score">0/20</div>
+    <div class="gk-grade" id="gk-grade">Great Job!</div>
+    
+    <div class="gk-results-stats">
+      <div class="gk-result-stat">
+        <div class="gk-result-stat-label">✅ Correct</div>
+        <div class="gk-result-stat-value" id="gk-correct-count">0</div>
+      </div>
+      <div class="gk-result-stat">
+        <div class="gk-result-stat-label">🔥 Best Streak</div>
+        <div class="gk-result-stat-value" id="gk-best-streak">0</div>
+      </div>
+      <div class="gk-result-stat">
+        <div class="gk-result-stat-label">⏱️ Time Taken</div>
+        <div class="gk-result-stat-value" id="gk-time-taken">0:00</div>
+      </div>
+      <div class="gk-result-stat">
+        <div class="gk-result-stat-label">📊 Accuracy</div>
+        <div class="gk-result-stat-value" id="gk-accuracy">0%</div>
+      </div>
+    </div>
+
+    <div class="gk-controls">
+      <button class="gk-btn" id="gk-replay-btn">🔄 Play Again</button>
+      <button class="gk-btn secondary" id="gk-review-btn">📋 Review Answers</button>
+      <button class="gk-btn secondary" id="gk-share-btn">📤 Share Score</button>
+    </div>
+
+    <!-- Review Section -->
+    <div class="gk-review" id="gk-review" style="display:none;">
+      <div style="font-weight:600;margin-bottom:0.8rem;text-align:center;">📝 Answer Review</div>
+      <div id="gk-review-list"></div>
+    </div>
+  </div>
+
+  <script>
+    (function(){
+      // ====== QUESTIONS DATABASE (60 Questions - 6 Categories x 10) ======
+      const questions = [
+        // 🔬 SCIENCE (Easy-Medium-Hard)
+        {id:1, cat:'science', diff:'easy', q:"Which planet is known as the Red Planet?", o:["Venus","Mars","Jupiter","Saturn"], a:1, hint:"It's the fourth planet from the Sun.", fact:"Mars has the largest volcano in the solar system - Olympus Mons!"},
+        {id:2, cat:'science', diff:'easy', q:"What is the chemical symbol for Gold?", o:["Go","Gd","Au","Ag"], a:2, hint:"It comes from the Latin word 'Aurum'.", fact:"Gold is so malleable that 1 ounce can be beaten into a sheet of 300 square feet!"},
+        {id:3, cat:'science', diff:'easy', q:"What gas do plants absorb from the atmosphere?", o:["Oxygen","Nitrogen","Carbon Dioxide","Helium"], a:2, hint:"It's what humans exhale when breathing.", fact:"A single tree can absorb about 48 lbs of CO2 per year!"},
+        {id:4, cat:'science', diff:'medium', q:"What is the speed of light (approx)?", o:["300,000 km/s","150,000 km/s","1,000 km/s","500,000 km/s"], a:0, hint:"Light can circle Earth about 7.5 times in one second.", fact:"Nothing can travel faster than light according to Einstein's theory!"},
+        {id:5, cat:'science', diff:'medium', q:"What is the hardest natural substance on Earth?", o:["Iron","Diamond","Quartz","Sapphire"], a:1, hint:"It's a form of carbon with a specific crystal structure.", fact:"Diamonds are formed under extreme pressure 100 miles below Earth's surface!"},
+        {id:6, cat:'science', diff:'medium', q:"Which blood type is known as the universal donor?", o:["A","B","AB","O"], a:3, hint:"This type can be given to anyone in emergencies.", fact:"Only about 7% of people have O-negative blood!"},
+        {id:7, cat:'science', diff:'hard', q:"What is the smallest unit of matter?", o:["Molecule","Atom","Proton","Quark"], a:3, hint:"Atoms are made of these even smaller particles.", fact:"Quarks were first theorized in 1964 by Murray Gell-Mann!"},
+        {id:8, cat:'science', diff:'hard', q:"How many bones are in the adult human body?", o:["206","256","306","156"], a:0, hint:"Babies are born with about 270, but some fuse together.", fact:"The smallest bone is the stapes in your ear - only 3mm long!"},
+        {id:9, cat:'science', diff:'hard', q:"What is the powerhouse of the cell?", o:["Nucleus","Ribosome","Mitochondria","Golgi"], a:2, hint:"This organelle produces ATP energy.", fact:"Mitochondria have their own DNA, separate from the cell's nucleus!"},
+        {id:10, cat:'science', diff:'medium', q:"Which element has the atomic number 1?", o:["Helium","Hydrogen","Oxygen","Carbon"], a:1, hint:"It's the lightest and most abundant element in the universe.", fact:"Hydrogen makes up about 75% of the universe's elemental mass!"},
+        
+        // 📜 HISTORY
+        {id:11, cat:'history', diff:'easy', q:"Who painted the Mona Lisa?", o:["Van Gogh","Da Vinci","Picasso","Rembrandt"], a:1, hint:"He was also an inventor and scientist from Italy.", fact:"The Mona Lisa has no eyebrows - possibly due to over-cleaning!"},
+        {id:12, cat:'history', diff:'easy', q:"In which year did World War II end?", o:["1943","1944","1945","1946"], a:2, hint:"It ended with Japan's surrender after atomic bombs.", fact:"WWII was the deadliest conflict in human history with 70-85 million fatalities!"},
+        {id:13, cat:'history', diff:'easy', q:"Who wrote 'Romeo and Juliet'?", o:["Dickens","Shakespeare","Austen","Hemingway"], a:1, hint:"He was an English playwright from the 16th century.", fact:"Shakespeare invented over 1,700 words still used today!"},
+        {id:14, cat:'history', diff:'medium', q:"Which ancient wonder was located in Egypt?", o:["Hanging Gardens","Colossus","Pyramids of Giza","Lighthouse"], a:2, hint:"It's the only ancient wonder still standing today.", fact:"The Great Pyramid was the tallest man-made structure for over 3,800 years!"},
+        {id:15, cat:'history', diff:'medium', q:"Who was the first person to walk on the Moon?", o:["Buzz Aldrin","Yuri Gagarin","Neil Armstrong","John Glenn"], a:2, hint:"He said 'That's one small step for man...'", fact:"Armstrong's heartbeat reached 156 bpm during the lunar landing!"},
+        {id:16, cat:'history', diff:'medium', q:"The Renaissance began in which country?", o:["France","Germany","Italy","Spain"], a:2, hint:"Home to Florence, Rome, and Venice.", fact:"The word 'Renaissance' means 'rebirth' in French!"},
+        {id:17, cat:'history', diff:'hard', q:"Which empire was ruled by Genghis Khan?", o:["Ottoman","Roman","Mongol","Persian"], a:2, hint:"It became the largest contiguous land empire in history.", fact:"At its peak, the Mongol Empire covered 24 million square kilometers!"},
+        {id:18, cat:'history', diff:'hard', q:"In which year did the Berlin Wall fall?", o:["1987","1988","1989","1990"], a:2, hint:"It happened just before the end of the Cold War.", fact:"People danced on the wall and chipped away pieces as souvenirs!"},
+        {id:19, cat:'history', diff:'hard', q:"Who was the first female Prime Minister of the UK?", o:["Theresa May","Margaret Thatcher","Angela Merkel","Indira Gandhi"], a:1, hint:"She was known as the 'Iron Lady'.", fact:"Thatcher served as PM for 11 years, the longest in the 20th century!"},
+        {id:20, cat:'history', diff:'medium', q:"Which country gifted the Statue of Liberty to the USA?", o:["UK","France","Germany","Spain"], a:1, hint:"It was a symbol of friendship after the American Revolution.", fact:"The statue's full name is 'Liberty Enlightening the World'!"},
+        
+        // 🌍 GEOGRAPHY
+        {id:21, cat:'geography', diff:'easy', q:"What is the largest ocean on Earth?", o:["Atlantic","Indian","Arctic","Pacific"], a:3, hint:"It covers more area than all land masses combined.", fact:"The Pacific Ocean contains about 25,000 islands!"},
+        {id:22, cat:'geography', diff:'easy', q:"How many continents are there?", o:["5","6","7","8"], a:2, hint:"The standard model taught in most schools.", fact:"Some models count Europe and Asia as one continent - Eurasia!"},
+        {id:23, cat:'geography', diff:'easy', q:"Which is the longest river in the world?", o:["Amazon","Nile","Yangtze","Mississippi"], a:1, hint:"It flows through northeastern Africa.", fact:"The Nile is about 6,650 km (4,130 miles) long!"},
+        {id:24, cat:'geography', diff:'medium', q:"Which country has the most natural lakes?", o:["USA","Russia","Canada","Finland"], a:2, hint:"It has over 2 million lakes!", fact:"Canada contains about 60% of the world's lakes!"},
+        {id:25, cat:'geography', diff:'medium', q:"What is the capital of Australia?", o:["Sydney","Melbourne","Canberra","Perth"], a:2, hint:"It was chosen as a compromise between Sydney and Melbourne.", fact:"Canberra means 'meeting place' in the local Indigenous language!"},
+        {id:26, cat:'geography', diff:'medium', q:"Which desert is the largest in the world?", o:["Sahara","Gobi","Antarctic","Arabian"], a:2, hint:"It's a cold desert, not a hot one!", fact:"Antarctica receives less than 200mm of precipitation annually!"},
+        {id:27, cat:'geography', diff:'hard', q:"Which country has the most time zones?", o:["Russia","USA","France","China"], a:2, hint:"Due to its overseas territories, this European country spans 12 zones!", fact:"France's time zones range from UTC-10 to UTC+12!"},
+        {id:28, cat:'geography', diff:'hard', q:"What is the smallest country in the world?", o:["Monaco","Vatican City","San Marino","Liechtenstein"], a:1, hint:"It's located entirely within Rome, Italy.", fact:"Vatican City has an area of just 0.44 square kilometers!"},
+        {id:29, cat:'geography', diff:'hard', q:"Which mountain range separates Europe from Asia?", o:["Alps","Himalayas","Urals","Andes"], a:2, hint:"They run north-south through western Russia.", fact:"The Ural Mountains are about 2,500 km long!"},
+        {id:30, cat:'geography', diff:'medium', q:"Which African country was formerly known as Abyssinia?", o:["Kenya","Ethiopia","Somalia","Sudan"], a:1, hint:"It was never colonized by European powers.", fact:"Ethiopia is the only African country with its own alphabet!"},
+        
+        // 🎨 ARTS & LITERATURE
+        {id:31, cat:'arts', diff:'easy', q:"Who composed the Four Seasons?", o:["Mozart","Beethoven","Vivaldi","Bach"], a:2, hint:"He was an Italian Baroque composer.", fact:"Vivaldi was also a Catholic priest and violin virtuoso!"},
+        {id:32, cat:'arts', diff:'easy', q:"Which artist cut off his own ear?", o:["Picasso","Van Gogh","Monet","Dali"], a:1, hint:"He painted 'Starry Night' while in an asylum.", fact:"Van Gogh only sold one painting during his lifetime!"},
+        {id:33, cat:'arts', diff:'easy', q:"Who wrote '1984'?", o:["Huxley","Orwell","Bradbury","Asimov"], a:1, hint:"His real first name was Eric.", fact:"The term 'Big Brother' comes from this novel!"},
+        {id:34, cat:'arts', diff:'medium', q:"Which Shakespeare play features the character Hamlet?", o:["Macbeth","Othello","Hamlet","King Lear"], a:2, hint:"The title character is the Prince of Denmark.", fact:"'To be or not to be' is one of the most famous soliloquies ever!"},
+        {id:35, cat:'arts', diff:'medium', q:"What art movement was Salvador Dalí associated with?", o:["Impressionism","Cubism","Surrealism","Expressionism"], a:2, hint:"Known for dream-like, bizarre imagery.", fact:"Dalí's famous melting clocks painting is called 'The Persistence of Memory'!"},
+        {id:36, cat:'arts', diff:'medium', q:"Which novel begins with 'It was the best of times, it was the worst of times'?", o:["Great Expectations","A Tale of Two Cities","Oliver Twist","David Copperfield"], a:1, hint:"Set during the French Revolution.", fact:"Dickens wrote this while serializing it in his magazine!"},
+        {id:37, cat:'arts', diff:'hard', q:"Who painted 'The Persistence of Memory' (melting clocks)?", o:["Picasso","Matisse","Dalí","Magritte"], a:2, hint:"Spanish surrealist with a famous mustache.", fact:"Dalí claimed the melting clocks were inspired by melting cheese!"},
+        {id:38, cat:'arts', diff:'hard', q:"Which composer wrote the opera 'The Magic Flute'?", o:["Verdi","Puccini","Mozart","Wagner"], a:2, hint:"A child prodigy who composed over 600 works.", fact:"Mozart wrote this opera just months before his death at age 35!"},
+        {id:39, cat:'arts', diff:'hard', q:"Who wrote 'One Hundred Years of Solitude'?", o:["Borges","Neruda","Marquez","Allende"], a:2, hint:"Colombian author who won the Nobel Prize in Literature.", fact:"This novel is a cornerstone of magical realism!"},
+        {id:40, cat:'arts', diff:'medium', q:"Which museum houses the Mona Lisa?", o:["Metropolitan","Louvre","British Museum","Prado"], a:1, hint:"Located in Paris, France.", fact:"The Louvre is the world's largest art museum with over 38,000 objects!"},
+        
+        // ⚽ SPORTS
+        {id:41, cat:'sports', diff:'easy', q:"How many players are on a soccer team on the field?", o:["9","10","11","12"], a:2, hint:"Includes one goalkeeper.", fact:"A soccer match has two 45-minute halves!"},
+        {id:42, cat:'sports', diff:'easy', q:"In which sport would you perform a slam dunk?", o:["Volleyball","Basketball","Tennis","Badminton"], a:1, hint:"Played on a court with hoops.", fact:"The slam dunk was popularized by players like Julius Erving and Michael Jordan!"},
+        {id:43, cat:'sports', diff:'easy', q:"How many rings are on the Olympic flag?", o:["4","5","6","7"], a:1, hint:"Each represents a continent.", fact:"The five rings are blue, yellow, black, green, and red on a white background!"},
+        {id:44, cat:'sports', diff:'medium', q:"Which country has won the most FIFA World Cups?", o:["Germany","Argentina","Brazil","Italy"], a:2, hint:"They've won it 5 times!", fact:"Brazil is the only team to have played in every World Cup tournament!"},
+        {id:45, cat:'sports', diff:'medium', q:"What is the maximum score in ten-pin bowling?", o:["200","250","300","350"], a:2, hint:"12 consecutive strikes!", fact:"A perfect 300 game has been bowled over 50,000 times in certified play!"},
+        {id:46, cat:'sports', diff:'medium', q:"In tennis, what does 'love' mean?", o:["Tie game","Zero points","Final set","Ace serve"], a:1, hint:"It's the score before anyone has won a point.", fact:"'Love' likely comes from the French word 'l'oeuf' meaning egg (shaped like zero)!"},
+        {id:47, cat:'sports', diff:'hard', q:"Who holds the record for most Olympic gold medals?", o:["Usain Bolt","Michael Phelps","Carl Lewis","Mark Spitz"], a:1, hint:"American swimmer with 23 golds!", fact:"Michael Phelps has won a total of 28 Olympic medals!"},
+        {id:48, cat:'sports', diff:'hard', q:"Which boxer was known as 'The Greatest'?", o:["Mike Tyson","Muhammad Ali","Joe Frazier","George Foreman"], a:1, hint:"He changed his name from Cassius Clay.", fact:"Ali refused to be drafted for the Vietnam War, costing him 3 prime years!"},
+        {id:49, cat:'sports', diff:'hard', q:"In which year were the first modern Olympic Games held?", o:["1892","1896","1900","1904"], a:1, hint:"Held in Athens, Greece.", fact:"Only 14 nations participated in the 1896 Olympics!"},
+        {id:50, cat:'sports', diff:'medium', q:"What is the national sport of Japan?", o:["Karate","Judo","Sumo","Kendo"], a:2, hint:"A traditional wrestling sport with ritual elements.", fact:"Sumo wrestlers can weigh over 400 pounds (180 kg)!"},
+        
+        // 💻 TECHNOLOGY
+        {id:51, cat:'technology', diff:'easy', q:"What does 'WWW' stand for?", o:["World Wide Web","World Web Wide","Wide World Web","Web World Wide"], a:0, hint:"Invented by Tim Berners-Lee in 1989.", fact:"The first website went live on August 6, 1991!"},
+        {id:52, cat:'technology', diff:'easy', q:"Which company developed the iPhone?", o:["Samsung","Google","Apple","Microsoft"], a:2, hint:"Founded by Steve Jobs, Steve Wozniak, and Ronald Wayne.", fact:"The first iPhone was announced on January 9, 2007!"},
+        {id:53, cat:'technology', diff:'easy', q:"What does 'CPU' stand for?", o:["Central Processing Unit","Computer Personal Unit","Central Program Utility","Core Processing Unit"], a:0, hint:"Often called the 'brain' of the computer.", fact:"Modern CPUs contain billions of transistors!"},
+        {id:54, cat:'technology', diff:'medium', q:"Who is known as the father of the computer?", o:["Alan Turing","Charles Babbage","Bill Gates","Steve Jobs"], a:1, hint:"He designed the Analytical Engine in the 1830s.", fact:"Babbage's designs weren't built in his lifetime due to funding issues!"},
+        {id:55, cat:'technology', diff:'medium', q:"What year was Google founded?", o:["1996","1998","2000","2002"], a:1, hint:"By Larry Page and Sergey Brin at Stanford.", fact:"Google was originally called 'BackRub'!"},
+        {id:56, cat:'technology', diff:'medium', q:"Which programming language is known as the 'language of the web'?", o:["Python","Java","JavaScript","C++"], a:2, hint:"It runs in every web browser.", fact:"JavaScript was created in just 10 days by Brendan Eich!"},
+        {id:57, cat:'technology', diff:'hard', q:"What does 'AI' stand for in tech?", o:["Automated Intelligence","Artificial Intelligence","Advanced Integration","Algorithmic Input"], a:1, hint:"Machines that can learn and make decisions.", fact:"The term 'Artificial Intelligence' was coined in 1956 at Dartmouth College!"},
+        {id:58, cat:'technology', diff:'hard', q:"Which company developed the Android operating system?", o:["Apple","Microsoft","Google","Samsung"], a:2, hint:"Originally developed by Android Inc., acquired in 2005.", fact:"Android is based on the Linux kernel!"},
+        {id:59, cat:'technology', diff:'hard', q:"What is the smallest unit of digital information?", o:["Byte","Bit","Kilobyte","Nibble"], a:1, hint:"It can be either 0 or 1.", fact:"8 bits make up 1 byte!"},
+        {id:60, cat:'technology', diff:'medium', q:"Which social media platform uses a bird as its logo?", o:["Facebook","Instagram","Twitter/X","LinkedIn"], a:2, hint:"Originally limited to 140 characters per post.", fact:"Twitter was founded in 2006 by Jack Dorsey and others!"}
+      ];
+
+      // ====== STATE MANAGEMENT ======
+      const state = {
+        currentIdx: 0,
+        score: 0,
+        streak: 0,
+        bestStreak: 0,
+        answers: [],
+        startTime: null,
+        timer: null,
+        timeRemaining: 30,
+        lifelines: { '5050': true, hint: true, double: true, skip: true },
+        doubleActive: false,
+        settings: { sound: true, timer: true, hardMode: false, qty: 20 },
+        highScore: parseInt(localStorage.getItem('gkquiz-highscore')) || 0,
+        selectedCat: 'all',
+        questionPool: []
+      };
+
+      // ====== DOM ELEMENTS ======
+      const els = {
+        score: document.getElementById('gk-score'),
+        streak: document.getElementById('gk-streak'),
+        highscore: document.getElementById('gk-highscore'),
+        progressText: document.getElementById('gk-progress-text'),
+        progressFill: document.getElementById('gk-progress-fill'),
+        categoryDisplay: document.getElementById('gk-category-display'),
+        timer: document.getElementById('gk-timer'),
+        timerDisplay: document.getElementById('gk-timer-display'),
+        categoryBadge: document.getElementById('gk-category-badge'),
+        categoryIcon: document.getElementById('gk-category-icon'),
+        categoryName: document.getElementById('gk-category-name'),
+        difficulty: document.getElementById('gk-difficulty'),
+        question: document.getElementById('gk-question'),
+        hintBox: document.getElementById('gk-hint-box'),
+        hintText: document.getElementById('gk-hint-text'),
+        options: document.getElementById('gk-options'),
+        feedback: document.getElementById('gk-feedback'),
+        feedbackMsg: document.getElementById('gk-feedback-msg'),
+        fact: document.getElementById('gk-fact'),
+        nextBtn: document.getElementById('gk-next-btn'),
+        skipBtn: document.getElementById('gk-skip-btn'),
+        showHintBtn: document.getElementById('gk-show-hint'),
+        lifelines: {
+          '5050': document.getElementById('gk-lifeline-5050'),
+          hint: document.getElementById('gk-lifeline-hint'),
+          double: document.getElementById('gk-lifeline-double'),
+          skip: document.getElementById('gk-lifeline-skip')
+        },
+        quizContainer: document.getElementById('gk-quiz-container'),
+        results: document.getElementById('gk-results'),
+        finalScore: document.getElementById('gk-final-score'),
+        grade: document.getElementById('gk-grade'),
+        correctCount: document.getElementById('gk-correct-count'),
+        bestStreakEl: document.getElementById('gk-best-streak'),
+        timeTaken: document.getElementById('gk-time-taken'),
+        accuracy: document.getElementById('gk-accuracy'),
+        review: document.getElementById('gk-review'),
+        reviewList: document.getElementById('gk-review-list'),
+        replayBtn: document.getElementById('gk-replay-btn'),
+        reviewBtn: document.getElementById('gk-review-btn'),
+        shareBtn: document.getElementById('gk-share-btn'),
+        settingsToggle: document.getElementById('gk-settings-toggle'),
+        settingsPanel: document.getElementById('gk-settings-panel'),
+        soundToggle: document.getElementById('gk-sound-toggle'),
+        timerToggle: document.getElementById('gk-timer-toggle'),
+        hardToggle: document.getElementById('gk-hard-toggle'),
+        qtySelect: document.getElementById('gk-qty-select'),
+        resetProgressBtn: document.getElementById('gk-reset-progress'),
+        catBtns: document.querySelectorAll('.gk-cat-btn')
+      };
+
+      const categories = {
+        science: { icon: '🔬', name: 'Science', gradient: 'science' },
+        history: { icon: '📜', name: 'History', gradient: 'history' },
+        geography: { icon: '🌍', name: 'Geography', gradient: 'geo' },
+        arts: { icon: '🎨', name: 'Arts', gradient: 'arts' },
+        sports: { icon: '⚽', name: 'Sports', gradient: 'sports' },
+        technology: { icon: '💻', name: 'Technology', gradient: 'tech' },
+        mixed: { icon: '🎲', name: 'Mixed', gradient: 'main' }
+      };
+
+      // ====== UTILITIES ======
+      const formatTime = (sec) => {
+        const m = Math.floor(sec / 60);
+        const s = sec % 60;
+        return `${m}:${s.toString().padStart(2, '0')}`;
+      };
+
+      const shuffle = (arr) => {
+        const newArr = [...arr];
+        for(let i = newArr.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [newArr[i], newArr[j]] = [newArr[j], newArr[i]];
+        }
+        return newArr;
+      };
+
+      const filterQuestions = () => {
+        let pool = state.selectedCat === 'all' 
+          ? [...questions] 
+          : questions.filter(q => q.cat === state.selectedCat);
+        return shuffle(pool).slice(0, state.settings.qty);
+      };
+
+      const updateProgress = () => {
+        const total = state.settings.qty;
+        const pct = (state.currentIdx / total) * 100;
+        els.progressFill.style.width = `${pct}%`;
+        els.progressText.textContent = `Question ${state.currentIdx + 1}/${total}`;
+        els.score.textContent = state.score;
+        els.streak.textContent = state.streak;
+        els.highscore.textContent = state.highScore;
+      };
+
+      const updateTimerDisplay = () => {
+        els.timerDisplay.textContent = `${state.timeRemaining}s`;
+        els.timer.classList.remove('warning', 'critical');
+        if(state.timeRemaining <= 10) els.timer.classList.add('critical');
+        else if(state.timeRemaining <= 15) els.timer.classList.add('warning');
+      };
+
+      const startTimer = () => {
+        if(!state.settings.timer) return;
+        state.timeRemaining = state.settings.hardMode ? 20 : 30;
+        updateTimerDisplay();
+        clearInterval(state.timer);
+        state.timer = setInterval(() => {
+          state.timeRemaining--;
+          updateTimerDisplay();
+          if(state.timeRemaining <= 0) {
+            clearInterval(state.timer);
+            handleTimeout();
+          }
+        }, 1000);
+      };
+
+      const stopTimer = () => clearInterval(state.timer);
+
+      const loadQuestion = (idx) => {
+        const q = state.questionPool[idx];
+        if(!q) return;
+        
+        // Update category badge
+        const cat = categories[q.cat];
+        els.categoryBadge.className = `gk-category ${q.cat}`;
+        els.categoryIcon.textContent = cat.icon;
+        els.categoryName.textContent = cat.name;
+        els.difficulty.textContent = q.diff.charAt(0).toUpperCase() + q.diff.slice(1);
+        els.difficulty.className = `gk-difficulty ${q.diff}`;
+        els.categoryDisplay.textContent = `${cat.icon} ${cat.name}`;
+        
+        // Update question
+        els.question.textContent = q.q;
+        els.hintBox.classList.remove('show');
+        els.hintText.textContent = q.hint;
+        els.feedback.classList.remove('show', 'correct', 'wrong');
+        
+        // Generate shuffled options
+        const shuffled = q.o.map((opt, i) => ({ text: opt, isCorrect: i === q.a }));
+        const displayed = shuffle(shuffled);
+        
+        // Render options
+        els.options.innerHTML = '';
+        const letters = ['A', 'B', 'C', 'D'];
+        displayed.forEach((opt, i) => {
+          const btn = document.createElement('button');
+          btn.className = 'gk-option';
+          btn.innerHTML = `<span class="gk-option-letter">${letters[i]}</span>${opt.text}`;
+          btn.dataset.correct = opt.isCorrect;
+          btn.onclick = () => handleAnswer(btn, opt.isCorrect, q);
+          els.options.appendChild(btn);
+        });
+        
+        // Reset lifelines UI
+        Object.entries(els.lifelines).forEach(([key, el]) => {
+          el.classList.toggle('used', !state.lifelines[key]);
+        });
+        els.lifelines.double.classList.toggle('active', state.doubleActive);
+        
+        // Reset buttons
+        els.nextBtn.style.display = 'none';
+        els.skipBtn.disabled = false;
+        els.showHintBtn.style.display = 'inline-flex';
+        
+        updateProgress();
+        startTimer();
+        state.answers[idx] = null;
+      };
+
+      const handleAnswer = (btn, isCorrect, question) => {
+        stopTimer();
+        document.querySelectorAll('.gk-option').forEach(b => {
+          b.disabled = true;
+          if(b.dataset.correct === 'true') b.classList.add('correct');
+        });
+        
+        const points = (question.diff === 'hard' ? 30 : question.diff === 'medium' ? 20 : 10) * (state.streak + 1);
+        const finalPoints = state.doubleActive ? points * 2 : points;
+        
+        if(isCorrect) {
+          btn.classList.add('correct');
+          state.score += finalPoints;
+          state.streak++;
+          if(state.streak > state.bestStreak) state.bestStreak = state.streak;
+          showFeedback(true, `🎉 Correct! +${finalPoints} pts`, question.fact);
+          createConfetti();
+        } else {
+          btn.classList.add('wrong');
+          state.streak = 0;
+          showFeedback(false, '❌ Not quite!', `Correct: ${question.o[question.a]}. ${question.fact}`);
+        }
+        
+        state.answers[state.currentIdx] = {
+          question: question.q,
+          selected: btn.textContent.replace(/^[A-D]\s*/, ''),
+          correct: question.o[question.a],
+          isCorrect,
+          fact: question.fact
+        };
+        
+        els.nextBtn.style.display = 'inline-flex';
+        els.skipBtn.disabled = true;
+        els.showHintBtn.style.display = 'none';
+        state.doubleActive = false;
+      };
+
+      const handleTimeout = () => {
+        document.querySelectorAll('.gk-option').forEach(b => {
+          b.disabled = true;
+          if(b.dataset.correct === 'true') b.classList.add('correct');
+        });
+        state.streak = 0;
+        const q = state.questionPool[state.currentIdx];
+        showFeedback(false, '⏰ Time\'s up!', `Correct: ${q.o[q.a]}. ${q.fact}`);
+        els.nextBtn.style.display = 'inline-flex';
+        els.skipBtn.disabled = true;
+      };
+
+      const showFeedback = (isCorrect, msg, info) => {
+        els.feedbackMsg.textContent = msg;
+        els.fact.textContent = info;
+        els.feedback.className = `gk-feedback show ${isCorrect ? 'correct' : 'wrong'}`;
+      };
+
+      const nextQuestion = () => {
+        state.currentIdx++;
+        if(state.currentIdx >= state.settings.qty) {
+          showResults();
+        } else {
+          loadQuestion(state.currentIdx);
+        }
+      };
+
+      const showResults = () => {
+        stopTimer();
+        els.quizContainer.style.display = 'none';
+        els.results.classList.add('show');
+        
+        const correct = state.answers.filter(a => a?.isCorrect).length;
+        const totalTime = Math.floor((Date.now() - state.startTime) / 1000);
+        const accuracy = Math.round((correct / state.settings.qty) * 100);
+        
+        els.finalScore.textContent = `${correct}/${state.settings.qty}`;
+        els.correctCount.textContent = correct;
+        els.bestStreakEl.textContent = state.bestStreak;
+        els.timeTaken.textContent = formatTime(totalTime);
+        els.accuracy.textContent = `${accuracy}%`;
+        
+        if(accuracy >= 90) { els.grade.textContent = '🌟 Knowledge Master!'; els.grade.className = 'gk-grade excellent'; }
+        else if(accuracy >= 70) { els.grade.textContent = '🎓 Well Informed!'; els.grade.className = 'gk-grade good'; }
+        else if(accuracy >= 50) { els.grade.textContent = '📚 Learning Journey!'; els.grade.className = 'gk-grade average'; }
+        else { els.grade.textContent = '🔍 Keep Exploring!'; els.grade.className = 'gk-grade poor'; }
+        
+        if(state.score > state.highScore) {
+          state.highScore = state.score;
+          localStorage.setItem('gkquiz-highscore', state.highScore);
+          els.highscore.textContent = state.highScore;
+        }
+        
+        generateReview();
+      };
+
+      const generateReview = () => {
+        els.reviewList.innerHTML = '';
+        state.answers.forEach((a, i) => {
+          if(!a) return;
+          const item = document.createElement('div');
+          item.className = `gk-review-item ${a.isCorrect ? 'correct' : 'wrong'}`;
+          item.innerHTML = `
+            <div class="gk-review-q">${i+1}. ${a.question}</div>
+            <div class="gk-review-a">You: ${a.selected} | ✓ ${a.correct}</div>
+            <div style="font-size:0.85rem;color:var(--text-secondary);margin-top:0.4rem;font-style:italic;">💡 ${a.fact}</div>
+          `;
+          els.reviewList.appendChild(item);
+        });
+      };
+
+      // ====== LIFELINES ======
+      const use5050 = () => {
+        if(!state.lifelines['5050']) return;
+        state.lifelines['5050'] = false;
+        els.lifelines['5050'].classList.add('used');
+        const wrong = Array.from(document.querySelectorAll('.gk-option')).filter(b => b.dataset.correct !== 'true');
+        shuffle(wrong).slice(0, 2).forEach(btn => {
+          btn.style.opacity = '0.3'; btn.style.pointerEvents = 'none'; btn.disabled = true;
+        });
+      };
+
+      const useHint = () => {
+        if(!state.lifelines.hint) return;
+        state.lifelines.hint = false;
+        els.lifelines.hint.classList.add('used');
+        els.hintBox.classList.add('show');
+      };
+
+      const useDouble = () => {
+        if(!state.lifelines.double || state.doubleActive) return;
+        state.lifelines.double = false;
+        state.doubleActive = true;
+        els.lifelines.double.classList.add('used', 'active');
+        showFeedback(true, '✨ Double Points Active! Next correct answer = 2x points!', '');
+        setTimeout(() => els.feedback.classList.remove('show'), 2500);
+      };
+
+      const useSkip = () => {
+        if(!state.lifelines.skip) return;
+        state.lifelines.skip = false;
+        els.lifelines.skip.classList.add('used');
+        state.streak = 0;
+        const q = state.questionPool[state.currentIdx];
+        state.answers[state.currentIdx] = { question: q.q, selected: 'Skipped', correct: q.o[q.a], isCorrect: false, fact: q.fact };
+        nextQuestion();
+      };
+
+      // ====== CONFETTI ======
+      const createConfetti = () => {
+        const colors = ['#10b981','#3b82f6','#f59e0b','#ef4444','#8b5cf6','#ec4899'];
+        for(let i=0;i<40;i++){
+          const c=document.createElement('div');c.className='gk-confetti';
+          c.style.left=Math.random()*100+'vw';c.style.backgroundColor=colors[Math.floor(Math.random()*colors.length)];
+          c.style.animationDelay=Math.random()*2+'s';c.style.transform=`rotate(${Math.random()*360}deg)`;
+          document.body.appendChild(c);setTimeout(()=>c.remove(),3000);
+        }
+      };
+
+      // ====== SHARE ======
+      const shareResults = async () => {
+        const correct = state.answers.filter(a=>a?.isCorrect).length;
+        const text = `🧠 I scored ${correct}/${state.settings.qty} on GK Quiz Arena! 🏆\n\nCan you beat my score?`;
+        if(navigator.share){try{await navigator.share({title:'GK Quiz Arena Results',text});}catch(e){}}
+        else{await navigator.clipboard.writeText(text);els.shareBtn.textContent='✅ Copied!';setTimeout(()=>els.shareBtn.textContent='📤 Share Score',2000);}
+      };
+
+      // ====== EVENT LISTENERS ======
+      els.nextBtn.onclick = nextQuestion;
+      els.skipBtn.onclick = () => useSkip();
+      els.showHintBtn.onclick = useHint;
+      els.lifelines['5050'].onclick = use5050;
+      els.lifelines.hint.onclick = useHint;
+      els.lifelines.double.onclick = useDouble;
+      els.lifelines.skip.onclick = useSkip;
+      
+      els.replayBtn.onclick = () => {
+        state.currentIdx=0;state.score=0;state.streak=0;state.bestStreak=0;state.answers=[];
+        state.lifelines={'5050':true,hint:true,double:true,skip:true};state.doubleActive=false;
+        state.startTime=Date.now();state.questionPool=filterQuestions();
+        els.results.classList.remove('show');els.quizContainer.style.display='block';els.review.style.display='none';
+        loadQuestion(0);
+      };
+      
+      els.reviewBtn.onclick = () => {
+        els.review.style.display = els.review.style.display==='none'?'block':'none';
+        els.reviewBtn.textContent = els.review.style.display==='none'?'📋 Review Answers':'🔙 Hide Review';
+      };
+      
+      els.shareBtn.onclick = shareResults;
+      
+      // Settings
+      els.settingsToggle.onclick = (e) => { e.stopPropagation(); els.settingsPanel.classList.toggle('show'); };
+      document.addEventListener('click',(e)=>{if(!els.settingsPanel.contains(e.target)&&e.target!==els.settingsToggle)els.settingsPanel.classList.remove('show');});
+      
+      els.soundToggle.onchange = (e) => state.settings.sound = e.target.checked;
+      els.timerToggle.onchange = (e) => { state.settings.timer = e.target.checked; if(!e.target.checked) stopTimer(); else startTimer(); };
+      els.hardToggle.onchange = (e) => state.settings.hardMode = e.target.checked;
+      els.qtySelect.onchange = (e) => { state.settings.qty = parseInt(e.target.value); init(); };
+      
+      els.resetProgressBtn.onclick = () => {
+        if(confirm('Reset all progress and high scores?')) {
+          localStorage.removeItem('gkquiz-highscore');
+          state.highScore = 0; els.highscore.textContent = '0';
+          alert('Progress reset! 🔄');
+        }
+      };
+      
+      // Category filter
+      els.catBtns.forEach(btn => {
+        btn.onclick = () => {
+          els.catBtns.forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          state.selectedCat = btn.dataset.cat;
+          state.questionPool = filterQuestions();
+          state.currentIdx = 0;
+          loadQuestion(0);
+        };
+      });
+      
+      // Keyboard
+      document.addEventListener('keydown',(e)=>{
+        if(els.results.classList.contains('show'))return;
+        const opts=document.querySelectorAll('.gk-option:not(:disabled)');
+        if(e.key>='1'&&e.key<='4'&&opts[e.key-1])opts[e.key-1].click();
+        if(e.key==='Enter'&&els.nextBtn.style.display!=='none')els.nextBtn.click();
+        if((e.ctrlKey||e.metaKey)&&e.key==='h'){e.preventDefault();useHint();}
+        if((e.ctrlKey||e.metaKey)&&e.key==='s'){e.preventDefault();useSkip();}
+      });
+
+      // ====== INIT ======
+      const init = () => {
+        state.startTime = Date.now();
+        state.questionPool = filterQuestions();
+        els.highscore.textContent = state.highScore;
+        loadQuestion(0);
+      };
+
+      init();
+    })();
+  </script>
+</div>

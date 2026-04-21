@@ -1,0 +1,335 @@
+<div class="disc-tool" lang="en">
+  <style>
+    :root {
+      --bg-main: #0b0e11; --bg-card: #161a21; --bg-input: #1e232c;
+      --border: rgba(255,255,255,0.08); --text: #f1f5f9; --text-sec: #94a3b8;
+      --accent: #38bdf8; --accent-glow: rgba(56,189,248,0.2);
+      --success: #22c55e; --warning: #f59e0b; --danger: #ef4444;
+      --grad: linear-gradient(135deg, #38bdf8, #818cf8); --radius: 14px;
+      --trans: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .disc-tool { max-width: 680px; margin: 0 auto; padding: 1.5rem; font-family: system-ui, -apple-system, sans-serif; color: var(--text); }
+    .disc-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.8rem; }
+    .disc-header h3 { margin: 0; font-size: 1.3rem; font-weight: 700; background: var(--grad); -webkit-background-clip: text; color: transparent; }
+    .mode-toggle { display: flex; background: var(--bg-input); border-radius: 10px; padding: 4px; border: 1px solid var(--border); }
+    .mode-btn { padding: 0.45rem 0.9rem; border: none; border-radius: 8px; background: transparent; color: var(--text-sec); cursor: pointer; transition: var(--trans); font-size: 0.85rem; font-weight: 500; }
+    .mode-btn.active { background: var(--accent); color: #0b0e11; }
+
+    .input-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 0.9rem; margin-bottom: 0.8rem; }
+    .input-wrap { position: relative; }
+    .disc-label { display: block; margin-bottom: 0.4rem; color: var(--text-sec); font-size: 0.85rem; font-weight: 500; }
+    .disc-input, .disc-select { width: 100%; padding: 0.9rem 1rem; border-radius: var(--radius); border: 1px solid var(--border); background: var(--bg-input); color: var(--text); font-size: 1rem; outline: none; transition: var(--trans); }
+    .disc-input:focus, .disc-select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow); }
+    .disc-input.error { border-color: var(--danger); }
+    .input-hint { position: absolute; right: 10px; top: 38px; font-size: 0.75rem; color: var(--text-sec); pointer-events: none; }
+    .error-msg { color: var(--danger); font-size: 0.75rem; margin-top: 4px; display: none; }
+    .error-msg.show { display: block; }
+
+    .adv-panel { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 0.9rem; margin: 0.5rem 0 1rem; padding: 1rem; background: var(--bg-card); border-radius: var(--radius); border: 1px solid var(--border); display: none; }
+    .adv-panel.show { display: grid; }
+    .toggle-btn { background: transparent; border: 1px dashed var(--border); border-radius: 10px; padding: 0.6rem; color: var(--text-sec); cursor: pointer; transition: var(--trans); font-size: 0.9rem; width: 100%; margin-bottom: 0.5rem; }
+    .toggle-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+    .calc-btn { width: 100%; padding: 1.1rem; background: var(--grad); border: none; border-radius: var(--radius); color: #0b0e11; font-weight: 700; font-size: 1.05rem; cursor: pointer; transition: var(--trans); margin-bottom: 1.2rem; }
+    .calc-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 18px var(--accent-glow); }
+    .calc-btn:active { transform: scale(0.99); }
+
+    .results-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 0.9rem; margin-bottom: 1.2rem; }
+    .result-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem; text-align: center; transition: var(--trans); position: relative; overflow: hidden; }
+    .result-card:hover { transform: translateY(-3px); border-color: var(--accent); }
+    .result-card::before { content: ''; position: absolute; top: 0; left: 0; width: 3px; height: 100%; background: var(--grad); }
+    .result-val { font-size: 1.4rem; font-weight: 800; color: var(--accent); margin: 0.3rem 0; }
+    .result-lbl { font-size: 0.75rem; color: var(--text-sec); text-transform: uppercase; letter-spacing: 0.5px; }
+    .result-tag { font-size: 0.7rem; padding: 2px 6px; border-radius: 4px; margin-top: 4px; display: inline-block; }
+    .tag-save { background: rgba(34,197,94,0.15); color: var(--success); }
+    .tag-tax { background: rgba(245,158,11,0.15); color: var(--warning); }
+
+    .visual-wrap { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem; margin-bottom: 1.2rem; }
+    .visual-title { font-size: 0.9rem; color: var(--text-sec); margin-bottom: 0.8rem; display: flex; justify-content: space-between; }
+    .price-bar { display: flex; height: 24px; border-radius: 12px; overflow: hidden; background: var(--bg-input); }
+    .bar-final { background: var(--grad); transition: width 0.5s ease; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 600; color: #0b0e11; }
+    .bar-saved { background: rgba(34,197,94,0.3); transition: width 0.5s ease; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; color: var(--success); }
+    .visual-legend { display: flex; justify-content: center; gap: 1.2rem; margin-top: 0.8rem; font-size: 0.8rem; }
+    .legend-item { display: flex; align-items: center; gap: 6px; }
+    .legend-dot { width: 12px; height: 12px; border-radius: 3px; }
+
+    .actions { display: flex; justify-content: flex-end; gap: 0.6rem; margin-bottom: 1rem; flex-wrap: wrap; }
+    .act-btn { padding: 0.5rem 0.9rem; background: var(--bg-input); border: 1px solid var(--border); border-radius: 8px; color: var(--text-sec); cursor: pointer; transition: var(--trans); font-size: 0.85rem; display: flex; align-items: center; gap: 6px; }
+    .act-btn:hover { background: rgba(255,255,255,0.05); color: var(--text); }
+
+    .history-panel { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); max-height: 0; overflow: hidden; transition: max-height 0.3s ease, padding 0.3s ease; }
+    .history-panel.open { max-height: 160px; padding: 0.7rem; overflow-y: auto; }
+    .hist-item { display: flex; justify-content: space-between; padding: 0.5rem; border-radius: 8px; cursor: pointer; transition: var(--trans); font-size: 0.85rem; color: var(--text-sec); border-bottom: 1px solid var(--border); }
+    .hist-item:last-child { border-bottom: none; }
+    .hist-item:hover { background: rgba(255,255,255,0.05); color: var(--text); }
+    .empty-hist { text-align: center; color: var(--text-sec); padding: 0.8rem 0; font-size: 0.8rem; }
+
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+    .animate-in { animation: fadeIn 0.35s ease-out forwards; }
+
+    @media (max-width: 520px) {
+      .disc-tool { padding: 1rem 0.8rem; }
+      .input-grid { grid-template-columns: 1fr 1fr; }
+      .results-grid { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+
+  <div class="disc-header">
+    <h3>💸 Discount & Savings Calculator</h3>
+    <div class="mode-toggle">
+      <button class="mode-btn active" data-mode="standard">Standard</button>
+      <button class="mode-btn" data-mode="stacked">Stacked</button>
+      <button class="mode-btn" data-mode="reverse">Reverse</button>
+    </div>
+  </div>
+
+  <div class="input-grid">
+    <div class="input-wrap">
+      <label class="disc-label" for="d-price">Original Price</label>
+      <input class="disc-input" type="number" id="d-price" placeholder="1000" min="0" step="0.01">
+      <span class="input-hint" id="curr-symbol">$</span>
+      <div class="error-msg" id="price-err">Enter valid price</div>
+    </div>
+    <div class="input-wrap" id="disc-wrap">
+      <label class="disc-label" for="d-disc">Discount (%)</label>
+      <input class="disc-input" type="number" id="d-disc" placeholder="20" min="0" max="100" step="0.1">
+      <div class="error-msg" id="disc-err">Max 100%</div>
+    </div>
+    <div class="input-wrap">
+      <label class="disc-label" for="d-tax">Tax / VAT (%)</label>
+      <input class="disc-input" type="number" id="d-tax" placeholder="0" min="0" max="50" step="0.1">
+    </div>
+    <div class="input-wrap">
+      <label class="disc-label" for="d-currency">Currency</label>
+      <select class="disc-select" id="d-currency">
+        <option value="$">USD ($)</option>
+        <option value="₹">INR (₹)</option>
+        <option value="€">EUR (€)</option>
+        <option value="£">GBP (£)</option>
+        <option value="﷼">SAR (﷼)</option>
+      </select>
+    </div>
+  </div>
+
+  <button class="toggle-btn" id="adv-toggle">⚙️ Show Advanced Options</button>
+  <div class="adv-panel" id="adv-panel">
+    <div class="input-wrap">
+      <label class="disc-label" for="d-disc2">Extra Discount (%)</label>
+      <input class="disc-input" type="number" id="d-disc2" placeholder="0" min="0" max="100" step="0.1">
+    </div>
+    <div class="input-wrap">
+      <label class="disc-label" for="d-qty">Quantity</label>
+      <input class="disc-input" type="number" id="d-qty" placeholder="1" min="1" step="1" value="1">
+    </div>
+    <div class="input-wrap" id="rev-price-wrap" style="display:none;">
+      <label class="disc-label" for="d-final">Final Price (After Discount)</label>
+      <input class="disc-input" type="number" id="d-final" placeholder="800" min="0" step="0.01">
+    </div>
+  </div>
+
+  <button class="calc-btn" id="calc-btn">Calculate Savings</button>
+
+  <div class="results-grid" id="results">
+    <div class="result-card animate-in"><div class="result-lbl">Final Price</div><div class="result-val" id="r-final">$0</div><div class="result-tag tag-save" id="r-save-tag">You Save: $0</div></div>
+    <div class="result-card animate-in" style="animation-delay:80ms"><div class="result-lbl">Total Tax</div><div class="result-val" id="r-tax">$0</div><div class="result-tag tag-tax">Added at checkout</div></div>
+    <div class="result-card animate-in" style="animation-delay:160ms"><div class="result-lbl">Original Price</div><div class="result-val" id="r-orig">$0</div><div class="result-tag" style="background:rgba(255,255,255,0.05);color:var(--text-sec)">Before discounts</div></div>
+    <div class="result-card animate-in" style="animation-delay:240ms"><div class="result-lbl">Effective Discount</div><div class="result-val" id="r-eff">0%</div><div class="result-tag" style="background:rgba(56,189,248,0.15);color:var(--accent)">Combined rate</div></div>
+  </div>
+
+  <div class="visual-wrap">
+    <div class="visual-title"><span>Price Breakdown</span><span id="r-total">$0</span></div>
+    <div class="price-bar">
+      <div class="bar-final" id="bar-final">0%</div>
+      <div class="bar-saved" id="bar-saved">0%</div>
+    </div>
+    <div class="visual-legend">
+      <div class="legend-item"><div class="legend-dot" style="background:var(--grad)"></div> Final Price</div>
+      <div class="legend-item"><div class="legend-dot" style="background:var(--success)"></div> Savings</div>
+    </div>
+  </div>
+
+  <div class="actions">
+    <button class="act-btn" id="clear-btn">🗑️ Clear</button>
+    <button class="act-btn" id="save-btn">💾 Save</button>
+    <button class="act-btn" id="copy-btn">📋 Copy</button>
+    <button class="act-btn" id="hist-btn">📜 History</button>
+  </div>
+
+  <div class="history-panel" id="history-panel">
+    <div class="empty-hist">No saved calculations</div>
+  </div>
+
+  <script>
+    (function(){
+      const $ = id => document.getElementById(id);
+      const fmt = (n, sym) => sym + parseFloat(n.toFixed(2)).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
+      
+      const els = {
+        price: $('d-price'), disc: $('d-disc'), tax: $('d-tax'), disc2: $('d-disc2'), qty: $('d-qty'), final: $('d-final'),
+        currency: $('d-currency'), currSym: $('curr-symbol'),
+        calcBtn: $('calc-btn'), clearBtn: $('clear-btn'), saveBtn: $('save-btn'), copyBtn: $('copy-btn'), histBtn: $('hist-btn'),
+        advToggle: $('adv-toggle'), advPanel: $('adv-panel'),
+        rFinal: $('r-final'), rTax: $('r-tax'), rOrig: $('r-orig'), rEff: $('r-eff'), rSaveTag: $('r-save-tag'),
+        barFinal: $('bar-final'), barSaved: $('bar-saved'), rTotal: $('r-total'),
+        histPanel: $('history-panel'), discWrap: $('disc-wrap'), revWrap: $('rev-price-wrap')
+      };
+
+      let mode = 'standard';
+      let history = JSON.parse(localStorage.getItem('disc_history') || '[]');
+
+      const validate = () => {
+        let valid = true;
+        const p = parseFloat(els.price.value);
+        const d = parseFloat(els.disc.value) || 0;
+        const f = parseFloat(els.final.value);
+        els.price.classList.remove('error'); $('price-err').classList.remove('show');
+        els.disc.classList.remove('error'); $('disc-err').classList.remove('show');
+
+        if(mode === 'reverse') {
+          if(!f || f<=0) { els.final.classList.add('error'); valid=false; }
+        } else {
+          if(!p || p<=0) { els.price.classList.add('error'); $('price-err').classList.add('show'); valid=false; }
+          if(d<0 || d>100) { els.disc.classList.add('error'); $('disc-err').classList.add('show'); valid=false; }
+        }
+        return valid;
+      };
+
+      const calculate = () => {
+        if(!validate()) return;
+        const sym = els.currency.value;
+        const qty = parseInt(els.qty.value) || 1;
+        const taxRate = (parseFloat(els.tax.value) || 0) / 100;
+
+        let orig, finalPrice, saved, effDisc;
+
+        if(mode === 'reverse') {
+          finalPrice = parseFloat(els.final.value) * qty;
+          const d = (parseFloat(els.disc.value) || 0) / 100;
+          const d2 = (parseFloat(els.disc2.value) || 0) / 100;
+          const totalDisc = 1 - ((1-d)*(1-d2));
+          orig = finalPrice / (1 - totalDisc);
+          saved = orig - finalPrice;
+          effDisc = totalDisc * 100;
+        } else {
+          orig = parseFloat(els.price.value) * qty;
+          const d = (parseFloat(els.disc.value) || 0) / 100;
+          const d2 = (parseFloat(els.disc2.value) || 0) / 100;
+          const totalDisc = 1 - ((1-d)*(1-d2));
+          saved = orig * totalDisc;
+          finalPrice = orig - saved;
+          effDisc = totalDisc * 100;
+        }
+
+        const taxAmt = finalPrice * taxRate;
+        const grandTotal = finalPrice + taxAmt;
+
+        // Update UI
+        els.rFinal.textContent = fmt(finalPrice, sym);
+        els.rTax.textContent = fmt(taxAmt, sym);
+        els.rOrig.textContent = fmt(orig, sym);
+        els.rEff.textContent = effDisc.toFixed(1) + '%';
+        els.rSaveTag.textContent = `You Save: ${fmt(saved, sym)}`;
+        els.rTotal.textContent = fmt(grandTotal, sym);
+
+        // Visual Bar
+        const total = orig || 1;
+        const pFinal = (finalPrice / total) * 100;
+        const pSaved = 100 - pFinal;
+        els.barFinal.style.width = pFinal + '%';
+        els.barFinal.textContent = pFinal.toFixed(1) + '%';
+        els.barSaved.style.width = pSaved + '%';
+        els.barSaved.textContent = pSaved.toFixed(1) + '%';
+
+        // Hide/Show Reverse Inputs
+        els.discWrap.style.display = mode === 'reverse' ? 'none' : 'block';
+        els.revWrap.style.display = mode === 'reverse' ? 'block' : 'none';
+        if(mode === 'reverse') els.final.focus();
+      };
+
+      const renderHistory = () => {
+        if(!history.length) {
+          els.histPanel.innerHTML = '<div class="empty-hist">No saved calculations</div>';
+          return;
+        }
+        els.histPanel.innerHTML = history.map(h => 
+          `<div class="hist-item" data-idx="${h.id}"><span>${h.orig} → ${h.final} (${h.disc}%)</span><span style="color:var(--accent)">${h.total}</span></div>`
+        ).join('');
+      };
+
+      const saveCalc = () => {
+        const id = Date.now().toString(36);
+        const entry = {
+          id, orig: els.rOrig.textContent, final: els.rFinal.textContent,
+          disc: els.rEff.textContent, total: els.rTotal.textContent,
+          mode, ts: new Date().toLocaleDateString()
+        };
+        history.unshift(entry);
+        if(history.length > 12) history.pop();
+        localStorage.setItem('disc_history', JSON.stringify(history));
+        renderHistory();
+        els.saveBtn.innerHTML = '✅ Saved!';
+        setTimeout(() => els.saveBtn.innerHTML = '💾 Save', 1500);
+      };
+
+      const copyResults = async () => {
+        const text = `💸 Discount Summary\nOriginal: ${els.rOrig.textContent}\nDiscount: ${els.rEff.textContent}\nFinal Price: ${els.rFinal.textContent}\nTax: ${els.rTax.textContent}\nTotal: ${els.rTotal.textContent}\nYou Save: ${els.rSaveTag.textContent.replace('You Save: ','')}\nDate: ${new Date().toLocaleString()}`;
+        try {
+          await navigator.clipboard.writeText(text);
+          els.copyBtn.innerHTML = '✅ Copied!';
+          setTimeout(() => els.copyBtn.innerHTML = '📋 Copy', 1500);
+        } catch(e){}
+      };
+
+      // Events
+      document.querySelectorAll('.mode-btn').forEach(btn => btn.addEventListener('click', () => {
+        document.querySelectorAll('.mode-btn').forEach(b=>b.classList.remove('active'));
+        btn.classList.add('active');
+        mode = btn.dataset.mode;
+        calculate();
+      }));
+
+      els.calcBtn.addEventListener('click', calculate);
+      els.clearBtn.addEventListener('click', () => {
+        ['price','disc','tax','disc2','qty','final'].forEach(k => {
+          if(k==='qty') els[k].value = 1; else els[k].value = '';
+        });
+        els.price.classList.remove('error'); els.disc.classList.remove('error');
+        $('price-err').classList.remove('show'); $('disc-err').classList.remove('show');
+        calculate();
+      });
+      els.saveBtn.addEventListener('click', saveCalc);
+      els.copyBtn.addEventListener('click', copyResults);
+      els.advToggle.addEventListener('click', () => {
+        els.advPanel.classList.toggle('show');
+        els.advToggle.textContent = els.advPanel.classList.contains('show') ? '🔼 Hide Advanced' : '⚙️ Show Advanced Options';
+      });
+      els.histBtn.addEventListener('click', () => {
+        els.histPanel.classList.toggle('open');
+        els.histBtn.innerHTML = els.histPanel.classList.contains('open') ? '🔽 Close' : '📜 History';
+      });
+      els.histPanel.addEventListener('click', e => {
+        const item = e.target.closest('.hist-item');
+        if(item) { /* Load logic can be added here if needed */ }
+      });
+      els.currency.addEventListener('change', () => { els.currSym.textContent = els.currency.value; calculate(); });
+
+      // Auto-calculate (debounced)
+      let timeout;
+      document.querySelectorAll('.disc-input').forEach(el => el.addEventListener('input', () => {
+        clearTimeout(timeout);
+        timeout = setTimeout(calculate, 300);
+      }));
+
+      // Keyboard
+      document.addEventListener('keydown', e => {
+        if(e.key === 'Enter' && document.activeElement.classList.contains('disc-input')) {
+          e.preventDefault(); calculate();
+        }
+      });
+
+      // Init
+      renderHistory();
+      calculate();
+    })();
+  </script>
+</div>

@@ -1,0 +1,1184 @@
+<div class="utility-tool">
+  <style>
+    .utility-tool {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 2rem;
+      font-family: var(--font-family, 'Segoe UI', sans-serif);
+      position: relative;
+    }
+    
+    /* ===== CARTOON EYES ANIMATION ===== */
+    .dashboard-eyes {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      display: flex;
+      gap: 0.5rem;
+      pointer-events: none;
+      z-index: 10;
+      animation: float 3s ease-in-out infinite;
+    }
+    
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-5px); }
+    }
+    
+    .dash-eye {
+      width: 35px;
+      height: 35px;
+      background: var(--bg-card, #fff);
+      border: 2px solid var(--accent, #6366f1);
+      border-radius: 50%;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 3px 10px rgba(99, 102, 241, 0.3);
+    }
+    
+    .dash-pupil {
+      width: 16px;
+      height: 16px;
+      background: var(--accent, #6366f1);
+      border-radius: 50%;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      transition: transform 0.1s ease-out;
+    }
+    
+    .dash-pupil::after {
+      content: '';
+      position: absolute;
+      width: 5px;
+      height: 5px;
+      background: #fff;
+      border-radius: 50%;
+      top: 3px;
+      right: 3px;
+    }
+    
+    .dash-eye.blink {
+      animation: blink 0.2s ease;
+    }
+    
+    @keyframes blink {
+      0%, 100% { transform: scaleY(1); }
+      50% { transform: scaleY(0.1); }
+    }
+    
+    /* ===== HEADER SECTION ===== */
+    .dash-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+    
+    .dash-title {
+      font-size: 1.8rem;
+      font-weight: 800;
+      background: var(--gradient-main, linear-gradient(135deg, #6366f1, #8b5cf6));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .dash-greeting {
+      font-size: 1rem;
+      color: var(--text-secondary, #64748b);
+    }
+    
+    .dash-actions {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+    
+    .dash-btn {
+      padding: 0.6rem 1rem;
+      border-radius: 10px;
+      border: 2px solid var(--glass-border, #e2e8f0);
+      background: var(--bg-card, #f8fafc);
+      color: var(--text-primary, #1e293b);
+      font-size: 0.9rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    
+    .dash-btn:hover {
+      border-color: var(--accent, #6366f1);
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(99, 102, 241, 0.2);
+    }
+    
+    .dash-btn.primary {
+      background: var(--gradient-main);
+      color: #fff;
+      border: none;
+    }
+    
+    .dash-btn.primary:hover {
+      box-shadow: 0 8px 25px rgba(99, 102, 241, 0.4);
+    }
+    
+    .dash-btn.icon-only {
+      width: 40px;
+      height: 40px;
+      padding: 0;
+      justify-content: center;
+      border-radius: 50%;
+    }
+    
+    /* ===== STATS GRID ===== */
+    .dash-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+    
+    .dash-card {
+      background: var(--bg-card, #f8fafc);
+      border: 2px solid var(--glass-border, #e2e8f0);
+      border-radius: 16px;
+      padding: 1.3rem 1rem;
+      text-align: center;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .dash-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(99,102,241,0.1), transparent);
+      transition: left 0.5s ease;
+    }
+    
+    .dash-card:hover::before {
+      left: 100%;
+    }
+    
+    .dash-card:hover {
+      transform: translateY(-5px) scale(1.02);
+      border-color: var(--accent, #6366f1);
+      box-shadow: 0 12px 30px rgba(99, 102, 241, 0.2);
+    }
+    
+    .dash-card:active {
+      transform: translateY(-2px) scale(1.01);
+    }
+    
+    .dash-icon {
+      font-size: 2.2rem;
+      margin-bottom: 0.6rem;
+      transition: transform 0.3s ease;
+    }
+    
+    .dash-card:hover .dash-icon {
+      transform: scale(1.2) rotate(5deg);
+    }
+    
+    .dash-val {
+      font-size: 2rem;
+      font-weight: 800;
+      color: var(--accent, #6366f1);
+      margin-bottom: 0.3rem;
+      line-height: 1;
+    }
+    
+    .dash-val.animate {
+      animation: countPop 0.3s ease;
+    }
+    
+    @keyframes countPop {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.15); }
+      100% { transform: scale(1); }
+    }
+    
+    .dash-lbl {
+      font-size: 0.85rem;
+      color: var(--text-secondary, #64748b);
+      font-weight: 500;
+    }
+    
+    .dash-trend {
+      font-size: 0.75rem;
+      margin-top: 0.3rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.2rem;
+    }
+    
+    .dash-trend.up { color: #22c55e; }
+    .dash-trend.down { color: #ef4444; }
+    
+    /* ===== SEARCH BAR ===== */
+    .dash-search {
+      position: relative;
+      margin-bottom: 1.5rem;
+    }
+    
+    .dash-search input {
+      width: 100%;
+      padding: 1rem 1rem 1rem 3rem;
+      border-radius: 14px;
+      border: 2px solid var(--glass-border, #e2e8f0);
+      background: var(--bg-card, #f8fafc);
+      color: var(--text-primary, #1e293b);
+      font-size: 1rem;
+      outline: none;
+      transition: all 0.3s ease;
+      box-sizing: border-box;
+    }
+    
+    .dash-search input:focus {
+      border-color: var(--accent, #6366f1);
+      box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.15);
+    }
+    
+    .dash-search-icon {
+      position: absolute;
+      left: 1rem;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 1.2rem;
+      color: var(--text-secondary);
+    }
+    
+    .search-results {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      background: var(--bg-card);
+      border: 2px solid var(--glass-border);
+      border-radius: 12px;
+      margin-top: 0.5rem;
+      max-height: 300px;
+      overflow-y: auto;
+      z-index: 100;
+      display: none;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+    }
+    
+    .search-results.show {
+      display: block;
+      animation: slideDown 0.2s ease;
+    }
+    
+    @keyframes slideDown {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .search-item {
+      padding: 0.8rem 1rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      border-bottom: 1px solid var(--glass-border);
+      transition: background 0.2s ease;
+    }
+    
+    .search-item:last-child {
+      border-bottom: none;
+    }
+    
+    .search-item:hover {
+      background: rgba(99, 102, 241, 0.08);
+    }
+    
+    .search-item-icon {
+      font-size: 1.3rem;
+    }
+    
+    .search-item-name {
+      font-weight: 500;
+      color: var(--text-primary);
+    }
+    
+    .search-item-cat {
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+    }
+    
+    /* ===== USAGE CHARTS ===== */
+    .dash-sec {
+      margin-bottom: 2rem;
+      background: var(--bg-card);
+      border: 2px solid var(--glass-border);
+      border-radius: 20px;
+      padding: 1.5rem;
+    }
+    
+    .dash-sec h3 {
+      margin-bottom: 1rem;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 1.2rem;
+    }
+    
+    .dash-list {
+      display: grid;
+      gap: 1rem;
+    }
+    
+    .dash-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.8rem 1rem;
+      background: var(--bg-primary, #fff);
+      border-radius: 12px;
+      border: 1px solid var(--glass-border);
+      transition: transform 0.2s ease;
+    }
+    
+    .dash-item:hover {
+      transform: translateX(5px);
+      border-color: var(--accent);
+    }
+    
+    .dash-item-name {
+      font-weight: 500;
+      color: var(--text-primary);
+    }
+    
+    .dash-item-perc {
+      font-weight: 700;
+      color: var(--accent);
+      min-width: 50px;
+      text-align: right;
+    }
+    
+    .dash-prog {
+      height: 8px;
+      background: var(--bg-primary);
+      border-radius: 4px;
+      overflow: hidden;
+      margin-top: 0.5rem;
+    }
+    
+    .dash-fill {
+      height: 100%;
+      background: var(--gradient-main);
+      border-radius: 4px;
+      width: 0;
+      transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+    }
+    
+    .dash-fill::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+      animation: shimmer 2s infinite;
+    }
+    
+    @keyframes shimmer {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(100%); }
+    }
+    
+    /* ===== RECENT ACTIVITY ===== */
+    .activity-list {
+      display: grid;
+      gap: 0.7rem;
+      max-height: 250px;
+      overflow-y: auto;
+      padding-right: 0.5rem;
+    }
+    
+    .activity-list::-webkit-scrollbar {
+      width: 6px;
+    }
+    
+    .activity-list::-webkit-scrollbar-track {
+      background: var(--bg-primary);
+      border-radius: 3px;
+    }
+    
+    .activity-list::-webkit-scrollbar-thumb {
+      background: var(--accent);
+      border-radius: 3px;
+    }
+    
+    .activity-item {
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      padding: 0.8rem;
+      background: var(--bg-primary);
+      border-radius: 10px;
+      border-left: 3px solid var(--accent);
+      transition: all 0.2s ease;
+      cursor: pointer;
+    }
+    
+    .activity-item:hover {
+      transform: translateX(3px);
+      background: rgba(99, 102, 241, 0.08);
+    }
+    
+    .activity-icon {
+      font-size: 1.4rem;
+      min-width: 35px;
+      text-align: center;
+    }
+    
+    .activity-info {
+      flex: 1;
+    }
+    
+    .activity-name {
+      font-weight: 500;
+      color: var(--text-primary);
+      font-size: 0.95rem;
+    }
+    
+    .activity-time {
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+    }
+    
+    .activity-action {
+      padding: 0.3rem 0.7rem;
+      background: var(--accent);
+      color: #fff;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: transform 0.2s ease;
+    }
+    
+    .activity-action:hover {
+      transform: scale(1.05);
+    }
+    
+    /* ===== FAVORITES QUICK ACCESS ===== */
+    .favorites-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+      gap: 0.8rem;
+    }
+    
+    .fav-item {
+      background: var(--bg-primary);
+      border: 2px solid var(--glass-border);
+      border-radius: 12px;
+      padding: 1rem 0.7rem;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      position: relative;
+    }
+    
+    .fav-item:hover {
+      border-color: var(--accent);
+      transform: translateY(-3px);
+      box-shadow: 0 8px 20px rgba(99, 102, 241, 0.2);
+    }
+    
+    .fav-item .fav-icon {
+      font-size: 1.8rem;
+      margin-bottom: 0.4rem;
+    }
+    
+    .fav-item .fav-name {
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--text-primary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    
+    .fav-remove {
+      position: absolute;
+      top: -6px;
+      right: -6px;
+      width: 20px;
+      height: 20px;
+      background: #ef4444;
+      color: #fff;
+      border-radius: 50%;
+      font-size: 0.8rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      opacity: 0;
+      transition: opacity 0.2s ease;
+    }
+    
+    .fav-item:hover .fav-remove {
+      opacity: 1;
+    }
+    
+    .empty-state {
+      text-align: center;
+      padding: 2rem;
+      color: var(--text-secondary);
+    }
+    
+    .empty-state-icon {
+      font-size: 3rem;
+      margin-bottom: 0.5rem;
+      opacity: 0.5;
+    }
+    
+    /* ===== NOTIFICATION TOAST ===== */
+    .dash-toast {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      background: var(--bg-card);
+      border: 2px solid var(--accent);
+      border-radius: 14px;
+      padding: 1rem 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+      z-index: 1000;
+      transform: translateX(400px);
+      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      max-width: 350px;
+    }
+    
+    .dash-toast.show {
+      transform: translateX(0);
+    }
+    
+    .dash-toast.success {
+      border-color: #22c55e;
+    }
+    
+    .dash-toast.error {
+      border-color: #ef4444;
+    }
+    
+    .toast-icon {
+      font-size: 1.5rem;
+    }
+    
+    .toast-msg {
+      flex: 1;
+      font-size: 0.95rem;
+      color: var(--text-primary);
+    }
+    
+    .toast-close {
+      background: none;
+      border: none;
+      font-size: 1.2rem;
+      cursor: pointer;
+      color: var(--text-secondary);
+      padding: 0.3rem;
+      border-radius: 50%;
+      transition: background 0.2s ease;
+    }
+    
+    .toast-close:hover {
+      background: rgba(0,0,0,0.1);
+    }
+    
+    /* ===== LOADING SKELETON ===== */
+    .skeleton {
+      background: linear-gradient(90deg, var(--bg-primary) 25%, var(--bg-card) 50%, var(--bg-primary) 75%);
+      background-size: 200% 100%;
+      animation: skeleton-load 1.5s infinite;
+      border-radius: 8px;
+    }
+    
+    @keyframes skeleton-load {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+    
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 768px) {
+      .utility-tool {
+        padding: 1.5rem 1rem;
+      }
+      .dash-header {
+        flex-direction: column;
+        text-align: center;
+      }
+      .dash-actions {
+        width: 100%;
+        justify-content: center;
+      }
+      .dash-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      .dashboard-eyes {
+        top: 0.5rem;
+        right: 0.5rem;
+      }
+      .dash-eye {
+        width: 30px;
+        height: 30px;
+      }
+    }
+    
+    @media (max-width: 480px) {
+      .dash-grid {
+        grid-template-columns: 1fr;
+      }
+      .dash-val {
+        font-size: 1.6rem;
+      }
+      .dash-title {
+        font-size: 1.5rem;
+      }
+    }
+  </style>
+
+  <!-- Cartoon Eyes -->
+  <div class="dashboard-eyes" id="dashEyes">
+    <div class="dash-eye"><div class="dash-pupil" id="pupil1"></div></div>
+    <div class="dash-eye"><div class="dash-pupil" id="pupil2"></div></div>
+  </div>
+
+  <!-- Header -->
+  <div class="dash-header">
+    <div>
+      <h2 class="dash-title">📊 Dashboard</h2>
+      <div class="dash-greeting" id="greeting">Welcome back! 👋</div>
+    </div>
+    <div class="dash-actions">
+      <button class="dash-btn icon-only" onclick="toggleTheme()" title="Toggle Theme" id="themeBtn">🌙</button>
+      <button class="dash-btn icon-only" onclick="refreshData()" title="Refresh">🔄</button>
+      <button class="dash-btn primary" onclick="openToolManager()">⚙️ Manage Tools</button>
+    </div>
+  </div>
+
+  <!-- Search Bar -->
+  <div class="dash-search">
+    <span class="dash-search-icon">🔍</span>
+    <input type="text" id="toolSearch" placeholder="Search any tool (e.g., calculator, converter, AI...)">
+    <div class="search-results" id="searchResults"></div>
+  </div>
+
+  <!-- Stats Grid -->
+  <div class="dash-grid">
+    <div class="dash-card" onclick="filterByCategory('all')">
+      <div class="dash-icon">🛠️</div>
+      <div class="dash-val" id="u-tools">0</div>
+      <div class="dash-lbl">Total Tools</div>
+      <div class="dash-trend up">▲ All categories</div>
+    </div>
+    <div class="dash-card" onclick="showFavorites()">
+      <div class="dash-icon">⭐</div>
+      <div class="dash-val" id="u-favs">0</div>
+      <div class="dash-lbl">Favorites</div>
+      <div class="dash-trend" id="favsTrend">▲ Tap to view</div>
+    </div>
+    <div class="dash-card" onclick="showRecent()">
+      <div class="dash-icon">🕒</div>
+      <div class="dash-val" id="u-recent">0</div>
+      <div class="dash-lbl">Recent Opens</div>
+      <div class="dash-trend">▲ Last 7 days</div>
+    </div>
+    <div class="dash-card" onclick="toggleTheme()">
+      <div class="dash-icon" id="themeIcon">🌙</div>
+      <div class="dash-val" id="u-theme">Dark</div>
+      <div class="dash-lbl">Active Theme</div>
+      <div class="dash-trend">▲ Click to switch</div>
+    </div>
+  </div>
+
+  <!-- Usage Distribution -->
+  <div class="dash-sec">
+    <h3>📈 Tool Usage Distribution</h3>
+    <div class="dash-list">
+      <div>
+        <div class="dash-item">
+          <span class="dash-item-name">🧮 Calculators & Finance</span>
+          <span class="dash-item-perc" id="perc-finance">0%</span>
+        </div>
+        <div class="dash-prog"><div class="dash-fill" id="prog-finance"></div></div>
+      </div>
+      <div>
+        <div class="dash-item">
+          <span class="dash-item-name">📚 Productivity & Student</span>
+          <span class="dash-item-perc" id="perc-productivity">0%</span>
+        </div>
+        <div class="dash-prog"><div class="dash-fill" id="prog-productivity"></div></div>
+      </div>
+      <div>
+        <div class="dash-item">
+          <span class="dash-item-name">🤖 AI, Tech & Games</span>
+          <span class="dash-item-perc" id="perc-ai">0%</span>
+        </div>
+        <div class="dash-prog"><div class="dash-fill" id="prog-ai"></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Favorites Quick Access -->
+  <div class="dash-sec">
+    <h3>⭐ Quick Access Favorites</h3>
+    <div class="favorites-grid" id="favoritesGrid">
+      <!-- Dynamic content -->
+    </div>
+    <div class="empty-state" id="favoritesEmpty" style="display:none;">
+      <div class="empty-state-icon">⭐</div>
+      <p>No favorites yet!<br><small>Click ⭐ on any tool to add it here</small></p>
+    </div>
+  </div>
+
+  <!-- Recent Activity -->
+  <div class="dash-sec">
+    <h3>🕒 Recent Activity</h3>
+    <div class="activity-list" id="activityList">
+      <!-- Dynamic content -->
+    </div>
+    <div class="empty-state" id="activityEmpty" style="display:none;">
+      <div class="empty-state-icon">🕒</div>
+      <p>No recent activity<br><small>Start using tools to see history</small></p>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div class="dash-toast" id="toast">
+    <span class="toast-icon" id="toastIcon">✅</span>
+    <span class="toast-msg" id="toastMsg">Notification message</span>
+    <button class="toast-close" onclick="hideToast()">×</button>
+  </div>
+
+  <script>
+    // ===== CONFIGURATION =====
+    const CONFIG = {
+      totalTools: 102,
+      categories: {
+        finance: { name: 'Calculators & Finance', tools: 43, usage: 42 },
+        productivity: { name: 'Productivity & Student', tools: 29, usage: 28 },
+        ai: { name: 'AI, Tech & Games', tools: 30, usage: 30 }
+      },
+      sampleTools: [
+        { id: 'loan-calc', name: 'Loan Calculator', icon: '🏦', category: 'finance' },
+        { id: 'tip-calc', name: 'Tip Calculator', icon: '💰', category: 'finance' },
+        { id: 'budget-tracker', name: 'Budget Tracker', icon: '📊', category: 'finance' },
+        { id: 'pomodoro', name: 'Pomodoro Timer', icon: '⏱️', category: 'productivity' },
+        { id: 'note-taker', name: 'Quick Notes', icon: '📝', category: 'productivity' },
+        { id: 'ai-writer', name: 'AI Content Helper', icon: '🤖', category: 'ai' },
+        { id: 'qr-gen', name: 'QR Code Generator', icon: '📱', category: 'ai' },
+        { id: 'password-gen', name: 'Password Generator', icon: '🔐', category: 'ai' }
+      ]
+    };
+
+    // ===== STATE MANAGEMENT =====
+    let state = {
+      favorites: JSON.parse(localStorage.getItem('ab-favorites') || '[]'),
+      recent: JSON.parse(localStorage.getItem('ab-recent') || '[]'),
+      theme: localStorage.getItem('ab-theme') || 'dark',
+      usage: JSON.parse(localStorage.getItem('ab-usage-stats') || '{}')
+    };
+
+    // ===== INITIALIZATION =====
+    document.addEventListener('DOMContentLoaded', () => {
+      initEyes();
+      initGreeting();
+      loadStats();
+      loadFavorites();
+      loadRecent();
+      loadUsageStats();
+      initSearch();
+      initBlink();
+      animateProgressBars();
+    });
+
+    // ===== CARTOON EYES =====
+    function initEyes() {
+      document.addEventListener('mousemove', (e) => {
+        const pupils = document.querySelectorAll('.dash-pupil');
+        const eyesContainer = document.getElementById('dashEyes');
+        const rect = eyesContainer.getBoundingClientRect();
+        const centerX = rect.left + rect.width / 2;
+        const centerY = rect.top + rect.height / 2;
+        
+        const angle = Math.atan2(e.clientY - centerY, e.clientX - centerX);
+        const distance = Math.min(8, Math.hypot(e.clientX - centerX, e.clientY - centerY) / 25);
+        
+        const x = Math.cos(angle) * distance;
+        const y = Math.sin(angle) * distance;
+        
+        pupils.forEach(pupil => {
+          pupil.style.transform = `translate(calc(-50% + ${x}px), calc(-50% + ${y}px))`;
+        });
+      });
+    }
+
+    function initBlink() {
+      setInterval(() => {
+        document.querySelectorAll('.dash-eye').forEach(eye => {
+          eye.classList.add('blink');
+          setTimeout(() => eye.classList.remove('blink'), 200);
+        });
+      }, 4000 + Math.random() * 3000);
+    }
+
+    // ===== GREETING =====
+    function initGreeting() {
+      const hour = new Date().getHours();
+      const greetings = [
+        { start: 5, end: 12, text: 'Good morning! ☀️' },
+        { start: 12, end: 17, text: 'Good afternoon! 🌤️' },
+        { start: 17, end: 21, text: 'Good evening! 🌙' },
+        { start: 21, end: 24, text: 'Good night! 🌟' },
+        { start: 0, end: 5, text: 'Early bird! 🌅' }
+      ];
+      const greeting = greetings.find(g => hour >= g.start && hour < g.end) || greetings[0];
+      document.getElementById('greeting').textContent = greeting.text;
+    }
+
+    // ===== STATS LOADING =====
+    function loadStats() {
+      animateCount('u-tools', CONFIG.totalTools, 1500);
+      animateCount('u-favs', state.favorites.length, 800);
+      animateCount('u-recent', state.recent.length, 800);
+      
+      const themeIcon = document.getElementById('themeIcon');
+      const themeText = document.getElementById('u-theme');
+      const themeBtn = document.getElementById('themeBtn');
+      
+      if (state.theme === 'dark') {
+        themeIcon.textContent = '🌙';
+        themeText.textContent = 'Dark';
+        themeBtn.textContent = '🌙';
+      } else {
+        themeIcon.textContent = '☀️';
+        themeText.textContent = 'Light';
+        themeBtn.textContent = '☀️';
+      }
+    }
+
+    function animateCount(elementId, target, duration) {
+      const el = document.getElementById(elementId);
+      const start = 0;
+      const increment = target / (duration / 16);
+      let current = start;
+      
+      const timer = setInterval(() => {
+        current += increment;
+        if (current >= target) {
+          el.textContent = target + (elementId === 'u-tools' ? '+' : '');
+          el.classList.add('animate');
+          setTimeout(() => el.classList.remove('animate'), 300);
+          clearInterval(timer);
+        } else {
+          el.textContent = Math.floor(current) + (elementId === 'u-tools' ? '+' : '');
+        }
+      }, 16);
+    }
+
+    // ===== USAGE STATS =====
+    function loadUsageStats() {
+      Object.entries(CONFIG.categories).forEach(([key, data]) => {
+        const percEl = document.getElementById(`perc-${key}`);
+        const progEl = document.getElementById(`prog-${key}`);
+        
+        // Animate percentage counter
+        let current = 0;
+        const target = data.usage;
+        const timer = setInterval(() => {
+          current += 0.5;
+          if (current >= target) {
+            percEl.textContent = target + '%';
+            clearInterval(timer);
+          } else {
+            percEl.textContent = Math.floor(current) + '%';
+          }
+        }, 30);
+        
+        // Animate progress bar
+        setTimeout(() => {
+          progEl.style.width = target + '%';
+        }, 300);
+      });
+    }
+
+    function animateProgressBars() {
+      // Trigger animation on load
+      setTimeout(() => {
+        document.querySelectorAll('.dash-fill').forEach(bar => {
+          const width = bar.style.width;
+          bar.style.width = '0';
+          setTimeout(() => bar.style.width = width, 100);
+        });
+      }, 500);
+    }
+
+    // ===== FAVORITES =====
+    function loadFavorites() {
+      const grid = document.getElementById('favoritesGrid');
+      const empty = document.getElementById('favoritesEmpty');
+      
+      if (state.favorites.length === 0) {
+        grid.innerHTML = '';
+        empty.style.display = 'block';
+        return;
+      }
+      
+      empty.style.display = 'none';
+      grid.innerHTML = state.favorites.slice(0, 8).map(tool => `
+        <div class="fav-item" onclick="openTool('${tool.id}')">
+          <span class="fav-remove" onclick="event.stopPropagation(); removeFavorite('${tool.id}')">×</span>
+          <div class="fav-icon">${tool.icon || '🔧'}</div>
+          <div class="fav-name">${tool.name}</div>
+        </div>
+      `).join('');
+    }
+
+    function removeFavorite(toolId) {
+      state.favorites = state.favorites.filter(t => t.id !== toolId);
+      localStorage.setItem('ab-favorites', JSON.stringify(state.favorites));
+      loadFavorites();
+      loadStats();
+      showToast('⭐ Removed from favorites', 'success');
+    }
+
+    function showFavorites() {
+      showToast(`You have ${state.favorites.length} favorite tools ⭐`, 'success');
+    }
+
+    // ===== RECENT ACTIVITY =====
+    function loadRecent() {
+      const list = document.getElementById('activityList');
+      const empty = document.getElementById('activityEmpty');
+      
+      if (state.recent.length === 0) {
+        list.innerHTML = '';
+        empty.style.display = 'block';
+        return;
+      }
+      
+      empty.style.display = 'none';
+      list.innerHTML = state.recent.slice(0, 6).map(item => `
+        <div class="activity-item" onclick="openTool('${item.id}')">
+          <div class="activity-icon">${item.icon || '🔧'}</div>
+          <div class="activity-info">
+            <div class="activity-name">${item.name}</div>
+            <div class="activity-time">${formatTime(item.timestamp)}</div>
+          </div>
+          <div class="activity-action">Open</div>
+        </div>
+      `).join('');
+    }
+
+    function formatTime(timestamp) {
+      const now = Date.now();
+      const diff = now - timestamp;
+      const minutes = Math.floor(diff / 60000);
+      const hours = Math.floor(diff / 3600000);
+      const days = Math.floor(diff / 86400000);
+      
+      if (minutes < 1) return 'Just now';
+      if (minutes < 60) return `${minutes}m ago`;
+      if (hours < 24) return `${hours}h ago`;
+      return `${days}d ago`;
+    }
+
+    function showRecent() {
+      showToast(`Last opened: ${state.recent.length} tools 🕒`, 'success');
+    }
+
+    // ===== SEARCH FUNCTIONALITY =====
+    function initSearch() {
+      const input = document.getElementById('toolSearch');
+      const results = document.getElementById('searchResults');
+      
+      input.addEventListener('input', (e) => {
+        const query = e.target.value.toLowerCase().trim();
+        
+        if (query.length < 2) {
+          results.classList.remove('show');
+          results.innerHTML = '';
+          return;
+        }
+        
+        const matches = CONFIG.sampleTools.filter(tool => 
+          tool.name.toLowerCase().includes(query) || 
+          tool.category.toLowerCase().includes(query)
+        );
+        
+        if (matches.length > 0) {
+          results.innerHTML = matches.map(tool => `
+            <div class="search-item" onclick="openTool('${tool.id}'); document.getElementById('toolSearch').value=''; results.classList.remove('show');">
+              <span class="search-item-icon">${tool.icon}</span>
+              <div>
+                <div class="search-item-name">${tool.name}</div>
+                <div class="search-item-cat">${CONFIG.categories[tool.category]?.name || tool.category}</div>
+              </div>
+            </div>
+          `).join('');
+          results.classList.add('show');
+        } else {
+          results.innerHTML = `<div class="search-item" style="cursor:default;color:var(--text-secondary)">No tools found for "${query}"</div>`;
+          results.classList.add('show');
+        }
+      });
+      
+      // Close search on outside click
+      document.addEventListener('click', (e) => {
+        if (!e.target.closest('.dash-search')) {
+          results.classList.remove('show');
+        }
+      });
+    }
+
+    // ===== THEME TOGGLE =====
+    function toggleTheme() {
+      state.theme = state.theme === 'dark' ? 'light' : 'dark';
+      localStorage.setItem('ab-theme', state.theme);
+      
+      // Update UI
+      const themeIcon = document.getElementById('themeIcon');
+      const themeText = document.getElementById('u-theme');
+      const themeBtn = document.getElementById('themeBtn');
+      
+      if (state.theme === 'dark') {
+        themeIcon.textContent = '🌙';
+        themeText.textContent = 'Dark';
+        themeBtn.textContent = '🌙';
+        document.documentElement.setAttribute('data-theme', 'dark');
+      } else {
+        themeIcon.textContent = '☀️';
+        themeText.textContent = 'Light';
+        themeBtn.textContent = '☀️';
+        document.documentElement.setAttribute('data-theme', 'light');
+      }
+      
+      showToast(`🎨 Switched to ${state.theme} theme`, 'success');
+      loadStats();
+    }
+
+    // ===== TOOL ACTIONS =====
+    function openTool(toolId) {
+      // Add to recent
+      const tool = CONFIG.sampleTools.find(t => t.id === toolId) || { id: toolId, name: toolId, icon: '🔧', category: 'ai' };
+      
+      // Remove if already exists
+      state.recent = state.recent.filter(t => t.id !== toolId);
+      // Add to beginning
+      state.recent.unshift({ ...tool, timestamp: Date.now() });
+      // Keep only last 20
+      state.recent = state.recent.slice(0, 20);
+      localStorage.setItem('ab-recent', JSON.stringify(state.recent));
+      
+      // Update usage stats
+      state.usage[tool.category] = (state.usage[tool.category] || 0) + 1;
+      localStorage.setItem('ab-usage-stats', JSON.stringify(state.usage));
+      
+      showToast(`🚀 Opening ${tool.name}...`, 'success');
+      
+      // Simulate navigation (replace with actual routing)
+      setTimeout(() => {
+        console.log(`Navigating to tool: ${toolId}`);
+        // window.location.href = `/tools/${toolId}`;
+      }, 800);
+      
+      loadRecent();
+      loadStats();
+    }
+
+    function filterByCategory(category) {
+      showToast(`📁 Filtering: ${category === 'all' ? 'All Tools' : CONFIG.categories[category]?.name}`, 'success');
+      // Implement actual filtering logic here
+    }
+
+    function openToolManager() {
+      showToast('⚙️ Tool Manager coming soon!', 'success');
+      // window.location.href = '/manage';
+    }
+
+    function refreshData() {
+      showToast('🔄 Refreshing dashboard...', 'success');
+      setTimeout(() => {
+        loadStats();
+        loadFavorites();
+        loadRecent();
+        showToast('✅ Dashboard updated!', 'success');
+      }, 1000);
+    }
+
+    // ===== TOAST NOTIFICATIONS =====
+    function showToast(message, type = 'success') {
+      const toast = document.getElementById('toast');
+      const icon = document.getElementById('toastIcon');
+      const msg = document.getElementById('toastMsg');
+      
+      icon.textContent = type === 'success' ? '✅' : '❌';
+      msg.textContent = message;
+      toast.className = `dash-toast ${type} show`;
+      
+      // Auto hide
+      setTimeout(hideToast, 4000);
+    }
+
+    function hideToast() {
+      document.getElementById('toast').classList.remove('show');
+    }
+
+    // ===== KEYBOARD SHORTCUTS =====
+    document.addEventListener('keydown', (e) => {
+      // Ctrl/Cmd + K for search
+      if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+        e.preventDefault();
+        document.getElementById('toolSearch').focus();
+      }
+      // Escape to close search
+      if (e.key === 'Escape') {
+        document.getElementById('searchResults').classList.remove('show');
+        document.getElementById('toolSearch').blur();
+      }
+    });
+
+    // ===== EXPOSE FUNCTIONS FOR EXTERNAL USE =====
+    window.addFavorite = function(tool) {
+      if (!state.favorites.find(t => t.id === tool.id)) {
+        state.favorites.push(tool);
+        localStorage.setItem('ab-favorites', JSON.stringify(state.favorites));
+        loadFavorites();
+        loadStats();
+        showToast(`⭐ Added ${tool.name} to favorites!`, 'success');
+      }
+    };
+
+    window.updateRecent = function(tool) {
+      state.recent = state.recent.filter(t => t.id !== tool.id);
+      state.recent.unshift({ ...tool, timestamp: Date.now() });
+      state.recent = state.recent.slice(0, 20);
+      localStorage.setItem('ab-recent', JSON.stringify(state.recent));
+      loadRecent();
+    };
+  </script>
+</div>

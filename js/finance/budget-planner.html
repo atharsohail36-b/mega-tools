@@ -1,0 +1,307 @@
+<div class="fin-tool">
+  <style>
+    .fin-tool {
+      --bg: #f1f5f9;
+      --card: #ffffff;
+      --text: #0f172a;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+      --primary: #3b82f6;
+      --primary-hover: #2563eb;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --shadow: 0 4px 12px rgba(0,0,0,0.08);
+      --radius: 12px;
+      font-family: system-ui, -apple-system, sans-serif;
+      max-width: 680px;
+      margin: 2rem auto;
+      background: var(--bg);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      color: var(--text);
+      line-height: 1.5;
+    }
+    .fin-tool * { box-sizing: border-box; }
+    .fin-header { padding: 1.5rem; background: var(--card); border-bottom: 1px solid var(--border); }
+    .fin-header h2 { margin: 0; font-size: 1.4rem; font-weight: 700; }
+    .fin-header p { margin: 0.25rem 0 0; color: var(--text-muted); font-size: 0.9rem; }
+    .fin-section { padding: 1rem 1.5rem; background: var(--card); border-bottom: 1px solid var(--border); }
+    .fin-label { display: block; font-weight: 500; margin-bottom: 0.4rem; font-size: 0.9rem; color: var(--text-muted); }
+    .fin-input, .fin-select { width: 100%; padding: 0.75rem; border: 1px solid var(--border); border-radius: 8px; background: #f8fafc; font-size: 1rem; transition: all 0.2s; outline: none; }
+    .fin-input:focus, .fin-select:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(59,130,246,0.15); background: #fff; }
+    .fin-list { padding: 0.5rem 1.5rem; background: var(--card); }
+    .fin-row { display: grid; grid-template-columns: 100px 1fr 100px 60px 32px; gap: 0.5rem; align-items: center; padding: 0.5rem 0; border-bottom: 1px dashed var(--border); animation: fadeIn 0.3s ease; }
+    .fin-row:last-child { border-bottom: none; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+    .fin-row input, .fin-row select { padding: 0.6rem; border: 1px solid var(--border); border-radius: 6px; background: #f8fafc; font-size: 0.9rem; width: 100%; }
+    .fin-row input[type="number"] { text-align: right; }
+    .fin-btn-del { width: 28px; height: 28px; border-radius: 50%; border: none; background: rgba(239,68,68,0.1); color: var(--danger); cursor: pointer; font-weight: bold; transition: all 0.2s; display: flex; align-items: center; justify-content: center; }
+    .fin-btn-del:hover { background: var(--danger); color: #fff; transform: scale(1.1); }
+    .fin-add-btn { margin: 1rem 1.5rem; width: calc(100% - 3rem); padding: 0.8rem; background: transparent; border: 2px dashed var(--border); border-radius: 8px; color: var(--primary); font-weight: 500; cursor: pointer; transition: all 0.2s; }
+    .fin-add-btn:hover { border-style: solid; background: var(--primary); color: #fff; }
+    .fin-summary { padding: 1.5rem; background: var(--card); border-top: 1px solid var(--border); }
+    .fin-summary-row { display: flex; justify-content: space-between; margin-bottom: 0.8rem; font-size: 0.95rem; }
+    .fin-val { font-weight: 700; font-size: 1.1rem; }
+    .fin-progress-bg { height: 8px; background: #e2e8f0; border-radius: 4px; overflow: hidden; margin: 0.5rem 0 1rem; }
+    .fin-progress-fill { height: 100%; background: var(--success); transition: width 0.4s ease, background 0.3s; border-radius: 4px; }
+    .fin-status { text-align: center; font-size: 0.9rem; padding: 0.4rem 0.8rem; border-radius: 20px; background: #f1f5f9; display: inline-block; margin: 0.5rem auto; width: max-content; }
+    .fin-health { padding: 1rem 1.5rem; background: #f8fafc; }
+    .fin-health-title { font-weight: 600; margin-bottom: 0.8rem; display: flex; justify-content: space-between; align-items: center; }
+    .fin-health-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.8rem; }
+    .fin-health-card { background: var(--card); padding: 0.8rem; border-radius: 8px; border: 1px solid var(--border); text-align: center; }
+    .fin-health-card h4 { margin: 0 0 0.3rem; font-size: 0.85rem; color: var(--text-muted); }
+    .fin-health-card .val { font-weight: 700; font-size: 1.1rem; }
+    .fin-health-card .bar { height: 4px; background: #e2e8f0; border-radius: 2px; margin-top: 0.4rem; overflow: hidden; }
+    .fin-health-card .bar-fill { height: 100%; border-radius: 2px; transition: width 0.4s; }
+    .fin-actions { padding: 1rem 1.5rem; display: flex; gap: 0.8rem; background: var(--card); }
+    .fin-btn { flex: 1; padding: 0.7rem; border: none; border-radius: 8px; font-weight: 500; cursor: pointer; transition: all 0.2s; }
+    .fin-btn-primary { background: var(--primary); color: #fff; }
+    .fin-btn-primary:hover { background: var(--primary-hover); transform: translateY(-1px); }
+    .fin-btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text-muted); }
+    .fin-btn-outline:hover { background: #f1f5f9; border-color: var(--primary); color: var(--primary); }
+    .fin-save-indicator { position: fixed; bottom: 1rem; right: 1rem; background: #10b981; color: #fff; padding: 0.4rem 0.8rem; border-radius: 20px; font-size: 0.8rem; opacity: 0; transition: opacity 0.3s; pointer-events: none; }
+    .fin-save-indicator.show { opacity: 1; }
+    @media (max-width: 600px) {
+      .fin-row { grid-template-columns: 1fr 1fr 32px; }
+      .fin-row .fin-select, .fin-row .fin-percent { display: none; }
+      .fin-health-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+
+  <div class="fin-header">
+    <h2>💰 Smart Budget Planner</h2>
+    <p>Track, allocate & optimize your monthly finances</p>
+  </div>
+
+  <div class="fin-section">
+    <label class="fin-label">Monthly Income (₹)</label>
+    <input type="number" id="fin-income" class="fin-input" placeholder="e.g. 80000" min="0">
+  </div>
+
+  <div class="fin-list" id="fin-list">
+    <!-- Rows injected by JS -->
+  </div>
+  <button class="fin-add-btn" id="fin-add">+ Add Category</button>
+
+  <div class="fin-summary">
+    <div class="fin-summary-row"><span>Total Allocated</span><span class="fin-val" id="fin-total">₹0</span></div>
+    <div class="fin-progress-bg"><div class="fin-progress-fill" id="fin-progress"></div></div>
+    <div class="fin-summary-row"><span>Remaining</span><span class="fin-val" id="fin-rem">₹0</span></div>
+    <div style="text-align:center"><span class="fin-status" id="fin-status">Start adding expenses...</span></div>
+  </div>
+
+  <div class="fin-health">
+    <div class="fin-health-title">📊 50/30/20 Budget Health <span id="fin-rule-badge" style="font-size:0.8rem;background:#f1f5f9;padding:2px 8px;border-radius:10px">--</span></div>
+    <div class="fin-health-grid">
+      <div class="fin-health-card"><h4>Needs (50%)</h4><div class="val" id="fin-needs-val">₹0</div><div class="bar"><div class="bar-fill" id="fin-needs-bar" style="background:#3b82f6;width:0%"></div></div></div>
+      <div class="fin-health-card"><h4>Wants (30%)</h4><div class="val" id="fin-wants-val">₹0</div><div class="bar"><div class="bar-fill" id="fin-wants-bar" style="background:#f59e0b;width:0%"></div></div></div>
+      <div class="fin-health-card"><h4>Savings (20%)</h4><div class="val" id="fin-savings-val">₹0</div><div class="bar"><div class="bar-fill" id="fin-savings-bar" style="background:#10b981;width:0%"></div></div></div>
+    </div>
+  </div>
+
+  <div class="fin-actions">
+    <button class="fin-btn fin-btn-outline" id="fin-export">📥 Export CSV</button>
+    <button class="fin-btn fin-btn-primary" id="fin-clear">🗑️ Clear All</button>
+  </div>
+
+  <div class="fin-save-indicator" id="fin-save-ind">✓ Saved</div>
+
+  <script>
+    (function() {
+      const STORAGE_KEY = 'fin_budget_v2';
+      const DEFAULTS = {
+        income: 80000,
+        categories: [
+          { id: 'c1', type: 'needs', name: 'Rent / Housing', amount: 20000 },
+          { id: 'c2', type: 'needs', name: 'Groceries & Utilities', amount: 12000 },
+          { id: 'c3', type: 'wants', name: 'Dining & Entertainment', amount: 8000 },
+          { id: 'c4', type: 'savings', name: 'Emergency & Investments', amount: 15000 }
+        ]
+      };
+
+      let state = {};
+      let saveTimeout;
+
+      const els = {
+        income: document.getElementById('fin-income'),
+        list: document.getElementById('fin-list'),
+        total: document.getElementById('fin-total'),
+        rem: document.getElementById('fin-rem'),
+        progress: document.getElementById('fin-progress'),
+        status: document.getElementById('fin-status'),
+        addBtn: document.getElementById('fin-add'),
+        exportBtn: document.getElementById('fin-export'),
+        clearBtn: document.getElementById('fin-clear'),
+        saveInd: document.getElementById('fin-save-ind'),
+        needsVal: document.getElementById('fin-needs-val'),
+        wantsVal: document.getElementById('fin-wants-val'),
+        savingsVal: document.getElementById('fin-savings-val'),
+        needsBar: document.getElementById('fin-needs-bar'),
+        wantsBar: document.getElementById('fin-wants-bar'),
+        savingsBar: document.getElementById('fin-savings-bar'),
+        ruleBadge: document.getElementById('fin-rule-badge')
+      };
+
+      const fmt = (n) => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(n || 0);
+      const pct = (val, total) => total ? Math.round((val / total) * 100) : 0;
+
+      function load() {
+        try {
+          const stored = localStorage.getItem(STORAGE_KEY);
+          state = stored ? JSON.parse(stored) : { ...DEFAULTS };
+        } catch { state = { ...DEFAULTS }; }
+        els.income.value = state.income || '';
+        renderList();
+        calculate();
+      }
+
+      function save() {
+        try {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+          els.saveInd.classList.add('show');
+          setTimeout(() => els.saveInd.classList.remove('show'), 1500);
+        } catch(e) { console.warn('Storage failed', e); }
+      }
+
+      function renderList() {
+        els.list.innerHTML = '';
+        state.categories.forEach(c => createRow(c));
+      }
+
+      function createRow(cat) {
+        const row = document.createElement('div');
+        row.className = 'fin-row';
+        row.dataset.id = cat.id;
+        row.innerHTML = `
+          <select class="fin-type">
+            <option value="needs" ${cat.type==='needs'?'selected':''}>🏠 Needs</option>
+            <option value="wants" ${cat.type==='wants'?'selected':''}>🎉 Wants</option>
+            <option value="savings" ${cat.type==='savings'?'selected':''}>💰 Savings</option>
+          </select>
+          <input type="text" class="fin-name" placeholder="Category Name" value="${cat.name}">
+          <input type="number" class="fin-amount" placeholder="₹0" min="0" value="${cat.amount}">
+          <div class="fin-percent" style="font-size:0.8rem;color:#64748b;text-align:center">0%</div>
+          <button class="fin-btn-del">×</button>
+        `;
+        els.list.appendChild(row);
+
+        // Bind events
+        row.querySelector('.fin-type').onchange = e => update(cat.id, 'type', e.target.value);
+        row.querySelector('.fin-name').oninput = e => update(cat.id, 'name', e.target.value);
+        row.querySelector('.fin-amount').oninput = e => {
+          let v = parseFloat(e.target.value) || 0;
+          if(v < 0) v = 0;
+          update(cat.id, 'amount', v);
+        };
+        row.querySelector('.fin-btn-del').onclick = () => remove(cat.id);
+      }
+
+      function update(id, field, value) {
+        const idx = state.categories.findIndex(c => c.id === id);
+        if(idx === -1) return;
+        state.categories[idx][field] = value;
+        calculate();
+        scheduleSave();
+      }
+
+      function remove(id) {
+        state.categories = state.categories.filter(c => c.id !== id);
+        renderList();
+        calculate();
+        save();
+      }
+
+      function addCategory() {
+        const id = 'c' + Date.now();
+        state.categories.push({ id, type: 'wants', name: 'New Category', amount: 0 });
+        renderList();
+        calculate();
+        save();
+        // Focus new amount input
+        const newRow = els.list.querySelector(`[data-id="${id}"]`);
+        if(newRow) newRow.querySelector('.fin-amount').focus();
+      }
+
+      function calculate() {
+        const income = parseFloat(els.income.value) || 0;
+        state.income = income;
+        let totalAlloc = 0, needs = 0, wants = 0, savings = 0;
+
+        state.categories.forEach(c => {
+          totalAlloc += c.amount;
+          if(c.type === 'needs') needs += c.amount;
+          else if(c.type === 'wants') wants += c.amount;
+          else savings += c.amount;
+
+          // Update % per row
+          const row = els.list.querySelector(`[data-id="${c.id}"]`);
+          if(row) row.querySelector('.fin-percent').textContent = pct(c.amount, income) + '%';
+        });
+
+        const rem = income - totalAlloc;
+        els.total.textContent = fmt(totalAlloc);
+        els.rem.textContent = fmt(rem);
+        els.rem.style.color = rem >= 0 ? 'var(--success)' : 'var(--danger)';
+        els.progress.style.width = Math.min(100, pct(totalAlloc, income)) + '%';
+        els.progress.style.background = totalAlloc > income ? 'var(--danger)' : totalAlloc === income ? 'var(--warning)' : 'var(--success)';
+
+        if(income === 0) els.status.textContent = 'Enter your monthly income';
+        else if(rem > 0) els.status.textContent = `✅ Under budget by ${fmt(rem)}`;
+        else if(rem === 0) els.status.textContent = `⚖️ Perfectly balanced`;
+        else els.status.textContent = `❌ Over budget by ${fmt(Math.abs(rem))}`;
+
+        // 50/30/20 Health
+        const tNeeds = income * 0.5, tWants = income * 0.3, tSavings = income * 0.2;
+        els.needsVal.textContent = fmt(needs);
+        els.wantsVal.textContent = fmt(wants);
+        els.savingsVal.textContent = fmt(savings);
+        els.needsBar.style.width = pct(needs, tNeeds) + '%';
+        els.wantsBar.style.width = pct(wants, tWants) + '%';
+        els.savingsBar.style.width = pct(savings, tSavings) + '%';
+
+        const devNeeds = Math.abs(needs - tNeeds)/tNeeds*100;
+        const devWants = Math.abs(wants - tWants)/tWants*100;
+        const devSavings = Math.abs(savings - tSavings)/tSavings*100;
+        const avgDev = (devNeeds + devWants + devSavings) / 3;
+        els.ruleBadge.textContent = avgDev < 15 ? '✅ On Track' : avgDev < 30 ? '⚠️ Adjust' : '🔍 Rebalance';
+      }
+
+      function scheduleSave() {
+        clearTimeout(saveTimeout);
+        saveTimeout = setTimeout(save, 800);
+      }
+
+      function exportCSV() {
+        let csv = 'Type,Category,Amount,Percentage\n';
+        state.categories.forEach(c => {
+          csv += `${c.type},${c.name},${c.amount},${pct(c.amount, state.income)}%\n`;
+        });
+        const blob = new Blob([csv], { type: 'text/csv' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url; a.download = `budget_${new Date().toISOString().slice(0,10)}.csv`;
+        a.click(); URL.revokeObjectURL(url);
+      }
+
+      function clearAll() {
+        if(!confirm('Reset all data? This cannot be undone.')) return;
+        state = { ...DEFAULTS, categories: [] };
+        els.income.value = '';
+        renderList();
+        calculate();
+        save();
+      }
+
+      // Init
+      els.addBtn.onclick = addCategory;
+      els.exportBtn.onclick = exportCSV;
+      els.clearBtn.onclick = clearAll;
+      els.income.oninput = () => { calculate(); scheduleSave(); };
+
+      // Delegate for performance if needed, but direct binding on render is fine for this scale
+      load();
+    })();
+  </script>
+</div>

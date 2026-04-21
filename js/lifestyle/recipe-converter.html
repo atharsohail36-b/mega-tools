@@ -1,0 +1,238 @@
+<div class="lifestyle-tool recipe-converter">
+  <style>
+    .recipe-converter {
+      --rc-bg: #0b1120; --rc-card: #161e31; --rc-border: #2a3654;
+      --rc-text: #e2e8f0; --rc-sec: #94a3b8; --rc-accent: #22c55e;
+      --rc-hover: #16a34a; --rc-radius: 16px;
+      font-family: system-ui, -apple-system, sans-serif;
+      max-width: 700px; margin: 0 auto; padding: 1.5rem;
+      background: var(--rc-bg); color: var(--rc-text); border-radius: var(--rc-radius);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.4); position: relative;
+    }
+    .rc-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.2rem; flex-wrap: wrap; gap: 0.5rem; }
+    .rc-header h2 { margin: 0; font-size: 1.4rem; background: linear-gradient(90deg, var(--rc-accent), #38bdf8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .rc-actions { display: flex; gap: 0.5rem; }
+    .rc-btn-sm { padding: 0.4rem 0.8rem; background: var(--rc-card); border: 1px solid var(--rc-border); color: var(--rc-sec); border-radius: 8px; cursor: pointer; font-size: 0.8rem; transition: 0.2s; }
+    .rc-btn-sm:hover { background: var(--rc-border); color: var(--rc-text); }
+    .rc-controls { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 0.8rem; margin-bottom: 1rem; }
+    .rc-field { display: flex; flex-direction: column; gap: 0.4rem; }
+    .rc-field label { font-size: 0.85rem; color: var(--rc-sec); }
+    .rc-input, .rc-select { padding: 0.7rem; border-radius: 10px; border: 1px solid var(--rc-border); background: var(--rc-card); color: var(--rc-text); outline: none; }
+    .rc-input:focus, .rc-select:focus { border-color: var(--rc-accent); box-shadow: 0 0 0 2px rgba(34,197,94,0.15); }
+    .rc-textarea { width: 100%; min-height: 130px; padding: 0.8rem; border-radius: 12px; border: 1px solid var(--rc-border); background: var(--rc-card); color: var(--rc-text); outline: none; font-family: inherit; line-height: 1.5; resize: vertical; margin-bottom: 1rem; }
+    .rc-textarea::placeholder { color: var(--rc-sec); }
+    .rc-presets { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1rem; }
+    .rc-chip { padding: 0.3rem 0.7rem; background: var(--rc-card); border: 1px solid var(--rc-border); border-radius: 20px; font-size: 0.8rem; cursor: pointer; transition: 0.2s; color: var(--rc-sec); }
+    .rc-chip:hover { border-color: var(--rc-accent); color: var(--rc-text); background: rgba(34,197,94,0.1); }
+    .rc-output { background: var(--rc-card); border: 1px solid var(--rc-border); border-radius: 12px; padding: 1rem; min-height: 100px; margin-bottom: 1rem; position: relative; }
+    .rc-output-title { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; }
+    .rc-output-title span { font-size: 0.9rem; color: var(--rc-sec); font-weight: 500; }
+    .rc-copy-btn { background: none; border: none; color: var(--rc-sec); cursor: pointer; padding: 0.3rem; transition: 0.2s; }
+    .rc-copy-btn:hover { color: var(--rc-accent); }
+    .rc-result { white-space: pre-wrap; font-size: 0.95rem; line-height: 1.5; color: var(--rc-text); }
+    .rc-result .rc-new { color: var(--rc-accent); font-weight: 500; }
+    .rc-hist { max-height: 120px; overflow-y: auto; background: var(--rc-card); border: 1px solid var(--rc-border); border-radius: 10px; padding: 0.5rem; margin-top: 0.5rem; }
+    .rc-hist-item { display: flex; justify-content: space-between; align-items: center; padding: 0.4rem 0; font-size: 0.85rem; border-bottom: 1px solid var(--rc-border); cursor: pointer; }
+    .rc-hist-item:last-child { border: none; }
+    .rc-hist-item:hover { color: var(--rc-accent); }
+    .rc-empty { text-align: center; color: var(--rc-sec); font-style: italic; padding: 0.5rem; }
+    .rc-toast { position: fixed; bottom: 20px; right: 20px; padding: 0.8rem 1.2rem; border-radius: 10px; background: var(--rc-card); border: 1px solid var(--rc-border); color: var(--rc-text); font-size: 0.9rem; opacity: 0; transform: translateY(20px); transition: 0.3s; pointer-events: none; z-index: 999; box-shadow: 0 8px 24px rgba(0,0,0,0.5); }
+    .rc-toast.show { opacity: 1; transform: translateY(0); }
+    .rc-toast.success { border-color: var(--rc-accent); color: var(--rc-accent); }
+    .rc-toast.warn { border-color: #f59e0b; color: #f59e0b; }
+    @media (max-width: 500px) {
+      .rc-controls { grid-template-columns: 1fr; }
+      .rc-header { flex-direction: column; align-items: flex-start; }
+    }
+  </style>
+
+  <div class="rc-header">
+    <h2>📜 Smart Recipe Converter</h2>
+    <div class="rc-actions">
+      <button class="rc-btn-sm" id="rc-demo">📋 Load Demo</button>
+      <button class="rc-btn-sm" id="rc-clear">🗑️ Clear</button>
+    </div>
+  </div>
+
+  <div class="rc-controls">
+    <div class="rc-field">
+      <label>👥 Original Servings</label>
+      <input type="number" id="rc-from" class="rc-input" value="2" min="0.1" step="0.5">
+    </div>
+    <div class="rc-field">
+      <label>🎯 Target Servings</label>
+      <input type="number" id="rc-to" class="rc-input" value="4" min="0.1" step="0.5">
+    </div>
+    <div class="rc-field">
+      <label>⚖️ Unit Mode</label>
+      <select id="rc-mode" class="rc-select">
+        <option value="scale">📐 Scale Only</option>
+        <option value="metric">🇮🇳 → Metric (g/ml)</option>
+        <option value="imperial">🇺🇸 → Imperial (oz/cups)</option>
+      </select>
+    </div>
+  </div>
+
+  <textarea id="rc-input" class="rc-textarea" placeholder="Enter ingredients (1 per line)...&#10;e.g. 2 cups flour&#10;1/2 tsp salt&#10;1.5 tbsp oil"></textarea>
+
+  <div class="rc-presets">
+    <span class="rc-chip" data-add="2 cups flour">🌾 Flour</span>
+    <span class="rc-chip" data-add="1 cup sugar">🍬 Sugar</span>
+    <span class="rc-chip" data-add="1/2 cup butter">🧈 Butter</span>
+    <span class="rc-chip" data-add="1 cup milk">🥛 Milk</span>
+    <span class="rc-chip" data-add="2 eggs">🥚 Eggs</span>
+    <span class="rc-chip" data-add="1 tsp baking powder">⚡ Baking Pwd</span>
+    <span class="rc-chip" data-add="300 ml water">💧 Water</span>
+  </div>
+
+  <div class="rc-output">
+    <div class="rc-output-title">
+      <span>📤 Converted Ingredients</span>
+      <button class="rc-copy-btn" id="rc-copy" title="Copy to clipboard">📋</button>
+    </div>
+    <div class="rc-result" id="rc-output">Enter ingredients to see real-time conversions...</div>
+  </div>
+
+  <div class="rc-hist" id="rc-hist">
+    <div class="rc-empty">💾 Recent conversions will appear here</div>
+  </div>
+
+  <div class="rc-toast" id="rc-toast"></div>
+
+  <script>
+  (function(){
+    const KEY = 'rc-history-v1';
+    let history = JSON.parse(localStorage.getItem(KEY) || '[]');
+    const toast = (m, t='success') => {
+      const el = document.getElementById('rc-toast'); el.textContent = m; el.className = `rc-toast show ${t}`;
+      setTimeout(() => el.className = 'rc-toast', 2500);
+    };
+    const fmt = (d) => d.toLocaleDateString('en-IN', { day:'numeric', month:'short', hour:'2-digit', minute:'2-digit' });
+
+    const UNIT_MAP = {
+      'cup': { ml: 240, tbsp: 16, tsp: 48, oz: 8, g: 240, kg: 0.24 },
+      'tbsp': { tsp: 3, ml: 15, oz: 0.5, g: 15 },
+      'tsp': { ml: 5, g: 5, oz: 0.17 },
+      'oz': { g: 28.35, ml: 30, tbsp: 2, tsp: 6 },
+      'lb': { g: 453.6, oz: 16, kg: 0.45 },
+      'kg': { g: 1000, lb: 2.2, oz: 35.27 },
+      'g': { oz: 0.035, tbsp: 0.07, tsp: 0.2 },
+      'ml': { cup: 0.004, tbsp: 0.067, tsp: 0.2, oz: 0.034 }
+    };
+
+    const parseLine = (line) => {
+      const m = line.trim().match(/^(\d+(?:\.\d+)?|\d+\/\d+|\d+\s+\d+\/\d+)\s*([a-zA-Z°]+)?\s*(.*)$/i);
+      if (!m) return { qty: null, unit: '', name: line, raw: line };
+      let q = m[1].replace(/\s+/g, '');
+      if (q.includes('/')) {
+        const p = q.split('/');
+        q = (p[0] || 0) / (p[1] || 1);
+      }
+      return { qty: parseFloat(q), unit: (m[2]||'').toLowerCase(), name: m[3]||'', raw: line };
+    };
+
+    const smartRound = (n) => {
+      if (n <= 0) return '0';
+      if (n < 0.25) return '1/4';
+      if (n < 0.35) return '1/3';
+      if (n < 0.55) return '1/2';
+      if (n < 0.8) return '3/4';
+      if (n < 1.2) return '1';
+      if (n < 1.3) return '1 1/4';
+      if (n < 1.45) return '1 1/3';
+      if (n < 1.8) return '1 1/2';
+      return Number.isInteger(n) ? n.toString() : n.toFixed(1).replace(/\.0$/, '');
+    };
+
+    const convertLine = (line, mult, mode) => {
+      const p = parseLine(line);
+      if (p.qty === null) return `<span class="rc-new">${line}</span>`;
+      
+      let newQty = p.qty * mult;
+      let newUnit = p.unit;
+
+      if (mode === 'metric' && UNIT_MAP[p.unit]) {
+        const targets = ['ml', 'g'];
+        const match = targets.find(t => UNIT_MAP[p.unit][t]);
+        if (match) { newQty *= UNIT_MAP[p.unit][match]; newUnit = match; }
+      } else if (mode === 'imperial' && UNIT_MAP[p.unit]) {
+        const targets = ['oz', 'cup', 'tbsp', 'tsp'];
+        const match = targets.find(t => UNIT_MAP[p.unit][t]);
+        if (match) { newQty *= UNIT_MAP[p.unit][match]; newUnit = match; }
+      }
+
+      return `<span class="rc-new">${smartRound(newQty)} ${newUnit}</span>${p.name ? ' ' + p.name : ''}`;
+    };
+
+    const render = () => {
+      const from = parseFloat(document.getElementById('rc-from').value) || 1;
+      const to = parseFloat(document.getElementById('rc-to').value) || 1;
+      const mode = document.getElementById('rc-mode').value;
+      const raw = document.getElementById('rc-input').value;
+      const mult = from > 0 ? to / from : 1;
+
+      const lines = raw.split('\n').filter(l => l.trim());
+      const outEl = document.getElementById('rc-output');
+      if (lines.length === 0) {
+        outEl.innerHTML = 'Enter ingredients to see real-time conversions...';
+        return;
+      }
+      outEl.innerHTML = lines.map(l => convertLine(l, mult, mode)).join('\n');
+      saveToHistory(from, to, lines.length);
+    };
+
+    const saveToHistory = (f, t, count) => {
+      const now = new Date();
+      if (!history.length || history[0].time !== fmt(now)) {
+        history.unshift({ time: fmt(now), f, t, count });
+        if (history.length > 6) history.pop();
+        localStorage.setItem(KEY, JSON.stringify(history));
+        renderHistory();
+      }
+    };
+
+    const renderHistory = () => {
+      const hEl = document.getElementById('rc-hist');
+      if (history.length === 0) { hEl.innerHTML = '<div class="rc-empty">💾 Recent conversions will appear here</div>'; return; }
+      hEl.innerHTML = history.map(h => 
+        `<div class="rc-hist-item"><span>📅 ${h.time} • ${h.f}→${h.t} servings</span><span>${h.count} items</span></div>`
+      ).join('');
+    };
+
+    // Events
+    ['rc-input', 'rc-from', 'rc-to', 'rc-mode'].forEach(id => {
+      document.getElementById(id).addEventListener('input', render);
+      document.getElementById(id).addEventListener('change', render);
+    });
+
+    document.querySelectorAll('.rc-chip').forEach(chip => {
+      chip.onclick = () => {
+        const ta = document.getElementById('rc-input');
+        ta.value += (ta.value.endsWith('\n') ? '' : '\n') + chip.dataset.add + '\n';
+        render(); toast('Ingredient added', 'success');
+      };
+    });
+
+    document.getElementById('rc-copy').onclick = () => {
+      const txt = document.getElementById('rc-output').textContent;
+      if (txt.includes('Enter ingredients')) return toast('Nothing to copy', 'warn');
+      navigator.clipboard.writeText(txt).then(() => toast('📋 Copied to clipboard!'));
+    };
+
+    document.getElementById('rc-demo').onclick = () => {
+      document.getElementById('rc-input').value = `2 cups all-purpose flour\n1/2 tsp baking soda\n1 tsp salt\n1/2 cup unsalted butter\n1 cup granulated sugar\n2 large eggs\n1 cup buttermilk\n1/2 cup chocolate chips`;
+      render(); toast('📋 Demo recipe loaded', 'success');
+    };
+
+    document.getElementById('rc-clear').onclick = () => {
+      document.getElementById('rc-input').value = '';
+      document.getElementById('rc-from').value = 2;
+      document.getElementById('rc-to').value = 4;
+      document.getElementById('rc-mode').value = 'scale';
+      render(); toast('🗑️ Cleared', 'warn');
+    };
+
+    renderHistory(); render();
+  })();
+  </script>
+</div>

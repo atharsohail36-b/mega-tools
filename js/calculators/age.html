@@ -1,0 +1,275 @@
+<div class="calc-tool" lang="en">
+  <style>
+    :root {
+      --bg-main: #0f1115;
+      --bg-card: #1a1d24;
+      --glass-border: rgba(255,255,255,0.08);
+      --text-primary: #f1f5f9;
+      --text-secondary: #94a3b8;
+      --accent: #38bdf8;
+      --accent-glow: rgba(56,189,248,0.25);
+      --gradient-main: linear-gradient(135deg, #38bdf8, #818cf8);
+      --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      --radius: 14px;
+    }
+    .calc-tool {
+      max-width: 600px; margin: 0 auto; padding: 2rem 1.5rem;
+      font-family: system-ui, -apple-system, sans-serif; color: var(--text-primary);
+    }
+    .calc-header { text-align: center; margin-bottom: 1.5rem; }
+    .calc-header h2 { margin: 0; font-size: 1.8rem; background: var(--gradient-main); -webkit-background-clip: text; background-clip: text; color: transparent; }
+    .calc-header p { margin: 0.3rem 0 0; color: var(--text-secondary); font-size: 0.95rem; }
+
+    .age-row { display: flex; gap: 1rem; margin-bottom: 1.2rem; flex-wrap: wrap; }
+    .input-wrap { flex: 1; min-width: 220px; }
+    .age-label { display: block; margin-bottom: 0.4rem; color: var(--text-secondary); font-size: 0.85rem; font-weight: 500; }
+    .age-input {
+      width: 100%; padding: 0.95rem 1rem; border-radius: var(--radius);
+      border: 1px solid var(--glass-border); background: var(--bg-card);
+      color: var(--text-primary); font-size: 1rem; outline: none;
+      transition: var(--transition);
+    }
+    .age-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow); }
+    .age-btn {
+      width: 100%; padding: 1rem; background: var(--gradient-main); border: none;
+      border-radius: var(--radius); color: #0f1115; font-weight: 700; font-size: 1rem;
+      cursor: pointer; transition: var(--transition); margin-bottom: 1.2rem;
+    }
+    .age-btn:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 6px 16px var(--accent-glow); }
+    .age-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+    .age-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 1rem; margin-bottom: 1.2rem; }
+    .age-card {
+      background: var(--bg-card); border: 1px solid var(--glass-border); border-radius: var(--radius);
+      padding: 1.2rem 0.8rem; text-align: center; transition: var(--transition);
+    }
+    .age-card:hover { transform: translateY(-4px); border-color: var(--accent); }
+    .age-num { font-size: 1.9rem; font-weight: 800; color: var(--accent); min-height: 2.2rem; display: flex; align-items: center; justify-content: center; }
+    .age-lbl { font-size: 0.75rem; color: var(--text-secondary); margin-top: 0.3rem; text-transform: uppercase; letter-spacing: 0.5px; }
+
+    .extra-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; margin-bottom: 1.2rem; }
+    .info-card { background: rgba(255,255,255,0.03); border-radius: 12px; padding: 1rem; border: 1px solid var(--glass-border); }
+    .info-title { font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 0.2rem; }
+    .info-val { font-size: 1.1rem; font-weight: 600; color: var(--text-primary); }
+
+    .next-bday {
+      margin-top: 1rem; padding: 1.2rem; background: rgba(56,189,248,0.08);
+      border-radius: var(--radius); text-align: center; border: 1px solid var(--glass-border);
+      position: relative; overflow: hidden;
+    }
+    .next-bday::before {
+      content: ''; position: absolute; top: 0; left: 0; width: 4px; height: 100%;
+      background: var(--gradient-main); border-radius: 4px 0 0 4px;
+    }
+    .nb-main { font-size: 1.1rem; font-weight: 600; margin-bottom: 0.2rem; }
+    .nb-timer { font-size: 0.9rem; color: var(--accent); font-variant-numeric: tabular-nums; }
+
+    .actions { display: flex; justify-content: flex-end; margin-top: 1rem; gap: 0.8rem; }
+    .action-btn {
+      padding: 0.6rem 1rem; background: transparent; border: 1px solid var(--glass-border);
+      border-radius: 8px; color: var(--text-secondary); cursor: pointer; transition: var(--transition);
+      font-size: 0.85rem; display: flex; align-items: center; gap: 6px;
+    }
+    .action-btn:hover { background: rgba(255,255,255,0.05); color: var(--text-primary); }
+    .action-btn.copied { background: var(--accent); color: #0f1115; border-color: var(--accent); }
+
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    .animate-in { animation: fadeIn 0.4s ease-out forwards; }
+
+    @media (max-width: 480px) {
+      .calc-tool { padding: 1.5rem 1rem; }
+      .age-grid { grid-template-columns: repeat(2, 1fr); }
+      .extra-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+
+  <div class="calc-header">
+    <h2>🎂 Age Calculator</h2>
+    <p>Get precise age breakdown + fun insights</p>
+  </div>
+
+  <div class="age-row">
+    <div class="input-wrap">
+      <label class="age-label" for="dob">Date of Birth</label>
+      <input class="age-input" type="date" id="dob" max="">
+    </div>
+    <div class="input-wrap">
+      <label class="age-label" for="to-date">Calculate To</label>
+      <input class="age-input" type="date" id="to-date">
+    </div>
+  </div>
+
+  <button class="age-btn" id="calc-btn">Calculate Age</button>
+
+  <div class="age-grid" id="age-grid" aria-live="polite"></div>
+  <div class="extra-grid" id="extra-info" style="display:none;"></div>
+  <div class="next-bday" id="next-bday" style="display:none;"></div>
+
+  <div class="actions" id="actions" style="display:none;">
+    <button class="action-btn" id="copy-btn">📋 Copy Results</button>
+  </div>
+
+  <script>
+    (function() {
+      const dobEl = document.getElementById('dob');
+      const toDateEl = document.getElementById('to-date');
+      const btn = document.getElementById('calc-btn');
+      const grid = document.getElementById('age-grid');
+      const extra = document.getElementById('extra-info');
+      const nbDiv = document.getElementById('next-bday');
+      const actions = document.getElementById('actions');
+      const copyBtn = document.getElementById('copy-btn');
+
+      // Set defaults
+      const today = new Date();
+      toDateEl.valueAsDate = today;
+      dobEl.max = today.toISOString().split('T')[0];
+
+      let countdownInterval = null;
+
+      // Zodiac Signs
+      const getZodiac = (m, d) => {
+        const signs = [
+          ['Capricorn','Aquarius','Pisces','Aries','Taurus','Gemini','Cancer','Leo','Virgo','Libra','Scorpio','Sagittarius','Capricorn'],
+          [20,19,20,20,21,21,23,23,23,23,22,22,22]
+        ];
+        return d < signs[1][m-1] ? signs[0][m-1] : signs[0][m];
+      };
+
+      const getChineseZodiac = (y) => {
+        const animals = ['Rat','Ox','Tiger','Rabbit','Dragon','Snake','Horse','Goat','Monkey','Rooster','Dog','Pig'];
+        return animals[(y - 4) % 12];
+      };
+
+      // Smooth number count-up
+      const animateValue = (el, end, duration = 600) => {
+        let start = 0;
+        const step = (ts) => {
+          if (!start) start = ts;
+          const progress = Math.min((ts - start) / duration, 1);
+          el.textContent = Math.floor(progress * end).toLocaleString();
+          if (progress < 1) requestAnimationFrame(step);
+        };
+        requestAnimationFrame(step);
+      };
+
+      // Live Countdown
+      const startCountdown = (targetDate, birthDate) => {
+        if (countdownInterval) clearInterval(countdownInterval);
+        const nbMain = document.createElement('div'); nbMain.className = 'nb-main';
+        const nbTimer = document.createElement('div'); nbTimer.className = 'nb-timer';
+        nbDiv.innerHTML = ''; nbDiv.appendChild(nbMain); nbDiv.appendChild(nbTimer);
+        nbDiv.style.display = 'block';
+
+        const update = () => {
+          let next = new Date(birthDate);
+          next.setFullYear(targetDate.getFullYear());
+          if (next < targetDate) next.setFullYear(targetDate.getFullYear() + 1);
+          
+          // Feb 29 handling
+          if (birthDate.getMonth() === 1 && birthDate.getDate() === 29) {
+            const y = next.getFullYear();
+            const isLeap = (y % 4 === 0 && y % 100 !== 0) || (y % 400 === 0);
+            if (!isLeap) { next.setMonth(2); next.setDate(1); }
+          }
+
+          const diff = next - targetDate;
+          const d = Math.floor(diff / 86400000);
+          const h = Math.floor((diff % 86400000) / 3600000);
+          const m = Math.floor((diff % 3600000) / 60000);
+          const s = Math.floor((diff % 60000) / 1000);
+
+          nbMain.textContent = `🎂 Next Birthday in ${d} day${d!==1?'s':''}`;
+          nbTimer.textContent = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+        };
+        update();
+        countdownInterval = setInterval(update, 1000);
+      };
+
+      // Main Calculation
+      const calculate = () => {
+        if (!dobEl.value || !toDateEl.value) return;
+        const d1 = new Date(dobEl.value);
+        const d2 = new Date(toDateEl.value);
+        if (d2 < d1) { alert('Target date cannot be before Date of Birth'); return; }
+
+        btn.disabled = true; btn.textContent = 'Calculating...';
+
+        setTimeout(() => {
+          // Y/M/D Calculation
+          let y = d2.getFullYear() - d1.getFullYear();
+          let m = d2.getMonth() - d1.getMonth();
+          let d = d2.getDate() - d1.getDate();
+          if (d < 0) {
+            m--;
+            d += new Date(d2.getFullYear(), d2.getMonth(), 0).getDate();
+          }
+          if (m < 0) {
+            y--;
+            m += 12;
+          }
+
+          const totalDays = Math.floor((d2 - d1) / 86400000);
+          const totalWeeks = Math.floor(totalDays / 7);
+
+          // Render Grid
+          const units = [
+            { val: y, label: 'Years' },
+            { val: m, label: 'Months' },
+            { val: d, label: 'Days' },
+            { val: totalDays, label: 'Total Days' },
+            { val: totalWeeks, label: 'Weeks' },
+            { val: totalDays * 24, label: 'Hours' }
+          ];
+          grid.innerHTML = '';
+          units.forEach((u, i) => {
+            const card = document.createElement('div');
+            card.className = 'age-card animate-in';
+            card.style.animationDelay = `${i * 60}ms`;
+            const num = document.createElement('div'); num.className = 'age-num'; num.textContent = '0';
+            const lbl = document.createElement('div'); lbl.className = 'age-lbl'; lbl.textContent = u.label;
+            card.append(num, lbl);
+            grid.appendChild(card);
+            animateValue(num, u.val);
+          });
+
+          // Extra Info
+          const dayOfWeek = d1.toLocaleDateString('en-US', { weekday: 'long' });
+          const zodiac = getZodiac(d1.getMonth()+1, d1.getDate());
+          const chinese = getChineseZodiac(d1.getFullYear());
+          extra.style.display = 'grid';
+          extra.innerHTML = `
+            <div class="info-card"><div class="info-title">Born On</div><div class="info-val">${dayOfWeek}</div></div>
+            <div class="info-card"><div class="info-title">Zodiac Sign</div><div class="info-val">♈ ${zodiac}</div></div>
+            <div class="info-card"><div class="info-title">Chinese Zodiac</div><div class="info-val">🐉 ${chinese}</div></div>
+          `;
+
+          // Live Countdown
+          startCountdown(d2, d1);
+
+          actions.style.display = 'flex';
+          btn.disabled = false; btn.textContent = 'Calculate Age';
+        }, 300);
+      };
+
+      // Event Listeners
+      btn.addEventListener('click', calculate);
+      [dobEl, toDateEl].forEach(el => el.addEventListener('change', () => {
+        if (dobEl.value && toDateEl.value) calculate();
+      }));
+
+      // Copy Functionality
+      copyBtn.addEventListener('click', () => {
+        const text = `🎂 Age Calculation Results\n${grid.innerText.replace(/\n/g, '\n')}\n${extra.innerText.replace(/\n/g, '\n')}\n📅 ${nbDiv.innerText}`;
+        navigator.clipboard.writeText(text).then(() => {
+          copyBtn.classList.add('copied');
+          copyBtn.textContent = '✅ Copied!';
+          setTimeout(() => {
+            copyBtn.classList.remove('copied');
+            copyBtn.textContent = '📋 Copy Results';
+          }, 2000);
+        });
+      });
+    })();
+  </script>
+</div>

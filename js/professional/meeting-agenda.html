@@ -1,0 +1,309 @@
+<div class="professional-tool">
+  <style>
+    .professional-tool {
+      --bg: #f8fafc; --card: #ffffff; --border: #e2e8f0;
+      --text: #0f172a; --text-sec: #64748b; --accent: #6366f1;
+      --success: #10b981; --warning: #f59e0b; --danger: #ef4444;
+      --info: #3b82f6; --shadow: 0 4px 12px rgba(0,0,0,0.05); --radius: 12px;
+      font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+      max-width: 850px; margin: 0 auto; padding: 1.8rem;
+      background: var(--bg); border-radius: 16px; box-shadow: var(--shadow);
+      box-sizing: border-box; position: relative;
+    }
+    .professional-tool * { box-sizing: border-box; }
+    .m-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.2rem; flex-wrap: wrap; gap: 1rem; }
+    .m-header h3 { margin: 0; font-size: 1.45rem; color: var(--text); }
+    .m-template { display: flex; gap: 0.5rem; align-items: center; }
+    .m-template select { padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--radius); background: var(--card); color: var(--text); font-size: 0.85rem; }
+    .m-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1.2rem; }
+    .m-field { display: flex; flex-direction: column; gap: 0.35rem; }
+    .m-field label { font-size: 0.78rem; font-weight: 600; color: var(--text-sec); }
+    .m-input, .m-select, .m-textarea {
+      padding: 0.75rem; border: 1px solid var(--border); border-radius: var(--radius);
+      background: var(--card); color: var(--text); font-size: 0.92rem; outline: none; transition: all 0.2s;
+    }
+    .m-input:focus, .m-select:focus, .m-textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(99,102,241,0.12); }
+    .m-textarea { resize: vertical; min-height: 60px; }
+    .m-agenda-box { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); overflow-x: auto; margin-bottom: 1rem; }
+    .m-agenda-table { width: 100%; border-collapse: collapse; min-width: 650px; }
+    .m-agenda-table th { text-align: left; padding: 0.8rem 1rem; background: #f1f5f9; font-size: 0.78rem; font-weight: 600; color: var(--text-sec); border-bottom: 1px solid var(--border); }
+    .m-agenda-table td { padding: 0.6rem 0.8rem; border-bottom: 1px solid var(--border); vertical-align: middle; }
+    .m-row-actions { display: flex; gap: 0.3rem; }
+    .m-icon-btn {
+      width: 28px; height: 28px; border-radius: 6px; border: 1px solid var(--border); background: transparent;
+      cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; font-size: 0.8rem; color: var(--text-sec);
+    }
+    .m-icon-btn:hover { background: #f8fafc; color: var(--accent); border-color: var(--accent); }
+    .m-icon-btn.del:hover { background: rgba(239,68,68,0.1); color: var(--danger); border-color: var(--danger); }
+    .m-badge { font-size: 0.7rem; padding: 0.2rem 0.5rem; border-radius: 12px; font-weight: 500; }
+    .m-badge.info { background: rgba(59,130,246,0.1); color: var(--info); }
+    .m-badge.disc { background: rgba(245,158,11,0.1); color: var(--warning); }
+    .m-badge.dec { background: rgba(16,185,129,0.1); color: var(--success); }
+    .m-time-bar { margin-bottom: 1.2rem; }
+    .m-bar-header { display: flex; justify-content: space-between; font-size: 0.82rem; color: var(--text-sec); margin-bottom: 0.4rem; }
+    .m-bar-track { height: 8px; background: var(--border); border-radius: 4px; overflow: hidden; }
+    .m-bar-fill { height: 100%; background: var(--accent); border-radius: 4px; transition: width 0.4s ease, background 0.3s; }
+    .m-bar-fill.warn { background: var(--warning); }
+    .m-bar-fill.over { background: var(--danger); }
+    .m-preview {
+      background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.2rem;
+      margin-bottom: 1.2rem; white-space: pre-wrap; font-family: 'Courier New', monospace; font-size: 0.9rem; line-height: 1.5; color: var(--text);
+    }
+    .m-actions { display: flex; gap: 0.8rem; flex-wrap: wrap; }
+    .m-btn {
+      padding: 0.8rem 1rem; border: none; border-radius: var(--radius); font-weight: 600; cursor: pointer;
+      transition: all 0.2s; font-size: 0.9rem; display: flex; align-items: center; gap: 0.5rem; justify-content: center; flex: 1;
+    }
+    .m-btn-primary { background: var(--accent); color: #fff; }
+    .m-btn-primary:hover { background: #4f46e5; transform: translateY(-1px); }
+    .m-btn-secondary { background: var(--card); border: 1px solid var(--border); color: var(--text-sec); }
+    .m-btn-secondary:hover { background: #f1f5f9; border-color: var(--accent); color: var(--accent); }
+    .m-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+    .m-toast {
+      position: absolute; bottom: 1.2rem; right: 1.2rem; background: var(--text); color: #fff;
+      padding: 0.7rem 1rem; border-radius: 10px; font-size: 0.85rem; transform: translateY(120%);
+      transition: transform 0.3s cubic-bezier(0.4,0,0.2,1); z-index: 10; pointer-events: none;
+    }
+    .m-toast.show { transform: translateY(0); }
+    @media (max-width: 750px) {
+      .professional-tool { padding: 1.2rem; }
+      .m-grid { grid-template-columns: 1fr; }
+      .m-agenda-table { min-width: auto; }
+      .m-actions { flex-direction: column; }
+    }
+    @media print {
+      body { background: #fff !important; margin: 0 !important; }
+      .professional-tool { box-shadow: none; padding: 0; background: #fff; max-width: 100%; border-radius: 0; }
+      .m-btn, .m-template, .m-agenda-box .m-icon-btn, .m-toast, .m-add-row { display: none !important; }
+      .m-input, .m-select, .m-textarea { border: none; background: transparent; padding: 0.2rem 0; color: var(--text); font-weight: 500; }
+      .m-field label { display: none; }
+      .m-preview { border: none; padding: 0; font-family: system-ui; }
+      .m-agenda-table th { background: transparent; border-bottom: 2px solid #000; }
+      .m-agenda-table td { border-bottom: 1px solid #ccc; }
+    }
+  </style>
+
+  <div class="m-header">
+    <h3>📅 Meeting Agenda Builder</h3>
+    <div class="m-template">
+      <label style="font-size:0.82rem;color:var(--text-sec);font-weight:600;">Template:</label>
+      <select id="m-tpl">
+        <option value="">Custom</option>
+        <option value="standup">Daily Standup</option>
+        <option value="sprint">Sprint Review</option>
+        <option value="client">Client Call</option>
+        <option value="brainstorm">Brainstorming</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="m-grid">
+    <div class="m-field"><label>Meeting Title</label><input class="m-input" id="m-title" value="Q3 Strategy Review"></div>
+    <div class="m-field"><label>Date & Time</label><input type="datetime-local" class="m-input" id="m-dt"></div>
+    <div class="m-field"><label>Duration (mins)</label><input type="number" class="m-input" id="m-dur" value="60" min="10"></div>
+    <div class="m-field"><label>Location / Link</label><input class="m-input" id="m-loc" value="Conference Room A / Zoom"></div>
+    <div class="m-field"><label>Host / Facilitator</label><input class="m-input" id="m-host" value="Project Manager"></div>
+    <div class="m-field"><label>Attendees (comma sep.)</label><input class="m-input" id="m-att" value="Dev Team, QA, Design Lead"></div>
+  </div>
+  <div class="m-field" style="margin-bottom:1.2rem;"><label>Meeting Objective</label><textarea class="m-textarea" id="m-obj" placeholder="Primary goal of this meeting...">Align on Q3 deliverables and assign ownership.</textarea></div>
+
+  <div class="m-agenda-box">
+    <table class="m-agenda-table">
+      <thead>
+        <tr>
+          <th style="width:40px;">#</th>
+          <th>Topic</th>
+          <th style="width:120px;">Owner</th>
+          <th style="width:110px;">Type</th>
+          <th style="width:70px;">Time</th>
+          <th style="width:90px;">Actions</th>
+        </tr>
+      </thead>
+      <tbody id="m-agenda-body"></tbody>
+    </table>
+  </div>
+  <button class="m-add-row" id="m-add" style="margin-bottom:1rem;padding:0.6rem 1rem;background:var(--card);border:1px dashed var(--border);border-radius:8px;color:var(--text-sec);cursor:pointer;width:auto;font-size:0.85rem;">+ Add Agenda Item</button>
+
+  <div class="m-time-bar">
+    <div class="m-bar-header">
+      <span>Allocated: <b id="m-alloc">0m</b> / <b id="m-limit">60m</b></span>
+      <span id="m-status">Ready</span>
+    </div>
+    <div class="m-bar-track"><div class="m-bar-fill" id="m-bar"></div></div>
+  </div>
+
+  <div class="m-preview" id="m-preview">Preview will appear here...</div>
+
+  <div class="m-actions">
+    <button class="m-btn m-btn-secondary" id="m-copy">📋 Copy Text</button>
+    <button class="m-btn m-btn-secondary" id="m-dl">📥 Download .md</button>
+    <button class="m-btn m-btn-primary" id="m-print">🖨️ Print / PDF</button>
+  </div>
+
+  <div class="m-toast" id="m-toast"></div>
+
+  <script>
+    (function(){
+      // Templates
+      const templates = {
+        standup: { title:'Daily Standup', dur:15, items:[{t:'What did I do yesterday?',o:'Everyone',tp:'disc',time:5},{t:'What will I do today?',o:'Everyone',tp:'disc',time:5},{t:'Any blockers?',o:'Everyone',tp:'dec',time:5}] },
+        sprint: { title:'Sprint Review & Retrospective', dur:60, items:[{t:'Demo completed work',o:'Devs',tp:'info',time:15},{t:'Feedback & metrics',o:'PO/PM',tp:'disc',time:15},{t:'What went well?',o:'All',tp:'disc',time:10},{t:'Action items for next sprint',o:'All',tp:'dec',time:10}] },
+        client: { title:'Client Check-In Call', dur:45, items:[{t:'Progress update & deliverables',o:'Account Mgr',tp:'info',time:15},{t:'Review & feedback',o:'Client',tp:'disc',time:15},{t:'Next steps & timeline',o:'Both',tp:'dec',time:15}] },
+        brainstorm: { title:'Creative Brainstorm Session', dur:60, items:[{t:'Problem statement & goals',o:'Facilitator',tp:'info',time:10},{t:'Idea generation (round 1)',o:'All',tp:'disc',time:20},{t:'Idea generation (round 2)',o:'All',tp:'disc',time:20},{t:'Vote & prioritize top 3',o:'All',tp:'dec',time:10}] }
+      };
+
+      // State
+      let state = { items: [{t:'', o:'', tp:'disc', time:10}] };
+      const els = {
+        tpl: document.getElementById('m-tpl'), title: document.getElementById('m-title'), dt: document.getElementById('m-dt'),
+        dur: document.getElementById('m-dur'), loc: document.getElementById('m-loc'), host: document.getElementById('m-host'),
+        att: document.getElementById('m-att'), obj: document.getElementById('m-obj'),
+        tbody: document.getElementById('m-agenda-body'), add: document.getElementById('m-add'),
+        alloc: document.getElementById('m-alloc'), limit: document.getElementById('m-limit'),
+        status: document.getElementById('m-status'), bar: document.getElementById('m-bar'),
+        preview: document.getElementById('m-preview'), toast: document.getElementById('m-toast'),
+        copy: document.getElementById('m-copy'), dl: document.getElementById('m-dl'), print: document.getElementById('m-print')
+      };
+
+      // Utils
+      const toast = msg => { els.toast.textContent = msg; els.toast.classList.add('show'); setTimeout(()=>els.toast.classList.remove('show'), 2000); };
+      const uid = () => Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+      const save = () => {
+        const data = { title: els.title.value, dt: els.dt.value, dur: els.dur.value, loc: els.loc.value, host: els.host.value, att: els.att.value, obj: els.obj.value, items: state.items, tpl: els.tpl.value };
+        localStorage.setItem('meeting_agenda_draft', JSON.stringify(data));
+      };
+      const load = () => {
+        const d = JSON.parse(localStorage.getItem('meeting_agenda_draft')||'{}');
+        if(!d.title) return;
+        Object.assign(els, { title:d.title, dt:d.dt, dur:d.dur, loc:d.loc, host:d.host, att:d.att, obj:d.obj });
+        state.items = d.items || [{t:'',o:'',tp:'disc',time:10}];
+        els.tpl.value = d.tpl || '';
+        render();
+      };
+
+      // Render Agenda Rows
+      const render = () => {
+        els.tbody.innerHTML = state.items.map((it, i) => `
+          <tr>
+            <td style="color:var(--text-sec);font-weight:600;">${i+1}</td>
+            <td><input class="m-input" value="${it.t}" data-field="t" data-idx="${i}" placeholder="e.g., Project Update"></td>
+            <td><input class="m-input" value="${it.o}" data-field="o" data-idx="${i}" placeholder="Owner"></td>
+            <td>
+              <select class="m-select" data-field="tp" data-idx="${i}">
+                <option value="info" ${it.tp==='info'?'selected':''}>ℹ️ Info</option>
+                <option value="disc" ${it.tp==='disc'?'selected':''}>💬 Discussion</option>
+                <option value="dec" ${it.tp==='dec'?'selected':''}>🎯 Decision</option>
+              </select>
+            </td>
+            <td><input type="number" class="m-input" value="${it.time}" min="1" data-field="time" data-idx="${i}" style="width:50px;"></td>
+            <td>
+              <div class="m-row-actions">
+                <button class="m-icon-btn" data-move="-1" ${i===0?'disabled':''}>⬆️</button>
+                <button class="m-icon-btn" data-move="1" ${i===state.items.length-1?'disabled':''}>⬇️</button>
+                <button class="m-icon-btn del" data-del="${i}">🗑️</button>
+              </div>
+            </td>
+          </tr>
+        `).join('');
+        attachRowEvents();
+        calcTime();
+        updatePreview();
+      };
+
+      const attachRowEvents = () => {
+        els.tbody.querySelectorAll('input, select').forEach(el => {
+          el.addEventListener('input', e => {
+            const idx = parseInt(e.target.dataset.idx);
+            const field = e.target.dataset.field;
+            state.items[idx][field] = e.target.value;
+            save(); calcTime(); updatePreview();
+          });
+        });
+        els.tbody.querySelectorAll('[data-move]').forEach(btn => {
+          btn.addEventListener('click', e => {
+            const idx = parseInt(e.target.closest('tr').querySelector('[data-idx]').dataset.idx);
+            const dir = parseInt(e.target.dataset.move);
+            const newIdx = idx + dir;
+            if(newIdx >= 0 && newIdx < state.items.length) {
+              [state.items[idx], state.items[newIdx]] = [state.items[newIdx], state.items[idx]];
+              render(); save();
+            }
+          });
+        });
+        els.tbody.querySelectorAll('[data-del]').forEach(btn => {
+          btn.addEventListener('click', e => {
+            const idx = parseInt(e.target.dataset.del);
+            if(state.items.length > 1) {
+              state.items.splice(idx, 1);
+              render(); save();
+            } else toast('⚠️ Keep at least 1 agenda item');
+          });
+        });
+      };
+
+      // Time Calculation
+      const calcTime = () => {
+        const total = state.items.reduce((sum, i) => sum + (parseInt(i.time)||0), 0);
+        const limit = parseInt(els.dur.value) || 60;
+        els.alloc.textContent = `${total}m`;
+        els.limit.textContent = `${limit}m`;
+        const pct = Math.min(100, (total/limit)*100);
+        els.bar.style.width = `${pct}%`;
+        els.bar.className = `m-bar-fill ${total>limit?'over':total>limit*0.9?'warn':''}`;
+        els.status.textContent = total>limit ? `⚠️ Over by ${total-limit}m` : total===limit ? '✅ Perfect fit' : `${limit-total}m remaining`;
+      };
+
+      // Preview Generation
+      const updatePreview = () => {
+        const dt = els.dt.value ? new Date(els.dt.value).toLocaleString() : 'TBD';
+        const att = els.att.value.split(',').map(s=>s.trim()).filter(Boolean).join(', ') || 'All Team';
+        let agenda = state.items.filter(i=>i.t).map((i,idx) => `${idx+1}. ${i.t} [${i.tp.toUpperCase()}] (${i.time}m) - @${i.o}`).join('\n') || '• Open floor discussion';
+        
+        els.preview.textContent = `📋 ${els.title.value || 'Untitled Meeting'}
+📅 ${dt} | ⏱️ ${els.dur.value}m | 📍 ${els.loc.value || 'TBD'}
+👤 Host: ${els.host.value} | 👥 ${att}
+🎯 Objective: ${els.obj.value || 'N/A'}
+
+📝 AGENDA:
+${agenda}
+
+⏱️ Time Allocation: ${els.alloc.textContent} / ${els.limit.textContent}
+---
+Generated via Professional Tool`;
+      };
+
+      // Events
+      els.add.addEventListener('click', () => { state.items.push({t:'',o:'',tp:'disc',time:10}); render(); save(); });
+      els.dur.addEventListener('input', () => { save(); calcTime(); });
+      Object.values(els).forEach(el => { if(el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') el.addEventListener('input', () => { save(); updatePreview(); }); });
+      
+      els.tpl.addEventListener('change', e => {
+        const t = templates[e.target.value];
+        if(!t) return;
+        els.title.value = t.title; els.dur.value = t.dur;
+        state.items = t.items.map(i => ({...i}));
+        render(); save();
+        toast(`📂 Loaded "${t.title}" template`);
+      });
+
+      els.copy.addEventListener('click', async () => {
+        try { await navigator.clipboard.writeText(els.preview.textContent); toast('📋 Copied to clipboard'); } catch { toast('❌ Copy failed'); }
+      });
+
+      els.dl.addEventListener('click', () => {
+        const blob = new Blob([els.preview.textContent], {type:'text/markdown'});
+        const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+        a.download = `${els.title.value.replace(/\s+/g,'_') || 'Agenda'}.md`;
+        a.click(); URL.revokeObjectURL(a.href);
+        toast('📥 Downloaded .md file');
+      });
+
+      els.print.addEventListener('click', () => window.print());
+
+      // Init
+      const today = new Date(); today.setMinutes(today.getMinutes() - today.getTimezoneOffset());
+      els.dt.value = today.toISOString().slice(0,16);
+      load(); render();
+    })();
+  </script>
+</div>

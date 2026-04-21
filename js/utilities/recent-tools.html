@@ -1,0 +1,540 @@
+<div class="recent-widget">
+  <style>
+    .recent-widget {
+      --rw-bg: var(--bg-card, #111827);
+      --rw-border: var(--glass-border, #374151);
+      --rw-text: var(--text-primary, #f9fafb);
+      --rw-muted: var(--text-secondary, #9ca3af);
+      --rw-accent: #3b82f6;
+      --rw-success: #10b981;
+      --rw-warning: #f59e0b;
+      --rw-danger: #ef4444;
+      --rw-radius: 16px;
+      --rw-transition: 0.25s ease;
+      
+      background: var(--rw-bg);
+      border: 1px solid var(--rw-border);
+      border-radius: var(--rw-radius);
+      padding: 1.5rem;
+      max-width: 680px;
+      margin: 2rem auto;
+      font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+      color: var(--rw-text);
+      box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+    }
+    .recent-widget * { box-sizing: border-box; }
+    
+    /* Header */
+    .rw-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem; }
+    .rw-title { font-size: 1.3rem; font-weight: 600; display: flex; align-items: center; gap: 0.5rem; }
+    .rw-meta { font-size: 0.85rem; color: var(--rw-muted); }
+    
+    /* Search & Filter */
+    .rw-controls { display: flex; gap: 0.5rem; margin-bottom: 1rem; flex-wrap: wrap; }
+    .rw-search {
+      flex: 1; min-width: 200px; padding: 0.6rem 0.8rem; border-radius: 8px;
+      border: 1px solid var(--rw-border); background: rgba(255,255,255,0.05);
+      color: var(--rw-text); font-size: 0.9rem; outline: none; transition: var(--rw-transition);
+    }
+    .rw-search:focus { border-color: var(--rw-accent); box-shadow: 0 0 0 3px rgba(59,130,246,0.2); }
+    .rw-filter {
+      padding: 0.6rem 0.8rem; border-radius: 8px; border: 1px solid var(--rw-border);
+      background: rgba(255,255,255,0.05); color: var(--rw-text); font-size: 0.85rem; cursor: pointer;
+    }
+    .rw-filter:hover { background: var(--rw-accent); color: #fff; border-color: var(--rw-accent); }
+    
+    /* List */
+    .rw-list { display: flex; flex-direction: column; gap: 0.5rem; max-height: 400px; overflow-y: auto; padding-right: 0.3rem; }
+    .rw-list::-webkit-scrollbar { width: 6px; }
+    .rw-list::-webkit-scrollbar-track { background: transparent; }
+    .rw-list::-webkit-scrollbar-thumb { background: var(--rw-border); border-radius: 3px; }
+    
+    /* Item Card */
+    .rw-item {
+      display: flex; align-items: center; gap: 0.8rem; padding: 0.8rem;
+      background: rgba(255,255,255,0.03); border: 1px solid var(--rw-border);
+      border-radius: 10px; cursor: pointer; transition: var(--rw-transition);
+      position: relative;
+    }
+    .rw-item:hover { border-color: var(--rw-accent); transform: translateX(4px); background: rgba(59,130,246,0.08); }
+    .rw-item.pinned { border-left: 3px solid var(--rw-warning); background: rgba(245,158,11,0.08); }
+    
+    .rw-icon {
+      width: 40px; height: 40px; border-radius: 8px; background: rgba(255,255,255,0.1);
+      display: flex; align-items: center; justify-content: center; font-size: 1.2rem; flex-shrink: 0;
+    }
+    .rw-info { flex: 1; min-width: 0; }
+    .rw-name { font-weight: 600; font-size: 0.95rem; margin-bottom: 0.2rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .rw-meta-row { display: flex; align-items: center; gap: 0.5rem; font-size: 0.8rem; color: var(--rw-muted); }
+    .rw-category { background: rgba(59,130,246,0.15); color: var(--rw-accent); padding: 0.15rem 0.5rem; border-radius: 4px; font-size: 0.75rem; }
+    .rw-time { font-family: monospace; }
+    
+    .rw-actions { display: flex; gap: 0.3rem; }
+    .rw-action-btn {
+      width: 28px; height: 28px; border: none; border-radius: 6px;
+      background: rgba(255,255,255,0.1); color: var(--rw-text); cursor: pointer;
+      display: flex; align-items: center; justify-content: center; font-size: 0.9rem;
+      transition: var(--rw-transition);
+    }
+    .rw-action-btn:hover { background: var(--rw-accent); color: #fff; }
+    .rw-action-btn.pin.active { color: var(--rw-warning); background: rgba(245,158,11,0.2); }
+    .rw-action-btn.delete:hover { background: var(--rw-danger); }
+    
+    /* Empty State */
+    .rw-empty { text-align: center; padding: 2rem 1rem; color: var(--rw-muted); }
+    .rw-empty-icon { font-size: 2.5rem; margin-bottom: 0.5rem; opacity: 0.5; }
+    
+    /* Footer Actions */
+    .rw-footer { display: flex; gap: 0.5rem; margin-top: 1rem; flex-wrap: wrap; }
+    .rw-btn {
+      flex: 1; min-width: 120px; padding: 0.6rem; border: none; border-radius: 8px;
+      font-weight: 500; font-size: 0.85rem; cursor: pointer; transition: var(--rw-transition);
+      display: flex; align-items: center; justify-content: center; gap: 0.4rem;
+    }
+    .rw-btn.secondary { background: rgba(255,255,255,0.05); color: var(--rw-text); border: 1px solid var(--rw-border); }
+    .rw-btn.secondary:hover { background: var(--rw-accent); color: #fff; border-color: var(--rw-accent); }
+    .rw-btn.danger { background: rgba(239,68,68,0.1); color: var(--rw-danger); border: 1px solid var(--rw-danger); }
+    .rw-btn.danger:hover { background: var(--rw-danger); color: #fff; }
+    
+    /* Settings Panel */
+    .rw-settings { margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--rw-border); }
+    .rw-settings-toggle {
+      background: none; border: none; color: var(--rw-muted); cursor: pointer;
+      font-size: 0.85rem; display: flex; align-items: center; gap: 0.3rem; width: 100%; text-align: left;
+    }
+    .rw-settings-panel { display: none; margin-top: 0.8rem; padding: 0.8rem; background: rgba(255,255,255,0.03); border-radius: 8px; }
+    .rw-settings-panel.show { display: block; }
+    .rw-setting-row { display: flex; justify-content: space-between; align-items: center; padding: 0.4rem 0; font-size: 0.9rem; }
+    .rw-setting-row input[type="number"], .rw-setting-row select {
+      padding: 0.3rem 0.5rem; border-radius: 6px; border: 1px solid var(--rw-border);
+      background: rgba(255,255,255,0.1); color: var(--rw-text); font-size: 0.85rem;
+    }
+    
+    /* Toast */
+    .rw-toast { position: fixed; bottom: 24px; right: 24px; padding: 0.75rem 1rem; border-radius: 8px; font-weight: 500; transform: translateY(120%); opacity: 0; transition: 0.3s; z-index: 9999; box-shadow: 0 8px 20px rgba(0,0,0,0.25); pointer-events: none; }
+    .rw-toast.success { background: var(--rw-success); color: #fff; }
+    .rw-toast.error { background: var(--rw-danger); color: #fff; }
+    .rw-toast.info { background: var(--rw-accent); color: #fff; }
+    .rw-toast.show { transform: translateY(0); opacity: 1; }
+    
+    /* Light Mode */
+    :root.light-mode .recent-widget { --rw-bg: #ffffff; --rw-border: #e5e7eb; --rw-text: #111827; --rw-muted: #6b7280; }
+    :root.light-mode .rw-search, :root.light-mode .rw-filter, :root.light-mode .rw-item { background: #f9fafb; }
+    :root.light-mode .rw-action-btn { background: #f3f4f6; color: #374151; }
+    :root.light-mode .rw-btn.secondary { background: #f3f4f6; color: #374151; border-color: #e5e7eb; }
+    
+    /* Print */
+    @media print {
+      .rw-controls, .rw-footer, .rw-settings, .rw-action-btn, .rw-toast { display: none !important; }
+      .rw-item { break-inside: avoid; border-color: #000 !important; }
+    }
+  </style>
+
+  <!-- Header -->
+  <div class="rw-header">
+    <div class="rw-title">🕒 Recently Opened</div>
+    <div class="rw-meta"><span id="rw-count">0</span> items • <span id="rw-pinned-count">0</span> pinned</div>
+  </div>
+  
+  <!-- Search & Filter -->
+  <div class="rw-controls">
+    <input type="text" class="rw-search" id="rw-search" placeholder="🔍 Search tools...">
+    <select class="rw-filter" id="rw-filter">
+      <option value="all">📋 All</option>
+      <option value="pinned">📌 Pinned</option>
+      <option value="today">📅 Today</option>
+      <option value="week">🗓️ This Week</option>
+    </select>
+  </div>
+  
+  <!-- List -->
+  <div class="rw-list" id="rw-list">
+    <div class="rw-empty">
+      <div class="rw-empty-icon">🕐</div>
+      <div>No recent tools yet</div>
+      <div style="font-size:0.85rem;margin-top:0.3rem">Open any tool to see it here</div>
+    </div>
+  </div>
+  
+  <!-- Footer Actions -->
+  <div class="rw-footer">
+    <button class="rw-btn secondary" id="rw-export">📥 Export History</button>
+    <button class="rw-btn secondary" id="rw-import">📤 Import</button>
+    <button class="rw-btn danger" id="rw-clear">🗑️ Clear All</button>
+  </div>
+  <input type="file" id="rw-file-input" accept=".json" style="display:none">
+  
+  <!-- Settings -->
+  <div class="rw-settings">
+    <button class="rw-settings-toggle" id="rw-settings-toggle">⚙️ Settings <span style="margin-left:0.3rem">▼</span></button>
+    <div class="rw-settings-panel" id="rw-settings-panel">
+      <div class="rw-setting-row">
+        <span>Max items to keep</span>
+        <input type="number" id="rw-max-items" min="5" max="100" value="20" style="width:70px">
+      </div>
+      <div class="rw-setting-row">
+        <span>Auto-remove after</span>
+        <select id="rw-retention">
+          <option value="7">7 days</option>
+          <option value="30" selected>30 days</option>
+          <option value="90">90 days</option>
+          <option value="0">Never</option>
+        </select>
+      </div>
+      <div class="rw-setting-row">
+        <span>Track across devices</span>
+        <input type="checkbox" id="rw-sync" disabled title="Requires account">
+      </div>
+      <button class="rw-btn secondary" id="rw-save-settings" style="margin-top:0.5rem;width:100%">💾 Save Settings</button>
+    </div>
+  </div>
+  
+  <div class="rw-toast" id="rw-toast"></div>
+
+  <script>
+    (function() {
+      const CONFIG = {
+        STORAGE_KEY: 'ab_recent_tools',
+        SETTINGS_KEY: 'ab_recent_settings',
+        TOOLS_REGISTRY: 'ab_tools_registry', // Global tool definitions
+        DEFAULTS: { maxItems: 20, retentionDays: 30, sync: false }
+      };
+      
+      // Tool icons mapping (customize per your actual tools)
+      const TOOL_ICONS = {
+        'calculator': '🧮', 'converter': '🔄', 'password': '🔐', 'qr': '📱',
+        'weather': '🌤️', 'currency': '💱', 'loan': '🏦', 'tip': '💡',
+        'budget': '📊', 'tax': '🧾', 'interest': '📈', 'discount': '🏷️',
+        'default': '🛠️'
+      };
+      
+      const els = {
+        list: document.getElementById('rw-list'),
+        count: document.getElementById('rw-count'),
+        pinnedCount: document.getElementById('rw-pinned-count'),
+        search: document.getElementById('rw-search'),
+        filter: document.getElementById('rw-filter'),
+        exportBtn: document.getElementById('rw-export'),
+        importBtn: document.getElementById('rw-import'),
+        clearBtn: document.getElementById('rw-clear'),
+        fileInput: document.getElementById('rw-file-input'),
+        settingsToggle: document.getElementById('rw-settings-toggle'),
+        settingsPanel: document.getElementById('rw-settings-panel'),
+        maxItems: document.getElementById('rw-max-items'),
+        retention: document.getElementById('rw-retention'),
+        sync: document.getElementById('rw-sync'),
+        saveSettings: document.getElementById('rw-save-settings'),
+        toast: document.getElementById('rw-toast')
+      };
+      
+      let settings = JSON.parse(localStorage.getItem(CONFIG.SETTINGS_KEY) || JSON.stringify(CONFIG.DEFAULTS));
+      let recent = JSON.parse(localStorage.getItem(CONFIG.STORAGE_KEY) || '[]');
+      
+      // Toast
+      const toast = (msg, type = 'info') => {
+        els.toast.textContent = msg;
+        els.toast.className = `rw-toast ${type} show`;
+        setTimeout(() => els.toast.classList.remove('show'), 2500);
+      };
+      
+      // Get tool icon
+      const getIcon = (tool) => {
+        const key = Object.keys(TOOL_ICONS).find(k => tool.name?.toLowerCase().includes(k) || tool.category?.toLowerCase().includes(k));
+        return TOOL_ICONS[key] || TOOL_ICONS.default;
+      };
+      
+      // Format time ago
+      const timeAgo = (ts) => {
+        const diff = Date.now() - ts;
+        const mins = Math.floor(diff / 60000);
+        if (mins < 1) return 'Just now';
+        if (mins < 60) return `${mins}m ago`;
+        const hrs = Math.floor(mins / 60);
+        if (hrs < 24) return `${hrs}h ago`;
+        const days = Math.floor(hrs / 24);
+        return `${days}d ago`;
+      };
+      
+      // Filter items by date
+      const isWithin = (ts, filter) => {
+        const now = Date.now();
+        const day = 24 * 60 * 60 * 1000;
+        if (filter === 'today') return ts > now - day;
+        if (filter === 'week') return ts > now - 7 * day;
+        return true;
+      };
+      
+      // Render list
+      const render = () => {
+        const query = els.search.value.toLowerCase();
+        const filter = els.filter.value;
+        
+        let items = recent.filter(item => {
+          const matchesSearch = !query || item.name?.toLowerCase().includes(query) || item.category?.toLowerCase().includes(query);
+          const matchesFilter = filter === 'all' || (filter === 'pinned' && item.pinned) || (filter !== 'pinned' && isWithin(item.time, filter));
+          return matchesSearch && matchesFilter;
+        });
+        
+        // Sort: pinned first, then by time desc
+        items.sort((a, b) => (b.pinned - a.pinned) || (b.time - a.time));
+        
+        // Update counts
+        els.count.textContent = recent.length;
+        els.pinnedCount.textContent = recent.filter(i => i.pinned).length;
+        
+        // Empty state
+        if (items.length === 0) {
+          els.list.innerHTML = `
+            <div class="rw-empty">
+              <div class="rw-empty-icon">${query || filter !== 'all' ? '🔍' : '🕐'}</div>
+              <div>${query ? 'No matching tools' : filter !== 'all' ? 'No items in this filter' : 'No recent tools yet'}</div>
+              <div style="font-size:0.85rem;margin-top:0.3rem">${query ? 'Try a different search' : 'Open any tool to see it here'}</div>
+            </div>`;
+          return;
+        }
+        
+        // Render items
+        els.list.innerHTML = items.map((item, idx) => {
+          const originalIdx = recent.findIndex(r => r.id === item.id);
+          return `
+            <div class="rw-item ${item.pinned ? 'pinned' : ''}" data-id="${item.id}" data-idx="${originalIdx}" tabindex="0" role="link">
+              <div class="rw-icon">${getIcon(item)}</div>
+              <div class="rw-info">
+                <div class="rw-name" title="${item.name}">${item.name}</div>
+                <div class="rw-meta-row">
+                  ${item.category ? `<span class="rw-category">${item.category}</span>` : ''}
+                  <span class="rw-time" title="${new Date(item.time).toLocaleString()}">${timeAgo(item.time)}</span>
+                </div>
+              </div>
+              <div class="rw-actions">
+                <button class="rw-action-btn pin ${item.pinned ? 'active' : ''}" title="${item.pinned ? 'Unpin' : 'Pin'}" data-action="pin">📌</button>
+                <button class="rw-action-btn delete" title="Remove" data-action="delete">✕</button>
+              </div>
+            </div>`;
+        }).join('');
+        
+        // Bind events
+        bindItemEvents();
+      };
+      
+      // Bind item click/pin/delete
+      const bindItemEvents = () => {
+        // Click to open tool
+        document.querySelectorAll('.rw-item').forEach(item => {
+          item.onclick = (e) => {
+            if (e.target.closest('.rw-action-btn')) return; // Ignore action buttons
+            const id = item.dataset.id;
+            openTool(id);
+          };
+          item.onkeydown = (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); item.click(); } };
+        });
+        
+        // Action buttons
+        document.querySelectorAll('.rw-action-btn').forEach(btn => {
+          btn.onclick = (e) => {
+            e.stopPropagation();
+            const item = btn.closest('.rw-item');
+            const idx = +item.dataset.idx;
+            const action = btn.dataset.action;
+            
+            if (action === 'pin') {
+              recent[idx].pinned = !recent[idx].pinned;
+              save();
+              toast(recent[idx].pinned ? '📌 Pinned' : '📍 Unpinned', 'info');
+            } else if (action === 'delete') {
+              recent.splice(idx, 1);
+              save();
+              toast('🗑️ Removed from history', 'info');
+            }
+            render();
+          };
+        });
+      };
+      
+      // Open tool (integrate with your actual routing)
+      const openTool = (id) => {
+        // 🔄 REPLACE WITH YOUR ACTUAL ROUTING:
+        // Option 1: Hash routing
+        // window.location.hash = `#tool/${id}`;
+        
+        // Option 2: Path routing
+        // window.location.href = `/tools/${id}`;
+        
+        // Option 3: Custom event for framework (React/Vue)
+        window.dispatchEvent(new CustomEvent('tool:open', { detail: { id } }));
+        
+        // Option 4: Direct function call if tools are functions
+        // if (window.ABTools?.[id]) window.ABTools[id]();
+        
+        toast(`🚀 Opening: ${recent.find(r => r.id === id)?.name || id}`, 'success');
+        
+        // Analytics event
+        window.dispatchEvent(new CustomEvent('recent:toolOpened', { detail: { id, source: 'recent-widget' } }));
+      };
+      
+      // Save to localStorage
+      const save = () => {
+        // Auto-cleanup: remove old items
+        const now = Date.now();
+        const day = 24 * 60 * 60 * 1000;
+        if (settings.retentionDays > 0) {
+          recent = recent.filter(item => item.pinned || (now - item.time) < settings.retentionDays * day);
+        }
+        // Limit max items (keep pinned)
+        const pinned = recent.filter(i => i.pinned);
+        const others = recent.filter(i => !i.pinned).slice(0, settings.maxItems - pinned.length);
+        recent = [...pinned, ...others];
+        
+        localStorage.setItem(CONFIG.STORAGE_KEY, JSON.stringify(recent));
+      };
+      
+      // Add tool to recent (call this when any tool is opened site-wide)
+      window.addRecentTool = (tool) => {
+        const item = {
+          id: tool.id || tool.name?.toLowerCase().replace(/\s+/g, '-'),
+          name: tool.name,
+          category: tool.category || 'Tools',
+          url: tool.url || `#/tool/${tool.id}`,
+          icon: tool.icon,
+          time: Date.now(),
+          pinned: false,
+          ...tool
+        };
+        
+        // Remove duplicate if exists
+        recent = recent.filter(r => r.id !== item.id);
+        // Add to top
+        recent.unshift(item);
+        save();
+        render();
+        
+        // Global event for other widgets
+        window.dispatchEvent(new CustomEvent('recent:updated', { detail: { tool: item, count: recent.length } }));
+      };
+      
+      // Export history
+      const exportHistory = () => {
+        const data = { exported_at: new Date().toISOString(), items: recent };
+        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = `recent-tools-${new Date().toISOString().slice(0,10)}.json`;
+        a.click();
+        toast('📥 History exported', 'success');
+      };
+      
+      // Import history
+      const importHistory = (file) => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          try {
+            const data = JSON.parse(e.target.result);
+            if (!Array.isArray(data.items) && !Array.isArray(data)) throw new Error('Invalid format');
+            const items = Array.isArray(data) ? data : data.items;
+            // Merge: keep existing pinned, add new
+            const existingIds = new Set(recent.map(r => r.id));
+            items.forEach(item => { if (!existingIds.has(item.id)) recent.push(item); });
+            save();
+            render();
+            toast('📤 History imported', 'success');
+          } catch { toast('❌ Invalid file format', 'error'); }
+        };
+        reader.readAsText(file);
+      };
+      
+      // Clear all (keep pinned option)
+      const clearAll = (keepPinned = false) => {
+        if (keepPinned) {
+          recent = recent.filter(i => i.pinned);
+          toast('🗑️ Non-pinned items cleared', 'info');
+        } else {
+          if (!confirm('🗑️ Clear ALL recent history? Pinned items will also be removed.')) return;
+          recent = [];
+          toast('🗑️ All history cleared', 'info');
+        }
+        save();
+        render();
+      };
+      
+      // Load settings UI
+      const loadSettings = () => {
+        els.maxItems.value = settings.maxItems;
+        els.retention.value = settings.retentionDays;
+        els.sync.checked = settings.sync;
+      };
+      
+      // Save settings
+      const saveSettings = () => {
+        settings = {
+          maxItems: +els.maxItems.value,
+          retentionDays: +els.retention.value,
+          sync: els.sync.checked
+        };
+        localStorage.setItem(CONFIG.SETTINGS_KEY, JSON.stringify(settings));
+        save(); // Re-apply limits
+        render();
+        toast('⚙️ Settings saved', 'success');
+      };
+      
+      // Event Listeners
+      els.search.oninput = render;
+      els.filter.onchange = render;
+      els.exportBtn.onclick = exportHistory;
+      els.importBtn.onclick = () => els.fileInput.click();
+      els.fileInput.onchange = (e) => e.target.files[0] && importHistory(e.target.files[0]);
+      els.clearBtn.onclick = () => {
+        const pinned = recent.filter(i => i.pinned).length;
+        if (pinned > 0) {
+          const choice = confirm(`You have ${pinned} pinned item(s).\n\n• Cancel: Keep all\n• OK: Clear non-pinned only\n• Shift+Click: Clear EVERYTHING`);
+          if (choice) clearAll(false); // Clear non-pinned
+          else clearAll(true); // Keep pinned
+        } else {
+          clearAll(false);
+        }
+      };
+      // Shift+click for force clear
+      els.clearBtn.onmousedown = (e) => { if (e.shiftKey) { e.preventDefault(); clearAll(false); } };
+      
+      els.settingsToggle.onclick = () => els.settingsPanel.classList.toggle('show');
+      els.saveSettings.onclick = saveSettings;
+      
+      // Keyboard shortcuts
+      document.addEventListener('keydown', (e) => {
+        if (e.ctrlKey && e.key === 'k') { e.preventDefault(); els.search.focus(); } // Ctrl+K to search
+        if (e.key === 'Escape' && els.search === document.activeElement) { els.search.blur(); els.search.value = ''; render(); }
+      });
+      
+      // Listen for global tool open events (from other parts of your site)
+      window.addEventListener('tool:opened', (e) => {
+        if (e.detail?.tool) addRecentTool(e.detail.tool);
+      });
+      
+      // Init
+      loadSettings();
+      render();
+      
+      // Expose API for external use
+      window.RecentWidget = {
+        add: addRecentTool,
+        get: () => [...recent],
+        clear: clearAll,
+        export: exportHistory,
+        import: importHistory,
+        settings: () => ({...settings})
+      };
+      
+      // Demo: Add sample items if empty (remove in production)
+      if (recent.length === 0 && !localStorage.getItem('rw_demo_shown')) {
+        const demo = [
+          { id: 'loan-calculator', name: 'Loan Calculator', category: 'Finance', time: Date.now() - 3600000 },
+          { id: 'currency-converter', name: 'Currency Converter', category: 'Finance', time: Date.now() - 7200000, pinned: true },
+          { id: 'password-generator', name: 'Password Generator', category: 'Security', time: Date.now() - 86400000 }
+        ];
+        recent = demo;
+        save();
+        render();
+        localStorage.setItem('rw_demo_shown', 'true');
+      }
+    })();
+  </script>
+</div>

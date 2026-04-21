@@ -1,0 +1,801 @@
+<div class="cf-pro-tool">
+  <style>
+    .cf-pro-tool {
+      --cf-primary: #6366f1; --cf-primary-hover: #4f46e5; --cf-accent: #8b5cf6;
+      --cf-bg: #0f0f1a; --cf-card: #1a1a2e; --cf-input: #1e1e3f;
+      --cf-border: #334155; --cf-text: #f1f5f9; --cf-text-muted: #94a3b8;
+      --cf-success: #10b981; --cf-error: #ef4444; --cf-warning: #f59e0b;
+      --cf-radius: 12px; --cf-shadow: 0 4px 20px rgba(0,0,0,0.4);
+      --cf-transition: all 0.25s cubic-bezier(0.4,0,0.2,1);
+      --cf-font-mono: 'Fira Code', 'JetBrains Mono', 'Courier New', monospace;
+      
+      max-width: 1000px; margin: 1.5rem auto; padding: 1.2rem;
+      background: var(--cf-card); border: 1px solid var(--cf-border);
+      border-radius: var(--cf-radius); box-shadow: var(--cf-shadow);
+      font-family: system-ui, -apple-system, 'Segoe UI', sans-serif; color: var(--cf-text);
+    }
+    
+    /* Header */
+    .cf-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; padding-bottom: 0.8rem; border-bottom: 1px solid var(--cf-border); flex-wrap: wrap; gap: 0.5rem; }
+    .cf-title { font-size: 1.3rem; font-weight: 700; display: flex; align-items: center; gap: 0.5rem; }
+    .cf-title i { color: var(--cf-primary); }
+    .cf-badges { display: flex; gap: 0.4rem; flex-wrap: wrap; }
+    .cf-badge { padding: 0.25rem 0.6rem; background: var(--cf-input); border-radius: 6px; font-size: 0.7rem; color: var(--cf-text-muted); }
+    
+    /* Controls */
+    .cf-controls { display: flex; gap: 0.5rem; margin-bottom: 1rem; flex-wrap: wrap; align-items: center; }
+    .cf-select { padding: 0.5rem 0.9rem; background: var(--cf-input); border: 1px solid var(--cf-border); border-radius: 8px; color: var(--cf-text); font-size: 0.85rem; outline: none; cursor: pointer; min-width: 130px; }
+    .cf-select:focus { border-color: var(--cf-primary); box-shadow: 0 0 0 2px rgba(99,102,241,0.2); }
+    .cf-btn { padding: 0.5rem 1rem; border-radius: 8px; border: 1px solid var(--cf-border); background: var(--cf-input); color: var(--cf-text); font-size: 0.85rem; cursor: pointer; transition: var(--cf-transition); display: flex; align-items: center; gap: 0.4rem; font-weight: 500; }
+    .cf-btn:hover { background: var(--cf-primary); border-color: transparent; color: white; transform: translateY(-1px); }
+    .cf-btn.primary { background: linear-gradient(135deg, var(--cf-primary), var(--cf-accent)); border: none; color: white; font-weight: 600; }
+    .cf-btn.primary:hover { box-shadow: 0 4px 15px rgba(99,102,241,0.4); }
+    .cf-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+    .cf-btn-group { display: flex; gap: 0.3rem; }
+    
+    /* Format Options */
+    .cf-options { display: flex; gap: 0.8rem; margin-bottom: 0.8rem; flex-wrap: wrap; padding: 0.6rem 0.8rem; background: var(--cf-input); border-radius: 10px; border: 1px solid var(--cf-border); align-items: center; }
+    .cf-opt-group { display: flex; align-items: center; gap: 0.4rem; font-size: 0.8rem; }
+    .cf-opt-group label { cursor: pointer; display: flex; align-items: center; gap: 0.3rem; }
+    .cf-opt-input { width: 60px; padding: 0.3rem 0.5rem; background: var(--cf-bg); border: 1px solid var(--cf-border); border-radius: 6px; color: var(--cf-text); font-size: 0.8rem; text-align: center; }
+    
+    /* Editor Grid */
+    .cf-editor-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 0.8rem; }
+    @media (max-width: 700px) { .cf-editor-grid { grid-template-columns: 1fr; } }
+    
+    .cf-editor-box { display: flex; flex-direction: column; }
+    .cf-editor-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem; padding: 0.4rem 0.6rem; background: var(--cf-input); border-radius: 8px 8px 0 0; border: 1px solid var(--cf-border); border-bottom: none; font-size: 0.8rem; }
+    .cf-editor-title { font-weight: 600; display: flex; align-items: center; gap: 0.4rem; }
+    .cf-editor-stats { color: var(--cf-text-muted); font-size: 0.75rem; }
+    
+    .cf-editor-wrapper { position: relative; flex: 1; border: 2px solid var(--cf-border); border-radius: 0 0 10px 10px; overflow: hidden; background: #0a0a14; }
+    .cf-editor-wrapper:focus-within { border-color: var(--cf-primary); }
+    
+    .cf-line-numbers { position: absolute; left: 0; top: 0; bottom: 0; width: 45px; background: #15152a; border-right: 1px solid var(--cf-border); padding: 0.8rem 0; text-align: right; font-family: var(--cf-font-mono); font-size: 0.8rem; color: var(--cf-text-muted); user-select: none; overflow: hidden; }
+    .cf-line-numbers span { display: block; padding: 0 0.5rem; line-height: 1.5; }
+    
+    .cf-textarea { width: 100%; height: 100%; min-height: 280px; padding: 0.8rem 0.8rem 0.8rem 50px; background: transparent; border: none; color: var(--cf-text); font-family: var(--cf-font-mono); font-size: 0.85rem; line-height: 1.5; outline: none; resize: vertical; tab-size: 2; }
+    .cf-textarea[readonly] { background: #0d0d1a; cursor: default; }
+    
+    /* Status Bar */
+    .cf-status { display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0.8rem; background: var(--cf-input); border-radius: 8px; font-size: 0.8rem; margin-bottom: 0.8rem; flex-wrap: wrap; gap: 0.4rem; }
+    .cf-status-msg { display: flex; align-items: center; gap: 0.4rem; }
+    .cf-status-msg.success { color: var(--cf-success); }
+    .cf-status-msg.error { color: var(--cf-error); }
+    .cf-status-info { color: var(--cf-text-muted); }
+    
+    /* Action Buttons Row */
+    .cf-actions { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1rem; }
+    
+    /* Diff View */
+    .cf-diff { margin-top: 0.8rem; display: none; }
+    .cf-diff.show { display: block; }
+    .cf-diff-header { display: flex; justify-content: space-between; margin-bottom: 0.4rem; font-size: 0.85rem; font-weight: 600; }
+    .cf-diff-content { background: #0a0a14; border: 1px solid var(--cf-border); border-radius: 8px; padding: 0.8rem; font-family: var(--cf-font-mono); font-size: 0.8rem; max-height: 200px; overflow: auto; white-space: pre-wrap; }
+    .cf-diff-add { background: rgba(16,185,129,0.2); color: var(--cf-success); }
+    .cf-diff-rem { background: rgba(239,68,68,0.2); color: var(--cf-error); text-decoration: line-through; }
+    
+    /* History */
+    .cf-history { margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--cf-border); }
+    .cf-history-header { display: flex; justify-content: space-between; align-items: center; cursor: pointer; margin-bottom: 0.5rem; }
+    .cf-history-title { font-size: 0.9rem; font-weight: 600; display: flex; align-items: center; gap: 0.4rem; }
+    .cf-history-toggle { color: var(--cf-text-muted); transition: var(--cf-transition); }
+    .cf-history-toggle.collapsed { transform: rotate(-90deg); }
+    .cf-history-list { display: grid; gap: 0.4rem; max-height: 150px; overflow-y: auto; transition: var(--cf-transition); }
+    .cf-history-list.collapsed { display: none; }
+    .cf-history-item { padding: 0.5rem 0.7rem; background: var(--cf-input); border-radius: 8px; cursor: pointer; border-left: 3px solid var(--cf-primary); transition: var(--cf-transition); font-size: 0.8rem; display: flex; justify-content: space-between; align-items: center; }
+    .cf-history-item:hover { background: #252545; }
+    .cf-history-preview { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 220px; color: var(--cf-text-muted); }
+    .cf-history-lang { font-size: 0.7rem; padding: 0.15rem 0.5rem; background: var(--cf-bg); border-radius: 4px; }
+    .cf-history-del { padding: 0.2rem 0.4rem; background: transparent; border: none; color: var(--cf-error); cursor: pointer; border-radius: 4px; font-size: 0.75rem; }
+    .cf-history-del:hover { background: rgba(239,68,68,0.15); }
+    
+    /* Copy Dropdown */
+    .cf-copy-dropdown { position: relative; display: inline-block; }
+    .cf-copy-menu { position: absolute; bottom: 100%; right: 0; margin-bottom: 0.4rem; background: var(--cf-card); border: 1px solid var(--cf-border); border-radius: 10px; padding: 0.4rem; min-width: 180px; box-shadow: var(--cf-shadow); display: none; z-index: 100; }
+    .cf-copy-menu.show { display: block; animation: cf-slide 0.2s ease; }
+    @keyframes cf-slide { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    .cf-copy-item { display: block; width: 100%; padding: 0.5rem 0.8rem; background: none; border: none; color: var(--cf-text); font-size: 0.85rem; text-align: left; cursor: pointer; border-radius: 6px; transition: var(--cf-transition); }
+    .cf-copy-item:hover { background: var(--cf-primary); color: white; }
+    
+    /* Toast */
+    .cf-toast { position: fixed; bottom: 1.2rem; right: 1.2rem; padding: 0.7rem 1.1rem; background: var(--cf-card); border-left: 4px solid var(--cf-success); border-radius: 10px; box-shadow: var(--cf-shadow); display: flex; align-items: center; gap: 0.5rem; z-index: 9999; transform: translateY(150%); transition: transform 0.35s cubic-bezier(0.68,-0.55,0.265,1.55); font-size: 0.9rem; }
+    .cf-toast.show { transform: translateY(0); }
+    .cf-toast.error { border-left-color: var(--cf-error); }
+    
+    /* Responsive */
+    @media (max-width: 600px) {
+      .cf-pro-tool { padding: 1rem; }
+      .cf-controls { flex-direction: column; align-items: stretch; }
+      .cf-options { flex-direction: column; align-items: flex-start; }
+      .cf-actions { flex-direction: column; }
+      .cf-btn { width: 100%; justify-content: center; }
+    }
+  </style>
+
+  <!-- Header -->
+  <div class="cf-header">
+    <div class="cf-title"><i class="fas fa-code"></i> Code Formatter Pro</div>
+    <div class="cf-badges">
+      <span class="cf-badge">JS/JSON/HTML/CSS</span>
+      <span class="cf-badge">Minify</span>
+      <span class="cf-badge">Diff View</span>
+    </div>
+  </div>
+
+  <!-- Controls -->
+  <div class="cf-controls">
+    <select class="cf-select" id="cf-lang" title="Select language">
+      <option value="json">📋 JSON</option>
+      <option value="js">🟨 JavaScript</option>
+      <option value="html">🌐 HTML</option>
+      <option value="css">🎨 CSS</option>
+      <option value="auto">🔍 Auto-Detect</option>
+    </select>
+    <button class="cf-btn primary" id="cf-format" title="Format code (Ctrl+Enter)">✨ Format</button>
+    <button class="cf-btn" id="cf-minify" title="Minify code (Ctrl+Shift+M)">📦 Minify</button>
+    <div class="cf-copy-dropdown">
+      <button class="cf-btn" id="cf-copy-btn" title="Copy options">📋 Copy</button>
+      <div class="cf-copy-menu" id="cf-copy-menu">
+        <button class="cf-copy-item" data-copy="raw">📄 Raw Output</button>
+        <button class="cf-copy-item" data-copy="escaped">🔗 Escaped String</button>
+        <button class="cf-copy-item" data-copy="markdown">📝 Markdown Code Block</button>
+      </div>
+    </div>
+    <button class="cf-btn" id="cf-download" title="Download as file">💾 Download</button>
+    <button class="cf-btn" id="cf-clear" title="Clear all">🗑️ Clear</button>
+  </div>
+
+  <!-- Format Options -->
+  <div class="cf-options">
+    <div class="cf-opt-group">
+      <label><input type="checkbox" id="cf-indent-tabs" checked> Use spaces</label>
+      <input type="number" class="cf-opt-input" id="cf-indent-size" value="2" min="1" max="8" title="Indent size">
+      <span style="color:var(--cf-text-muted)">indent</span>
+    </div>
+    <div class="cf-opt-group" id="cf-json-opts">
+      <label><input type="checkbox" id="cf-json-sort" title="Sort JSON keys alphabetically"> Sort keys</label>
+      <label><input type="checkbox" id="cf-json-compact" title="Remove unnecessary whitespace"> Compact</label>
+    </div>
+    <div class="cf-opt-group" id="cf-js-opts" style="display:none">
+      <label><input type="checkbox" id="cf-js-semi" checked> Add semicolons</label>
+      <label><input type="checkbox" id="cf-js-single" title="Use single quotes"> Single quotes</label>
+    </div>
+    <button class="cf-btn" id="cf-diff-toggle" style="margin-left:auto" title="Show differences">🔍 Show Diff</button>
+  </div>
+
+  <!-- Editor -->
+  <div class="cf-editor-grid">
+    <div class="cf-editor-box">
+      <div class="cf-editor-header">
+        <span class="cf-editor-title">📥 Input</span>
+        <span class="cf-editor-stats" id="cf-in-stats">0 lines | 0 chars</span>
+      </div>
+      <div class="cf-editor-wrapper">
+        <div class="cf-line-numbers" id="cf-in-lines"><span>1</span></div>
+        <textarea class="cf-textarea" id="cf-input" placeholder="Paste your code here...&#10;&#10;Supports: JSON, JavaScript, HTML, CSS&#10;Try: {&quot;hello&quot;: &quot;world&quot;}" spellcheck="false"></textarea>
+      </div>
+    </div>
+    <div class="cf-editor-box">
+      <div class="cf-editor-header">
+        <span class="cf-editor-title">📤 Output</span>
+        <span class="cf-editor-stats" id="cf-out-stats">0 lines | 0 chars</span>
+      </div>
+      <div class="cf-editor-wrapper">
+        <div class="cf-line-numbers" id="cf-out-lines"><span>1</span></div>
+        <textarea class="cf-textarea" id="cf-output" readonly placeholder="Formatted code will appear here..." spellcheck="false"></textarea>
+      </div>
+    </div>
+  </div>
+
+  <!-- Diff View -->
+  <div class="cf-diff" id="cf-diff">
+    <div class="cf-diff-header">
+      <span>🔍 Changes Preview</span>
+      <button class="cf-btn" id="cf-diff-close" style="padding:0.3rem 0.6rem;font-size:0.75rem">✕ Close</button>
+    </div>
+    <div class="cf-diff-content" id="cf-diff-content"></div>
+  </div>
+
+  <!-- Status Bar -->
+  <div class="cf-status">
+    <span class="cf-status-msg" id="cf-status-msg">✅ Ready to format</span>
+    <span class="cf-status-info" id="cf-status-info">Language: JSON • Indent: 2 spaces</span>
+  </div>
+
+  <!-- Extra Actions -->
+  <div class="cf-actions">
+    <button class="cf-btn" id="cf-validate" title="Validate syntax">✓ Validate</button>
+    <button class="cf-btn" id="cf-beautify" title="Extra beautify options">🎨 Beautify</button>
+    <button class="cf-btn" id="cf-swap" title="Swap input/output">🔄 Swap</button>
+    <button class="cf-btn" id="cf-auto-format" title="Auto-format on paste">⚡ Auto-Format: OFF</button>
+  </div>
+
+  <!-- History -->
+  <div class="cf-history">
+    <div class="cf-history-header" id="cf-history-toggle">
+      <div class="cf-history-title"><i class="fas fa-history"></i> Format History</div>
+      <span class="cf-history-toggle">▼</span>
+    </div>
+    <div class="cf-history-list" id="cf-history-list"></div>
+  </div>
+
+  <!-- Toast -->
+  <div class="cf-toast" id="cf-toast"><i class="fas fa-check-circle"></i><span id="cf-toast-msg"></span></div>
+
+  <script>
+    (function() {
+      'use strict';
+      
+      // DOM Cache
+      const $ = id => document.getElementById(id);
+      const $$ = sel => document.querySelectorAll(sel);
+      
+      const els = {
+        lang: $('cf-lang'), format: $('cf-format'), minify: $('cf-minify'),
+        copyBtn: $('cf-copy-btn'), copyMenu: $('cf-copy-menu'), download: $('cf-download'), clear: $('cf-clear'),
+        input: $('cf-input'), output: $('cf-output'),
+        inStats: $('cf-in-stats'), outStats: $('cf-out-stats'),
+        inLines: $('cf-in-lines'), outLines: $('cf-out-lines'),
+        indentTabs: $('cf-indent-tabs'), indentSize: $('cf-indent-size'),
+        jsonOpts: $('cf-json-opts'), jsOpts: $('cf-js-opts'),
+        jsonSort: $('cf-json-sort'), jsonCompact: $('cf-json-compact'),
+        jsSemi: $('cf-js-semi'), jsSingle: $('cf-js-single'),
+        diffToggle: $('cf-diff-toggle'), diff: $('cf-diff'), diffContent: $('cf-diff-content'), diffClose: $('cf-diff-close'),
+        statusMsg: $('cf-status-msg'), statusInfo: $('cf-status-info'),
+        validate: $('cf-validate'), beautify: $('cf-beautify'), swap: $('cf-swap'), autoFormat: $('cf-auto-format'),
+        historyToggle: $('cf-history-toggle'), historyList: $('cf-history-list'),
+        toast: $('cf-toast'), toastMsg: $('cf-toast-msg')
+      };
+
+      // State
+      const state = {
+        lang: 'json',
+        history: JSON.parse(localStorage.getItem('cfpro_history') || '[]'),
+        historyCollapsed: false,
+        autoFormatEnabled: false,
+        originalInput: ''
+      };
+
+      // Toast
+      function toast(msg, type = 'success') {
+        els.toastMsg.textContent = msg;
+        els.toast.className = `cf-toast ${type} show`;
+        setTimeout(() => els.toast.classList.remove('show'), 2500);
+      }
+
+      // Update Stats & Line Numbers
+      function updateEditorStats(el, statsEl, linesEl) {
+        const text = el.value;
+        const lines = text.split('\n').length;
+        const chars = text.length;
+        const bytes = new Blob([text]).size;
+        statsEl.textContent = `${lines} lines | ${chars} chars | ${bytes} B`;
+        
+        // Update line numbers
+        linesEl.innerHTML = Array.from({length: Math.max(lines, 1)}, (_, i) => 
+          `<span>${i + 1}</span>`
+        ).join('');
+      }
+
+      // Update Status
+      function setStatus(msg, type = 'info', extra = '') {
+        els.statusMsg.textContent = msg;
+        els.statusMsg.className = `cf-status-msg ${type}`;
+        const langName = els.lang.options[els.lang.selectedIndex].text;
+        els.statusInfo.textContent = extra || `Language: ${langName} • Indent: ${els.indentSize.value} ${els.indentTabs.checked ? 'spaces' : 'tabs'}`;
+      }
+
+      // Auto-detect Language
+      function detectLanguage(code) {
+        code = code.trim();
+        if (!code) return 'json';
+        if (code.startsWith('{') || code.startsWith('[')) return 'json';
+        if (code.startsWith('<!DOCTYPE') || code.startsWith('<html') || /<[\w\-]+[^>]*>/.test(code)) return 'html';
+        if (/[{};]\s*$|function\s*\(|=>\s*{|const\s+\w+\s*=/.test(code)) return 'js';
+        if (/[\w\-]+\s*:[^;]+;|@media|@keyframes/.test(code)) return 'css';
+        return 'json';
+      }
+
+      // Language Change Handler
+      els.lang.onchange = () => {
+        state.lang = els.lang.value;
+        if (state.lang === 'auto') {
+          const detected = detectLanguage(els.input.value);
+          setStatus(`🔍 Auto-detected: ${detected.toUpperCase()}`, 'success');
+        } else {
+          setStatus('✅ Language changed', 'success');
+        }
+        // Show/hide options
+        els.jsonOpts.style.display = state.lang === 'json' || state.lang === 'auto' ? 'flex' : 'none';
+        els.jsOpts.style.display = state.lang === 'js' || state.lang === 'auto' ? 'flex' : 'none';
+      };
+
+      // Input Handlers
+      els.input.oninput = () => {
+        updateEditorStats(els.input, els.inStats, els.inLines);
+        if (state.lang === 'auto') {
+          const detected = detectLanguage(els.input.value);
+          if (detected !== state.lang) {
+            setStatus(`🔍 Detected: ${detected.toUpperCase()}`, 'success');
+          }
+        }
+        // Auto-save to localStorage
+        localStorage.setItem('cfpro_draft', els.input.value);
+      };
+
+      // Sync scroll between textarea and line numbers
+      function syncScroll(src, dest) {
+        src.onscroll = () => { dest.scrollTop = src.scrollTop; };
+      }
+      syncScroll(els.input, els.inLines.parentElement);
+      syncScroll(els.output, els.outLines.parentElement);
+
+      // ============ FORMATTING ENGINES ============
+      
+      // JSON Formatter
+      function formatJSON(txt, options) {
+        const parsed = JSON.parse(txt);
+        if (options.sort) {
+          const sortObj = obj => {
+            if (Array.isArray(obj)) return obj.map(sortObj);
+            if (obj && typeof obj === 'object') {
+              return Object.keys(obj).sort().reduce((acc, key) => {
+                acc[key] = sortObj(obj[key]);
+                return acc;
+              }, {});
+            }
+            return obj;
+          };
+          return JSON.stringify(sortObj(parsed), null, options.compact ? 0 : parseInt(els.indentSize.value));
+        }
+        return JSON.stringify(parsed, null, options.compact ? 0 : parseInt(els.indentSize.value));
+      }
+
+      // JavaScript Formatter (Smart Indent)
+      function formatJS(txt, options) {
+        const indentStr = els.indentTabs.checked ? ' '.repeat(parseInt(els.indentSize.value)) : '\t';
+        let result = '';
+        let indent = 0;
+        let inString = false;
+        let stringChar = '';
+        let i = 0;
+        
+        while (i < txt.length) {
+          const char = txt[i];
+          const next = txt[i + 1];
+          
+          // Handle strings
+          if ((char === '"' || char === "'" || char === '`') && txt[i - 1] !== '\\') {
+            if (!inString) { inString = true; stringChar = char; }
+            else if (char === stringChar) { inString = false; }
+            result += char; i++; continue;
+          }
+          if (inString) { result += char; i++; continue; }
+          
+          // Handle comments
+          if (char === '/' && next === '/') {
+            while (i < txt.length && txt[i] !== '\n') { result += txt[i]; i++; }
+            continue;
+          }
+          if (char === '/' && next === '*') {
+            result += '/*'; i += 2;
+            while (i < txt.length - 1 && !(txt[i] === '*' && txt[i + 1] === '/')) {
+              result += txt[i]; i++;
+            }
+            result += '*/'; i += 2; continue;
+          }
+          
+          // Handle braces/brackets
+          if (char === '{' || char === '[' || char === '(') {
+            result += char + '\n' + indentStr.repeat(++indent);
+            i++; continue;
+          }
+          if (char === '}' || char === ']' || char === ')') {
+            result = result.trimEnd();
+            result += '\n' + indentStr.repeat(--indent) + char;
+            i++; continue;
+          }
+          
+          // Handle semicolons and commas
+          if ((char === ';' || char === ',') && options.semi) {
+            result += char + '\n' + indentStr.repeat(indent);
+            i++; continue;
+          }
+          
+          // Handle newlines
+          if (char === '\n') {
+            result += '\n' + indentStr.repeat(indent);
+            i++; continue;
+          }
+          
+          result += char;
+          i++;
+        }
+        return result.trim();
+      }
+
+      // HTML Formatter
+      function formatHTML(txt, options) {
+        const indentStr = els.indentTabs.checked ? ' '.repeat(parseInt(els.indentSize.value)) : '\t';
+        let result = '';
+        let indent = 0;
+        const tags = txt.match(/<\/?[\w\-]+[^>]*>/g) || [];
+        let lastIndex = 0;
+        
+        for (const tag of tags) {
+          const idx = txt.indexOf(tag, lastIndex);
+          if (idx > lastIndex) result += txt.slice(lastIndex, idx);
+          
+          // Closing tag
+          if (tag.startsWith('</')) {
+            indent = Math.max(0, indent - 1);
+            result += indentStr.repeat(indent) + tag + '\n';
+          }
+          // Self-closing or void tag
+          else if (tag.includes('/>') || /<(area|base|br|col|embed|hr|img|input|link|meta|param|source|track|wbr)/i.test(tag)) {
+            result += indentStr.repeat(indent) + tag + '\n';
+          }
+          // Opening tag
+          else {
+            result += indentStr.repeat(indent) + tag + '\n';
+            if (!tag.includes('/>')) indent++;
+          }
+          lastIndex = idx + tag.length;
+        }
+        if (lastIndex < txt.length) result += txt.slice(lastIndex);
+        return result.trim();
+      }
+
+      // CSS Formatter
+      function formatCSS(txt, options) {
+        const indentStr = els.indentTabs.checked ? ' '.repeat(parseInt(els.indentSize.value)) : '\t';
+        return txt
+          .replace(/\s*([{};:,])\s*/g, '$1 ')
+          .replace(/\s*\{\s*/g, ' {\n' + indentStr)
+          .replace(/\s*\}\s*/g, '\n}\n')
+          .replace(/;\s*/g, ';\n' + indentStr)
+          .replace(/\n\s*\n/g, '\n')
+          .replace(new RegExp(indentStr + '}', 'g'), '}')
+          .trim();
+      }
+
+      // Minify Functions
+      function minifyJSON(txt) {
+        return JSON.stringify(JSON.parse(txt));
+      }
+      
+      function minifyJS(txt) {
+        return txt
+          .replace(/\/\*[\s\S]*?\*\//g, '') // Remove multi-line comments
+          .replace(/\/\/[^\n]*/g, '') // Remove single-line comments
+          .replace(/\s+/g, ' ') // Collapse whitespace
+          .replace(/\s*([{}();,=+\-*/<>!&|])\s*/g, '$1') // Remove spaces around operators
+          .trim();
+      }
+      
+      function minifyHTML(txt) {
+        return txt
+          .replace(/<!--[\s\S]*?-->/g, '') // Remove comments
+          .replace(/\s+/g, ' ') // Collapse whitespace
+          .replace(/>\s+</g, '><') // Remove spaces between tags
+          .trim();
+      }
+      
+      function minifyCSS(txt) {
+        return txt
+          .replace(/\/\*[\s\S]*?\*\//g, '') // Remove comments
+          .replace(/\s+/g, ' ') // Collapse whitespace
+          .replace(/\s*([{};:,])\s*/g, '$1') // Remove spaces around special chars
+          .trim();
+      }
+
+      // Main Format Function
+      function formatCode() {
+        const input = els.input.value.trim();
+        if (!input) { setStatus('⚠️ Please enter code', 'error'); toast('Input is empty', 'error'); return; }
+        
+        state.originalInput = input;
+        const lang = state.lang === 'auto' ? detectLanguage(input) : state.lang;
+        const options = {
+          indent: parseInt(els.indentSize.value),
+          useTabs: !els.indentTabs.checked,
+          sort: els.jsonSort?.checked || false,
+          compact: els.jsonCompact?.checked || false,
+          semi: els.jsSemi?.checked !== false,
+          singleQuotes: els.jsSingle?.checked || false
+        };
+        
+        try {
+          let output = '';
+          switch (lang) {
+            case 'json': output = formatJSON(input, options); break;
+            case 'js': output = formatJS(input, options); break;
+            case 'html': output = formatHTML(input, options); break;
+            case 'css': output = formatCSS(input, options); break;
+            default: output = input;
+          }
+          
+          els.output.value = output;
+          updateEditorStats(els.output, els.outStats, els.outLines);
+          setStatus('✅ Formatted successfully', 'success');
+          toast('✓ Code formatted');
+          
+          // Show diff if enabled
+          if (els.diff.classList.contains('show')) showDiff(input, output);
+          
+          // Save to history
+          saveHistory(input.substring(0, 40), output.substring(0, 40), lang);
+          
+        } catch (err) {
+          setStatus(`❌ ${err.message}`, 'error');
+          toast('Format error: ' + err.message, 'error');
+          els.output.value = `/* Error: ${err.message} */\n${input}`;
+        }
+      }
+
+      // Minify Function
+      function minifyCode() {
+        const input = els.input.value.trim();
+        if (!input) { setStatus('⚠️ Please enter code', 'error'); return; }
+        
+        const lang = state.lang === 'auto' ? detectLanguage(input) : state.lang;
+        
+        try {
+          let output = '';
+          switch (lang) {
+            case 'json': output = minifyJSON(input); break;
+            case 'js': output = minifyJS(input); break;
+            case 'html': output = minifyHTML(input); break;
+            case 'css': output = minifyCSS(input); break;
+            default: output = input.replace(/\s+/g, ' ').trim();
+          }
+          
+          els.output.value = output;
+          updateEditorStats(els.output, els.outStats, els.outLines);
+          setStatus('✅ Minified successfully', 'success');
+          toast('✓ Code minified');
+          
+          if (els.diff.classList.contains('show')) showDiff(input, output);
+          saveHistory(input.substring(0, 40), output.substring(0, 40), lang + '-min');
+          
+        } catch (err) {
+          setStatus(`❌ ${err.message}`, 'error');
+          toast('Minify error: ' + err.message, 'error');
+        }
+      }
+
+      // Show Diff
+      function showDiff(original, formatted) {
+        const origLines = original.split('\n');
+        const fmtLines = formatted.split('\n');
+        let diff = '';
+        
+        // Simple line-by-line diff
+        const maxLen = Math.max(origLines.length, fmtLines.length);
+        for (let i = 0; i < maxLen; i++) {
+          const o = origLines[i] || '';
+          const f = fmtLines[i] || '';
+          if (o === f) {
+            diff += f + '\n';
+          } else if (!o) {
+            diff += `<span class="cf-diff-add">+ ${f}</span>\n`;
+          } else if (!f) {
+            diff += `<span class="cf-diff-rem">- ${o}</span>\n`;
+          } else {
+            diff += `<span class="cf-diff-rem">- ${o}</span>\n<span class="cf-diff-add">+ ${f}</span>\n`;
+          }
+        }
+        els.diffContent.innerHTML = diff;
+      }
+
+      // Copy Functions
+      function copyOutput(type = 'raw') {
+        const text = els.output.value;
+        if (!text) { toast('Nothing to copy', 'error'); return; }
+        
+        let copyText = text;
+        if (type === 'escaped') {
+          copyText = JSON.stringify(text);
+        } else if (type === 'markdown') {
+          const lang = state.lang === 'auto' ? detectLanguage(els.input.value) : state.lang;
+          copyText = '```' + lang + '\n' + text + '\n```';
+        }
+        
+        navigator.clipboard.writeText(copyText).then(() => {
+          toast(`📋 Copied as ${type}`);
+          els.copyMenu.classList.remove('show');
+        }).catch(() => {
+          // Fallback
+          const ta = document.createElement('textarea');
+          ta.value = copyText; document.body.appendChild(ta); ta.select();
+          document.execCommand('copy'); document.body.removeChild(ta);
+          toast('📋 Copied (fallback)');
+          els.copyMenu.classList.remove('show');
+        });
+      }
+
+      // Download Output
+      function downloadOutput() {
+        const text = els.output.value;
+        if (!text) { toast('Nothing to download', 'error'); return; }
+        
+        const lang = state.lang === 'auto' ? detectLanguage(els.input.value) : state.lang;
+        const ext = { json: 'json', js: 'js', html: 'html', css: 'css' }[lang] || 'txt';
+        const blob = new Blob([text], { type: 'text/plain' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = `formatted_${Date.now()}.${ext}`;
+        a.click();
+        URL.revokeObjectURL(a.href);
+        toast('💾 Downloaded');
+      }
+
+      // Validate Syntax
+      function validateCode() {
+        const input = els.input.value.trim();
+        const lang = state.lang === 'auto' ? detectLanguage(input) : state.lang;
+        
+        try {
+          if (lang === 'json') {
+            JSON.parse(input);
+            setStatus('✓ Valid JSON', 'success');
+            toast('✓ JSON is valid');
+          } else if (lang === 'js') {
+            new Function(input);
+            setStatus('✓ Valid JavaScript', 'success');
+            toast('✓ JS syntax OK');
+          } else if (lang === 'html') {
+            // Basic HTML validation
+            const openTags = (input.match(/<[\w\-]+[^>]*>/g) || []).filter(t => !t.includes('/>'));
+            const closeTags = input.match(/<\/[\w\-]+>/g) || [];
+            if (openTags.length === closeTags.length) {
+              setStatus('✓ HTML structure looks good', 'success');
+              toast('✓ HTML appears valid');
+            } else {
+              setStatus('⚠️ Possible unclosed tags', 'error');
+              toast('⚠️ Check for unclosed HTML tags', 'error');
+            }
+          } else {
+            setStatus('✓ No obvious errors', 'success');
+            toast('✓ Code looks OK');
+          }
+        } catch (err) {
+          setStatus(`❌ ${err.message}`, 'error');
+          toast('Syntax error: ' + err.message, 'error');
+        }
+      }
+
+      // History Management
+      function saveHistory(inPreview, outPreview, lang) {
+        state.history.unshift({
+          in: inPreview + (inPreview.length === 40 ? '...' : ''),
+          out: outPreview + (outPreview.length === 40 ? '...' : ''),
+          lang, time: new Date().toLocaleTimeString()
+        });
+        if (state.history.length > 15) state.history.pop();
+        localStorage.setItem('cfpro_history', JSON.stringify(state.history));
+        renderHistory();
+      }
+
+      function renderHistory() {
+        if (state.history.length === 0) {
+          els.historyList.innerHTML = '<span style="color:var(--cf-text-muted);font-size:0.8rem;padding:0.5rem">No history yet</span>';
+          return;
+        }
+        els.historyList.innerHTML = state.history.map((h, i) => `
+          <div class="cf-history-item" onclick="window._cfLoadHist(${i})">
+            <div>
+              <span class="cf-history-lang">${h.lang.toUpperCase()}</span>
+              <span class="cf-history-preview" title="${h.in} → ${h.out}">${h.in} → ${h.out}</span>
+            </div>
+            <div style="text-align:right">
+              <span style="font-size:0.7rem;color:var(--cf-text-muted)">${h.time}</span><br>
+              <button class="cf-history-del" onclick="window._cfDelHist(${i});event.stopPropagation()">✕</button>
+            </div>
+          </div>
+        `).join('');
+      }
+      
+      window._cfLoadHist = (i) => {
+        const h = state.history[i];
+        els.input.value = h.in;
+        els.lang.value = h.lang.replace('-min', '');
+        state.lang = els.lang.value;
+        setStatus('📜 Loaded from history');
+        updateEditorStats(els.input, els.inStats, els.inLines);
+        els.input.scrollIntoView({ behavior: 'smooth' });
+      };
+      
+      window._cfDelHist = (i) => {
+        state.history.splice(i, 1);
+        localStorage.setItem('cfpro_history', JSON.stringify(state.history));
+        renderHistory();
+        toast('🗑️ Deleted');
+      };
+
+      // Event Listeners
+      els.format.onclick = formatCode;
+      els.minify.onclick = minifyCode;
+      els.copyBtn.onclick = (e) => { els.copyMenu.classList.toggle('show'); e.stopPropagation(); };
+      els.copyMenu.querySelectorAll('.cf-copy-item').forEach(item => {
+        item.onclick = (e) => { copyOutput(item.dataset.copy); e.stopPropagation(); };
+      });
+      document.addEventListener('click', (e) => { if (!e.target.closest('.cf-copy-dropdown')) els.copyMenu.classList.remove('show'); });
+      
+      els.download.onclick = downloadOutput;
+      els.clear.onclick = () => {
+        els.input.value = ''; els.output.value = '';
+        updateEditorStats(els.input, els.inStats, els.inLines);
+        updateEditorStats(els.output, els.outStats, els.outLines);
+        setStatus('✅ Ready', 'success');
+        els.input.focus();
+        localStorage.removeItem('cfpro_draft');
+      };
+      
+      els.validate.onclick = validateCode;
+      els.swap.onclick = () => {
+        const temp = els.input.value;
+        els.input.value = els.output.value;
+        els.output.value = temp;
+        updateEditorStats(els.input, els.inStats, els.inLines);
+        updateEditorStats(els.output, els.outStats, els.outLines);
+        toast('🔄 Swapped');
+      };
+      
+      els.autoFormat.onclick = () => {
+        state.autoFormatEnabled = !state.autoFormatEnabled;
+        els.autoFormat.textContent = `⚡ Auto-Format: ${state.autoFormatEnabled ? 'ON' : 'OFF'}`;
+        els.autoFormat.style.background = state.autoFormatEnabled ? 'var(--cf-success)' : '';
+        toast(state.autoFormatEnabled ? '✅ Auto-format enabled' : '⚙️ Auto-format disabled');
+      };
+      
+      // Auto-format on paste
+      els.input.addEventListener('paste', () => {
+        setTimeout(() => {
+          if (state.autoFormatEnabled && els.input.value.trim()) {
+            formatCode();
+          }
+        }, 100);
+      });
+      
+      // Diff Toggle
+      els.diffToggle.onclick = () => {
+        els.diff.classList.toggle('show');
+        els.diffToggle.innerHTML = els.diff.classList.contains('show') ? '🔍 Hide Diff' : '🔍 Show Diff';
+        if (els.diff.classList.contains('show') && els.output.value) {
+          showDiff(state.originalInput || els.input.value, els.output.value);
+        }
+      };
+      els.diffClose.onclick = () => { els.diff.classList.remove('show'); els.diffToggle.innerHTML = '🔍 Show Diff'; };
+      
+      // History Toggle
+      els.historyToggle.onclick = () => {
+        state.historyCollapsed = !state.historyCollapsed;
+        els.historyList.classList.toggle('collapsed', state.historyCollapsed);
+        els.historyToggle.classList.toggle('collapsed', state.historyCollapsed);
+      };
+      
+      // Keyboard Shortcuts
+      document.addEventListener('keydown', (e) => {
+        if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { e.preventDefault(); formatCode(); }
+        if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'M') { e.preventDefault(); minifyCode(); }
+        if (e.key === '/' && document.activeElement !== els.input && document.activeElement.tagName !== 'TEXTAREA') {
+          e.preventDefault(); els.input.focus();
+        }
+      });
+      
+      // Init
+      updateEditorStats(els.input, els.inStats, els.inLines);
+      updateEditorStats(els.output, els.outStats, els.outLines);
+      renderHistory();
+      
+      // Restore draft
+      const draft = localStorage.getItem('cfpro_draft');
+      if (draft) { els.input.value = draft; updateEditorStats(els.input, els.inStats, els.inLines); }
+      
+      setStatus('✅ Ready to format');
+      console.log('🎨 Code Formatter Pro Initialized');
+    })();
+  </script>
+</div>

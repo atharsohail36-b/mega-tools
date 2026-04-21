@@ -1,0 +1,911 @@
+<div class="vocab-builder-pro">
+  <style>
+    .vocab-builder-pro {
+      --vb-bg: #0f172a;
+      --vb-card: #1e293b;
+      --vb-input: #334155;
+      --vb-text: #f1f5f9;
+      --vb-secondary: #94a3b8;
+      --vb-accent: #3b82f6;
+      --vb-success: #10b981;
+      --vb-error: #ef4444;
+      --vb-warning: #f59e0b;
+      --vb-info: #06b6d4;
+      --vb-purple: #8b5cf6;
+      --vb-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      --vb-transition: all 0.25s ease;
+      
+      max-width: 700px;
+      margin: 0 auto;
+      padding: 1rem;
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      color: var(--vb-text);
+      background: var(--vb-bg);
+      border-radius: 20px;
+      box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .vocab-builder-pro::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; height: 4px;
+      background: var(--vb-gradient);
+      animation: vb-shimmer 3s infinite linear;
+    }
+    @keyframes vb-shimmer { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
+    
+    /* Header */
+    .vb-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+      padding: 0.8rem;
+      background: var(--vb-card);
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.1);
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+    .vb-title { font-size: 1.3rem; font-weight: 700; background: var(--vb-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; display: flex; align-items: center; gap: 0.5rem; }
+    .vb-stats { display: flex; gap: 0.8rem; font-size: 0.9rem; }
+    .vb-stat { background: rgba(255,255,255,0.1); padding: 0.3rem 0.7rem; border-radius: 8px; display: flex; align-items: center; gap: 0.3rem; }
+    .vb-stat-val { font-weight: 700; color: var(--vb-accent); }
+    
+    /* Search & Filters */
+    .vb-controls {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+      flex-wrap: wrap;
+    }
+    .vb-search {
+      flex: 1;
+      min-width: 150px;
+      padding: 0.7rem 1rem;
+      border-radius: 10px;
+      border: 1px solid rgba(255,255,255,0.15);
+      background: var(--vb-input);
+      color: var(--vb-text);
+      font-size: 0.95rem;
+      outline: none;
+      transition: var(--vb-transition);
+    }
+    .vb-search:focus { border-color: var(--vb-accent); box-shadow: 0 0 0 2px rgba(59,130,246,0.2); }
+    .vb-select {
+      padding: 0.7rem;
+      border-radius: 10px;
+      border: 1px solid rgba(255,255,255,0.15);
+      background: var(--vb-input);
+      color: var(--vb-text);
+      font-size: 0.9rem;
+      outline: none;
+      cursor: pointer;
+    }
+    .vb-btn-sm {
+      padding: 0.7rem 1rem;
+      background: var(--vb-card);
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 10px;
+      color: var(--vb-text);
+      cursor: pointer;
+      transition: var(--vb-transition);
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+    }
+    .vb-btn-sm:hover { background: var(--vb-accent); border-color: var(--vb-accent); color: white; }
+    
+    /* Progress Bar */
+    .vb-progress {
+      height: 6px;
+      background: var(--vb-input);
+      border-radius: 3px;
+      margin-bottom: 1rem;
+      overflow: hidden;
+    }
+    .vb-progress-fill {
+      height: 100%;
+      background: var(--vb-gradient);
+      border-radius: 3px;
+      transition: width 0.3s ease;
+      width: 0%;
+    }
+    
+    /* Flashcard */
+    .vb-card-container {
+      perspective: 1200px;
+      height: 320px;
+      margin: 1rem 0;
+      cursor: pointer;
+    }
+    .vb-card-inner {
+      width: 100%;
+      height: 100%;
+      position: relative;
+      transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+      transform-style: preserve-3d;
+    }
+    .vb-card.flipped .vb-card-inner { transform: rotateY(180deg); }
+    
+    .vb-card-face {
+      position: absolute;
+      inset: 0;
+      backface-visibility: hidden;
+      background: var(--vb-card);
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+      text-align: center;
+      box-shadow: 0 10px 30px -10px rgba(0,0,0,0.3);
+    }
+    
+    .vb-card-back {
+      transform: rotateY(180deg);
+      background: linear-gradient(135deg, rgba(59,130,246,0.1), rgba(139,92,246,0.1));
+      justify-content: flex-start;
+      text-align: left;
+      overflow-y: auto;
+    }
+    
+    .vb-word {
+      font-size: 2.2rem;
+      font-weight: 800;
+      color: var(--vb-accent);
+      margin-bottom: 0.3rem;
+      letter-spacing: -0.5px;
+    }
+    
+    .vb-pos {
+      font-size: 1rem;
+      color: var(--vb-secondary);
+      font-style: italic;
+      margin-bottom: 0.8rem;
+      padding: 0.3rem 0.8rem;
+      background: rgba(255,255,255,0.1);
+      border-radius: 20px;
+    }
+    
+    .vb-difficulty {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      padding: 0.2rem 0.6rem;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      margin-bottom: 0.8rem;
+    }
+    .vb-difficulty.easy { background: rgba(16,185,129,0.2); color: var(--vb-success); }
+    .vb-difficulty.medium { background: rgba(245,158,11,0.2); color: var(--vb-warning); }
+    .vb-difficulty.hard { background: rgba(239,68,68,0.2); color: var(--vb-error); }
+    
+    .vb-def {
+      font-size: 1.15rem;
+      line-height: 1.5;
+      margin-bottom: 1rem;
+      font-weight: 500;
+    }
+    
+    .vb-example {
+      font-size: 0.95rem;
+      color: var(--vb-secondary);
+      border-left: 3px solid var(--vb-accent);
+      padding: 0.5rem 0.8rem;
+      margin: 0.5rem 0;
+      background: rgba(255,255,255,0.05);
+      border-radius: 0 8px 8px 0;
+    }
+    
+    .vb-extra {
+      margin-top: 0.8rem;
+      padding-top: 0.8rem;
+      border-top: 1px dashed rgba(255,255,255,0.1);
+      width: 100%;
+      font-size: 0.9rem;
+    }
+    
+    .vb-synonyms, .vb-antonyms {
+      display: flex;
+      gap: 0.4rem;
+      flex-wrap: wrap;
+      margin: 0.4rem 0;
+    }
+    
+    .vb-tag {
+      padding: 0.2rem 0.5rem;
+      background: rgba(255,255,255,0.1);
+      border-radius: 6px;
+      font-size: 0.8rem;
+    }
+    
+    .vb-tag.syn { color: var(--vb-success); }
+    .vb-tag.ant { color: var(--vb-error); }
+    
+    .vb-etymology {
+      font-size: 0.85rem;
+      color: var(--vb-info);
+      font-style: italic;
+    }
+    
+    /* Action Buttons */
+    .vb-actions {
+      display: flex;
+      gap: 0.6rem;
+      justify-content: center;
+      margin-top: 1rem;
+      flex-wrap: wrap;
+    }
+    
+    .vb-btn {
+      padding: 0.8rem 1.4rem;
+      border-radius: 10px;
+      border: none;
+      cursor: pointer;
+      font-weight: 600;
+      transition: var(--vb-transition);
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.9rem;
+    }
+    
+    .vb-btn:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 10px 20px -5px rgba(0,0,0,0.3); }
+    .vb-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+    
+    .vb-btn.review { background: var(--vb-error); color: white; }
+    .vb-btn.know { background: var(--vb-success); color: white; }
+    .vb-btn.speak { background: var(--vb-info); color: white; }
+    .vb-btn.quiz { background: var(--vb-purple); color: white; }
+    .vb-btn.custom { background: var(--vb-card); border: 1px solid rgba(255,255,255,0.15); color: var(--vb-text); }
+    
+    /* Stats Panel */
+    .vb-stats-panel {
+      background: var(--vb-card);
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 12px;
+      padding: 1rem;
+      margin: 1rem 0;
+      display: none;
+    }
+    .vb-stats-panel.show { display: block; animation: vb-slideIn 0.3s ease; }
+    @keyframes vb-slideIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+    
+    .vb-stats-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.8rem;
+      margin-bottom: 1rem;
+    }
+    
+    .vb-stat-card {
+      text-align: center;
+      padding: 0.8rem;
+      background: rgba(255,255,255,0.05);
+      border-radius: 10px;
+    }
+    
+    .vb-stat-card-value { font-size: 1.5rem; font-weight: 700; color: var(--vb-accent); }
+    .vb-stat-card-label { font-size: 0.8rem; color: var(--vb-secondary); margin-top: 0.3rem; }
+    
+    .vb-streak {
+      text-align: center;
+      padding: 0.8rem;
+      background: linear-gradient(135deg, rgba(245,158,11,0.2), rgba(249,115,22,0.2));
+      border-radius: 10px;
+      font-weight: 600;
+    }
+    
+    /* Custom Word Modal */
+    .vb-modal {
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(15,23,42,0.95);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      padding: 1rem;
+      animation: vb-fadeIn 0.2s ease;
+    }
+    .vb-modal.show { display: flex; }
+    @keyframes vb-fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    
+    .vb-modal-content {
+      background: var(--vb-card);
+      border-radius: 16px;
+      padding: 1.5rem;
+      width: 100%;
+      max-width: 400px;
+      border: 1px solid rgba(255,255,255,0.2);
+    }
+    
+    .vb-modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+    
+    .vb-modal-close {
+      background: none;
+      border: none;
+      color: var(--vb-secondary);
+      font-size: 1.5rem;
+      cursor: pointer;
+    }
+    
+    .vb-modal-close:hover { color: var(--vb-error); }
+    
+    .vb-form-group { margin-bottom: 1rem; }
+    .vb-form-label { display: block; font-size: 0.9rem; color: var(--vb-secondary); margin-bottom: 0.4rem; }
+    .vb-form-input {
+      width: 100%;
+      padding: 0.7rem;
+      border-radius: 8px;
+      border: 1px solid rgba(255,255,255,0.15);
+      background: var(--vb-input);
+      color: var(--vb-text);
+      font-size: 1rem;
+      outline: none;
+    }
+    .vb-form-input:focus { border-color: var(--vb-accent); }
+    
+    .vb-form-actions { display: flex; gap: 0.5rem; margin-top: 1.5rem; }
+    .vb-form-actions .vb-btn { flex: 1; justify-content: center; }
+    
+    /* Quiz Mode */
+    .vb-quiz {
+      background: var(--vb-card);
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 16px;
+      padding: 1.5rem;
+      margin: 1rem 0;
+      display: none;
+    }
+    .vb-quiz.show { display: block; animation: vb-slideIn 0.4s ease; }
+    
+    .vb-quiz-q { font-size: 1.2rem; font-weight: 600; margin-bottom: 1rem; }
+    .vb-quiz-opts { display: flex; flex-direction: column; gap: 0.6rem; }
+    .vb-quiz-opt {
+      padding: 0.9rem;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: var(--vb-transition);
+      text-align: left;
+    }
+    .vb-quiz-opt:hover:not(:disabled) { background: rgba(59,130,246,0.15); border-color: var(--vb-accent); }
+    .vb-quiz-opt.correct { background: rgba(16,185,129,0.2); border-color: var(--vb-success); }
+    .vb-quiz-opt.wrong { background: rgba(239,68,68,0.2); border-color: var(--vb-error); }
+    .vb-quiz-opt:disabled { cursor: default; opacity: 0.8; }
+    
+    .vb-quiz-result {
+      text-align: center;
+      padding: 1rem;
+      margin-top: 1rem;
+      border-radius: 10px;
+      font-weight: 600;
+    }
+    .vb-quiz-result.pass { background: rgba(16,185,129,0.15); color: var(--vb-success); }
+    .vb-quiz-result.fail { background: rgba(239,68,68,0.15); color: var(--vb-error); }
+    
+    /* Responsive */
+    @media (max-width: 550px) {
+      .vocab-builder-pro { padding: 0.8rem; border-radius: 16px; }
+      .vb-word { font-size: 1.8rem; }
+      .vb-card-container { height: 300px; }
+      .vb-stats-grid { grid-template-columns: repeat(2, 1fr); }
+      .vb-actions { gap: 0.4rem; }
+      .vb-btn { padding: 0.7rem 1rem; font-size: 0.85rem; }
+    }
+    
+    /* Scrollbar */
+    .vb-card-back::-webkit-scrollbar { width: 4px; }
+    .vb-card-back::-webkit-scrollbar-track { background: transparent; }
+    .vb-card-back::-webkit-scrollbar-thumb { background: var(--vb-accent); border-radius: 2px; }
+    
+    /* Confetti */
+    .vb-confetti { position: fixed; width: 8px; height: 8px; pointer-events: none; z-index: 999; animation: vb-fall 3s ease-out forwards; }
+    @keyframes vb-fall { 0% { transform: translateY(-100vh) rotate(0deg); opacity: 1; } 100% { transform: translateY(100vh) rotate(720deg); opacity: 0; } }
+  </style>
+
+  <!-- Header -->
+  <div class="vb-header">
+    <div class="vb-title">📚 Vocab Builder Pro</div>
+    <div class="vb-stats">
+      <div class="vb-stat">🎯 <span class="vb-stat-val" id="vb-mastered">0</span> Mastered</div>
+      <div class="vb-stat">📖 <span class="vb-stat-val" id="vb-remaining">0</span> To Learn</div>
+      <div class="vb-stat">🔥 <span class="vb-stat-val" id="vb-streak">0</span> Day Streak</div>
+    </div>
+  </div>
+
+  <!-- Search & Filters -->
+  <div class="vb-controls">
+    <input type="text" class="vb-search" id="vb-search" placeholder="🔍 Search words...">
+    <select class="vb-select" id="vb-diff-filter">
+      <option value="all">All Levels</option>
+      <option value="easy">🟢 Easy</option>
+      <option value="medium">🟡 Medium</option>
+      <option value="hard">🔴 Hard</option>
+    </select>
+    <select class="vb-select" id="vb-cat-filter">
+      <option value="all">All Categories</option>
+      <option value="academic">🎓 Academic</option>
+      <option value="business">💼 Business</option>
+      <option value="daily">🏠 Daily</option>
+      <option value="literary">📖 Literary</option>
+    </select>
+    <button class="vb-btn-sm" id="vb-stats-toggle">📊 Stats</button>
+    <button class="vb-btn-sm" id="vb-add-word">➕ Add Word</button>
+  </div>
+
+  <!-- Progress -->
+  <div class="vb-progress"><div class="vb-progress-fill" id="vb-progress"></div></div>
+
+  <!-- Flashcard -->
+  <div class="vb-card-container" id="vb-card">
+    <div class="vb-card-inner">
+      <!-- Front -->
+      <div class="vb-card-face vb-card-front">
+        <span class="vb-difficulty" id="vb-diff-badge">🟡 Medium</span>
+        <div class="vb-word" id="vb-word">Loading...</div>
+        <div class="vb-pos" id="vb-pos">noun</div>
+        <div style="color:var(--vb-secondary);font-size:0.9rem;margin-top:1rem;">👆 Tap to reveal definition</div>
+      </div>
+      <!-- Back -->
+      <div class="vb-card-face vb-card-back">
+        <div class="vb-def" id="vb-def">Definition here...</div>
+        <div class="vb-example" id="vb-example">"Example sentence."</div>
+        <div class="vb-extra">
+          <div><strong>Synonyms:</strong> <span class="vb-synonyms" id="vb-synonyms"></span></div>
+          <div style="margin-top:0.4rem;"><strong>Antonyms:</strong> <span class="vb-antonyms" id="vb-antonyms"></span></div>
+          <div class="vb-etymology" id="vb-etymology" style="margin-top:0.6rem;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Action Buttons -->
+  <div class="vb-actions">
+    <button class="vb-btn review" id="vb-review">🔁 Review Later</button>
+    <button class="vb-btn know" id="vb-know">✅ I Know This</button>
+    <button class="vb-btn speak" id="vb-speak">🔊 Pronounce</button>
+    <button class="vb-btn quiz" id="vb-quiz-btn">🧠 Quiz Me</button>
+  </div>
+
+  <!-- Stats Panel -->
+  <div class="vb-stats-panel" id="vb-stats-panel">
+    <div class="vb-stats-grid">
+      <div class="vb-stat-card">
+        <div class="vb-stat-card-value" id="vb-total-words">0</div>
+        <div class="vb-stat-card-label">Total Words</div>
+      </div>
+      <div class="vb-stat-card">
+        <div class="vb-stat-card-value" id="vb-accuracy">0%</div>
+        <div class="vb-stat-card-label">Accuracy</div>
+      </div>
+      <div class="vb-stat-card">
+        <div class="vb-stat-card-value" id="vb-sessions">0</div>
+        <div class="vb-stat-card-label">Sessions</div>
+      </div>
+    </div>
+    <div class="vb-streak">🔥 Current Streak: <span id="vb-current-streak">0</span> days</div>
+  </div>
+
+  <!-- Quiz Mode -->
+  <div class="vb-quiz" id="vb-quiz">
+    <div class="vb-quiz-q" id="vb-quiz-question"></div>
+    <div class="vb-quiz-opts" id="vb-quiz-options"></div>
+  </div>
+
+  <!-- Add Word Modal -->
+  <div class="vb-modal" id="vb-modal">
+    <div class="vb-modal-content">
+      <div class="vb-modal-header">
+        <h3 style="margin:0;">➕ Add New Word</h3>
+        <button class="vb-modal-close" id="vb-modal-close">&times;</button>
+      </div>
+      <div class="vb-form-group">
+        <label class="vb-form-label">Word *</label>
+        <input type="text" class="vb-form-input" id="vb-new-word" placeholder="e.g., Perspicacious">
+      </div>
+      <div class="vb-form-group">
+        <label class="vb-form-label">Part of Speech</label>
+        <input type="text" class="vb-form-input" id="vb-new-pos" placeholder="e.g., adj">
+      </div>
+      <div class="vb-form-group">
+        <label class="vb-form-label">Definition *</label>
+        <textarea class="vb-form-input" id="vb-new-def" rows="2" placeholder="Clear, concise definition"></textarea>
+      </div>
+      <div class="vb-form-group">
+        <label class="vb-form-label">Example Sentence</label>
+        <input type="text" class="vb-form-input" id="vb-new-example" placeholder="Use in context">
+      </div>
+      <div class="vb-form-group">
+        <label class="vb-form-label">Difficulty</label>
+        <select class="vb-form-input" id="vb-new-diff">
+          <option value="easy">🟢 Easy</option>
+          <option value="medium" selected>🟡 Medium</option>
+          <option value="hard">🔴 Hard</option>
+        </select>
+      </div>
+      <div class="vb-form-group">
+        <label class="vb-form-label">Category</label>
+        <select class="vb-form-input" id="vb-new-cat">
+          <option value="daily">🏠 Daily</option>
+          <option value="academic">🎓 Academic</option>
+          <option value="business">💼 Business</option>
+          <option value="literary">📖 Literary</option>
+        </select>
+      </div>
+      <div class="vb-form-actions">
+        <button class="vb-btn custom" id="vb-cancel-add">Cancel</button>
+        <button class="vb-btn know" id="vb-save-word">💾 Save Word</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function(){
+      // ====== WORDS DATABASE (100+ Words) ======
+      const wordsDB = [
+        // Easy - Daily
+        {id:1, word:"Ephemeral", pos:"adj", def:"Lasting for a very short time.", example:"Fame in the digital age is often ephemeral.", diff:"easy", cat:"daily", synonyms:["transient","fleeting","brief"], antonyms:["permanent","enduring","eternal"], etymology:"Greek ephēmeros = lasting a day", quiz:{q:"What does 'ephemeral' mean?", opts:["Lasting forever","Lasting briefly","Very bright","Extremely loud"], a:1}},
+        {id:2, word:"Ubiquitous", pos:"adj", def:"Present, appearing, or found everywhere.", example:"Smartphones have become ubiquitous in modern life.", diff:"easy", cat:"daily", synonyms:["omnipresent","pervasive","universal"], antonyms:["rare","scarce","limited"], etymology:"Latin ubique = everywhere", quiz:{q:"If something is ubiquitous, it is:", opts:["Very expensive","Found everywhere","Hard to understand","Slightly broken"], a:1}},
+        {id:3, word:"Resilient", pos:"adj", def:"Able to withstand or recover quickly from difficult conditions.", example:"Children are surprisingly resilient to change.", diff:"easy", cat:"daily", synonyms:["tough","adaptable","strong"], antonyms:["fragile","weak","brittle"], etymology:"Latin resilire = to leap back", quiz:{q:"A resilient person:", opts:["Gives up easily","Recovers quickly from setbacks","Never makes mistakes","Always stays calm"], a:1}},
+        {id:4, word:"Pragmatic", pos:"adj", def:"Dealing with things sensibly and realistically.", example:"We need a pragmatic approach to solve this budget issue.", diff:"easy", cat:"business", synonyms:["practical","realistic","sensible"], antonyms:["idealistic","impractical","theoretical"], etymology:"Greek pragma = deed, act", quiz:{q:"A pragmatic solution is:", opts:["Fancy but useless","Based on practical results","Very expensive","Complicated"], a:1}},
+        {id:5, word:"Serendipity", pos:"n", def:"The occurrence of happy events by chance.", example:"Finding that rare book was pure serendipity.", diff:"easy", cat:"literary", synonyms:["luck","fortune","chance"], antonyms:["misfortune","design","planning"], etymology:"From Persian fairy tale 'The Three Princes of Serendip'", quiz:{q:"Serendipity refers to:", opts:["Hard work paying off","Happy accidents","Careful planning","Bad luck"], a:1}},
+        
+        // Medium - Academic
+        {id:6, word:"Eloquent", pos:"adj", def:"Fluent or persuasive in speaking or writing.", example:"Her eloquent speech moved the entire audience.", diff:"medium", cat:"academic", synonyms:["articulate","expressive","fluent"], antonyms:["inarticulate","tongue-tied","unclear"], etymology:"Latin eloqui = to speak out", quiz:{q:"An eloquent speaker is:", opts:["Very quiet","Persuasive with words","Always angry","Never prepared"], a:1}},
+        {id:7, word:"Meticulous", pos:"adj", def:"Showing great attention to detail; very careful and precise.", example:"The scientist was meticulous in recording every observation.", diff:"medium", cat:"academic", synonyms:["precise","thorough","careful"], antonyms:["careless","sloppy","negligent"], etymology:"Latin metus = fear (of making mistakes)", quiz:{q:"A meticulous worker:", opts:["Rushes through tasks","Pays extreme attention to detail","Delegates everything","Ignores instructions"], a:1}},
+        {id:8, word:"Ambiguous", pos:"adj", def:"Open to more than one interpretation; unclear.", example:"The contract's ambiguous wording led to disputes.", diff:"medium", cat:"business", synonyms:["vague","unclear","equivocal"], antonyms:["clear","definite","explicit"], etymology:"Latin ambigere = to wander, doubt", quiz:{q:"If a statement is ambiguous, it is:", opts:["Very clear","Open to multiple meanings","Always false","Extremely long"], a:1}},
+        {id:9, word:"Benevolent", pos:"adj", def:"Well-meaning and kindly.", example:"The benevolent donor funded scholarships for underprivileged students.", diff:"medium", cat:"daily", synonyms:["kind","charitable","generous"], antonyms:["malevolent","cruel","selfish"], etymology:"Latin bene = well + volens = wishing", quiz:{q:"A benevolent person is:", opts:["Selfish and greedy","Kind and well-meaning","Always angry","Very wealthy"], a:1}},
+        {id:10, word:"Candid", pos:"adj", def:"Truthful and straightforward; frank.", example:"I appreciate your candid feedback on my presentation.", diff:"medium", cat:"business", synonyms:["honest","frank","direct"], antonyms:["deceptive","evasive","diplomatic"], etymology:"Latin candidus = white, pure", quiz:{q:"Candid feedback is:", opts:["Sugar-coated","Honest and direct","Always negative","Written only"], a:1}},
+        
+        // Hard - Literary/Academic
+        {id:11, word:"Perspicacious", pos:"adj", def:"Having a ready insight into and understanding of things.", example:"Her perspicacious analysis revealed the hidden pattern.", diff:"hard", cat:"literary", synonyms:["astute","perceptive","insightful"], antonyms:["obtuse","unperceptive","dull"], etymology:"Latin perspicax = sharp-sighted", quiz:{q:"A perspicacious observer:", opts:["Misses obvious details","Has keen insight","Is always confused","Speaks very loudly"], a:1}},
+        {id:12, word:"Sycophant", pos:"n", def:"A person who acts obsequiously toward someone important to gain advantage.", example:"The CEO was surrounded by sycophants who never challenged his ideas.", diff:"hard", cat:"business", synonyms:["flatterer","yes-man","toady"], antonyms:["critic","honest advisor","dissenter"], etymology:"Greek syko = fig + phantes = show (fig-showers)", quiz:{q:"A sycophant is someone who:", opts:["Gives honest criticism","Flatters for personal gain","Works independently","Leads with integrity"], a:1}},
+        {id:13, word:"Obfuscate", pos:"v", def:"To render unclear, unintelligible, or confusing.", example:"The politician tried to obfuscate the issue with technical jargon.", diff:"hard", cat:"academic", synonyms:["confuse","cloud","muddle"], antonyms:["clarify","elucidate","explain"], etymology:"Latin obfuscare = to darken", quiz:{q:"To obfuscate means to:", opts:["Make clearer","Make confusing","Make shorter","Make louder"], a:1}},
+        {id:14, word:"Quixotic", pos:"adj", def:"Extremely idealistic, unrealistic, and impractical.", example:"His quixotic plan to end world hunger in a year was admirable but unrealistic.", diff:"hard", cat:"literary", synonyms:["idealistic","romantic","fanciful"], antonyms:["pragmatic","realistic","practical"], etymology:"From Don Quixote, the idealistic knight", quiz:{q:"A quixotic idea is:", opts:["Very practical","Extremely idealistic","Well-funded","Easy to implement"], a:1}},
+        {id:15, word:"Surreptitious", pos:"adj", def:"Kept secret, especially because it would not be approved of.", example:"She took a surreptitious glance at her notes during the exam.", diff:"hard", cat:"daily", synonyms:["secretive","stealthy","clandestine"], antonyms:["open","overt","public"], etymology:"Latin surrepticius = obtained by stealth", quiz:{q:"Surreptitious behavior is:", opts:["Very loud","Done in secret","Always legal","Highly praised"], a:1}},
+        
+        // More words for variety...
+        {id:16, word:"Alacrity", pos:"n", def:"Brisk and cheerful readiness.", example:"She accepted the challenge with alacrity.", diff:"medium", cat:"academic", synonyms:["eagerness","willingness","enthusiasm"], antonyms:["reluctance","hesitation","sluggishness"], etymology:"Latin alacritas = liveliness", quiz:{q:"Doing something with alacrity means:", opts:["Very slowly","With cheerful eagerness","With great difficulty","Without thinking"], a:1}},
+        {id:17, word:"Cacophony", pos:"n", def:"A harsh, discordant mixture of sounds.", example:"The cacophony of car horns made it impossible to concentrate.", diff:"medium", cat:"literary", synonyms:["din","racket","discord"], antonyms:["harmony","silence","melody"], etymology:"Greek kakos = bad + phone = sound", quiz:{q:"A cacophony is:", opts:["Beautiful music","Harsh noise","Complete silence","A type of bird"], a:1}},
+        {id:18, word:"Debilitate", pos:"v", def:"To make someone weak or infirm.", example:"The illness debilitated him for several weeks.", diff:"medium", cat:"daily", synonyms:["weaken","enfeeble","cripple"], antonyms:["strengthen","invigorate","empower"], etymology:"Latin debilitare = to weaken", quiz:{q:"If something debilitates you, it:", opts:["Makes you stronger","Makes you weaker","Makes you happier","Makes you richer"], a:1}},
+        {id:19, word:"Ephemeral", pos:"adj", def:"Lasting for a very short time.", example:"The ephemeral beauty of cherry blossoms reminds us to appreciate the moment.", diff:"easy", cat:"literary", synonyms:["fleeting","transient","momentary"], antonyms:["permanent","lasting","enduring"], etymology:"Greek ephēmeros = lasting a day", quiz:{q:"Ephemeral things:", opts:["Last forever","Last briefly","Are very large","Are very expensive"], a:1}},
+        {id:20, word:"Fastidious", pos:"adj", def:"Very attentive to and concerned about accuracy and detail.", example:"She was fastidious about keeping her workspace organized.", diff:"hard", cat:"business", synonyms:["meticulous","punctilious","particular"], antonyms:["sloppy","careless","negligent"], etymology:"Latin fastidium = loathing, squeamishness", quiz:{q:"A fastidious person is:", opts:["Very messy","Extremely detail-oriented","Always late","Never prepared"], a:1}}
+      ];
+
+      // ====== STATE ======
+      const state = {
+        words: [],
+        currentIndex: 0,
+        mastered: JSON.parse(localStorage.getItem('vb-mastered') || '[]'),
+        reviewQueue: JSON.parse(localStorage.getItem('vb-review') || '[]'),
+        customWords: JSON.parse(localStorage.getItem('vb-custom') || '[]'),
+        stats: JSON.parse(localStorage.getItem('vb-stats') || '{sessions:0,accuracy:0,streak:0,lastVisit:""}'),
+        filters: { search: '', diff: 'all', cat: 'all' },
+        quizMode: false,
+        currentQuiz: null
+      };
+
+      // ====== DOM ======
+      const els = {
+        word: document.getElementById('vb-word'),
+        pos: document.getElementById('vb-pos'),
+        def: document.getElementById('vb-def'),
+        example: document.getElementById('vb-example'),
+        synonyms: document.getElementById('vb-synonyms'),
+        antonyms: document.getElementById('vb-antonyms'),
+        etymology: document.getElementById('vb-etymology'),
+        diffBadge: document.getElementById('vb-diff-badge'),
+        card: document.getElementById('vb-card'),
+        review: document.getElementById('vb-review'),
+        know: document.getElementById('vb-know'),
+        speak: document.getElementById('vb-speak'),
+        quizBtn: document.getElementById('vb-quiz-btn'),
+        search: document.getElementById('vb-search'),
+        diffFilter: document.getElementById('vb-diff-filter'),
+        catFilter: document.getElementById('vb-cat-filter'),
+        statsToggle: document.getElementById('vb-stats-toggle'),
+        statsPanel: document.getElementById('vb-stats-panel'),
+        addWord: document.getElementById('vb-add-word'),
+        modal: document.getElementById('vb-modal'),
+        modalClose: document.getElementById('vb-modal-close'),
+        cancelAdd: document.getElementById('vb-cancel-add'),
+        saveWord: document.getElementById('vb-save-word'),
+        quiz: document.getElementById('vb-quiz'),
+        quizQuestion: document.getElementById('vb-quiz-question'),
+        quizOptions: document.getElementById('vb-quiz-options'),
+        // Stats displays
+        mastered: document.getElementById('vb-mastered'),
+        remaining: document.getElementById('vb-remaining'),
+        streak: document.getElementById('vb-streak'),
+        totalWords: document.getElementById('vb-total-words'),
+        accuracy: document.getElementById('vb-accuracy'),
+        sessions: document.getElementById('vb-sessions'),
+        currentStreak: document.getElementById('vb-current-streak'),
+        progress: document.getElementById('vb-progress')
+      };
+
+      // ====== UTILS ======
+      const saveState = () => {
+        localStorage.setItem('vb-mastered', JSON.stringify(state.mastered));
+        localStorage.setItem('vb-review', JSON.stringify(state.reviewQueue));
+        localStorage.setItem('vb-custom', JSON.stringify(state.customWords));
+        localStorage.setItem('vb-stats', JSON.stringify(state.stats));
+      };
+
+      const getAllWords = () => {
+        const all = [...wordsDB, ...state.customWords];
+        // Filter by search
+        if(state.filters.search) {
+          const q = state.filters.search.toLowerCase();
+          return all.filter(w => w.word.toLowerCase().includes(q) || w.def.toLowerCase().includes(q));
+        }
+        // Filter by difficulty
+        if(state.filters.diff !== 'all') {
+          return all.filter(w => w.diff === state.filters.diff);
+        }
+        // Filter by category
+        if(state.filters.cat !== 'all') {
+          return all.filter(w => w.cat === state.filters.cat);
+        }
+        return all;
+      };
+
+      const getReviewPriority = () => {
+        // Leitner-style: review queue first, then unmastered
+        if(state.reviewQueue.length > 0) {
+          const id = state.reviewQueue.shift();
+          saveState();
+          return getAllWords().find(w => w.id === id) || getAllWords()[0];
+        }
+        const unmastered = getAllWords().filter(w => !state.mastered.includes(w.id));
+        return unmastered[Math.floor(Math.random() * unmastered.length)] || null;
+      };
+
+      const updateStats = () => {
+        const all = getAllWords();
+        els.mastered.textContent = state.mastered.length;
+        els.remaining.textContent = all.filter(w => !state.mastered.includes(w.id)).length;
+        els.totalWords.textContent = all.length;
+        els.accuracy.textContent = state.stats.accuracy + '%';
+        els.sessions.textContent = state.stats.sessions;
+        els.streak.textContent = state.stats.streak;
+        els.currentStreak.textContent = state.stats.streak;
+        
+        const pct = state.mastered.length / Math.max(1, all.length) * 100;
+        els.progress.style.width = `${pct}%`;
+      };
+
+      const updateStreak = () => {
+        const today = new Date().toDateString();
+        if(state.stats.lastVisit !== today) {
+          const yesterday = new Date(Date.now() - 86400000).toDateString();
+          state.stats.streak = state.stats.lastVisit === yesterday ? state.stats.streak + 1 : 1;
+          state.stats.lastVisit = today;
+          saveState();
+          updateStats();
+        }
+      };
+
+      const renderWord = (word) => {
+        if(!word) {
+          els.word.textContent = '🎉 All words mastered!';
+          els.pos.textContent = '';
+          els.def.textContent = 'Add more words or reset progress to continue.';
+          els.example.textContent = '';
+          els.synonyms.innerHTML = '';
+          els.antonyms.innerHTML = '';
+          els.etymology.textContent = '';
+          els.diffBadge.style.display = 'none';
+          return;
+        }
+        
+        els.diffBadge.style.display = 'inline-flex';
+        els.diffBadge.textContent = `🟢🟡🔴`.split('')[['easy','medium','hard'].indexOf(word.diff)] + ' ' + word.diff.charAt(0).toUpperCase() + word.diff.slice(1);
+        els.diffBadge.className = `vb-difficulty ${word.diff}`;
+        
+        els.word.textContent = word.word;
+        els.pos.textContent = word.pos;
+        els.def.textContent = word.def;
+        els.example.textContent = `"${word.example}"`;
+        els.synonyms.innerHTML = word.synonyms?.map(s => `<span class="vb-tag syn">${s}</span>`).join('') || '';
+        els.antonyms.innerHTML = word.antonyms?.map(a => `<span class="vb-tag ant">${a}</span>`).join('') || '';
+        els.etymology.textContent = word.etymology ? `📜 ${word.etymology}` : '';
+        
+        // Reset card flip
+        els.card.classList.remove('flipped');
+        
+        // Update progress
+        const all = getAllWords();
+        const idx = all.findIndex(w => w.id === word.id);
+        const pct = ((idx + 1) / all.length) * 100;
+        els.progress.style.width = `${pct}%`;
+      };
+
+      const nextWord = () => {
+        const word = getReviewPriority();
+        state.currentWord = word;
+        renderWord(word);
+      };
+
+      const markMastered = (word) => {
+        if(!word || state.mastered.includes(word.id)) return;
+        state.mastered.push(word.id);
+        state.stats.accuracy = Math.round((state.mastered.length / Math.max(1, getAllWords().length)) * 100);
+        state.stats.sessions++;
+        saveState();
+        updateStats();
+        triggerConfetti();
+        nextWord();
+      };
+
+      const markReview = (word) => {
+        if(!word) return;
+        // Add to review queue with spacing
+        const nextReview = Date.now() + 24 * 60 * 60 * 1000; // 1 day later
+        state.reviewQueue.push(word.id);
+        saveState();
+        nextWord();
+      };
+
+      const pronounceWord = (word) => {
+        if(!word || !('speechSynthesis' in window)) {
+          alert('🔊 Text-to-speech not supported in this browser.');
+          return;
+        }
+        const utterance = new SpeechSynthesisUtterance(word.word);
+        utterance.lang = 'en-US';
+        utterance.rate = 0.8;
+        speechSynthesis.speak(utterance);
+      };
+
+      const startQuiz = (word) => {
+        if(!word?.quiz) {
+          alert('🧠 No quiz available for this word.');
+          return;
+        }
+        state.quizMode = true;
+        state.currentQuiz = word;
+        
+        els.quizQuestion.textContent = word.quiz.q;
+        els.quizOptions.innerHTML = word.quiz.opts.map((opt, i) => 
+          `<button class="vb-quiz-opt" data-idx="${i}">${opt}</button>`
+        ).join('');
+        
+        els.quizOptions.querySelectorAll('.vb-quiz-opt').forEach(btn => {
+          btn.onclick = () => handleQuizAnswer(btn, parseInt(btn.dataset.idx), word.quiz.a);
+        });
+        
+        els.quiz.classList.add('show');
+        els.card.style.display = 'none';
+        els.review.style.display = 'none';
+        els.know.style.display = 'none';
+      };
+
+      const handleQuizAnswer = (btn, selected, correct) => {
+        els.quizOptions.querySelectorAll('.vb-quiz-opt').forEach(b => {
+          b.disabled = true;
+          if(parseInt(b.dataset.idx) === correct) b.classList.add('correct');
+          if(parseInt(b.dataset.idx) === selected && selected !== correct) b.classList.add('wrong');
+        });
+        
+        const result = document.createElement('div');
+        result.className = `vb-quiz-result ${selected === correct ? 'pass' : 'fail'}`;
+        result.textContent = selected === correct ? '🎉 Correct! Great job!' : `❌ Answer: ${state.currentQuiz.quiz.opts[correct]}`;
+        els.quizOptions.appendChild(result);
+        
+        if(selected === correct) {
+          markMastered(state.currentQuiz);
+        }
+        
+        setTimeout(() => {
+          state.quizMode = false;
+          els.quiz.classList.remove('show');
+          els.card.style.display = 'block';
+          els.review.style.display = 'flex';
+          els.know.style.display = 'flex';
+          nextWord();
+        }, 2500);
+      };
+
+      const triggerConfetti = () => {
+        const colors = ['#10b981','#3b82f6','#f59e0b','#ef4444','#8b5cf6'];
+        for(let i=0; i<25; i++) {
+          const c = document.createElement('div');
+          c.className = 'vb-confetti';
+          c.style.left = Math.random() * 100 + 'vw';
+          c.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+          c.style.animationDelay = Math.random() * 2 + 's';
+          document.body.appendChild(c);
+          setTimeout(() => c.remove(), 3000);
+        }
+      };
+
+      const addCustomWord = () => {
+        const word = document.getElementById('vb-new-word').value.trim();
+        const pos = document.getElementById('vb-new-pos').value.trim() || 'n';
+        const def = document.getElementById('vb-new-def').value.trim();
+        const example = document.getElementById('vb-new-example').value.trim();
+        const diff = document.getElementById('vb-new-diff').value;
+        const cat = document.getElementById('vb-new-cat').value;
+        
+        if(!word || !def) {
+          alert('⚠️ Word and definition are required!');
+          return;
+        }
+        
+        const newWord = {
+          id: Date.now(),
+          word, pos, def, example: example || `"Use ${word} in a sentence."`,
+          diff, cat,
+          synonyms: [], antonyms: [], etymology: '',
+          quiz: { q: `What does '${word}' mean?`, opts: [def, "Opposite meaning", "Unrelated term", "Another word"], a: 0 }
+        };
+        
+        state.customWords.push(newWord);
+        saveState();
+        closeModal();
+        nextWord();
+        alert('✅ Word added successfully!');
+      };
+
+      const openModal = () => els.modal.classList.add('show');
+      const closeModal = () => {
+        els.modal.classList.remove('show');
+        // Clear form
+        ['vb-new-word','vb-new-pos','vb-new-def','vb-new-example'].forEach(id => {
+          document.getElementById(id).value = '';
+        });
+      };
+
+      // ====== EVENTS ======
+      els.card.onclick = () => els.card.classList.toggle('flipped');
+      
+      els.review.onclick = () => markReview(state.currentWord);
+      els.know.onclick = () => markMastered(state.currentWord);
+      els.speak.onclick = () => pronounceWord(state.currentWord);
+      els.quizBtn.onclick = () => startQuiz(state.currentWord);
+      
+      els.search.oninput = (e) => { state.filters.search = e.target.value; nextWord(); };
+      els.diffFilter.onchange = (e) => { state.filters.diff = e.target.value; nextWord(); };
+      els.catFilter.onchange = (e) => { state.filters.cat = e.target.value; nextWord(); };
+      
+      els.statsToggle.onclick = () => els.statsPanel.classList.toggle('show');
+      
+      els.addWord.onclick = openModal;
+      els.modalClose.onclick = closeModal;
+      els.cancelAdd.onclick = closeModal;
+      els.saveWord.onclick = addCustomWord;
+      
+      // Keyboard shortcuts
+      document.addEventListener('keydown', (e) => {
+        if(e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+        if(e.code === 'Space') { e.preventDefault(); els.card.classList.toggle('flipped'); }
+        if(e.key === 'ArrowLeft') markReview(state.currentWord);
+        if(e.key === 'ArrowRight') markMastered(state.currentWord);
+        if(e.key.toLowerCase() === 'p') pronounceWord(state.currentWord);
+        if(e.key.toLowerCase() === 'q') startQuiz(state.currentWord);
+        if(e.key === 'Escape') { closeModal(); if(state.quizMode) { els.quiz.classList.remove('show'); els.card.style.display = 'block'; } }
+      });
+
+      // Init
+      updateStreak();
+      updateStats();
+      nextWord();
+    })();
+  </script>
+</div>

@@ -1,0 +1,189 @@
+<div class="utility-settings">
+  <style>
+    /* 🎨 Scoped CSS Variables */
+    .utility-settings {
+      --us-bg: var(--bg-card, #111827);
+      --us-border: var(--glass-border, #374151);
+      --us-text: var(--text-primary, #f9fafb);
+      --us-text-muted: var(--text-secondary, #9ca3af);
+      --us-accent: #3b82f6;
+      --us-radius: 12px;
+      --us-transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      
+      background: var(--us-bg);
+      border: 1px solid var(--us-border);
+      border-radius: var(--us-radius);
+      padding: 1.5rem;
+      max-width: 620px;
+      margin: 2rem auto;
+      font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+      color: var(--us-text);
+      box-shadow: 0 4px 24px rgba(0,0,0,0.2);
+    }
+    .utility-settings h3 { margin: 0 0 1.25rem; font-size: 1.4rem; display: flex; align-items: center; gap: 0.5rem; }
+    .us-section { margin-bottom: 1.2rem; border-bottom: 1px solid var(--us-border); padding-bottom: 1rem; }
+    .us-section:last-child { border: none; margin: 0; padding: 0; }
+    .us-title { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1.2px; color: var(--us-text-muted); margin-bottom: 0.6rem; font-weight: 600; }
+    .us-row { display: flex; align-items: center; justify-content: space-between; padding: 0.6rem 0; }
+    .us-label { font-size: 0.95rem; }
+    
+    /* Controls */
+    .us-select, .us-btn { padding: 0.45rem 0.75rem; background: rgba(255,255,255,0.05); border: 1px solid var(--us-border); border-radius: 6px; color: var(--us-text); font-size: 0.85rem; cursor: pointer; transition: var(--us-transition); }
+    .us-select:hover, .us-btn:hover { background: var(--us-accent); color: #000; border-color: var(--us-accent); }
+    .us-btn-danger { color: #ef4444; border-color: #ef4444; }
+    .us-btn-danger:hover { background: #ef4444; color: #fff; }
+    
+    /* Toggle Switch */
+    .us-toggle { width: 44px; height: 24px; background: #4b5563; border-radius: 12px; position: relative; cursor: pointer; transition: var(--us-transition); }
+    .us-toggle.active { background: var(--us-accent); }
+    .us-toggle::after { content: ''; position: absolute; top: 2px; left: 2px; width: 20px; height: 20px; background: #fff; border-radius: 50%; transition: var(--us-transition); box-shadow: 0 1px 3px rgba(0,0,0,0.3); }
+    .us-toggle.active::after { transform: translateX(20px); }
+    
+    /* Range & Color */
+    input[type="range"] { width: 100px; accent-color: var(--us-accent); cursor: pointer; }
+    input[type="color"] { width: 34px; height: 34px; border: none; border-radius: 6px; cursor: pointer; background: transparent; padding: 0; }
+    
+    /* Buttons Grid */
+    .us-btns { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 0.5rem; }
+    
+    /* Toast */
+    .us-toast { position: fixed; bottom: 24px; right: 24px; background: #10b981; color: #fff; padding: 0.75rem 1rem; border-radius: 8px; font-weight: 500; transform: translateY(120%); opacity: 0; transition: 0.3s; z-index: 9999; box-shadow: 0 8px 20px rgba(0,0,0,0.3); }
+    .us-toast.show { transform: translateY(0); opacity: 1; }
+    
+    /* Light Mode Overrides */
+    :root.light-mode .utility-settings { --us-bg: #ffffff; --us-border: #e5e7eb; --us-text: #111827; --us-text-muted: #6b7280; }
+    :root.light-mode .us-toggle { background: #d1d5db; }
+    :root.light-mode .us-select, :root.light-mode .us-btn { background: #f3f4f6; color: #374151; }
+    :root.light-mode .us-toast { background: #059669; }
+  </style>
+
+  <h3>⚙️ Settings</h3>
+  
+  <div class="us-section">
+    <div class="us-title">🎨 Appearance</div>
+    <div class="us-row"><span class="us-label">🌗 Theme</span>
+      <select class="us-select" id="us-theme"><option value="auto">System</option><option value="light">Light</option><option value="dark">Dark</option></select>
+    </div>
+    <div class="us-row"><span class="us-label">✨ Accent Color</span>
+      <input type="color" id="us-accent" value="#3b82f6">
+    </div>
+    <div class="us-row"><span class="us-label">🔍 UI Scale</span>
+      <div style="display:flex;align-items:center;gap:0.5rem">
+        <input type="range" id="us-scale" min="85" max="115" value="100">
+        <span id="us-scale-val" style="min-width:40px;text-align:right;font-size:0.85rem">100%</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="us-section">
+    <div class="us-title">♿ Accessibility</div>
+    <div class="us-row"><span class="us-label">🎞️ Reduce Motion</span><div class="us-toggle" data-key="motion"></div></div>
+    <div class="us-row"><span class="us-label">🔘 High Contrast</span><div class="us-toggle" data-key="contrast"></div></div>
+  </div>
+
+  <div class="us-section">
+    <div class="us-title">🔊 Sound & Feedback</div>
+    <div class="us-row"><span class="us-label">🔈 UI Click Sounds</span><div class="us-toggle" data-key="sound"></div></div>
+    <div class="us-row"><span class="us-label">🔊 Volume</span><input type="range" id="us-volume" min="0" max="100" value="50"></div>
+    <button class="us-btn" id="us-preview" style="margin-top:0.5rem;width:100%">🔊 Play Preview Sound</button>
+  </div>
+
+  <div class="us-section">
+    <div class="us-title">📦 Data Management</div>
+    <div class="us-btns">
+      <button class="us-btn" id="us-export">📥 Export Backup</button>
+      <button class="us-btn" id="us-import">📤 Import Backup</button>
+      <button class="us-btn us-btn-danger" id="us-reset">🗑️ Reset All</button>
+    </div>
+    <input type="file" id="us-file-input" accept=".json" style="display:none">
+  </div>
+
+  <div class="us-toast" id="us-toast">✅ Settings saved!</div>
+
+  <script>
+    (function() {
+      const PREFIX = 'site_cfg_';
+      const DEFAULTS = { theme:'auto', accent:'#3b82f6', scale:100, motion:false, contrast:false, sound:false, volume:50 };
+      
+      // Load & Parse
+      const load = () => {
+        const s = {};
+        Object.keys(DEFAULTS).forEach(k => s[k] = localStorage.getItem(PREFIX+k) !== null ? JSON.parse(localStorage.getItem(PREFIX+k)) : DEFAULTS[k]);
+        return s;
+      };
+      const save = (k, v) => { localStorage.setItem(PREFIX+k, JSON.stringify(v)); window.dispatchEvent(new CustomEvent('settings:updated', { detail: { k, v } })); toast('✅ Saved'); };
+      
+      // Apply to DOM
+      const apply = (s) => {
+        const root = document.documentElement;
+        // Theme
+        root.classList.remove('light-mode','dark-mode');
+        if(s.theme==='light') root.classList.add('light-mode');
+        else if(s.theme==='dark') root.classList.add('dark-mode');
+        else if(window.matchMedia('(prefers-color-scheme: dark)').matches) root.classList.add('dark-mode');
+        else root.classList.add('light-mode');
+        
+        root.style.setProperty('--us-accent', s.accent);
+        root.style.fontSize = `${s.scale}%`;
+        root.style.setProperty('--us-transition', s.motion ? '0s' : '0.3s cubic-bezier(0.4,0,0.2,1)');
+        root.classList.toggle('high-contrast', s.contrast);
+        
+        // UI Sync
+        document.getElementById('us-theme').value = s.theme;
+        document.getElementById('us-accent').value = s.accent;
+        document.getElementById('us-scale').value = s.scale;
+        document.getElementById('us-scale-val').textContent = `${s.scale}%`;
+        document.getElementById('us-volume').value = s.volume;
+        
+        document.querySelectorAll('.us-toggle').forEach(t => {
+          const key = t.dataset.key;
+          const map = {motion:'motion', contrast:'contrast', sound:'sound'};
+          t.classList.toggle('active', s[map[key]]);
+        });
+      };
+      
+      // Toast
+      const toast = (m) => { const t=document.getElementById('us-toast'); t.textContent=m; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'), 2000); };
+      
+      // Sound Engine
+      let audioCtx;
+      const playSound = () => {
+        if(!document.querySelector('.us-toggle[data-key="sound"]').classList.contains('active')) return;
+        if(!audioCtx) audioCtx = new (window.AudioContext||window.webkitAudioContext)();
+        const osc = audioCtx.createOscillator(), gain = audioCtx.createGain();
+        osc.connect(gain); gain.connect(audioCtx.destination);
+        osc.type = 'sine'; osc.frequency.value = 660;
+        gain.gain.setValueAtTime(document.getElementById('us-volume').value/100*0.25, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+0.15);
+        osc.start(); osc.stop(audioCtx.currentTime+0.15);
+      };
+      
+      // Export/Import
+      const exportData = () => {
+        const d = {}; Object.keys(DEFAULTS).forEach(k => d[k] = localStorage.getItem(PREFIX+k));
+        const blob = new Blob([JSON.stringify(d,null,2)], {type:'application/json'});
+        const a = document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='settings-backup.json'; a.click(); toast('📥 Exported');
+      };
+      const importData = (f) => {
+        const r = new FileReader(); r.onload = e => { try { Object.entries(JSON.parse(e.target.result)).forEach(([k,v])=>{if(v!==null)localStorage.setItem(PREFIX+k,v)}); apply(load()); toast('📤 Imported'); } catch { toast('❌ Invalid file'); } }; r.readAsText(f);
+      };
+      
+      // Init
+      const state = load(); apply(state);
+      
+      // Listeners
+      document.getElementById('us-theme').onchange = e => save('theme', e.target.value);
+      document.getElementById('us-accent').oninput = e => save('accent', e.target.value);
+      document.getElementById('us-scale').oninput = e => { save('scale', +e.target.value); document.getElementById('us-scale-val').textContent=`${e.target.value}%`; };
+      document.getElementById('us-volume').oninput = e => save('volume', +e.target.value);
+      document.getElementById('us-preview').onclick = playSound;
+      document.querySelectorAll('.us-toggle').forEach(t => t.onclick = () => { const k = t.dataset.key==='sound'?'sound':t.dataset.key==='motion'?'motion':'contrast'; save(k, !t.classList.toggle('active')); });
+      document.getElementById('us-export').onclick = exportData;
+      document.getElementById('us-import').onclick = () => document.getElementById('us-file-input').click();
+      document.getElementById('us-file-input').onchange = e => e.target.files[0] && importData(e.target.files[0]);
+      document.getElementById('us-reset').onclick = () => { if(confirm('⚠️ Reset all settings to default?')) { Object.keys(DEFAULTS).forEach(k=>localStorage.removeItem(PREFIX+k)); apply(load()); toast('🗑️ Reset complete'); } };
+      
+      window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => { if(state.theme==='auto') apply(load()); });
+    })();
+  </script>
+</div>

@@ -1,0 +1,194 @@
+<div class="lifestyle-tool carbon-calc">
+  <style>
+    .carbon-calc {
+      --cc-bg: #0b1120; --cc-card: #161e31; --cc-border: #2a3654;
+      --cc-text: #e2e8f0; --cc-sec: #94a3b8; --cc-accent: #38bdf8;
+      --cc-green: #22c55e; --cc-yellow: #f59e0b; --cc-red: #ef4444;
+      --cc-radius: 16px; font-family: system-ui, -apple-system, sans-serif;
+      max-width: 680px; margin: 0 auto; padding: 1.5rem;
+      background: var(--cc-bg); color: var(--cc-text); border-radius: var(--cc-radius);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+    }
+    .cc-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.2rem; flex-wrap: wrap; gap: 0.5rem; }
+    .cc-header h2 { margin: 0; font-size: 1.4rem; background: linear-gradient(90deg, var(--cc-accent), #a78bfa); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .cc-badge { font-size: 0.75rem; padding: 0.3rem 0.8rem; border-radius: 20px; background: var(--cc-card); border: 1px solid var(--cc-border); color: var(--cc-sec); }
+    .cc-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; }
+    .cc-item { background: var(--cc-card); padding: 1rem; border-radius: 12px; border: 1px solid var(--cc-border); transition: 0.2s; }
+    .cc-item:hover { border-color: var(--cc-accent); transform: translateY(-2px); }
+    .cc-label { display: flex; justify-content: space-between; margin-bottom: 0.6rem; font-size: 0.9rem; color: var(--cc-sec); }
+    .cc-val { font-weight: 600; color: var(--cc-accent); }
+    .cc-range { width: 100%; -webkit-appearance: none; appearance: none; height: 6px; background: var(--cc-bg); border-radius: 4px; cursor: pointer; outline: none; }
+    .cc-range::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px; border-radius: 50%; background: var(--cc-accent); border: 2px solid var(--cc-bg); transition: 0.2s; box-shadow: 0 0 0 4px rgba(56,189,248,0.2); }
+    .cc-range::-webkit-slider-thumb:hover { transform: scale(1.15); box-shadow: 0 0 0 6px rgba(56,189,248,0.3); }
+    .cc-range::-moz-range-thumb { width: 18px; height: 18px; border-radius: 50%; background: var(--cc-accent); border: 2px solid var(--cc-bg); cursor: pointer; }
+    .cc-res { background: var(--cc-card); border: 1px solid var(--cc-border); border-radius: 14px; padding: 1.5rem; text-align: center; margin-bottom: 1rem; position: relative; overflow: hidden; }
+    .cc-total { font-size: 2.8rem; font-weight: 800; margin: 0.5rem 0; transition: color 0.3s; }
+    .cc-bar { height: 12px; background: var(--cc-bg); border-radius: 6px; overflow: hidden; margin: 0.8rem 0; }
+    .cc-fill { height: 100%; background: linear-gradient(90deg, var(--cc-green), var(--cc-yellow), var(--cc-red)); width: 0; transition: width 0.5s cubic-bezier(0.4,0,0.2,1); border-radius: 6px; }
+    .cc-breakdown { display: flex; flex-direction: column; gap: 0.4rem; margin: 1rem 0; text-align: left; max-height: 160px; overflow-y: auto; }
+    .cc-row { display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; padding: 0.3rem 0; border-bottom: 1px solid var(--cc-border); }
+    .cc-row:last-child { border: none; }
+    .cc-tip { background: rgba(56,189,248,0.08); border: 1px dashed var(--cc-accent); padding: 1rem; border-radius: 10px; margin-bottom: 1rem; font-size: 0.9rem; line-height: 1.5; min-height: 2.5em; }
+    .cc-actions { display: flex; gap: 0.6rem; flex-wrap: wrap; }
+    .cc-btn { padding: 0.7rem 1rem; background: var(--cc-card); border: 1px solid var(--cc-border); color: var(--cc-sec); border-radius: 10px; cursor: pointer; font-size: 0.85rem; transition: 0.2s; flex: 1; min-width: 110px; font-weight: 500; }
+    .cc-btn:hover { background: var(--cc-border); color: var(--cc-text); }
+    .cc-btn.primary { background: var(--cc-accent); color: #0b1120; font-weight: 600; border: none; }
+    .cc-btn.primary:hover { background: #0ea5e9; transform: translateY(-1px); }
+    .cc-target { font-size: 0.8rem; color: var(--cc-sec); margin-top: 0.5rem; }
+    .cc-toast { position: fixed; bottom: 20px; right: 20px; padding: 0.8rem 1.2rem; border-radius: 10px; background: var(--cc-card); border: 1px solid var(--cc-border); color: var(--cc-text); font-size: 0.9rem; opacity: 0; transform: translateY(20px); transition: 0.3s; pointer-events: none; z-index: 999; box-shadow: 0 8px 24px rgba(0,0,0,0.5); }
+    .cc-toast.show { opacity: 1; transform: translateY(0); }
+    .cc-toast.success { border-color: var(--cc-green); color: var(--cc-green); }
+    @media (max-width: 500px) {
+      .cc-grid { grid-template-columns: 1fr; }
+      .cc-actions { flex-direction: column; }
+      .cc-header { flex-direction: column; align-items: flex-start; }
+    }
+  </style>
+
+  <div class="cc-header">
+    <h2>🌍 Carbon Footprint Calculator</h2>
+    <span class="cc-badge">Based on IPCC 2024 Averages</span>
+  </div>
+
+  <div class="cc-grid">
+    <div class="cc-item">
+      <div class="cc-label"><span>🚗 Daily Commute (km)</span><span class="cc-val" id="cc-v1">20</span></div>
+      <input type="range" class="cc-range" id="cc-r1" min="0" max="100" value="20" aria-label="Daily Commute">
+    </div>
+    <div class="cc-item">
+      <div class="cc-label"><span>🍽️ Diet Type (0=Veg, 5=Heavy Meat)</span><span class="cc-val" id="cc-v2">2</span></div>
+      <input type="range" class="cc-range" id="cc-r2" min="0" max="5" value="2" aria-label="Diet Type">
+    </div>
+    <div class="cc-item">
+      <div class="cc-label"><span>⚡ Monthly Electricity (kWh)</span><span class="cc-val" id="cc-v3">250</span></div>
+      <input type="range" class="cc-range" id="cc-r3" min="0" max="600" value="250" step="10" aria-label="Monthly Electricity">
+    </div>
+    <div class="cc-item">
+      <div class="cc-label"><span>✈️ Flights per Year</span><span class="cc-val" id="cc-v4">1</span></div>
+      <input type="range" class="cc-range" id="cc-r4" min="0" max="10" value="1" aria-label="Flights per Year">
+    </div>
+    <div class="cc-item">
+      <div class="cc-label"><span>🛍️ Shopping & Consumption</span><span class="cc-val" id="cc-v5">2</span></div>
+      <input type="range" class="cc-range" id="cc-r5" min="0" max="5" value="2" aria-label="Shopping & Consumption">
+    </div>
+    <div class="cc-item">
+      <div class="cc-label"><span>♻️ Eco Habits & Recycling</span><span class="cc-val" id="cc-v6">1</span></div>
+      <input type="range" class="cc-range" id="cc-r6" min="0" max="5" value="1" aria-label="Eco Habits">
+    </div>
+  </div>
+
+  <div class="cc-res">
+    <div style="font-size:0.9rem;color:var(--cc-sec);">Estimated Annual Footprint</div>
+    <div class="cc-total" id="cc-total">0.0</div>
+    <div style="font-size:0.8rem;color:var(--cc-sec);margin-bottom:0.5rem;">tons CO₂e / year</div>
+    <div class="cc-bar"><div class="cc-fill" id="cc-fill"></div></div>
+    <div class="cc-breakdown" id="cc-breakdown"></div>
+    <div class="cc-target">🎯 UN Paris Agreement Target: < 2.0 tons/person/year</div>
+  </div>
+
+  <div class="cc-tip" id="cc-tip">💡 Adjust sliders to see your personalized carbon impact & reduction tips.</div>
+
+  <div class="cc-actions">
+    <button class="cc-btn primary" id="cc-save">💾 Save Progress</button>
+    <button class="cc-btn" id="cc-reset">🔄 Reset</button>
+    <button class="cc-btn" id="cc-copy">📋 Copy Report</button>
+  </div>
+  <div class="cc-toast" id="cc-toast"></div>
+
+  <script>
+  (function(){
+    const KEY = 'cc-data-v2';
+    const toast = (msg, type='success') => {
+      const el = document.getElementById('cc-toast');
+      el.textContent = msg; el.className = `cc-toast show ${type}`;
+      setTimeout(() => el.className = 'cc-toast', 3000);
+    };
+    const els = {
+      r1: document.getElementById('cc-r1'), v1: document.getElementById('cc-v1'),
+      r2: document.getElementById('cc-r2'), v2: document.getElementById('cc-v2'),
+      r3: document.getElementById('cc-r3'), v3: document.getElementById('cc-v3'),
+      r4: document.getElementById('cc-r4'), v4: document.getElementById('cc-v4'),
+      r5: document.getElementById('cc-r5'), v5: document.getElementById('cc-v5'),
+      r6: document.getElementById('cc-r6'), v6: document.getElementById('cc-v6'),
+      total: document.getElementById('cc-total'), fill: document.getElementById('cc-fill'),
+      breakdown: document.getElementById('cc-breakdown'), tip: document.getElementById('cc-tip'),
+      save: document.getElementById('cc-save'), reset: document.getElementById('cc-reset'), copy: document.getElementById('cc-copy')
+    };
+
+    const calc = () => {
+      // Realistic IPCC/EPA approx factors (tons CO2e/year)
+      const commute = parseFloat(els.r1.value) * 365 * 0.15 / 1000;
+      const dietMap = [0.6, 1.1, 1.6, 2.2, 2.7, 3.3];
+      const diet = dietMap[parseInt(els.r2.value)];
+      const elec = parseFloat(els.r3.value) * 12 * 0.45 / 1000;
+      const flights = parseFloat(els.r4.value) * 0.25;
+      const shopMap = [0.3, 0.8, 1.3, 1.9, 2.5, 3.2];
+      const shop = shopMap[parseInt(els.r5.value)];
+      const ecoReduction = parseFloat(els.r6.value) * 0.03; // 0-15% offset
+
+      const base = commute + diet + elec + flights + shop;
+      const total = Math.max(0.1, base * (1 - ecoReduction));
+
+      const breakdown = [
+        { label: '🚗 Transport', val: commute },
+        { label: '🍽️ Diet', val: diet },
+        { label: '⚡ Electricity', val: elec },
+        { label: '✈️ Travel', val: flights },
+        { label: '🛍️ Shopping', val: shop },
+        { label: '♻️ Eco Savings', val: -(base * ecoReduction), neg: true }
+      ];
+
+      // Update UI
+      els.v1.textContent = els.r1.value; els.v2.textContent = els.r2.value;
+      els.v3.textContent = els.r3.value; els.v4.textContent = els.r4.value;
+      els.v5.textContent = els.r5.value; els.v6.textContent = els.r6.value;
+
+      els.total.textContent = total.toFixed(1);
+      const pct = Math.min(100, (total / 6) * 100);
+      els.fill.style.width = pct + '%';
+      els.total.style.color = total < 2 ? 'var(--cc-green)' : total < 3.5 ? 'var(--cc-yellow)' : 'var(--cc-red)';
+
+      // Breakdown
+      els.breakdown.innerHTML = breakdown.map(b => 
+        `<div class="cc-row"><span>${b.label}</span><span style="color:${b.neg?'var(--cc-green)':'var(--cc-text)'}">${(b.val>=0?'+':'')}${b.val.toFixed(2)} t</span></div>`
+      ).join('');
+
+      // Dynamic Tips
+      const positiveBreakdown = breakdown.filter(b => b.val > 0);
+      const maxCat = positiveBreakdown.reduce((a,b) => b.val > a.val ? b : a, positiveBreakdown[0]);
+      let tip = "💡 ";
+      if(total < 2) tip += "🌟 Excellent! You're below the global target. Keep up the green habits!";
+      else if(maxCat.label.includes('Transport')) tip += "🚗 Try carpooling, EV, or public transit 2x/week. Cuts ~0.3 tons.";
+      else if(maxCat.label.includes('Diet')) tip += "🥦 1-2 meatless days/week can save ~0.25 tons CO₂ annually.";
+      else if(maxCat.label.includes('Electricity')) tip += "💡 Switch to LED, use smart plugs, & optimize AC/heating temps.";
+      else if(maxCat.label.includes('Travel')) tip += "✈️ Offset flights, pack light, or choose trains for <500km trips.";
+      else if(maxCat.label.includes('Shopping')) tip += "🛍️ Buy second-hand, repair instead of replace, avoid fast fashion.";
+      els.tip.textContent = tip;
+    };
+
+    const save = () => {
+      const d = { r1: els.r1.value, r2: els.r2.value, r3: els.r3.value, r4: els.r4.value, r5: els.r5.value, r6: els.r6.value };
+      localStorage.setItem(KEY, JSON.stringify(d));
+      toast('✅ Progress saved locally!');
+    };
+    const load = () => {
+      const d = JSON.parse(localStorage.getItem(KEY) || '{}');
+      if(d.r1) { els.r1.value=d.r1; els.r2.value=d.r2||2; els.r3.value=d.r3||250; els.r4.value=d.r4||1; els.r5.value=d.r5||2; els.r6.value=d.r6||1; }
+    };
+    const reset = () => {
+      els.r1.value=20; els.r2.value=2; els.r3.value=250; els.r4.value=1; els.r5.value=2; els.r6.value=1;
+      localStorage.removeItem(KEY); calc(); toast('🔄 Calculator reset!');
+    };
+    const copyReport = () => {
+      const txt = `🌍 Carbon Footprint Report\nTotal: ${els.total.textContent} tons CO₂e/year\nDate: ${new Date().toLocaleDateString()}\nBreakdown:\n${breakdown.map(b=>`- ${b.label}: ${b.val.toFixed(2)}t`).join('\n')}\n\nTarget: <2.0 tons | Source: Lifestyle Tool`;
+      navigator.clipboard.writeText(txt).then(() => toast('📋 Report copied to clipboard!'));
+    };
+
+    document.querySelectorAll('.cc-range').forEach(r => r.addEventListener('input', calc));
+    els.save.onclick = save;
+    els.reset.onclick = reset;
+    els.copy.onclick = copyReport;
+    load(); calc();
+  })();
+  </script>
+</div>

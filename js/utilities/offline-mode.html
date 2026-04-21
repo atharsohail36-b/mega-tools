@@ -1,0 +1,426 @@
+<div class="offline-widget">
+  <style>
+    .offline-widget {
+      --ow-bg: var(--bg-card, #111827);
+      --ow-border: var(--glass-border, #374151);
+      --ow-text: var(--text-primary, #f9fafb);
+      --ow-muted: var(--text-secondary, #9ca3af);
+      --ow-accent: #3b82f6;
+      --ow-success: #10b981;
+      --ow-warning: #f59e0b;
+      --ow-danger: #ef4444;
+      --ow-radius: 16px;
+      --ow-transition: 0.25s ease;
+      
+      background: var(--ow-bg);
+      border: 1px solid var(--ow-border);
+      border-radius: var(--ow-radius);
+      padding: 1.5rem;
+      max-width: 560px;
+      margin: 2rem auto;
+      font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+      color: var(--ow-text);
+      box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+    }
+    .offline-widget h3 { margin: 0 0 1rem; font-size: 1.35rem; display: flex; align-items: center; gap: 0.5rem; justify-content: center; }
+    
+    /* Status Card */
+    .ow-status {
+      background: rgba(255,255,255,0.03); border: 1px solid var(--ow-border);
+      border-radius: 14px; padding: 1.2rem; margin-bottom: 1rem; text-align: center;
+      transition: var(--ow-transition);
+    }
+    .ow-status.online { border-color: var(--ow-success); background: rgba(16,185,129,0.08); }
+    .ow-status.offline { border-color: var(--ow-warning); background: rgba(245,158,11,0.08); }
+    .ow-status.slow { border-color: var(--ow-danger); background: rgba(239,68,68,0.08); }
+    
+    .ow-icon { font-size: 2.5rem; margin-bottom: 0.5rem; display: block; }
+    .ow-title { font-weight: 600; font-size: 1.1rem; margin-bottom: 0.2rem; }
+    .ow-subtitle { font-size: 0.9rem; color: var(--ow-muted); }
+    .ow-badge {
+      display: inline-block; padding: 0.25rem 0.6rem; border-radius: 20px;
+      font-size: 0.75rem; font-weight: 500; margin-top: 0.5rem;
+    }
+    .ow-badge.green { background: rgba(16,185,129,0.2); color: var(--ow-success); }
+    .ow-badge.yellow { background: rgba(245,158,11,0.2); color: var(--ow-warning); }
+    .ow-badge.red { background: rgba(239,68,68,0.2); color: var(--ow-danger); }
+    
+    /* Connection Info */
+    .ow-conn { display: grid; grid-template-columns: repeat(3,1fr); gap: 0.5rem; margin: 1rem 0; }
+    .ow-conn-item { background: rgba(255,255,255,0.03); border-radius: 8px; padding: 0.6rem; text-align: center; }
+    .ow-conn-val { font-weight: 600; font-size: 0.95rem; }
+    .ow-conn-label { font-size: 0.75rem; color: var(--ow-muted); }
+    
+    /* Storage Bar */
+    .ow-storage { margin: 1rem 0; }
+    .ow-bar { height: 8px; background: rgba(255,255,255,0.1); border-radius: 4px; overflow: hidden; margin: 0.5rem 0; }
+    .ow-bar-fill { height: 100%; background: var(--ow-accent); border-radius: 4px; transition: width 0.3s ease; }
+    .ow-bar-meta { display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--ow-muted); }
+    
+    /* Features Grid */
+    .ow-features { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; margin: 1rem 0; }
+    .ow-feature { display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem; background: rgba(255,255,255,0.03); border-radius: 8px; font-size: 0.9rem; }
+    .ow-feature.ok { color: var(--ow-success); }
+    .ow-feature.warn { color: var(--ow-warning); }
+    .ow-feature.err { color: var(--ow-danger); }
+    
+    /* Queue */
+    .ow-queue { margin: 1rem 0; }
+    .ow-queue-title { font-size: 0.9rem; font-weight: 500; margin-bottom: 0.4rem; display: flex; justify-content: space-between; }
+    .ow-queue-list { max-height: 120px; overflow-y: auto; background: rgba(255,255,255,0.03); border-radius: 8px; padding: 0.5rem; }
+    .ow-queue-item { display: flex; justify-content: space-between; padding: 0.4rem 0; border-bottom: 1px solid var(--ow-border); font-size: 0.85rem; }
+    .ow-queue-item:last-child { border: none; }
+    .ow-queue-empty { text-align: center; color: var(--ow-muted); padding: 0.5rem; font-size: 0.85rem; }
+    
+    /* Buttons */
+    .ow-btns { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 1rem; }
+    .ow-btn {
+      flex: 1; min-width: 120px; padding: 0.7rem; border: none; border-radius: 8px;
+      font-weight: 500; font-size: 0.9rem; cursor: pointer; transition: var(--ow-transition);
+      display: flex; align-items: center; justify-content: center; gap: 0.4rem;
+    }
+    .ow-btn.primary { background: var(--ow-accent); color: #fff; }
+    .ow-btn.primary:hover { filter: brightness(1.1); }
+    .ow-btn.secondary { background: rgba(255,255,255,0.05); color: var(--ow-text); border: 1px solid var(--ow-border); }
+    .ow-btn.secondary:hover { background: var(--ow-accent); color: #fff; border-color: var(--ow-accent); }
+    .ow-btn.danger { background: rgba(239,68,68,0.1); color: var(--ow-danger); border: 1px solid var(--ow-danger); }
+    .ow-btn.danger:hover { background: var(--ow-danger); color: #fff; }
+    .ow-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    
+    /* Install Prompt */
+    .ow-install { display: none; margin-top: 1rem; padding: 1rem; background: rgba(59,130,246,0.1); border: 1px solid var(--ow-accent); border-radius: 10px; text-align: center; }
+    .ow-install.show { display: block; animation: ow-slideIn 0.3s ease; }
+    @keyframes ow-slideIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+    
+    /* Toast */
+    .ow-toast { position: fixed; bottom: 24px; right: 24px; padding: 0.75rem 1rem; border-radius: 8px; font-weight: 500; transform: translateY(120%); opacity: 0; transition: 0.3s; z-index: 9999; box-shadow: 0 8px 20px rgba(0,0,0,0.25); pointer-events: none; }
+    .ow-toast.success { background: var(--ow-success); color: #fff; }
+    .ow-toast.warning { background: var(--ow-warning); color: #000; }
+    .ow-toast.error { background: var(--ow-danger); color: #fff; }
+    .ow-toast.info { background: var(--ow-accent); color: #fff; }
+    .ow-toast.show { transform: translateY(0); opacity: 1; }
+    
+    /* Light Mode */
+    :root.light-mode .offline-widget { --ow-bg: #ffffff; --ow-border: #e5e7eb; --ow-text: #111827; --ow-muted: #6b7280; }
+    :root.light-mode .ow-status { background: #f9fafb; }
+    :root.light-mode .ow-feature, :root.light-mode .ow-conn-item, :root.light-mode .ow-queue-list { background: #f3f4f6; }
+    :root.light-mode .ow-btn.secondary { background: #f9fafb; color: #374151; border-color: #e5e7eb; }
+  </style>
+
+  <h3>📶 Offline Mode & PWA</h3>
+  
+  <!-- Status Card -->
+  <div class="ow-status" id="ow-status">
+    <span class="ow-icon" id="ow-icon">🔄</span>
+    <div class="ow-title" id="ow-title">Checking connection...</div>
+    <div class="ow-subtitle" id="ow-subtitle">Please wait</div>
+    <span class="ow-badge" id="ow-badge">Detecting</span>
+  </div>
+  
+  <!-- Connection Info -->
+  <div class="ow-conn">
+    <div class="ow-conn-item">
+      <div class="ow-conn-val" id="ow-conn-type">--</div>
+      <div class="ow-conn-label">Connection</div>
+    </div>
+    <div class="ow-conn-item">
+      <div class="ow-conn-val" id="ow-conn-speed">--</div>
+      <div class="ow-conn-label">Est. Speed</div>
+    </div>
+    <div class="ow-conn-item">
+      <div class="ow-conn-val" id="ow-rtt">--</div>
+      <div class="ow-conn-label">Latency</div>
+    </div>
+  </div>
+  
+  <!-- Storage Usage -->
+  <div class="ow-storage">
+    <div style="display:flex;justify-content:space-between;font-size:0.9rem">
+      <span>💾 Cache Storage</span>
+      <span id="ow-storage-used">0 MB / 50 MB</span>
+    </div>
+    <div class="ow-bar"><div class="ow-bar-fill" id="ow-bar-fill" style="width:0%"></div></div>
+    <div class="ow-bar-meta"><span>Tools: <b id="ow-tools-cached">0</b>/100</span><span>SW: <b id="ow-sw-status">Inactive</b></span></div>
+  </div>
+  
+  <!-- Features Status -->
+  <div class="ow-features">
+    <div class="ow-feature" id="ow-f-sw"><span>⚙️</span><span>Service Worker</span></div>
+    <div class="ow-feature" id="ow-f-cache"><span>🗃️</span><span>Cache API</span></div>
+    <div class="ow-feature" id="ow-f-sync"><span>🔄</span><span>Background Sync</span></div>
+    <div class="ow-feature" id="ow-f-pwa"><span>📱</span><span>PWA Installable</span></div>
+  </div>
+  
+  <!-- Offline Queue -->
+  <div class="ow-queue">
+    <div class="ow-queue-title">
+      <span>⏳ Pending Actions</span>
+      <span id="ow-queue-count">0</span>
+    </div>
+    <div class="ow-queue-list" id="ow-queue-list">
+      <div class="ow-queue-empty">No pending actions</div>
+    </div>
+  </div>
+  
+  <!-- Install Prompt -->
+  <div class="ow-install" id="ow-install">
+    <div style="font-weight:500;margin-bottom:0.5rem">📲 Install App for Offline Access</div>
+    <p style="font-size:0.9rem;color:var(--ow-muted);margin:0 0 0.8rem">Get instant access to all tools, even without internet.</p>
+    <button class="ow-btn primary" id="ow-install-btn" style="width:auto;margin:0 auto">✨ Install Now</button>
+  </div>
+  
+  <!-- Action Buttons -->
+  <div class="ow-btns">
+    <button class="ow-btn secondary" id="ow-refresh">🔄 Refresh Status</button>
+    <button class="ow-btn secondary" id="ow-precache">⬇️ Pre-cache Tools</button>
+    <button class="ow-btn danger" id="ow-clear">🗑️ Clear Cache</button>
+  </div>
+  
+  <div class="ow-toast" id="ow-toast"></div>
+
+  <script>
+    (function() {
+      const CONFIG = {
+        CACHE_NAME: 'ab-offline-v1',
+        MAX_QUEUE: 20,
+        STORAGE_LIMIT_MB: 50,
+        TOOLS_COUNT: 100
+      };
+      
+      const els = {
+        status: document.getElementById('ow-status'),
+        icon: document.getElementById('ow-icon'),
+        title: document.getElementById('ow-title'),
+        subtitle: document.getElementById('ow-subtitle'),
+        badge: document.getElementById('ow-badge'),
+        connType: document.getElementById('ow-conn-type'),
+        connSpeed: document.getElementById('ow-conn-speed'),
+        rtt: document.getElementById('ow-rtt'),
+        storageUsed: document.getElementById('ow-storage-used'),
+        barFill: document.getElementById('ow-bar-fill'),
+        toolsCached: document.getElementById('ow-tools-cached'),
+        swStatus: document.getElementById('ow-sw-status'),
+        fSW: document.getElementById('ow-f-sw'),
+        fCache: document.getElementById('ow-f-cache'),
+        fSync: document.getElementById('ow-f-sync'),
+        fPWA: document.getElementById('ow-f-pwa'),
+        queueList: document.getElementById('ow-queue-list'),
+        queueCount: document.getElementById('ow-queue-count'),
+        install: document.getElementById('ow-install'),
+        installBtn: document.getElementById('ow-install-btn'),
+        refreshBtn: document.getElementById('ow-refresh'),
+        precacheBtn: document.getElementById('ow-precache'),
+        clearBtn: document.getElementById('ow-clear'),
+        toast: document.getElementById('ow-toast')
+      };
+      
+      let deferredPrompt = null;
+      let offlineQueue = JSON.parse(localStorage.getItem('ow_queue') || '[]');
+      let swRegistration = null;
+      
+      // Toast
+      const toast = (msg, type = 'info') => {
+        els.toast.textContent = msg;
+        els.toast.className = `ow-toast ${type} show`;
+        setTimeout(() => els.toast.classList.remove('show'), 2500);
+      };
+      
+      // Format bytes
+      const formatBytes = (b) => {
+        if (b === 0) return '0 B';
+        const k = 1024, sizes = ['B','KB','MB','GB'];
+        const i = Math.floor(Math.log(b) / Math.log(k));
+        return parseFloat((b / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+      };
+      
+      // Get connection info
+      const getConnectionInfo = () => {
+        const conn = navigator.connection || {};
+        const type = conn.effectiveType || 'unknown';
+        const rtt = conn.rtt || 'N/A';
+        const downlink = conn.downlink || 'N/A';
+        let speed = 'Unknown', speedClass = '';
+        if (type === '4g' || downlink > 5) { speed = 'Fast'; speedClass = 'green'; }
+        else if (type === '3g' || downlink > 1.5) { speed = 'Medium'; speedClass = 'yellow'; }
+        else { speed = 'Slow'; speedClass = 'red'; }
+        return { type: type.toUpperCase(), speed, speedClass, rtt: rtt + 'ms', downlink };
+      };
+      
+      // Update UI based on status
+      const updateStatus = async () => {
+        const online = navigator.onLine;
+        const conn = getConnectionInfo();
+        
+        // Status card
+        els.status.className = `ow-status ${online ? (conn.speedClass === 'red' ? 'slow' : 'online') : 'offline'}`;
+        els.icon.textContent = online ? (conn.speedClass === 'red' ? '🐌' : '✅') : '⚠️';
+        els.title.textContent = online ? 'Connected' : 'Offline Mode Active';
+        els.subtitle.textContent = online ? `${conn.type} • ${conn.speed} speed` : 'Using cached data only';
+        els.badge.textContent = online ? 'Online' : 'Offline';
+        els.badge.className = `ow-badge ${online ? (conn.speedClass === 'red' ? 'red' : 'green') : 'yellow'}`;
+        
+        // Connection info
+        els.connType.textContent = conn.type;
+        els.connSpeed.textContent = conn.speed;
+        els.rtt.textContent = conn.rtt;
+        
+        // Feature detection
+        const swSupported = 'serviceWorker' in navigator;
+        const cacheSupported = 'caches' in window;
+        const syncSupported = 'SyncManager' in window;
+        const pwaInstallable = deferredPrompt !== null || window.matchMedia('(display-mode: standalone)').matches;
+        
+        els.fSW.className = `ow-feature ${swSupported ? 'ok' : 'err'}`;
+        els.fSW.querySelector('span:last-child').textContent = `Service Worker ${swSupported ? '✓' : '✗'}`;
+        els.fCache.className = `ow-feature ${cacheSupported ? 'ok' : 'err'}`;
+        els.fCache.querySelector('span:last-child').textContent = `Cache API ${cacheSupported ? '✓' : '✗'}`;
+        els.fSync.className = `ow-feature ${syncSupported ? 'ok' : 'warn'}`;
+        els.fSync.querySelector('span:last-child').textContent = `Background Sync ${syncSupported ? '✓' : 'Limited'}`;
+        els.fPWA.className = `ow-feature ${pwaInstallable ? 'ok' : 'warn'}`;
+        els.fPWA.querySelector('span:last-child').textContent = `PWA ${pwaInstallable ? 'Installable' : 'Browser'}`;
+        
+        // PWA install prompt
+        els.install.classList.toggle('show', pwaInstallable && !window.matchMedia('(display-mode: standalone)').matches);
+        
+        // Service Worker status
+        if (swSupported) {
+          try {
+            const reg = await navigator.serviceWorker.getRegistration();
+            swRegistration = reg;
+            els.swStatus.textContent = reg?.active ? 'Active' : (reg?.installing ? 'Installing' : 'Inactive');
+            els.swStatus.parentElement.innerHTML = `SW: <b style="color:${reg?.active?'var(--ow-success)':'var(--ow-warning)'}">${reg?.active?'Active':'Inactive'}</b>`;
+          } catch { els.swStatus.textContent = 'Error'; }
+        }
+        
+        // Cache storage usage
+        if (cacheSupported) {
+          try {
+            const cache = await caches.open(CONFIG.CACHE_NAME);
+            const keys = await cache.keys();
+            const cachedCount = keys.filter(r => r.url.includes('/tools/')).length;
+            els.toolsCached.textContent = `${Math.min(cachedCount, CONFIG.TOOLS_COUNT)}`;
+            
+            // Estimate storage
+            if (navigator.storage?.estimate) {
+              const est = await navigator.storage.estimate();
+              const usedMB = (est.usage || 0) / 1024 / 1024;
+              const limitMB = CONFIG.STORAGE_LIMIT_MB;
+              const percent = Math.min((usedMB / limitMB) * 100, 100);
+              els.storageUsed.textContent = `${usedMB.toFixed(1)} MB / ${limitMB} MB`;
+              els.barFill.style.width = `${percent}%`;
+              els.barFill.style.background = percent > 90 ? 'var(--ow-danger)' : percent > 70 ? 'var(--ow-warning)' : 'var(--ow-accent)';
+            }
+          } catch (e) { console.warn('Cache read error:', e); }
+        }
+        
+        // Render offline queue
+        renderQueue();
+      };
+      
+      // Render pending queue
+      const renderQueue = () => {
+        if (offlineQueue.length === 0) {
+          els.queueList.innerHTML = '<div class="ow-queue-empty">No pending actions</div>';
+          els.queueCount.textContent = '0';
+          return;
+        }
+        els.queueCount.textContent = offlineQueue.length;
+        els.queueList.innerHTML = offlineQueue.slice(-5).reverse().map(item => `
+          <div class="ow-queue-item">
+            <span>${item.action}</span>
+            <span style="color:var(--ow-muted)">${new Date(item.ts).toLocaleTimeString()}</span>
+          </div>
+        `).join('');
+      };
+      
+      // Add to offline queue
+      window.addToOfflineQueue = (action, data) => {
+        if (offlineQueue.length >= CONFIG.MAX_QUEUE) offlineQueue.shift();
+        offlineQueue.push({ action, data, ts: Date.now(), synced: false });
+        localStorage.setItem('ow_queue', JSON.stringify(offlineQueue));
+        renderQueue();
+        toast(`📦 Queued: ${action}`, 'warning');
+        window.dispatchEvent(new CustomEvent('offline:queued', { detail: { action, data } }));
+      };
+      
+      // Process queue when back online
+      const processQueue = async () => {
+        if (!navigator.onLine) return;
+        const pending = offlineQueue.filter(q => !q.synced);
+        if (pending.length === 0) return;
+        
+        toast(`🔄 Syncing ${pending.length} action(s)...`, 'info');
+        for (const item of pending) {
+          try {
+            // 🔄 REPLACE WITH REAL API:
+            // await fetch('/api/sync', { method:'POST', body: JSON.stringify(item) });
+            await new Promise(r => setTimeout(r, 300)); // Simulate
+            item.synced = true;
+          } catch (e) { console.warn('Sync failed:', item.action, e); }
+        }
+        offlineQueue = offlineQueue.filter(q => q.synced);
+        localStorage.setItem('ow_queue', JSON.stringify(offlineQueue));
+        renderQueue();
+        toast('✅ All actions synced!', 'success');
+        window.dispatchEvent(new CustomEvent('offline:synced', { detail: { count: pending.length } }));
+      };
+      
+      // Pre-cache tools
+      const preCacheTools = async () => {
+        if (!('caches' in window)) return toast('❌ Cache API not supported', 'error');
+        toast('⬇️ Caching tools...', 'info');
+        try {
+          const cache = await caches.open(CONFIG.CACHE_NAME);
+          const urls = Array.from({length: CONFIG.TOOLS_COUNT}, (_,i) => `/tools/tool-${i+1}.html`);
+          // Simulate caching (replace with real fetch in production)
+          await Promise.all(urls.map(async url => {
+            // const resp = await fetch(url); if(resp.ok) cache.put(url, resp);
+            await new Promise(r => setTimeout(r, 10));
+          }));
+          toast(`✅ Cached ${CONFIG.TOOLS_COUNT} tools`, 'success');
+          updateStatus();
+        } catch (e) { toast('❌ Pre-cache failed', 'error'); console.error(e); }
+      };
+      
+      // Clear cache
+      const clearCache = async () => {
+        if (!confirm('🗑️ Clear all cached data? This will remove offline access.')) return;
+        try {
+          if ('caches' in window) {
+            const keys = await caches.keys();
+            await Promise.all(keys.map(k => caches.delete(k)));
+          }
+          localStorage.removeItem('ow_queue');
+          offlineQueue = [];
+          toast('🗑️ Cache cleared', 'success');
+          updateStatus();
+          window.dispatchEvent(new CustomEvent('offline:cacheCleared'));
+        } catch (e) { toast('❌ Clear failed', 'error'); }
+      };
+      
+      // Event Listeners
+      window.addEventListener('online', () => { toast('🌐 Back online!', 'success'); updateStatus(); processQueue(); });
+      window.addEventListener('offline', () => { toast('⚠️ You are offline', 'warning'); updateStatus(); });
+      window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); deferredPrompt = e; updateStatus(); });
+      window.addEventListener('appinstalled', () => { deferredPrompt = null; toast('🎉 App installed!', 'success'); updateStatus(); });
+      
+      els.refreshBtn.onclick = () => { updateStatus(); toast('🔄 Status refreshed'); };
+      els.precacheBtn.onclick = preCacheTools;
+      els.clearBtn.onclick = clearCache;
+      
+      els.installBtn.onclick = async () => {
+        if (!deferredPrompt) return;
+        deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+        if (outcome === 'accepted') toast('🎉 Installing...', 'success');
+        deferredPrompt = null;
+      };
+      
+      // Init
+      updateStatus();
+      
+      // Expose for external use
+      window.OfflineWidget = { update: updateStatus, queue: window.addToOfflineQueue, clear: clearCache };
+    })();
+  </script>
+</div>

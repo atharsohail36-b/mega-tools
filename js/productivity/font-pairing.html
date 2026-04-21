@@ -1,0 +1,495 @@
+<div class="font-studio">
+  <style>
+    .font-studio{
+      --fs-bg: #0f1115; --fs-card: #1a1d24; --fs-border: #2a2d36;
+      --fs-text: #e4e7ec; --fs-muted: #8b949e; --fs-accent: #6366f1;
+      --fs-success: #10b981; --fs-warn: #ef4444;
+      font-family: system-ui, -apple-system, sans-serif;
+      background: var(--fs-bg); color: var(--fs-text);
+      max-width: 800px; margin: 2rem auto; padding: 1.8rem;
+      border-radius: 24px; border: 1px solid var(--fs-border);
+      box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+    }
+    .fs-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:1.2rem;flex-wrap:wrap;gap:0.8rem;}
+    .fs-header h2{margin:0;font-size:1.5rem;background:linear-gradient(135deg,#6366f1,#ec4899);-webkit-background-clip:text;background-clip:text;color:transparent;}
+    
+    .fs-controls{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:0.8rem;margin-bottom:1rem;}
+    .fs-control{display:flex;flex-direction:column;gap:0.3rem;}
+    .fs-control label{font-size:0.75rem;color:var(--fs-muted);text-transform:uppercase;letter-spacing:0.5px;}
+    .fs-control input,.fs-control select{
+      padding:0.6rem;background:var(--fs-card);border:1px solid var(--fs-border);
+      border-radius:8px;color:var(--fs-text);font-size:0.9rem;outline:none;transition:0.2s;
+    }
+    .fs-control input:focus,.fs-control select:focus{border-color:var(--fs-accent);}
+    .fs-control input[type="color"]{padding:0;height:36px;cursor:pointer;}
+    
+    .fs-preview{background:var(--fs-card);border:1px solid var(--fs-border);border-radius:16px;padding:1.5rem;margin-bottom:1rem;}
+    .fs-preview-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;flex-wrap:wrap;gap:0.5rem;}
+    .fs-preview-toggle{display:flex;gap:0.3rem;background:var(--fs-bg);padding:0.2rem;border-radius:8px;}
+    .fs-preview-toggle button{padding:0.4rem 0.8rem;background:transparent;border:none;border-radius:6px;color:var(--fs-muted);cursor:pointer;font-size:0.8rem;transition:0.2s;}
+    .fs-preview-toggle button.active{background:var(--fs-accent);color:#fff;}
+    .fs-preview-area{min-height:120px;padding:1rem;border-radius:8px;transition:0.2s;}
+    .fs-preview-area.dark{background:#000;color:#fff;}
+    .fs-preview-area.light{background:#fff;color:#000;}
+    .fs-heading{margin:0 0 0.5rem;font-weight:600;line-height:1.3;}
+    .fs-body{margin:0;line-height:1.7;color:inherit;}
+    
+    .fs-contrast{display:flex;align-items:center;gap:0.5rem;margin-top:0.8rem;padding:0.5rem;background:var(--fs-bg);border-radius:8px;font-size:0.85rem;}
+    .fs-contrast-badge{padding:0.2rem 0.5rem;border-radius:4px;font-weight:600;font-size:0.75rem;}
+    .fs-contrast-badge.aaa{background:var(--fs-success);color:#000;}
+    .fs-contrast-badge.aa{background:#f59e0b;color:#000;}
+    .fs-contrast-badge.fail{background:var(--fs-warn);color:#fff;}
+    
+    .fs-actions{display:flex;gap:0.6rem;margin-bottom:1.2rem;flex-wrap:wrap;}
+    .fs-btn{padding:0.6rem 1rem;background:var(--fs-card);border:1px solid var(--fs-border);border-radius:10px;color:var(--fs-text);cursor:pointer;transition:0.2s;font-size:0.9rem;display:flex;align-items:center;gap:0.4rem;}
+    .fs-btn:hover{border-color:var(--fs-accent);}
+    .fs-btn.primary{background:linear-gradient(135deg,#6366f1,#8b5cf6);border:none;color:#fff;font-weight:600;}
+    .fs-btn.primary:hover{transform:translateY(-2px);box-shadow:0 4px 12px rgba(99,102,241,0.4);}
+    .fs-btn.active{border-color:var(--fs-success);background:rgba(16,185,129,0.1);}
+    
+    .fs-search{position:relative;margin-bottom:1rem;}
+    .fs-search input{width:100%;padding:0.7rem 1rem 0.7rem 2.5rem;background:var(--fs-card);border:1px solid var(--fs-border);border-radius:10px;color:var(--fs-text);font-size:0.9rem;}
+    .fs-search::before{content:'🔍';position:absolute;left:0.8rem;top:50%;transform:translateY(-50%);opacity:0.6;}
+    
+    .fs-list{display:flex;flex-direction:column;gap:0.6rem;max-height:280px;overflow-y:auto;padding-right:0.3rem;}
+    .fs-list::-webkit-scrollbar{width:6px;}
+    .fs-list::-webkit-scrollbar-track{background:var(--fs-bg);border-radius:3px;}
+    .fs-list::-webkit-scrollbar-thumb{background:var(--fs-border);border-radius:3px;}
+    .fs-list::-webkit-scrollbar-thumb:hover{background:var(--fs-muted);}
+    
+    .fs-item{background:var(--fs-card);border:1px solid var(--fs-border);border-radius:12px;padding:0.9rem;cursor:pointer;transition:0.2s;position:relative;}
+    .fs-item:hover{border-color:var(--fs-accent);transform:translateX(3px);}
+    .fs-item.active{border-color:var(--fs-accent);background:rgba(99,102,241,0.1);}
+    .fs-item-header{display:flex;justify-content:space-between;align-items:start;margin-bottom:0.4rem;}
+    .fs-item-name{font-weight:600;font-size:0.95rem;}
+    .fs-item-cat{font-size:0.7rem;color:var(--fs-muted);background:var(--fs-bg);padding:0.2rem 0.5rem;border-radius:4px;}
+    .fs-item-desc{font-size:0.8rem;color:var(--fs-muted);margin-bottom:0.5rem;}
+    .fs-item-preview{font-size:0.85rem;opacity:0.9;margin-bottom:0.5rem;}
+    .fs-item-meta{display:flex;justify-content:space-between;align-items:center;font-size:0.75rem;color:var(--fs-muted);}
+    .fs-item-fav{position:absolute;top:0.6rem;right:0.6rem;font-size:1rem;cursor:pointer;transition:0.2s;}
+    .fs-item-fav.active{color:#fbbf24;}
+    
+    .fs-code{background:var(--fs-bg);border:1px solid var(--fs-border);border-radius:10px;padding:1rem;margin-top:1rem;font-family:monospace;font-size:0.85rem;white-space:pre-wrap;max-height:150px;overflow:auto;}
+    
+    .fs-toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--fs-card);border:1px solid var(--fs-border);color:var(--fs-text);padding:0.8rem 1.2rem;border-radius:12px;font-size:0.9rem;opacity:0;pointer-events:none;transition:0.3s;z-index:1000;box-shadow:0 4px 12px rgba(0,0,0,0.5);}
+    .fs-toast.show{transform:translateX(-50%) translateY(0);opacity:1;}
+    
+    @media(max-width:600px){
+      .fs-controls{grid-template-columns:1fr 1fr;}
+      .fs-preview-area{min-height:100px;}
+      .fs-actions{justify-content:center;}
+    }
+  </style>
+
+  <div class="fs-header">
+    <h2>🔤 Font Pairing Studio</h2>
+    <span style="font-size:0.8rem;color:var(--fs-muted);">Google Fonts Powered</span>
+  </div>
+
+  <div class="fs-controls">
+    <div class="fs-control">
+      <label>Heading Size</label>
+      <input type="range" id="fs-h-size" min="16" max="72" value="32">
+    </div>
+    <div class="fs-control">
+      <label>Body Size</label>
+      <input type="range" id="fs-b-size" min="12" max="24" value="16">
+    </div>
+    <div class="fs-control">
+      <label>Heading Weight</label>
+      <select id="fs-h-weight"><option>400</option><option selected>600</option><option>700</option><option>800</option></select>
+    </div>
+    <div class="fs-control">
+      <label>Body Weight</label>
+      <select id="fs-b-weight"><option selected>400</option><option>500</option><option>600</option></select>
+    </div>
+    <div class="fs-control">
+      <label>Text Color</label>
+      <input type="color" id="fs-text-color" value="#e4e7ec">
+    </div>
+    <div class="fs-control">
+      <label>Line Height</label>
+      <select id="fs-line-height"><option>1.2</option><option>1.4</option><option selected>1.6</option><option>1.8</option><option>2.0</option></select>
+    </div>
+  </div>
+
+  <div class="fs-preview">
+    <div class="fs-preview-header">
+      <div class="fs-preview-toggle">
+        <button class="active" data-bg="auto">🎨 Auto</button>
+        <button data-bg="light">☀️ Light</button>
+        <button data-bg="dark">🌙 Dark</button>
+      </div>
+      <button class="fs-btn" id="fs-edit-text">✏️ Edit Text</button>
+    </div>
+    <div class="fs-preview-area light" id="fs-preview">
+      <h1 class="fs-heading" id="fs-prev-h" contenteditable="true">Heading Preview</h1>
+      <p class="fs-body" id="fs-prev-b" contenteditable="true">The quick brown fox jumps over the lazy dog. This is a sample body text to preview your font pairing.</p>
+    </div>
+    <div class="fs-contrast">
+      <span>Contrast:</span>
+      <span class="fs-contrast-badge aa" id="fs-contrast-badge">AA ✓</span>
+      <span id="fs-contrast-ratio" style="color:var(--fs-muted)">4.8:1</span>
+    </div>
+  </div>
+
+  <div class="fs-actions">
+    <button class="fs-btn primary" id="fs-copy-css">📋 Copy CSS</button>
+    <button class="fs-btn" id="fs-copy-link">🔗 Copy HTML Link</button>
+    <button class="fs-btn" id="fs-copy-import">@import CSS</button>
+    <button class="fs-btn" id="fs-fav-toggle">⭐ Save Favorite</button>
+    <button class="fs-btn" id="fs-reset">↺ Reset</button>
+  </div>
+
+  <div class="fs-search"><input type="text" id="fs-search" placeholder="Search fonts or categories..."></div>
+
+  <div class="fs-list" id="fs-list"></div>
+
+  <div class="fs-code" id="fs-code-output" style="display:none;"></div>
+
+  <div class="fs-toast" id="fs-toast"></div>
+
+  <script>
+    (function(){
+      const $ = id => document.getElementById(id);
+      
+      // Curated Font Pairs with Google Fonts URLs
+      const fontPairs = [
+        {
+          id: 'modern-1', name: 'Inter + Roboto', category: 'Modern',
+          heading: { family: 'Inter', weights: [400,600,700], css: 'font-family: "Inter", system-ui, sans-serif;' },
+          body: { family: 'Roboto', weights: [400,500], css: 'font-family: "Roboto", system-ui, sans-serif;' },
+          link: 'https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Roboto:wght@400;500&display=swap',
+          desc: 'Clean, professional, highly readable'
+        },
+        {
+          id: 'elegant-1', name: 'Playfair + Lato', category: 'Classic',
+          heading: { family: 'Playfair Display', weights: [400,600,700], css: 'font-family: "Playfair Display", serif;' },
+          body: { family: 'Lato', weights: [400], css: 'font-family: "Lato", sans-serif;' },
+          link: 'https://fonts.googleapis.com/css2?family=Lato&family=Playfair+Display:wght@400;600;700&display=swap',
+          desc: 'Elegant serif headings with friendly sans body'
+        },
+        {
+          id: 'bold-1', name: 'Montserrat + Merriweather', category: 'Bold',
+          heading: { family: 'Montserrat', weights: [600,700,800], css: 'font-family: "Montserrat", sans-serif;' },
+          body: { family: 'Merriweather', weights: [300,400], css: 'font-family: "Merriweather", serif;' },
+          link: 'https://fonts.googleapis.com/css2?family=Merriweather:wght@300;400&family=Montserrat:wght@600;700;800&display=swap',
+          desc: 'Strong headings with readable serif body'
+        },
+        {
+          id: 'friendly-1', name: 'Poppins + Open Sans', category: 'Friendly',
+          heading: { family: 'Poppins', weights: [500,600,700], css: 'font-family: "Poppins", sans-serif;' },
+          body: { family: 'Open Sans', weights: [400,600], css: 'font-family: "Open Sans", sans-serif;' },
+          link: 'https://fonts.googleapis.com/css2?family=Open+Sans&family=Poppins:wght@500;600;700&display=swap',
+          desc: 'Rounded, approachable, great for apps'
+        },
+        {
+          id: 'editorial-1', name: 'Libre Baskerville + Source Sans', category: 'Editorial',
+          heading: { family: 'Libre Baskerville', weights: [400,700], css: 'font-family: "Libre Baskerville", serif;' },
+          body: { family: 'Source Sans 3', weights: [400,600], css: 'font-family: "Source Sans 3", sans-serif;' },
+          link: 'https://fonts.googleapis.com/css2?family=Libre+Baskerville&family=Source+Sans+3:wght@400;600&display=swap',
+          desc: 'Traditional feel with modern readability'
+        },
+        {
+          id: 'tech-1', name: 'JetBrains Mono + Inter', category: 'Tech',
+          heading: { family: 'JetBrains Mono', weights: [400,700], css: 'font-family: "JetBrains Mono", monospace;' },
+          body: { family: 'Inter', weights: [400,500], css: 'font-family: "Inter", system-ui, sans-serif;' },
+          link: 'https://fonts.googleapis.com/css2?family=Inter:wght@400;500&family=JetBrains+Mono:wght@400;700&display=swap',
+          desc: 'Developer-friendly monospace headings'
+        },
+        {
+          id: 'minimal-1', name: 'Manrope + DM Sans', category: 'Minimal',
+          heading: { family: 'Manrope', weights: [600,700], css: 'font-family: "Manrope", sans-serif;' },
+          body: { family: 'DM Sans', weights: [400,500], css: 'font-family: "DM Sans", sans-serif;' },
+          link: 'https://fonts.googleapis.com/css2?family=DM+Sans&family=Manrope:wght@600;700&display=swap',
+          desc: 'Geometric, modern, ultra-clean'
+        },
+        {
+          id: 'creative-1', name: 'Space Grotesk + Instrument Sans', category: 'Creative',
+          heading: { family: 'Space Grotesk', weights: [500,700], css: 'font-family: "Space Grotesk", sans-serif;' },
+          body: { family: 'Instrument Sans', weights: [400,500], css: 'font-family: "Instrument Sans", sans-serif;' },
+          link: 'https://fonts.googleapis.com/css2?family=Instrument+Sans&family=Space+Grotesk:wght@500;700&display=swap',
+          desc: 'Futuristic headings with versatile body'
+        }
+      ];
+
+      let currentPair = null;
+      let favorites = JSON.parse(localStorage.getItem('fontFavorites') || '[]');
+      let bgMode = 'light';
+
+      // Contrast Calculator (WCAG)
+      const getLuminance = hex => {
+        const rgb = hex.replace('#','').match(/../g).map(c => parseInt(c,16)/255);
+        return rgb.map(v => v <= 0.03928 ? v/12.92 : Math.pow((v+0.055)/1.055, 2.4))
+          .reduce((a,b,i) => a + b * [0.2126,0.7152,0.0722][i], 0);
+      };
+      const getContrast = (hex1, hex2) => {
+        const l1 = getLuminance(hex1), l2 = getLuminance(hex2);
+        return ((Math.max(l1,l2)+0.05)/(Math.min(l1,l2)+0.05)).toFixed(2);
+      };
+      const getContrastBadge = ratio => {
+        const r = parseFloat(ratio);
+        if(r >= 7) return { cls:'aaa', text:'AAA ✓' };
+        if(r >= 4.5) return { cls:'aa', text:'AA ✓' };
+        if(r >= 3) return { cls:'aa', text:'AA Large' };
+        return { cls:'fail', text:'✗ Fail' };
+      };
+
+      // Load Google Font dynamically
+      const loadFont = pair => {
+        // Remove old font link
+        document.querySelectorAll('link[data-font-pair]').forEach(l => l.remove());
+        // Add new
+        const link = document.createElement('link');
+        link.rel = 'stylesheet';
+        link.href = pair.link;
+        link.dataset.fontPair = pair.id;
+        document.head.appendChild(link);
+        // Apply styles
+        $('fs-prev-h').style.cssText = pair.heading.css + `font-weight:${$('fs-h-weight').value};font-size:${$('fs-h-size').value}px;`;
+        $('fs-prev-b').style.cssText = pair.body.css + `font-weight:${$('fs-b-weight').value};font-size:${$('fs-b-size').value}px;line-height:${$('fs-line-height').value};`;
+      };
+
+      // Render Font List
+      const renderList = () => {
+        const search = $('fs-search').value.toLowerCase();
+        const cat = $('font-cat')?.value || 'All';
+        const list = $('fs-list');
+        list.innerHTML = '';
+        
+        fontPairs.filter(p => {
+          const matchSearch = p.name.toLowerCase().includes(search) || p.category.toLowerCase().includes(search) || p.desc.toLowerCase().includes(search);
+          const matchCat = cat === 'All' || p.category === cat;
+          return matchSearch && matchCat;
+        }).forEach(pair => {
+          const isFav = favorites.includes(pair.id);
+          const item = document.createElement('div');
+          item.className = `fs-item ${currentPair?.id === pair.id ? 'active' : ''}`;
+          item.dataset.id = pair.id;
+          item.innerHTML = `
+            <span class="fs-item-fav ${isFav?'active':''}" data-fav="${pair.id}">${isFav?'⭐':'☆'}</span>
+            <div class="fs-item-header">
+              <span class="fs-item-name">${pair.name}</span>
+              <span class="fs-item-cat">${pair.category}</span>
+            </div>
+            <div class="fs-item-desc">${pair.desc}</div>
+            <div class="fs-item-preview" style="${pair.heading.css}font-weight:600;">Aa</div>
+            <div class="fs-item-meta">
+              <span>${pair.heading.family} + ${pair.body.family}</span>
+              <span>${pair.heading.weights.length}w</span>
+            </div>
+          `;
+          item.onclick = (e) => {
+            if(e.target.dataset.fav) return;
+            currentPair = pair;
+            loadFont(pair);
+            document.querySelectorAll('.fs-item').forEach(i => i.classList.remove('active'));
+            item.classList.add('active');
+            updateContrast();
+            showToast(`🎨 ${pair.name} applied`);
+          };
+          item.querySelector('.fs-item-fav').onclick = (e) => {
+            e.stopPropagation();
+            toggleFavorite(pair.id, item.querySelector('.fs-item-fav'));
+          };
+          list.appendChild(item);
+        });
+      };
+
+      const toggleFavorite = (id, el) => {
+        const idx = favorites.indexOf(id);
+        if(idx > -1){
+          favorites.splice(idx,1);
+          el.textContent = '☆';
+          el.classList.remove('active');
+          showToast('❌ Removed from favorites');
+        } else {
+          favorites.push(id);
+          el.textContent = '⭐';
+          el.classList.add('active');
+          showToast('⭐ Added to favorites');
+        }
+        localStorage.setItem('fontFavorites', JSON.stringify(favorites));
+      };
+
+      const updateContrast = () => {
+        const textColor = $('fs-text-color').value;
+        const bgColor = bgMode === 'dark' ? '#000000' : '#ffffff';
+        const ratio = getContrast(textColor, bgColor);
+        const badge = getContrastBadge(ratio);
+        $('fs-contrast-badge').className = `fs-contrast-badge ${badge.cls}`;
+        $('fs-contrast-badge').textContent = badge.text;
+        $('fs-contrast-ratio').textContent = `${ratio}:1`;
+      };
+
+      const updatePreviewStyles = () => {
+        if(!currentPair) return;
+        const textColor = $('fs-text-color').value;
+        $('fs-prev-h').style.color = textColor;
+        $('fs-prev-b').style.color = textColor;
+        $('fs-prev-h').style.fontSize = $('fs-h-size').value + 'px';
+        $('fs-prev-b').style.fontSize = $('fs-b-size').value + 'px';
+        $('fs-prev-h').style.fontWeight = $('fs-h-weight').value;
+        $('fs-prev-b').style.fontWeight = $('fs-b-weight').value;
+        $('fs-prev-b').style.lineHeight = $('fs-line-height').value;
+        updateContrast();
+      };
+
+      const generateCSS = () => {
+        if(!currentPair) return '';
+        return `/* Google Fonts Import */
+@import url('${currentPair.link}');
+
+/* Heading Styles */
+h1, h2, h3, .heading {
+  ${currentPair.heading.css}
+  font-weight: ${$('fs-h-weight').value};
+  font-size: ${$('fs-h-size').value}px;
+  line-height: ${$('fs-line-height').value};
+  color: ${$('fs-text-color').value};
+}
+
+/* Body Styles */
+body, p, .body-text {
+  ${currentPair.body.css}
+  font-weight: ${$('fs-b-weight').value};
+  font-size: ${$('fs-b-size').value}px;
+  line-height: ${$('fs-line-height').value};
+  color: ${$('fs-text-color').value};
+}`;
+      };
+
+      const generateHTML = () => {
+        if(!currentPair) return '';
+        return `<link rel="stylesheet" href="${currentPair.link}">
+<!-- Then in your CSS: -->
+<style>
+  .heading { ${currentPair.heading.css} font-weight: ${$('fs-h-weight').value}; }
+  .body { ${currentPair.body.css} font-weight: ${$('fs-b-weight').value}; }
+</style>`;
+      };
+
+      const showToast = msg => {
+        const t = $('fs-toast');
+        t.textContent = msg;
+        t.classList.add('show');
+        setTimeout(() => t.classList.remove('show'), 2200);
+      };
+
+      // Event Listeners
+      $('fs-h-size').oninput = updatePreviewStyles;
+      $('fs-b-size').oninput = updatePreviewStyles;
+      $('fs-h-weight').onchange = updatePreviewStyles;
+      $('fs-b-weight').onchange = updatePreviewStyles;
+      $('fs-line-height').onchange = updatePreviewStyles;
+      $('fs-text-color').oninput = () => { updatePreviewStyles(); updateContrast(); };
+      $('fs-search').oninput = renderList;
+      
+      // Background Toggle
+      document.querySelectorAll('.fs-preview-toggle button').forEach(btn => {
+        btn.onclick = () => {
+          document.querySelectorAll('.fs-preview-toggle button').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          bgMode = btn.dataset.bg;
+          const area = $('fs-preview');
+          area.className = 'fs-preview-area';
+          if(bgMode === 'dark') area.classList.add('dark');
+          else if(bgMode === 'light') area.classList.add('light');
+          updateContrast();
+        };
+      });
+
+      // Edit Text Toggle
+      $('fs-edit-text').onclick = () => {
+        const h = $('fs-prev-h'), b = $('fs-prev-b');
+        const editable = h.contentEditable === 'true';
+        h.contentEditable = b.contentEditable = !editable;
+        $('fs-edit-text').textContent = !editable ? '✓ Done' : '✏️ Edit Text';
+        $('fs-edit-text').classList.toggle('active', !editable);
+        if(!editable) showToast('✏️ Click to edit text');
+        else showToast('✅ Changes saved');
+      };
+
+      // Copy Buttons
+      $('fs-copy-css').onclick = () => {
+        navigator.clipboard.writeText(generateCSS());
+        showToast('📋 CSS copied to clipboard');
+      };
+      $('fs-copy-link').onclick = () => {
+        navigator.clipboard.writeText(generateHTML());
+        showToast('🔗 HTML link copied');
+      };
+      $('fs-copy-import').onclick = () => {
+        const imp = `@import url('${currentPair?.link || ''}');\n/* Add font-family rules in your CSS */`;
+        navigator.clipboard.writeText(imp);
+        showToast('@import CSS copied');
+      };
+
+      // Favorites Toggle
+      $('fs-fav-toggle').onclick = () => {
+        if(!currentPair) return showToast('⚠️ Select a font pair first');
+        const btn = $('fs-fav-toggle');
+        const idx = favorites.indexOf(currentPair.id);
+        if(idx > -1){
+          favorites.splice(idx,1);
+          btn.classList.remove('active');
+          showToast('❌ Removed from favorites');
+        } else {
+          favorites.push(currentPair.id);
+          btn.classList.add('active');
+          showToast('⭐ Added to favorites');
+        }
+        localStorage.setItem('fontFavorites', JSON.stringify(favorites));
+        renderList();
+      };
+
+      // Reset
+      $('fs-reset').onclick = () => {
+        $('fs-h-size').value = 32; $('fs-b-size').value = 16;
+        $('fs-h-weight').value = 600; $('fs-b-weight').value = 400;
+        $('fs-line-height').value = 1.6; $('fs-text-color').value = '#e4e7ec';
+        $('fs-prev-h').textContent = 'Heading Preview';
+        $('fs-prev-b').textContent = 'The quick brown fox jumps over the lazy dog. This is a sample body text to preview your font pairing.';
+        $('fs-prev-h').contentEditable = $('fs-prev-b').contentEditable = 'true';
+        $('fs-edit-text').textContent = '✏️ Edit Text';
+        $('fs-edit-text').classList.remove('active');
+        updatePreviewStyles();
+        showToast('↺ Reset to defaults');
+      };
+
+      // Show Code Toggle
+      const toggleCode = () => {
+        const code = $('fs-code-output');
+        if(code.style.display === 'none' || !code.style.display){
+          code.textContent = generateCSS();
+          code.style.display = 'block';
+        } else {
+          code.style.display = 'none';
+        }
+      };
+
+      // Init
+      const init = () => {
+        // Load favorites state
+        document.querySelectorAll('.fs-item-fav').forEach(el => {
+          if(favorites.includes(el.dataset.fav)){
+            el.textContent = '⭐';
+            el.classList.add('active');
+          }
+        });
+        // Apply first pair
+        currentPair = fontPairs[0];
+        loadFont(currentPair);
+        renderList();
+        updatePreviewStyles();
+        // Highlight saved favorite button if current is fav
+        if(favorites.includes(currentPair.id)){
+          $('fs-fav-toggle').classList.add('active');
+        }
+      };
+
+      // Start
+      init();
+    })();
+  </script>
+</div>

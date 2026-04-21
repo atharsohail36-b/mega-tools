@@ -1,0 +1,514 @@
+<div class="ci-tool" lang="en">
+  <style>
+    :root {
+      --bg-main: #0b0e11; --bg-card: #161a21; --bg-input: #1e232c;
+      --border: rgba(255,255,255,0.08); --text: #f1f5f9; --text-sec: #94a3b8;
+      --accent: #38bdf8; --accent-glow: rgba(56,189,248,0.2);
+      --success: #22c55e; --warning: #f59e0b; --grad: linear-gradient(135deg, #38bdf8, #818cf8);
+      --radius: 14px; --trans: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .ci-tool { max-width: 750px; margin: 0 auto; padding: 1.5rem; font-family: system-ui, -apple-system, sans-serif; color: var(--text); }
+    .ci-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.2rem; flex-wrap: wrap; gap: 0.8rem; }
+    .ci-header h3 { margin: 0; font-size: 1.3rem; font-weight: 700; background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
+    .header-actions { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+    .action-btn { background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; padding: 0.5rem 0.9rem; color: var(--text-sec); cursor: pointer; transition: var(--trans); font-size: 0.85rem; display: flex; align-items: center; gap: 6px; }
+    .action-btn:hover { background: rgba(255,255,255,0.06); color: var(--text); transform: translateY(-1px); }
+    .action-btn.active { background: var(--accent); color: #0b0e11; border-color: var(--accent); }
+
+    .ci-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 0.9rem; margin-bottom: 1rem; }
+    .input-wrap { position: relative; }
+    .ci-label { display: block; margin-bottom: 0.4rem; color: var(--text-sec); font-size: 0.85rem; font-weight: 500; }
+    .ci-input, .ci-select { width: 100%; padding: 0.9rem 1rem; border-radius: var(--radius); border: 1px solid var(--border); background: var(--bg-input); color: var(--text); font-size: 1rem; outline: none; transition: var(--trans); }
+    .ci-input:focus, .ci-select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow); }
+    .ci-input::-webkit-outer-spin-button, .ci-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+    .input-hint { position: absolute; right: 10px; top: 38px; font-size: 0.75rem; color: var(--text-sec); }
+
+    .advanced-toggle { margin: 0.5rem 0 1rem; }
+    .adv-btn { background: transparent; border: 1px dashed var(--border); border-radius: 10px; padding: 0.6rem 1rem; color: var(--text-sec); cursor: pointer; transition: var(--trans); font-size: 0.9rem; width: 100%; display: flex; align-items: center; justify-content: center; gap: 6px; }
+    .adv-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .advanced-options { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 0.9rem; margin-bottom: 1rem; padding: 1rem; background: var(--bg-card); border-radius: var(--radius); border: 1px solid var(--border); display: none; }
+    .advanced-options.show { display: grid; }
+
+    .ci-btn { width: 100%; padding: 1.1rem; background: var(--grad); border: none; border-radius: var(--radius); color: #0b0e11; font-weight: 700; font-size: 1.05rem; cursor: pointer; transition: var(--trans); margin: 0.5rem 0 1.2rem; }
+    .ci-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px var(--accent-glow); }
+    .ci-btn:active { transform: scale(0.99); }
+
+    .results-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 0.9rem; margin-bottom: 1.2rem; }
+    .result-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem; text-align: center; transition: var(--trans); position: relative; overflow: hidden; }
+    .result-card:hover { transform: translateY(-3px); border-color: var(--accent); }
+    .result-card::before { content: ''; position: absolute; top: 0; left: 0; width: 3px; height: 100%; background: var(--grad); }
+    .result-val { font-size: 1.5rem; font-weight: 800; color: var(--accent); margin: 0.3rem 0; }
+    .result-lbl { font-size: 0.8rem; color: var(--text-sec); text-transform: uppercase; letter-spacing: 0.5px; }
+    .result-diff { font-size: 0.75rem; color: var(--success); margin-top: 0.3rem; }
+
+    .chart-wrap { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem; margin-bottom: 1.2rem; }
+    .chart-title { font-size: 0.95rem; color: var(--text-sec); margin-bottom: 0.8rem; display: flex; justify-content: space-between; }
+    .chart-bars { display: flex; align-items: flex-end; gap: 4px; height: 120px; padding: 0 10px; }
+    .chart-bar { flex: 1; background: var(--accent-glow); border-radius: 4px 4px 0 0; position: relative; min-width: 20px; transition: height 0.4s ease; }
+    .chart-bar.ci { background: var(--grad); }
+    .chart-bar.si { background: rgba(34,197,94,0.3); }
+    .chart-bar::after { content: attr(data-label); position: absolute; bottom: -20px; left: 50%; transform: translateX(-50%); font-size: 0.65rem; color: var(--text-sec); white-space: nowrap; }
+    .chart-legend { display: flex; justify-content: center; gap: 1.2rem; margin-top: 1.5rem; font-size: 0.8rem; }
+    .legend-item { display: flex; align-items: center; gap: 6px; }
+    .legend-dot { width: 12px; height: 12px; border-radius: 3px; }
+    .legend-dot.ci { background: var(--grad); }
+    .legend-dot.si { background: var(--success); }
+
+    .toggle-wrap { display: flex; gap: 0.5rem; margin-bottom: 0.8rem; justify-content: flex-end; }
+    .toggle-btn { padding: 0.4rem 0.8rem; background: var(--bg-input); border: 1px solid var(--border); border-radius: 8px; color: var(--text-sec); cursor: pointer; font-size: 0.8rem; transition: var(--trans); }
+    .toggle-btn.active { background: var(--accent); color: #0b0e11; border-color: var(--accent); }
+
+    .ci-table-wrap { overflow-x: auto; border-radius: var(--radius); border: 1px solid var(--border); }
+    .ci-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; min-width: 500px; }
+    .ci-table th, .ci-table td { padding: 0.8rem 1rem; border-bottom: 1px solid var(--border); text-align: right; }
+    .ci-table th { background: var(--bg-input); color: var(--text-sec); font-weight: 500; position: sticky; top: 0; }
+    .ci-table td:first-child, .ci-table th:first-child { text-align: left; }
+    .ci-table tr:hover { background: rgba(255,255,255,0.03); }
+    .ci-table .pos { color: var(--success); font-weight: 500; }
+
+    .goal-section { margin-top: 1.5rem; padding: 1.2rem; background: var(--bg-card); border-radius: var(--radius); border: 1px solid var(--border); }
+    .goal-section h4 { margin: 0 0 0.8rem; font-size: 1.1rem; color: var(--accent); }
+    .goal-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 0.9rem; }
+    .goal-result { margin-top: 1rem; padding: 0.8rem; background: rgba(56,189,248,0.1); border-radius: 10px; text-align: center; display: none; }
+    .goal-result.show { display: block; }
+
+    .saved-calcs { margin-top: 1.2rem; }
+    .saved-title { font-size: 0.95rem; color: var(--text-sec); margin-bottom: 0.6rem; }
+    .saved-list { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+    .saved-item { padding: 0.4rem 0.7rem; background: var(--bg-input); border-radius: 8px; font-size: 0.8rem; cursor: pointer; transition: var(--trans); border: 1px solid var(--border); }
+    .saved-item:hover { border-color: var(--accent); background: rgba(56,189,248,0.1); }
+
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+    .animate-in { animation: fadeIn 0.35s ease-out forwards; }
+
+    @media (max-width: 520px) {
+      .ci-tool { padding: 1rem 0.8rem; }
+      .ci-grid { grid-template-columns: 1fr 1fr; }
+      .results-grid { grid-template-columns: 1fr 1fr; }
+      .chart-bars { height: 100px; }
+    }
+  </style>
+
+  <div class="ci-header">
+    <h3>💰 Compound Interest Calculator</h3>
+    <div class="header-actions">
+      <button class="action-btn" id="save-btn">💾 Save</button>
+      <button class="action-btn" id="export-btn">📥 CSV</button>
+      <button class="action-btn" id="copy-btn">📋 Copy</button>
+    </div>
+  </div>
+
+  <div class="ci-grid">
+    <div class="input-wrap">
+      <label class="ci-label" for="ci-p">Principal Amount</label>
+      <input class="ci-input" type="number" id="ci-p" value="10000" min="0" step="100">
+      <span class="input-hint" id="currency-symbol">₹</span>
+    </div>
+    <div class="input-wrap">
+      <label class="ci-label" for="ci-r">Annual Rate (%)</label>
+      <input class="ci-input" type="number" id="ci-r" value="8" min="0" max="100" step="0.1">
+    </div>
+    <div class="input-wrap">
+      <label class="ci-label" for="ci-t">Time Period (Years)</label>
+      <input class="ci-input" type="number" id="ci-t" value="5" min="1" max="50" step="1">
+    </div>
+    <div class="input-wrap">
+      <label class="ci-label" for="ci-n">Compounding</label>
+      <select class="ci-select" id="ci-n">
+        <option value="1">Yearly</option>
+        <option value="2">Semi-Annual</option>
+        <option value="4">Quarterly</option>
+        <option value="12" selected>Monthly</option>
+        <option value="365">Daily</option>
+      </select>
+    </div>
+    <div class="input-wrap">
+      <label class="ci-label" for="ci-currency">Currency</label>
+      <select class="ci-select" id="ci-currency">
+        <option value="₹">INR (₹)</option>
+        <option value="$">USD ($)</option>
+        <option value="€">EUR (€)</option>
+        <option value="£">GBP (£)</option>
+        <option value="﷼">SAR (﷼)</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="advanced-toggle">
+    <button class="adv-btn" id="adv-toggle">⚙️ Advanced Options</button>
+  </div>
+  <div class="advanced-options" id="adv-options">
+    <div class="input-wrap">
+      <label class="ci-label" for="ci-inflation">Inflation Rate (%)</label>
+      <input class="ci-input" type="number" id="ci-inflation" value="0" min="0" max="20" step="0.1">
+    </div>
+    <div class="input-wrap">
+      <label class="ci-label" for="ci-tax">Tax on Interest (%)</label>
+      <input class="ci-input" type="number" id="ci-tax" value="0" min="0" max="50" step="0.1">
+    </div>
+    <div class="input-wrap">
+      <label class="ci-label" for="ci-addl">Monthly Addition</label>
+      <input class="ci-input" type="number" id="ci-addl" value="0" min="0" step="100">
+    </div>
+    <div class="input-wrap">
+      <label class="ci-label" for="ci-mode">Calculation Mode</label>
+      <select class="ci-select" id="ci-mode">
+        <option value="ci">Compound Interest</option>
+        <option value="si">Simple Interest</option>
+        <option value="both" selected>Compare Both</option>
+      </select>
+    </div>
+  </div>
+
+  <button class="ci-btn" id="calc-btn">Calculate Returns</button>
+
+  <div class="results-grid" id="results">
+    <div class="result-card animate-in" style="animation-delay: 0ms">
+      <div class="result-lbl">Final Amount (CI)</div>
+      <div class="result-val" id="ci-amount">₹0</div>
+      <div class="result-diff" id="ci-real">Real Value: ₹0</div>
+    </div>
+    <div class="result-card animate-in" style="animation-delay: 80ms">
+      <div class="result-lbl">Total Interest</div>
+      <div class="result-val" id="ci-int">₹0</div>
+      <div class="result-diff" id="ci-after-tax">After Tax: ₹0</div>
+    </div>
+    <div class="result-card animate-in" style="animation-delay: 160ms">
+      <div class="result-lbl">Final Amount (SI)</div>
+      <div class="result-val" id="si-amount">₹0</div>
+    </div>
+    <div class="result-card animate-in" style="animation-delay: 240ms">
+      <div class="result-lbl">CI Advantage</div>
+      <div class="result-val" id="ci-diff">₹0</div>
+      <div class="result-diff">Extra earnings vs SI</div>
+    </div>
+  </div>
+
+  <div class="chart-wrap">
+    <div class="chart-title">
+      <span>Growth Comparison</span>
+      <span id="chart-period">Year 1 - 5</span>
+    </div>
+    <div class="chart-bars" id="chart-bars"></div>
+    <div class="chart-legend">
+      <div class="legend-item"><div class="legend-dot ci"></div> Compound Interest</div>
+      <div class="legend-item"><div class="legend-dot si"></div> Simple Interest</div>
+    </div>
+  </div>
+
+  <div class="toggle-wrap">
+    <button class="toggle-btn active" data-view="year">Yearly</button>
+    <button class="toggle-btn" data-view="month">Monthly</button>
+  </div>
+  <div class="ci-table-wrap">
+    <table class="ci-table" id="ci-tbl">
+      <thead>
+        <tr><th>Period</th><th>Start Balance</th><th>Interest</th><th>Additions</th><th>End Balance</th></tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <div class="goal-section">
+    <h4>🎯 Goal Planner (Reverse CI)</h4>
+    <div class="goal-grid">
+      <div class="input-wrap">
+        <label class="ci-label" for="goal-target">Target Amount</label>
+        <input class="ci-input" type="number" id="goal-target" value="50000" min="0">
+      </div>
+      <div class="input-wrap">
+        <label class="ci-label" for="goal-years">Years to Reach</label>
+        <input class="ci-input" type="number" id="goal-years" value="5" min="1">
+      </div>
+      <div class="input-wrap">
+        <label class="ci-label" for="goal-rate">Expected Rate (%)</label>
+        <input class="ci-input" type="number" id="goal-rate" value="8" min="0" step="0.1">
+      </div>
+      <button class="ci-btn" id="goal-calc" style="margin:0; padding:0.9rem; grid-column: 1/-1;">Calculate Required Principal</button>
+    </div>
+    <div class="goal-result" id="goal-result">
+      <div style="font-size:0.9rem; color:var(--text-sec); margin-bottom:0.3rem">You need to invest</div>
+      <div style="font-size:1.8rem; font-weight:800; color:var(--accent)" id="goal-principal">₹0</div>
+      <div style="font-size:0.8rem; color:var(--text-sec); margin-top:0.3rem">at <span id="goal-rate-display">8%</span> for <span id="goal-years-display">5 years</span></div>
+    </div>
+  </div>
+
+  <div class="saved-calcs">
+    <div class="saved-title">💾 Saved Calculations</div>
+    <div class="saved-list" id="saved-list"></div>
+  </div>
+
+  <script>
+    (function(){
+      const $ = id => document.getElementById(id);
+      const fmt = (n, sym) => sym + Math.round(n).toLocaleString('en-IN');
+      const fmtDec = (n, d=2) => parseFloat(n.toFixed(d));
+
+      const els = {
+        p: $('ci-p'), r: $('ci-r'), t: $('ci-t'), n: $('ci-n'),
+        currency: $('ci-currency'), inflation: $('ci-inflation'),
+        tax: $('ci-tax'), addl: $('ci-addl'), mode: $('ci-mode'),
+        calcBtn: $('calc-btn'), results: $('results'),
+        chartBars: $('chart-bars'), table: $('ci-tbl').querySelector('tbody'),
+        goalTarget: $('goal-target'), goalYears: $('goal-years'),
+        goalRate: $('goal-rate'), goalCalc: $('goal-calc'),
+        goalResult: $('goal-result'), goalPrincipal: $('goal-principal'),
+        saveBtn: $('save-btn'), exportBtn: $('export-btn'), copyBtn: $('copy-btn'),
+        savedList: $('saved-list'), advToggle: $('adv-toggle'), advOptions: $('adv-options')
+      };
+
+      let tableMode = 'year';
+      let saved = JSON.parse(localStorage.getItem('ci_saved') || '[]');
+
+      const renderSaved = () => {
+        els.savedList.innerHTML = saved.length ? saved.map((s,i) => 
+          `<div class="saved-item" data-i="${i}">${s.p} @ ${s.r}% for ${s.t}y</div>`
+        ).join('') : '<span style="color:var(--text-sec); font-size:0.85rem">No saved calculations</span>';
+      };
+
+      const saveCalc = () => {
+        const entry = {
+          p: els.p.value, r: els.r.value, t: els.t.value,
+          n: els.n.value, currency: els.currency.value,
+          ts: new Date().toLocaleString()
+        };
+        saved.unshift(entry);
+        if(saved.length > 8) saved.pop();
+        localStorage.setItem('ci_saved', JSON.stringify(saved));
+        renderSaved();
+        els.saveBtn.innerHTML = '✅ Saved!';
+        setTimeout(() => els.saveBtn.innerHTML = '💾 Save', 1500);
+      };
+
+      const loadSaved = (i) => {
+        const s = saved[i];
+        els.p.value = s.p; els.r.value = s.r; els.t.value = s.t;
+        els.n.value = s.n; els.currency.value = s.currency;
+        calculate();
+      };
+
+      const calculate = () => {
+        const sym = els.currency.value;
+        const P = parseFloat(els.p.value) || 0;
+        const R = parseFloat(els.r.value) / 100 || 0;
+        const T = parseInt(els.t.value) || 1;
+        const N = parseInt(els.n.value) || 1;
+        const inflation = parseFloat(els.inflation.value) / 100 || 0;
+        const taxRate = parseFloat(els.tax.value) / 100 || 0;
+        const addlMonthly = parseFloat(els.addl.value) || 0;
+        const mode = els.mode.value;
+
+        if(P <= 0 || R <= 0 || T <= 0) return;
+
+        // CI Calculation
+        const ciAmount = P * Math.pow(1 + R/N, N*T);
+        // With monthly additions
+        let ciWithAddl = ciAmount;
+        if(addlMonthly > 0) {
+          const rMonth = R/12;
+          let bal = P;
+          for(let m=1; m<=T*12; m++) {
+            bal = bal * (1 + rMonth) + addlMonthly;
+          }
+          ciWithAddl = bal;
+        }
+        const ciInterest = ciWithAddl - P - (addlMonthly * T * 12);
+        
+        // SI Calculation
+        const siAmount = P * (1 + R * T) + (addlMonthly * T * 12);
+        const siInterest = siAmount - P - (addlMonthly * T * 12);
+
+        // Tax & Inflation
+        const taxOnInterest = ciInterest * taxRate;
+        const afterTax = ciWithAddl - taxOnInterest;
+        const realValue = afterTax / Math.pow(1 + inflation, T);
+
+        // Update Results
+        $('ci-amount').textContent = fmt(ciWithAddl, sym);
+        $('ci-int').textContent = fmt(ciInterest, sym);
+        $('ci-real').textContent = `Real Value: ${fmt(realValue, sym)}`;
+        $('ci-after-tax').textContent = `After Tax: ${fmt(afterTax, sym)}`;
+        $('si-amount').textContent = fmt(siAmount, sym);
+        
+        const diff = ciWithAddl - siAmount;
+        $('ci-diff').textContent = (diff >= 0 ? '+' : '') + fmt(diff, sym);
+        $('ci-diff').style.color = diff >= 0 ? 'var(--success)' : 'var(--warning)';
+
+        // Chart
+        renderChart(P, R, T, N, addlMonthly, sym);
+
+        // Table
+        renderTable(P, R, T, N, addlMonthly, sym, tableMode);
+
+        // Show/hide SI results based on mode
+        if(mode === 'si') {
+          $('si-amount').closest('.result-card').style.display = 'block';
+          $('ci-diff').closest('.result-card').style.display = 'none';
+        } else if(mode === 'ci') {
+          $('si-amount').closest('.result-card').style.display = 'none';
+          $('ci-diff').closest('.result-card').style.display = 'block';
+        } else {
+          $('si-amount').closest('.result-card').style.display = 'block';
+          $('ci-diff').closest('.result-card').style.display = 'block';
+        }
+      };
+
+      const renderChart = (P, R, T, N, addl, sym) => {
+        const bars = els.chartBars;
+        bars.innerHTML = '';
+        const maxVal = P * Math.pow(1+R, T) + (addl * T * 12);
+        const years = Math.min(T, 10);
+        
+        for(let y=1; y<=years; y++) {
+          const ci = P * Math.pow(1+R/N, N*y) + (addl * y * 12);
+          const si = P * (1 + R*y) + (addl * y * 12);
+          const ciH = (ci / maxVal) * 100;
+          const siH = (si / maxVal) * 100;
+          
+          const wrap = document.createElement('div');
+          wrap.style.cssText = 'display:flex; flex-direction:column; align-items:center; gap:2px; flex:1';
+          wrap.innerHTML = `
+            <div class="chart-bar ci" style="height:${ciH}%" data-label="${y}y"></div>
+            <div class="chart-bar si" style="height:${siH}%; margin-top:-2px"></div>
+          `;
+          bars.appendChild(wrap);
+        }
+        $('chart-period').textContent = `Year 1 - ${years}`;
+      };
+
+      const renderTable = (P, R, T, N, addl, sym, mode) => {
+        const tbody = els.table;
+        tbody.innerHTML = '';
+        let bal = P;
+        const periods = mode === 'month' ? T*12 : T;
+        const stepLabel = mode === 'month' ? 'Month' : 'Year';
+        const ratePerPeriod = mode === 'month' ? R/12 : R;
+        const nPerPeriod = mode === 'month' ? 1 : N;
+
+        for(let i=1; i<=periods; i++) {
+          const start = bal;
+          // Compound for this period
+          bal = bal * Math.pow(1 + ratePerPeriod/nPerPeriod, nPerPeriod);
+          // Add monthly contributions if applicable
+          if(addl > 0 && mode === 'month') {
+            bal += addl;
+          } else if(addl > 0 && mode === 'year' && i%1===0) {
+            bal += addl * 12;
+          }
+          const interest = bal - start - (mode==='month' ? addl : (i===1 ? addl*12 : 0));
+          
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td>${stepLabel} ${i}</td>
+            <td>${fmt(start, sym)}</td>
+            <td class="pos">+${fmt(Math.max(0,interest), sym)}</td>
+            <td>${addl>0 ? fmt(mode==='month'?addl:addl*12, sym) : '-'}</td>
+            <td style="font-weight:600">${fmt(bal, sym)}</td>
+          `;
+          tbody.appendChild(tr);
+          
+          if(i >= 20 && mode === 'month') break; // Limit rows for monthly view
+        }
+      };
+
+      const calculateGoal = () => {
+        const target = parseFloat(els.goalTarget.value) || 0;
+        const years = parseInt(els.goalYears.value) || 1;
+        const rate = parseFloat(els.goalRate.value) / 100 || 0;
+        const sym = els.currency.value;
+        
+        if(target <= 0 || rate <= 0) return;
+        
+        // Reverse CI: P = A / (1+r/n)^(nt), assuming yearly compounding
+        const requiredP = target / Math.pow(1 + rate, years);
+        
+        els.goalPrincipal.textContent = fmt(requiredP, sym);
+        $('goal-rate-display').textContent = (rate*100).toFixed(1) + '%';
+        $('goal-years-display').textContent = years;
+        els.goalResult.classList.add('show');
+      };
+
+      const exportCSV = () => {
+        const sym = els.currency.value;
+        const rows = [['Period','Start Balance','Interest','Additions','End Balance']];
+        let bal = parseFloat(els.p.value);
+        const R = parseFloat(els.r.value)/100;
+        const N = parseInt(els.n.value);
+        const addl = parseFloat(els.addl.value)||0;
+        const periods = tableMode==='month' ? Math.min(parseInt(els.t.value)*12, 24) : parseInt(els.t.value);
+        
+        for(let i=1; i<=periods; i++) {
+          const start = bal;
+          bal = bal * Math.pow(1 + R/N, N*(tableMode==='year'?1:1/12));
+          if(addl>0 && tableMode==='month') bal += addl;
+          const interest = bal - start - (addl>0 && tableMode==='month' ? addl : 0);
+          rows.push([`${tableMode==='month'?'Month':'Year'} ${i}`, start.toFixed(2), interest.toFixed(2), (addl>0?(tableMode==='month'?addl:addl*12):0).toFixed(2), bal.toFixed(2)]);
+        }
+        
+        const csv = rows.map(r => r.join(',')).join('\n');
+        const blob = new Blob([csv], {type:'text/csv'});
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url; a.download = `ci-calc-${Date.now()}.csv`;
+        a.click(); URL.revokeObjectURL(url);
+      };
+
+      const copyResults = async () => {
+        const text = `💰 Compound Interest Summary\nPrincipal: ${els.currency.value}${els.p.value}\nRate: ${els.r.value}%\nTime: ${els.t.value} years\n\nFinal Amount (CI): ${$('ci-amount').textContent}\nTotal Interest: ${$('ci-int').textContent}\nCI vs SI Advantage: ${$('ci-diff').textContent}\n\nCalculated on ${new Date().toLocaleString()}`;
+        try {
+          await navigator.clipboard.writeText(text);
+          els.copyBtn.innerHTML = '✅ Copied!';
+          setTimeout(() => els.copyBtn.innerHTML = '📋 Copy', 1500);
+        } catch(e) {}
+      };
+
+      // Event Listeners
+      els.calcBtn.addEventListener('click', calculate);
+      els.goalCalc.addEventListener('click', calculateGoal);
+      els.saveBtn.addEventListener('click', saveCalc);
+      els.exportBtn.addEventListener('click', exportCSV);
+      els.copyBtn.addEventListener('click', copyResults);
+      els.advToggle.addEventListener('click', () => {
+        els.advOptions.classList.toggle('show');
+        els.advToggle.textContent = els.advOptions.classList.contains('show') ? '🔼 Hide Advanced' : '⚙️ Advanced Options';
+      });
+
+      // Auto-calculate on input change (debounced)
+      let timeout;
+      document.querySelectorAll('.ci-input, .ci-select').forEach(el => {
+        el.addEventListener('input', () => {
+          clearTimeout(timeout);
+          timeout = setTimeout(calculate, 300);
+        });
+      });
+
+      // Table mode toggle
+      document.querySelectorAll('.toggle-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          tableMode = btn.dataset.view;
+          calculate();
+        });
+      });
+
+      // Saved calculations
+      els.savedList.addEventListener('click', e => {
+        const item = e.target.closest('.saved-item');
+        if(item) loadSaved(parseInt(item.dataset.i));
+      });
+
+      // Keyboard support
+      document.addEventListener('keydown', e => {
+        if(e.key === 'Enter' && document.activeElement.classList.contains('ci-input')) {
+          e.preventDefault();
+          calculate();
+        }
+      });
+
+      // Init
+      renderSaved();
+      calculate();
+    })();
+  </script>
+</div>

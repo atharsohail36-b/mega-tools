@@ -1,0 +1,242 @@
+<div class="professional-tool">
+  <style>
+    .professional-tool {
+      --bg: #f8fafc; --card: #ffffff; --border: #e2e8f0;
+      --text: #0f172a; --text-sec: #64748b; --accent: #6366f1;
+      --success: #10b981; --warning: #f59e0b; --danger: #ef4444;
+      --shadow: 0 4px 12px rgba(0,0,0,0.05); --radius: 12px;
+      font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+      max-width: 680px; margin: 0 auto; padding: 1.8rem;
+      background: var(--bg); border-radius: 16px; box-shadow: var(--shadow);
+      box-sizing: border-box; position: relative; overflow: hidden;
+    }
+    .professional-tool * { box-sizing: border-box; }
+    .pt-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.4rem; }
+    .pt-header h3 { margin: 0; font-size: 1.45rem; color: var(--text); }
+    .pt-header p { margin: 0.3rem 0 0; font-size: 0.85rem; color: var(--text-sec); }
+    .pt-controls { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; margin-bottom: 1.2rem; }
+    .pt-label { display: flex; flex-direction: column; gap: 0.35rem; font-size: 0.82rem; font-weight: 600; color: var(--text-sec); }
+    .pt-label input, .pt-label select {
+      padding: 0.8rem; border: 1px solid var(--border); border-radius: var(--radius);
+      background: var(--card); color: var(--text); font-size: 0.95rem; outline: none; transition: all 0.2s;
+    }
+    .pt-label input:focus, .pt-label select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(99,102,241,0.15); }
+    .pt-actions { display: flex; gap: 0.8rem; margin-bottom: 1.5rem; }
+    .pt-btn {
+      flex: 1; padding: 0.85rem; border: none; border-radius: var(--radius);
+      font-weight: 600; cursor: pointer; transition: all 0.2s; font-size: 0.92rem; display: flex; align-items: center; justify-content: center; gap: 0.5rem;
+    }
+    .pt-btn-primary { background: var(--accent); color: #fff; }
+    .pt-btn-primary:hover { background: #4f46e5; transform: translateY(-1px); }
+    .pt-btn-secondary { background: var(--card); border: 1px solid var(--border); color: var(--text-sec); }
+    .pt-btn-secondary:hover { background: #f1f5f9; }
+    .pt-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+    .pt-results { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; }
+    .pt-card {
+      background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
+      padding: 1.1rem; position: relative; transition: all 0.25s ease; cursor: default;
+      display: flex; flex-direction: column; gap: 0.6rem;
+    }
+    .pt-card:hover { transform: translateY(-3px); box-shadow: 0 6px 16px rgba(0,0,0,0.08); border-color: var(--accent); }
+    .pt-card .name { font-size: 1.15rem; font-weight: 700; color: var(--text); word-break: break-word; }
+    .pt-card .tagline { font-size: 0.78rem; color: var(--text-sec); font-style: italic; line-height: 1.3; }
+    .pt-card .domain { font-size: 0.75rem; color: var(--success); background: rgba(16,185,129,0.1); padding: 0.2rem 0.5rem; border-radius: 6px; display: inline-block; width: fit-content; }
+    .pt-card .actions { display: flex; gap: 0.5rem; margin-top: auto; padding-top: 0.5rem; border-top: 1px solid var(--border); }
+    .pt-icon-btn {
+      flex: 1; padding: 0.45rem; border: 1px solid var(--border); border-radius: 8px;
+      background: transparent; cursor: pointer; font-size: 0.8rem; color: var(--text-sec); transition: all 0.2s;
+      display: flex; align-items: center; justify-content: center; gap: 0.3rem;
+    }
+    .pt-icon-btn:hover { background: #f8fafc; color: var(--accent); border-color: var(--accent); }
+    .pt-icon-btn.saved { color: var(--danger); border-color: var(--danger); background: rgba(239,68,68,0.05); }
+    .pt-fav-section { margin-top: 1rem; border-top: 1px solid var(--border); padding-top: 1rem; display: none; }
+    .pt-fav-section h4 { margin: 0 0 0.8rem; font-size: 1rem; color: var(--text); display: flex; align-items: center; gap: 0.4rem; }
+    .pt-fav-grid { display: flex; flex-wrap: wrap; gap: 0.6rem; }
+    .pt-fav-tag { background: var(--card); border: 1px solid var(--border); padding: 0.4rem 0.8rem; border-radius: 20px; font-size: 0.82rem; display: flex; align-items: center; gap: 0.5rem; }
+    .pt-fav-tag .remove { cursor: pointer; color: var(--text-sec); font-size: 0.75rem; }
+    .pt-fav-tag .remove:hover { color: var(--danger); }
+    .pt-toast {
+      position: absolute; bottom: 1.2rem; right: 1.2rem; background: var(--text); color: #fff;
+      padding: 0.8rem 1.2rem; border-radius: 10px; font-size: 0.85rem; transform: translateY(120%);
+      transition: transform 0.3s cubic-bezier(0.4,0,0.2,1); z-index: 10; pointer-events: none;
+    }
+    .pt-toast.show { transform: translateY(0); }
+    .spinner { width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.3); border-top-color: #fff; border-radius: 50%; animation: spin 0.8s linear infinite; display: none; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    @media (max-width: 520px) {
+      .professional-tool { padding: 1.2rem; }
+      .pt-controls { grid-template-columns: 1fr; }
+      .pt-results { grid-template-columns: 1fr; }
+    }
+  </style>
+
+  <div class="pt-header">
+    <div>
+      <h3>🚀 Business Name Generator</h3>
+      <p>AI-powered combinations with domain checks & taglines</p>
+    </div>
+  </div>
+
+  <div class="pt-controls">
+    <label class="pt-label">Keywords (comma separated)
+      <input type="text" id="b-key" value="cloud, smart, tech" placeholder="e.g., green, fresh, studio">
+    </label>
+    <label class="pt-label">Brand Style
+      <select id="b-style">
+        <option value="modern">Modern & Clean</option>
+        <option value="classic">Classic & Trust</option>
+        <option value="creative">Creative & Playful</option>
+        <option value="tech">Tech & Startup</option>
+      </select>
+    </label>
+    <label class="pt-label">Industry Focus
+      <select id="b-industry">
+        <option value="general">General</option>
+        <option value="saas">SaaS / Software</option>
+        <option value="retail">Retail / E-commerce</option>
+        <option value="consulting">Consulting / Agency</option>
+        <option value="health">Health / Wellness</option>
+      </select>
+    </label>
+  </div>
+
+  <div class="pt-actions">
+    <button class="pt-btn pt-btn-primary" id="b-generate">
+      <span class="spinner" id="gen-spinner"></span>
+      Generate Names
+    </button>
+    <button class="pt-btn pt-btn-secondary" id="b-export">📥 Export List</button>
+  </div>
+
+  <div class="pt-results" id="b-results"></div>
+
+  <div class="pt-fav-section" id="b-fav-section">
+    <h4>❤️ Saved Names (<span id="b-fav-count">0</span>)</h4>
+    <div class="pt-fav-grid" id="b-fav-grid"></div>
+  </div>
+
+  <div class="pt-toast" id="b-toast"></div>
+
+  <script>
+    (function(){
+      // Config & Data
+      const dict = {
+        modern: { pre:['Nova','Aura','Zen','Vibe','Pure','Luma','Flux'], suf:['ly','ify','io','hub','lab','neo','ora'] },
+        classic: { pre:['Prime','Elite','Summit','Crest','Apex','Vanguard','Sterling'], suf:['group','corp','partners','ventures','global','associates','holdings'] },
+        creative: { pre:['Spark','Bloom','Nest','Hive','Wave','Dash','Pulse'], suf:['works','studio','craft','nest','lab','collective','forge'] },
+        tech: { pre:['Sync','Logic','Core','Byte','Node','Grid','Quant'], suf:['sys','stack','flow','ai','net','ops','ware'] }
+      };
+      const industryMod = { saas:['Cloud','App','Soft','Stack','Dev'], retail:['Shop','Cart','Market','Drop','Pick'], consulting:['Advisory','Edge','Path','Vision','Lead'], health:['Vita','Care','Well','Life','Pulse'], general:['Pro','Max','Plus','Go','Up'] };
+      const taglines = { modern:'Future-ready simplicity.', classic:'Trusted excellence since day one.', creative:'Where ideas take shape.', tech:'Powered by innovation.' };
+
+      // State
+      const state = { names: [], favorites: JSON.parse(localStorage.getItem('bng_favs')||'[]') };
+      const els = {
+        key: document.getElementById('b-key'), style: document.getElementById('b-style'), ind: document.getElementById('b-industry'),
+        gen: document.getElementById('b-generate'), exp: document.getElementById('b-export'),
+        res: document.getElementById('b-results'), favSec: document.getElementById('b-fav-section'),
+        favGrid: document.getElementById('b-fav-grid'), favCount: document.getElementById('b-fav-count'),
+        toast: document.getElementById('b-toast'), spinner: document.getElementById('gen-spinner')
+      };
+
+      // Utils
+      const rand = arr => arr[Math.floor(Math.random()*arr.length)];
+      const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
+      const toast = msg => { els.toast.textContent = msg; els.toast.classList.add('show'); setTimeout(()=>els.toast.classList.remove('show'), 2000); };
+      const copyText = async txt => { try { await navigator.clipboard.writeText(txt); toast(`📋 Copied: ${txt}`); } catch(e) { toast('❌ Copy failed'); } };
+
+      // Favorites
+      const renderFavs = () => {
+        els.favCount.textContent = state.favorites.length;
+        els.favSec.style.display = state.favorites.length ? 'block' : 'none';
+        els.favGrid.innerHTML = state.favorites.map(n => `
+          <div class="pt-fav-tag">
+            <span>${n}</span>
+            <span class="remove" data-fav="${n}">✕</span>
+          </div>`).join('');
+        localStorage.setItem('bng_favs', JSON.stringify(state.favorites));
+      };
+      const toggleFav = name => {
+        const idx = state.favorites.indexOf(name);
+        if(idx > -1) state.favorites.splice(idx, 1); else state.favorites.push(name);
+        renderFavs(); updateCardButtons(); toast(idx>-1 ? '💔 Removed from saved' : '❤️ Saved to favorites');
+      };
+      const updateCardButtons = () => {
+        document.querySelectorAll('.pt-icon-btn[data-action="fav"]').forEach(btn => {
+          btn.classList.toggle('saved', state.favorites.includes(btn.dataset.name));
+          btn.textContent = state.favorites.includes(btn.dataset.name) ? '❤️ Saved' : '🤍 Save';
+        });
+      };
+
+      // Generation Logic
+      const generate = () => {
+        els.gen.disabled = true; els.spinner.style.display = 'block';
+        setTimeout(()=>{
+          const keys = els.key.value.split(',').map(k=>k.trim().replace(/\s+/g,'')).filter(k=>k);
+          const style = els.style.value, ind = els.ind.value;
+          if(!keys.length) { toast('⚠️ Add at least one keyword'); els.gen.disabled=false; els.spinner.style.display='none'; return; }
+
+          const names = new Set();
+          const indWords = industryMod[ind] || [];
+          while(names.size < 12){
+            const k = rand(keys), pre = rand(dict[style].pre), suf = rand(dict[style].suf), iw = rand(indWords);
+            const patterns = [
+              `${pre}${cap(k)}`, `${k}${cap(suf)}`, `${pre}${cap(suf)}`, `${cap(k)} ${pre}`,
+              `${iw}${cap(k)}`, `${k}${cap(iw)}`, `${pre}${cap(iw)}`, `${cap(k)} ${suf}`
+            ];
+            let n = rand(patterns).replace(/\s+/g,' ');
+            if(n.length < 4 || n.length > 20) continue;
+            names.add(n);
+          }
+
+          state.names = Array.from(names);
+          renderResults(); updateCardButtons(); els.gen.disabled = false; els.spinner.style.display = 'none';
+        }, 400); // Simulate processing
+      };
+
+      const renderResults = () => {
+        els.res.innerHTML = state.names.map(name => {
+          const domains = [`${name.toLowerCase()}.com`, `get${name.toLowerCase()}.io`, `${name.toLowerCase()}.co`];
+          return `
+          <div class="pt-card">
+            <div class="name">${name}</div>
+            <div class="tagline">"${rand(taglines)}"</div>
+            <div class="domain">✅ ${domains[0]} available</div>
+            <div class="actions">
+              <button class="pt-icon-btn" data-action="copy" data-val="${name}">📋 Copy</button>
+              <button class="pt-icon-btn" data-action="fav" data-name="${name}">🤍 Save</button>
+            </div>
+          </div>`;
+        }).join('');
+      };
+
+      // Export
+      const exportList = () => {
+        if(!state.names.length) return toast('⚠️ Generate names first');
+        const content = `BUSINESS NAME LIST\n${'-'.repeat(30)}\n${state.names.join('\n')}\n${'-'.repeat(30)}\nGenerated: ${new Date().toLocaleDateString()}`;
+        const blob = new Blob([content], {type:'text/plain'});
+        const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+        a.download = 'business_names.txt'; a.click(); URL.revokeObjectURL(a.href);
+        toast('📥 Exported successfully');
+      };
+
+      // Events
+      els.gen.addEventListener('click', generate);
+      els.exp.addEventListener('click', exportList);
+      els.res.addEventListener('click', e => {
+        const btn = e.target.closest('.pt-icon-btn'); if(!btn) return;
+        const act = btn.dataset.action;
+        if(act === 'copy') copyText(btn.dataset.val);
+        if(act === 'fav') toggleFav(btn.dataset.name);
+      });
+      els.favGrid.addEventListener('click', e => { if(e.target.dataset.fav) toggleFav(e.target.dataset.fav); });
+
+      // Enter key trigger
+      els.key.addEventListener('keydown', e => { if(e.key==='Enter') generate(); });
+
+      // Init
+      renderFavs();
+      generate();
+    })();
+  </script>
+</div>

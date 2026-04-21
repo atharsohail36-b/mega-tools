@@ -1,0 +1,498 @@
+<div class="json-pro-tool">
+  <style>
+    .json-pro-tool {
+      --jpt-primary: #6366f1; --jpt-primary-hover: #4f46e5; --jpt-accent: #8b5cf6;
+      --jpt-green: #10b981; --jpt-red: #ef4444; --jpt-yellow: #f59e0b;
+      --jpt-bg: #0f0f1a; --jpt-card: #1a1a2e; --jpt-input: #1e1e3f;
+      --jpt-border: #334155; --jpt-text: #f1f5f9; --jpt-text-muted: #94a3b8;
+      --jpt-radius: 12px; --jpt-shadow: 0 4px 20px rgba(0,0,0,0.4);
+      --jpt-transition: all 0.25s cubic-bezier(0.4,0,0.2,1);
+      --jpt-font-mono: 'Fira Code', 'JetBrains Mono', 'Courier New', monospace;
+      
+      max-width: 1100px; margin: 1.5rem auto; padding: 1.2rem;
+      background: var(--jpt-card); border: 1px solid var(--jpt-border);
+      border-radius: var(--jpt-radius); box-shadow: var(--jpt-shadow);
+      font-family: system-ui, -apple-system, 'Segoe UI', sans-serif; color: var(--jpt-text);
+    }
+    .jpt-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; padding-bottom: 0.8rem; border-bottom: 1px solid var(--jpt-border); flex-wrap: wrap; gap: 0.5rem; }
+    .jpt-title { font-size: 1.3rem; font-weight: 700; display: flex; align-items: center; gap: 0.5rem; }
+    .jpt-title i { color: var(--jpt-primary); }
+    .jpt-badges { display: flex; gap: 0.4rem; flex-wrap: wrap; }
+    .jpt-badge { padding: 0.25rem 0.6rem; background: var(--jpt-input); border-radius: 6px; font-size: 0.7rem; color: var(--jpt-text-muted); }
+    
+    .jpt-tabs { display: flex; gap: 0.3rem; margin-bottom: 1rem; flex-wrap: wrap; }
+    .jpt-tab { padding: 0.5rem 1rem; border-radius: 8px 8px 0 0; cursor: pointer; font-size: 0.85rem; background: var(--jpt-input); color: var(--jpt-text-muted); border: 1px solid var(--jpt-border); border-bottom: none; transition: var(--jpt-transition); }
+    .jpt-tab:hover { color: var(--jpt-text); background: #252545; }
+    .jpt-tab.active { background: var(--jpt-primary); color: white; border-color: transparent; font-weight: 600; }
+    
+    .jpt-options { display: flex; gap: 0.8rem; margin-bottom: 1rem; flex-wrap: wrap; padding: 0.6rem 0.8rem; background: var(--jpt-input); border-radius: 10px; border: 1px solid var(--jpt-border); align-items: center; }
+    .jpt-opt-group { display: flex; align-items: center; gap: 0.4rem; font-size: 0.8rem; }
+    .jpt-opt-group label { cursor: pointer; display: flex; align-items: center; gap: 0.3rem; }
+    .jpt-opt-input { width: 60px; padding: 0.3rem 0.5rem; background: var(--jpt-bg); border: 1px solid var(--jpt-border); border-radius: 6px; color: var(--jpt-text); font-size: 0.8rem; text-align: center; }
+    .jpt-opt-select { padding: 0.3rem 0.5rem; background: var(--jpt-bg); border: 1px solid var(--jpt-border); border-radius: 6px; color: var(--jpt-text); font-size: 0.8rem; }
+    
+    .jpt-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; min-height: 320px; }
+    @media (max-width: 700px) { .jpt-grid { grid-template-columns: 1fr; } }
+    .jpt-box { display: flex; flex-direction: column; }
+    .jpt-box-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem; padding: 0.4rem 0.6rem; background: var(--jpt-input); border-radius: 8px 8px 0 0; border: 1px solid var(--jpt-border); border-bottom: none; font-size: 0.8rem; }
+    .jpt-box-title { font-weight: 600; display: flex; align-items: center; gap: 0.4rem; }
+    .jpt-box-stats { color: var(--jpt-text-muted); font-size: 0.75rem; }
+    .jpt-wrapper { position: relative; flex: 1; border: 2px solid var(--jpt-border); border-radius: 0 0 10px 10px; overflow: hidden; background: #0a0a14; }
+    .jpt-wrapper:focus-within { border-color: var(--jpt-primary); }
+    .jpt-lines { position: absolute; left: 0; top: 0; bottom: 0; width: 45px; background: #15152a; border-right: 1px solid var(--jpt-border); padding: 0.8rem 0; text-align: right; font-family: var(--jpt-font-mono); font-size: 0.8rem; color: var(--jpt-text-muted); user-select: none; overflow: hidden; transition: transform 0.1s; }
+    .jpt-lines span { display: block; padding: 0 0.5rem; line-height: 1.5; }
+    .jpt-textarea { width: 100%; height: 100%; min-height: 280px; padding: 0.8rem 0.8rem 0.8rem 50px; background: transparent; border: none; color: var(--jpt-text); font-family: var(--jpt-font-mono); font-size: 0.85rem; line-height: 1.5; outline: none; resize: vertical; tab-size: 2; }
+    .jpt-textarea[readonly] { background: #0d0d1a; cursor: default; }
+    .jpt-syntax-json { position: absolute; left: 50px; top: 0; bottom: 0; right: 0; padding: 0.8rem; font-family: var(--jpt-font-mono); font-size: 0.85rem; line-height: 1.5; white-space: pre-wrap; word-break: break-word; overflow: auto; pointer-events: none; }
+    .jpt-key { color: #9cdcfe; } .jpt-string { color: #ce9178; } .jpt-number { color: #b5cea8; } .jpt-boolean { color: #569cd6; } .jpt-null { color: #569cd6; }
+    
+    .jpt-actions { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1rem; }
+    .jpt-btn { padding: 0.6rem 1rem; border-radius: 8px; border: 1px solid var(--jpt-border); background: var(--jpt-input); color: var(--jpt-text); font-size: 0.85rem; cursor: pointer; transition: var(--jpt-transition); display: flex; align-items: center; gap: 0.4rem; font-weight: 500; }
+    .jpt-btn:hover { background: var(--jpt-primary); border-color: transparent; color: white; transform: translateY(-1px); }
+    .jpt-btn.primary { background: linear-gradient(135deg, var(--jpt-primary), var(--jpt-accent)); border: none; color: white; font-weight: 600; }
+    .jpt-btn.primary:hover { box-shadow: 0 4px 15px rgba(99,102,241,0.4); }
+    .jpt-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+    
+    .jpt-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 0.5rem; margin-bottom: 1rem; }
+    .jpt-stat { padding: 0.6rem; background: var(--jpt-input); border-radius: 8px; text-align: center; border: 1px solid var(--jpt-border); }
+    .jpt-stat-value { font-size: 1.3rem; font-weight: 700; color: var(--jpt-primary); }
+    .jpt-stat-label { font-size: 0.75rem; color: var(--jpt-text-muted); }
+    
+    .jpt-status { display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0.8rem; background: var(--jpt-input); border-radius: 8px; font-size: 0.8rem; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.4rem; }
+    .jpt-status-msg { display: flex; align-items: center; gap: 0.4rem; }
+    .jpt-status-msg.success { color: var(--jpt-green); }
+    .jpt-status-msg.error { color: var(--jpt-red); }
+    .jpt-status-msg.warn { color: var(--jpt-yellow); }
+    .jpt-status-info { color: var(--jpt-text-muted); }
+    
+    .jpt-tree-view { margin-bottom: 1rem; padding: 0.8rem; background: var(--jpt-input); border-radius: 8px; border: 1px solid var(--jpt-border); max-height: 200px; overflow-y: auto; font-size: 0.8rem; display: none; }
+    .jpt-tree-view.show { display: block; }
+    .jpt-tree-item { padding: 0.2rem 0; font-family: var(--jpt-font-mono); cursor: pointer; user-select: none; }
+    .jpt-tree-item:hover { color: var(--jpt-primary); }
+    .jpt-tree-toggle { display: inline-block; width: 16px; cursor: pointer; transition: var(--jpt-transition); }
+    .jpt-tree-toggle.collapsed { transform: rotate(-90deg); }
+    
+    .jpt-converter { margin-bottom: 1rem; padding: 0.8rem; background: var(--jpt-input); border-radius: 8px; border: 1px solid var(--jpt-border); }
+    .jpt-conv-header { font-size: 0.85rem; font-weight: 600; margin-bottom: 0.5rem; }
+    .jpt-conv-row { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+    
+    .jpt-history { margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--jpt-border); }
+    .jpt-history-header { display: flex; justify-content: space-between; align-items: center; cursor: pointer; margin-bottom: 0.5rem; }
+    .jpt-history-title { font-size: 0.9rem; font-weight: 600; display: flex; align-items: center; gap: 0.4rem; }
+    .jpt-history-toggle { color: var(--jpt-text-muted); transition: var(--jpt-transition); }
+    .jpt-history-toggle.collapsed { transform: rotate(-90deg); }
+    .jpt-history-list { display: grid; gap: 0.4rem; max-height: 150px; overflow-y: auto; transition: var(--jpt-transition); }
+    .jpt-history-list.collapsed { display: none; }
+    .jpt-history-item { padding: 0.5rem 0.7rem; background: var(--jpt-input); border-radius: 8px; cursor: pointer; border-left: 3px solid var(--jpt-primary); transition: var(--jpt-transition); font-size: 0.8rem; display: flex; justify-content: space-between; align-items: center; }
+    .jpt-history-item:hover { background: #252545; }
+    .jpt-history-preview { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 200px; color: var(--jpt-text-muted); }
+    .jpt-history-type { font-size: 0.7rem; padding: 0.15rem 0.5rem; background: var(--jpt-bg); border-radius: 4px; }
+    .jpt-history-del { padding: 0.2rem 0.4rem; background: transparent; border: none; color: var(--jpt-red); cursor: pointer; border-radius: 4px; font-size: 0.75rem; }
+    .jpt-history-del:hover { background: rgba(239,68,68,0.15); }
+    
+    .jpt-toast { position: fixed; bottom: 1.2rem; right: 1.2rem; padding: 0.7rem 1.1rem; background: var(--jpt-card); border-left: 4px solid var(--jpt-green); border-radius: 10px; box-shadow: var(--jpt-shadow); display: flex; align-items: center; gap: 0.5rem; z-index: 9999; transform: translateY(150%); transition: transform 0.35s cubic-bezier(0.68,-0.55,0.265,1.55); font-size: 0.9rem; }
+    .jpt-toast.show { transform: translateY(0); }
+    .jpt-toast.error { border-left-color: var(--jpt-red); }
+    
+    @media (max-width: 600px) {
+      .json-pro-tool { padding: 1rem; }
+      .jpt-actions { flex-direction: column; }
+      .jpt-btn { width: 100%; justify-content: center; }
+      .jpt-options { flex-direction: column; align-items: flex-start; }
+    }
+  </style>
+
+  <div class="jpt-header">
+    <div class="jpt-title"><i class="fas fa-code"></i> JSON Beautifier Pro</div>
+    <div class="jpt-badges"><span class="jpt-badge">Beautify/Minify</span><span class="jpt-badge">Validate</span><span class="jpt-badge">Tree View</span><span class="jpt-badge">Convert</span></div>
+  </div>
+
+  <div class="jpt-tabs">
+    <button class="jpt-tab active" data-view="editor">📝 Editor</button>
+    <button class="jpt-tab" data-view="tree">🌳 Tree View</button>
+    <button class="jpt-tab" data-view="converter">🔄 Converter</button>
+    <button class="jpt-tab" data-view="path">🔍 Path Finder</button>
+  </div>
+
+  <!-- Editor View -->
+  <div id="jpt-editor-view">
+    <div class="jpt-options">
+      <div class="jpt-opt-group"><label><input type="checkbox" id="jpt-indent-tabs" checked> Use spaces</label><input type="number" class="jpt-opt-input" id="jpt-indent-size" value="2" min="1" max="8"><span style="color:var(--jpt-text-muted)">indent</span></div>
+      <div class="jpt-opt-group"><label><input type="checkbox" id="jpt-sort-keys"> Sort keys</label><label><input type="checkbox" id="jpt-single-quotes"> Single quotes</label></div>
+      <div class="jpt-opt-group"><label><input type="checkbox" id="jpt-live-validate"> Live validate</label></div>
+    </div>
+
+    <div class="jpt-grid">
+      <div class="jpt-box">
+        <div class="jpt-box-header"><span class="jpt-box-title">📥 Input</span><span class="jpt-box-stats" id="jpt-in-stats">0 lines | 0 chars</span></div>
+        <div class="jpt-wrapper">
+          <div class="jpt-lines" id="jpt-in-lines"><span>1</span></div>
+          <textarea class="jpt-textarea" id="jpt-input" placeholder="Paste JSON here...&#10;&#10;e.g., {&quot;name&quot;: &quot;John&quot;, &quot;age&quot;: 30, &quot;active&quot;: true, &quot;roles&quot;: [&quot;admin&quot;, &quot;user&quot;]}" spellcheck="false"></textarea>
+        </div>
+      </div>
+      <div class="jpt-box">
+        <div class="jpt-box-header"><span class="jpt-box-title">📤 Output</span><span class="jpt-box-stats" id="jpt-out-stats">0 lines | 0 chars</span></div>
+        <div class="jpt-wrapper">
+          <div class="jpt-lines" id="jpt-out-lines"><span>1</span></div>
+          <textarea class="jpt-textarea" id="jpt-output" readonly placeholder="Processed JSON appears here..." spellcheck="false"></textarea>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tree View -->
+  <div id="jpt-tree-view" style="display: none;">
+    <div class="jpt-tree-view show" id="jpt-tree-container">
+      <p style="color: var(--jpt-text-muted); text-align: center;">Valid JSON required to display tree view. Enter and beautify first.</p>
+    </div>
+  </div>
+
+  <!-- Converter View -->
+  <div id="jpt-converter-view" style="display: none;">
+    <div class="jpt-converter">
+      <div class="jpt-conv-header">🔄 Convert JSON To:</div>
+      <div class="jpt-conv-row">
+        <button class="jpt-btn" data-conv="xml">📄 XML</button>
+        <button class="jpt-btn" data-conv="csv">📊 CSV</button>
+        <button class="jpt-btn" data-conv="yaml">📝 YAML</button>
+        <button class="jpt-btn" data-conv="tsv">📑 TSV</button>
+        <button class="jpt-btn" data-conv="properties">⚙️ Properties</button>
+      </div>
+      <div class="jpt-box" style="margin-top: 1rem;">
+        <div class="jpt-box-header"><span class="jpt-box-title">Converted Output</span><span class="jpt-box-stats" id="jpt-conv-stats">0 lines | 0 chars</span></div>
+        <div class="jpt-wrapper"><div class="jpt-lines" id="jpt-conv-lines"><span>1</span></div><textarea class="jpt-textarea" id="jpt-conv-output" readonly placeholder="Converted content will appear here..." spellcheck="false"></textarea></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Path Finder View -->
+  <div id="jpt-path-view" style="display: none;">
+    <div class="jpt-converter">
+      <div class="jpt-conv-header">🔍 JSON Path Finder</div>
+      <div class="jpt-conv-row" style="margin-bottom: 0.8rem;">
+        <input type="text" class="jpt-opt-input" id="jpt-path-input" placeholder="e.g., users[0].name or $.store.book[0].title" style="width:100%;padding:0.5rem 0.8rem;">
+        <button class="jpt-btn primary" id="jpt-path-search">🔎 Search</button>
+      </div>
+      <textarea class="jpt-textarea" id="jpt-path-output" readonly placeholder="Result will appear here..." style="min-height:80px"></textarea>
+    </div>
+  </div>
+
+  <div class="jpt-actions">
+    <button class="jpt-btn primary" id="jpt-beautify">✨ Beautify</button>
+    <button class="jpt-btn" id="jpt-minify">📦 Minify</button>
+    <button class="jpt-btn" id="jpt-copy">📋 Copy</button>
+    <button class="jpt-btn" id="jpt-download">💾 Download</button>
+    <button class="jpt-btn" id="jpt-clear">🗑️ Clear</button>
+  </div>
+
+  <div class="jpt-stats">
+    <div class="jpt-stat"><div class="jpt-stat-value" id="jpt-s-objects">0</div><div class="jpt-stat-label">Objects</div></div>
+    <div class="jpt-stat"><div class="jpt-stat-value" id="jpt-s-arrays">0</div><div class="jpt-stat-label">Arrays</div></div>
+    <div class="jpt-stat"><div class="jpt-stat-value" id="jpt-s-strings">0</div><div class="jpt-stat-label">Strings</div></div>
+    <div class="jpt-stat"><div class="jpt-stat-value" id="jpt-s-numbers">0</div><div class="jpt-stat-label">Numbers</div></div>
+    <div class="jpt-stat"><div class="jpt-stat-value" id="jpt-s-booleans">0</div><div class="jpt-stat-label">Booleans</div></div>
+    <div class="jpt-stat"><div class="jpt-stat-value" id="jpt-s-nulls">0</div><div class="jpt-stat-label">Nulls</div></div>
+  </div>
+
+  <div class="jpt-status">
+    <span class="jpt-status-msg" id="jpt-status-msg">✅ Ready to process JSON</span>
+    <span class="jpt-status-info" id="jpt-status-info">JSON Pro • Safe Parser</span>
+  </div>
+
+  <div class="jpt-history">
+    <div class="jpt-history-header" id="jpt-history-toggle">
+      <div class="jpt-history-title"><i class="fas fa-history"></i> History</div><span class="jpt-history-toggle">▼</span>
+    </div>
+    <div class="jpt-history-list" id="jpt-history-list"></div>
+  </div>
+
+  <div class="jpt-toast" id="jpt-toast"><i class="fas fa-check-circle"></i><span id="jpt-toast-msg"></span></div>
+
+  <script>
+    (function() {
+      'use strict';
+      const $ = id => document.getElementById(id);
+      const $$ = sel => document.querySelectorAll(sel);
+      
+      const els = {
+        tabs: $$('.jpt-tab'), views: { editor: $('jpt-editor-view'), tree: $('jpt-tree-view'), converter: $('jpt-converter-view'), path: $('jpt-path-view') },
+        input: $('jpt-input'), output: $('jpt-output'), inLines: $('jpt-in-lines'), outLines: $('jpt-out-lines'), inStats: $('jpt-in-stats'), outStats: $('jpt-out-stats'),
+        indentTabs: $('jpt-indent-tabs'), indentSize: $('jpt-indent-size'), sortKeys: $('jpt-sort-keys'), singleQuotes: $('jpt-single-quotes'), liveValidate: $('jpt-live-validate'),
+        beautify: $('jpt-beautify'), minify: $('jpt-minify'), copy: $('jpt-copy'), download: $('jpt-download'), clear: $('jpt-clear'),
+        convBtns: $$('.jpt-btn[data-conv]'), convOutput: $('jpt-conv-output'), convLines: $('jpt-conv-lines'), convStats: $('jpt-conv-stats'),
+        treeContainer: $('jpt-tree-container'),
+        pathInput: $('jpt-path-input'), pathSearch: $('jpt-path-search'), pathOutput: $('jpt-path-output'),
+        stats: { objects: $('jpt-s-objects'), arrays: $('jpt-s-arrays'), strings: $('jpt-s-strings'), numbers: $('jpt-s-numbers'), booleans: $('jpt-s-booleans'), nulls: $('jpt-s-nulls') },
+        statusMsg: $('jpt-status-msg'), statusInfo: $('jpt-status-info'),
+        historyToggle: $('jpt-history-toggle'), historyList: $('jpt-history-list'),
+        toast: $('jpt-toast'), toastMsg: $('jpt-toast-msg')
+      };
+
+      const state = { history: [], historyCollapsed: false, parsedJSON: null };
+      try { state.history = JSON.parse(localStorage.getItem('jpt_history') || '[]'); } catch { state.history = []; }
+
+      function toast(msg, type = 'success') {
+        els.toastMsg.textContent = msg;
+        els.toast.className = `jpt-toast ${type} show`;
+        setTimeout(() => els.toast.classList.remove('show'), 2500);
+      }
+      function setStatus(msg, type = 'info', extra = '') {
+        els.statusMsg.textContent = msg;
+        els.statusMsg.className = `jpt-status-msg ${type}`;
+        els.statusInfo.textContent = extra || 'JSON Pro • Safe Parser';
+      }
+      function updateStats(el, statsEl, linesEl) {
+        const t = el.value || '';
+        const lines = t ? t.split('\n').length : 1;
+        statsEl.textContent = `${lines} lines | ${t.length} chars | ${new Blob([t]).size} B`;
+        linesEl.innerHTML = Array.from({length: Math.max(lines, 1)}, (_, i) => `<span>${i+1}</span>`).join('');
+      }
+      els.input.onscroll = () => { els.inLines.style.transform = `translateY(-${els.input.scrollTop}px)`; };
+      els.output.onscroll = () => { els.outLines.style.transform = `translateY(-${els.output.scrollTop}px)`; };
+      if (els.convOutput) els.convOutput.onscroll = () => { els.convLines.style.transform = `translateY(-${els.convOutput.scrollTop}px)`; };
+
+      // Tab Switching
+      els.tabs.forEach(tab => {
+        tab.onclick = () => {
+          els.tabs.forEach(t => t.classList.remove('active'));
+          Object.values(els.views).forEach(v => v.style.display = 'none');
+          tab.classList.add('active');
+          els.views[tab.dataset.view].style.display = 'block';
+          if (tab.dataset.view === 'tree' && state.parsedJSON) renderTree(state.parsedJSON);
+        };
+      });
+
+      // Validate & Parse
+      function validateAndParse() {
+        const raw = els.input.value.trim();
+        if (!raw) { setStatus('⚠️ Input is empty', 'warn'); return null; }
+        try {
+          const parsed = JSON.parse(raw);
+          state.parsedJSON = parsed;
+          updateJSONStats(parsed);
+          setStatus('✅ Valid JSON', 'success', `Parsed successfully: ${Array.isArray(parsed) ? 'Array' : typeof parsed} with ${Object.keys(parsed).length} keys`);
+          return parsed;
+        } catch (e) {
+          setStatus(`❌ ${e.message}`, 'error');
+          return null;
+        }
+      }
+
+      // Input Handler
+      let inputTimer;
+      els.input.oninput = () => {
+        clearTimeout(inputTimer);
+        inputTimer = setTimeout(() => {
+          updateStats(els.input, els.inStats, els.inLines);
+          if (els.liveValidate.checked) validateAndParse();
+        }, 150);
+      };
+
+      // Beautify & Minify
+      function processJSON(action) {
+        const parsed = validateAndParse();
+        if (!parsed) { toast(action === 'beautify' ? 'Invalid JSON' : 'Cannot minify', 'error'); return; }
+        
+        try {
+          const sortFn = obj => Array.isArray(obj) ? obj.map(sortFn) : (obj && typeof obj === 'object' ? Object.keys(obj).sort().reduce((a, k) => { a[k] = sortFn(obj[k]); return a; }, {}) : obj);
+          const processed = els.sortKeys.checked ? sortFn(parsed) : parsed;
+          const indent = els.indentTabs.checked ? ' '.repeat(parseInt(els.indentSize.value)) : '\t';
+          
+          let output;
+          if (action === 'beautify') {
+            output = JSON.stringify(processed, null, indent);
+          } else {
+            output = JSON.stringify(processed);
+          }
+          
+          if (els.singleQuotes.checked && action === 'beautify') {
+            output = output.replace(/"(?=(?:[^"\\]|\\.)*)"([^"]*)":/g, "'$1'");
+          }
+          
+          els.output.value = output;
+          updateStats(els.output, els.outStats, els.outLines);
+          toast(`✅ JSON ${action === 'beautify' ? 'beautified' : 'minified'}`);
+          setStatus(`✅ ${action.charAt(0).toUpperCase() + action.slice(1)} successfully`, 'success');
+          saveHistory(els.input.value.substring(0, 40), action);
+        } catch (e) {
+          setStatus(`❌ Error during ${action}: ${e.message}`, 'error');
+          toast(e.message, 'error');
+        }
+      }
+
+      els.beautify.onclick = () => processJSON('beautify');
+      els.minify.onclick = () => processJSON('minify');
+
+      // Copy & Download
+      async function safeCopy(text) {
+        try { await navigator.clipboard.writeText(text); toast('📋 Copied'); } catch {
+          const ta = document.createElement('textarea'); ta.value = text; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta); toast('📋 Copied (fallback)');
+        }
+      }
+      els.copy.onclick = () => safeCopy(els.output.value);
+      els.download.onclick = () => {
+        const blob = new Blob([els.output.value || els.input.value], { type: 'application/json' });
+        const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `json_${Date.now()}.json`; a.click(); URL.revokeObjectURL(a.href); toast('💾 Downloaded');
+      };
+      els.clear.onclick = () => {
+        els.input.value = ''; els.output.value = ''; if (els.convOutput) els.convOutput.value = ''; state.parsedJSON = null;
+        updateStats(els.input, els.inStats, els.inLines); updateStats(els.output, els.outStats, els.outLines);
+        setStatus('✅ Ready', 'success'); els.input.focus();
+        Object.values(els.stats).forEach(el => el.textContent = '0');
+        if (els.convOutput && els.convStats) els.convStats.textContent = '0 lines | 0 chars';
+      };
+
+      // JSON Stats
+      function updateJSONStats(obj) {
+        const count = (o, res) => {
+          if (o === null) { res.nulls++; }
+          else if (typeof o === 'boolean') res.booleans++;
+          else if (typeof o === 'number') res.numbers++;
+          else if (typeof o === 'string') res.strings++;
+          else if (Array.isArray(o)) { res.arrays++; o.forEach(i => count(i, res)); }
+          else if (typeof o === 'object') { res.objects++; Object.values(o).forEach(v => count(v, res)); }
+          return res;
+        };
+        const r = count(obj, { objects: 0, arrays: 0, strings: 0, numbers: 0, booleans: 0, nulls: 0 });
+        Object.keys(els.stats).forEach(k => els.stats[k].textContent = r[k] || 0);
+      }
+
+      // Converters
+      function jsonToXML(obj, root = 'root') {
+        const escape = s => s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+        const toXML = (v, k) => {
+          if (Array.isArray(v)) return v.map(i => toXML(i, k)).join('\n');
+          if (v && typeof v === 'object') {
+            const children = Object.entries(v).map(([subK, subV]) => toXML(subV, subK)).join('\n');
+            return children ? `<${k}>\n${children}\n</${k}>` : `<${k}/>`;
+          }
+          return `<${k}>${escape(String(v))}</${k}>`;
+        };
+        return `<?xml version="1.0" encoding="UTF-8"?>\n${toXML(obj, root)}`;
+      }
+
+      function jsonToCSV(obj) {
+        if (!Array.isArray(obj) || obj.length === 0) return "Error: CSV requires an array of objects.";
+        const headers = Object.keys(obj[0]);
+        const rows = obj.map(r => headers.map(h => {
+          const v = typeof r[h] === 'object' ? JSON.stringify(r[h]) : String(r[h] || '');
+          return `"${v.replace(/"/g, '""')}"`;
+        }).join(','));
+        return [headers.join(','), ...rows].join('\n');
+      }
+
+      function jsonToYAML(obj, level = 0) {
+        const indent = '  '.repeat(level);
+        if (Array.isArray(obj)) return obj.map(v => `\n${indent}- ${typeof v === 'object' ? (Array.isArray(v) ? '' : '\n' + jsonToYAML(v, level + 1)).trim() : v}`).join('');
+        if (obj && typeof obj === 'object') return Object.entries(obj).map(([k, v]) => {
+          if (Array.isArray(v) || (v && typeof v === 'object')) return `\n${indent}${k}:${jsonToYAML(v, level + 1)}`;
+          return `\n${indent}${k}: ${v}`;
+        }).join('');
+        return String(obj);
+      }
+
+      function jsonToTSV(obj) {
+        if (!Array.isArray(obj) || obj.length === 0) return "Error: TSV requires an array of objects.";
+        const headers = Object.keys(obj[0]);
+        const rows = obj.map(r => headers.map(h => String(r[h] || '').replace(/\t/g, ' ')).join('\t'));
+        return [headers.join('\t'), ...rows].join('\n');
+      }
+
+      function jsonToProperties(obj, prefix = '') {
+        let result = '';
+        for (const [k, v] of Object.entries(obj)) {
+          const key = prefix ? `${prefix}.${k}` : k;
+          if (v && typeof v === 'object') result += jsonToProperties(v, key);
+          else result += `${key}=${v}\n`;
+        }
+        return result;
+      }
+
+      const converters = { xml: jsonToXML, csv: jsonToCSV, yaml: jsonToYAML, tsv: jsonToTSV, properties: jsonToProperties };
+
+      els.convBtns.forEach(btn => {
+        btn.onclick = () => {
+          const parsed = validateAndParse();
+          if (!parsed) { toast('Need valid JSON to convert', 'error'); return; }
+          try {
+            const res = converters[btn.dataset.conv](parsed);
+            if (els.convOutput) {
+              els.convOutput.value = res;
+              const t = res;
+              if (els.convStats) els.convStats.textContent = `${t ? t.split('\n').length : 1} lines | ${t.length} chars`;
+              if (els.convLines) els.convLines.innerHTML = Array.from({length: Math.max((t? t.split('\n').length : 1), 1)}, (_, i) => `<span>${i+1}</span>`).join('');
+            }
+            toast(`✅ Converted to ${btn.dataset.conv.toUpperCase()}`);
+          } catch(e) { toast(e.message, 'error'); }
+        };
+      });
+
+      // Tree View
+      function renderTree(obj, container = els.treeContainer, path = '$') {
+        const build = (o, p, lvl) => {
+          if (o === null) return `<div style="margin-left:${lvl*20}px;color:var(--jpt-text-muted)">${p}: null</div>`;
+          if (typeof o !== 'object') {
+            const cls = typeof o === 'string' ? 'color:#ce9178' : typeof o === 'number' ? 'color:#b5cea8' : 'color:#569cd6';
+            return `<div style="margin-left:${lvl*20}px">${p}: <span style="${cls}">${o}</span></div>`;
+          }
+          const isArray = Array.isArray(o);
+          const items = isArray ? o.map((v, i) => build(v, `[${i}]`, lvl + 1)).join('') : Object.entries(o).map(([k, v]) => build(v, k, lvl + 1)).join('');
+          return `<div style="margin-left:${lvl*20}px">${p}: {${isArray ? 'Array' : 'Object'}}<div>${items}</div></div>`;
+        };
+        container.innerHTML = build(obj, path, 0);
+      }
+
+      // Path Finder
+      function findPath(obj, path) {
+        let current = obj;
+        const parts = path.replace(/^\$/, '').replace(/\[(\d+)\]/g, '.$1').split('.').filter(Boolean);
+        for (let i = 0; i < parts.length; i++) {
+          const p = parts[i];
+          if (current === null || typeof current !== 'object') return `Path not found at "${parts.slice(0, i+1).join('.')}"`;
+          current = current[p] !== undefined ? current[p] : undefined;
+          if (current === undefined) return `Key "${p}" not found at path "${parts.slice(0, i+1).join('.')}"`;
+        }
+        return typeof current === 'object' ? JSON.stringify(current, null, 2) : String(current);
+      }
+
+      els.pathSearch.onclick = () => {
+        const parsed = validateAndParse();
+        if (!parsed) { toast('Need valid JSON first', 'error'); return; }
+        const res = findPath(parsed, els.pathInput.value.trim());
+        els.pathOutput.value = `Path: ${els.pathInput.value}\nResult:\n${res}`;
+        toast('🔍 Path search completed');
+      };
+
+      // History
+      function saveHistory(input, type) {
+        state.history.unshift({ input: input + '...', type, time: new Date().toLocaleTimeString() });
+        if (state.history.length > 10) state.history.pop();
+        try { localStorage.setItem('jpt_history', JSON.stringify(state.history)); } catch {}
+        renderHistory();
+      }
+      function renderHistory() {
+        els.historyList.innerHTML = state.history.length ? state.history.map((h, i) => `
+          <div class="jpt-history-item" onclick="window._jptLoad(${i})">
+            <div><span class="jpt-history-type">${h.type.toUpperCase()}</span><span class="jpt-history-preview">${h.input}</span></div>
+            <div><span style="font-size:0.7rem;color:var(--jpt-text-muted)">${h.time}</span><button class="jpt-history-del" onclick="window._jptDel(${i});event.stopPropagation()">✕</button></div>
+          </div>`).join('') : '<span style="color:var(--jpt-text-muted);font-size:0.8rem;padding:0.5rem">No history yet</span>';
+      }
+      window._jptLoad = i => { els.input.value = state.history[i].input; validateAndParse(); toast('📜 Loaded'); };
+      window._jptDel = i => { state.history.splice(i, 1); try { localStorage.setItem('jpt_history', JSON.stringify(state.history)); } catch {} renderHistory(); toast('🗑️ Deleted'); };
+      els.historyToggle.onclick = () => { state.historyCollapsed = !state.historyCollapsed; els.historyList.classList.toggle('collapsed', state.historyCollapsed); els.historyToggle.classList.toggle('collapsed', state.historyCollapsed); };
+
+      // Keyboard
+      document.addEventListener('keydown', e => {
+        if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { e.preventDefault(); processJSON('beautify'); }
+        if (e.key === '/' && document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'TEXTAREA') { e.preventDefault(); els.input.focus(); }
+      });
+
+      // Init
+      updateStats(els.input, els.inStats, els.inLines);
+      updateStats(els.output, els.outStats, els.outLines);
+      renderHistory();
+      setStatus('✅ Ready to process JSON');
+      console.log('📦 JSON Beautifier Pro Initialized Successfully');
+    })();
+  </script>
+</div>

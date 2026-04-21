@@ -1,0 +1,278 @@
+<div class="puzzle-app">
+  <style>
+    .puzzle-app {
+      --p-bg: #0f172a;
+      --p-panel: #1e293b;
+      --p-border: #334155;
+      --p-accent: #6366f1;
+      --p-success: #10b981;
+      --p-text: #f8fafc;
+      --p-muted: #94a3b8;
+      max-width: 420px; margin: 2rem auto; padding: 1.5rem;
+      background: var(--p-panel); border-radius: 16px;
+      box-shadow: 0 12px 30px rgba(0,0,0,0.3); border: 1px solid var(--p-border);
+      font-family: system-ui, -apple-system, sans-serif; color: var(--p-text);
+      position: relative; overflow: hidden; text-align: center;
+    }
+    .p-header { font-size: 1.4rem; font-weight: 800; margin: 0 0 1rem; background: linear-gradient(90deg, var(--p-accent), #8b5cf6); -webkit-background-clip: text; background-clip: text; color: transparent; }
+    
+    .p-controls { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; gap: 0.5rem; }
+    .p-select { padding: 0.5rem 0.8rem; border-radius: 8px; background: #334155; color: #fff; border: 1px solid var(--p-border); cursor: pointer; font-size: 0.85rem; outline: none; }
+    .p-select:focus { border-color: var(--p-accent); }
+    .p-btn-sm { background: none; border: none; color: #fff; font-size: 1.2rem; cursor: pointer; padding: 0.2rem; transition: 0.2s; }
+    .p-btn-sm:hover { transform: scale(1.1); }
+    
+    .p-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem; margin-bottom: 1.2rem; }
+    .p-stat { background: rgba(255,255,255,0.05); padding: 0.5rem; border-radius: 10px; border: 1px solid var(--p-border); }
+    .p-stat span { display: block; font-size: 0.7rem; color: var(--p-muted); text-transform: uppercase; }
+    .p-stat b { font-size: 1rem; display: block; margin-top: 2px; }
+    
+    .p-board { position: relative; width: 100%; aspect-ratio: 1/1; background: #111827; border-radius: 14px; border: 2px solid var(--p-border); overflow: hidden; margin-bottom: 1rem; }
+    .p-tile { position: absolute; display: flex; align-items: center; justify-content: center; font-weight: 700; color: #fff; background: linear-gradient(135deg, var(--p-accent), #8b5cf6); border-radius: 8px; cursor: pointer; transition: all 0.25s cubic-bezier(0.4, 0.0, 0.2, 1); box-shadow: 0 3px 6px rgba(0,0,0,0.2); user-select: none; }
+    .p-tile:hover { filter: brightness(1.15); transform: scale(0.97); }
+    .p-tile.correct { background: linear-gradient(135deg, #10b981, #059669); }
+    
+    .p-overlay { position: absolute; inset: 0; background: rgba(15,23,42,0.94); backdrop-filter: blur(8px); display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 2rem; opacity: 0; pointer-events: none; transition: opacity 0.3s; z-index: 10; border-radius: 16px; }
+    .p-overlay.active { opacity: 1; pointer-events: auto; }
+    .p-overlay h2 { font-size: 1.8rem; margin: 0 0 0.5rem; }
+    .p-overlay p { color: var(--p-muted); margin: 0 0 1.5rem; line-height: 1.5; }
+    .p-btn { padding: 0.9rem 2rem; background: linear-gradient(135deg, var(--p-accent), #8b5cf6); border: none; border-radius: 12px; color: #fff; font-weight: 700; cursor: pointer; box-shadow: 0 4px 15px rgba(99,102,241,0.4); transition: 0.2s; }
+    .p-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(99,102,241,0.5); }
+    
+    .p-confetti-box { position: absolute; inset: 0; pointer-events: none; overflow: hidden; z-index: 9; }
+    .p-confetti { position: absolute; width: 8px; height: 8px; border-radius: 2px; animation: pFall linear forwards; }
+    @keyframes pFall { to { transform: translateY(500px) rotate(720deg); opacity: 0; } }
+    .p-hint { font-size: 0.75rem; color: var(--p-muted); margin-top: 0.5rem; }
+  </style>
+
+  <div class="p-header">🧩 Slide Master Pro</div>
+  
+  <div class="p-controls">
+    <select class="p-select" id="p-diff">
+      <option value="3">3×3 (Easy)</option>
+      <option value="4" selected>4×4 (Medium)</option>
+      <option value="5">5×5 (Hard)</option>
+    </select>
+    <button class="p-btn-sm" id="p-sound">🔊</button>
+  </div>
+
+  <div class="p-stats">
+    <div class="p-stat"><span>Moves</span><b id="p-moves">0</b></div>
+    <div class="p-stat"><span>Time</span><b id="p-time">00:00</b></div>
+    <div class="p-stat"><span>Best</span><b id="p-best">0</b></div>
+  </div>
+
+  <div class="p-board" id="p-board"></div>
+  <div class="p-confetti-box" id="p-confetti"></div>
+  <p class="p-hint">💡 Use Arrow Keys or Click Tiles to Slide</p>
+
+  <div class="p-overlay active" id="p-start">
+    <h2>🎯 Ready to Solve?</h2>
+    <p>Slide tiles into numerical order (1, 2, 3...).<br>Empty space must be at the end to win!</p>
+    <button class="p-btn" id="p-play-btn">▶ Start Puzzle</button>
+  </div>
+
+  <div class="p-overlay" id="p-win">
+    <h2>🏆 Puzzle Solved!</h2>
+    <p>Moves: <b id="w-moves">0</b> | Time: <b id="w-time">00:00</b></p>
+    <button class="p-btn" id="p-replay-btn">Play Again</button>
+  </div>
+
+  <script>
+    (function() {
+      'use strict';
+      const state = {
+        size: 4, board: [], moves: 0, time: 0, timer: null, timerStarted: false,
+        playing: false, solved: false, sound: true, audioCtx: null, best: 0,
+        tileElements: []
+      };
+
+      const $ = id => document.getElementById(id);
+      const el = {
+        diff: $('p-diff'), sound: $('p-sound'), moves: $('p-moves'), time: $('p-time'), best: $('p-best'),
+        board: $('p-board'), confetti: $('p-confetti'),
+        start: $('p-start'), win: $('p-win'),
+        wMoves: $('w-moves'), wTime: $('w-time'),
+        playBtn: $('p-play-btn'), replayBtn: $('p-replay-btn')
+      };
+
+      // Audio Engine
+      const initAudio = () => {
+        if(!state.audioCtx) state.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if(state.audioCtx.state==='suspended') state.audioCtx.resume();
+      };
+      const beep = (f,t,d,del=0) => {
+        if(!state.audioCtx || !state.sound) return;
+        const o = state.audioCtx.createOscillator(), g = state.audioCtx.createGain();
+        o.type=t; o.frequency.value=f;
+        g.gain.setValueAtTime(0.05, state.audioCtx.currentTime+del);
+        g.gain.exponentialRampToValueAtTime(0.01, state.audioCtx.currentTime+del+d);
+        o.connect(g).connect(state.audioCtx.destination);
+        o.start(state.audioCtx.currentTime+del); o.stop(state.audioCtx.currentTime+del+d);
+      };
+      const sfx = t => {
+        if(t==='slide') beep(280, 'sine', 0.06);
+        if(t==='win') [400,500,600,800,1000].forEach((f,i)=>beep(f,'sine',0.1,i*0.06));
+      };
+
+      // Storage
+      const loadBest = () => {
+        try { const d = JSON.parse(localStorage.getItem('puzzle_hs')||'{}'); state.best = d[state.size] || 0; } catch { state.best = 0; }
+        el.best.textContent = state.best || '-';
+      };
+      const saveBest = () => {
+        try {
+          const d = JSON.parse(localStorage.getItem('puzzle_hs')||'{}');
+          d[state.size] = state.moves;
+          localStorage.setItem('puzzle_hs', JSON.stringify(d));
+        } catch {}
+      };
+
+      // Utilities
+      const fmtTime = s => `${String(Math.floor(s/60)).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`;
+      const clearConfetti = () => { el.confetti.innerHTML = ''; };
+      const confetti = () => {
+        clearConfetti();
+        const cols = ['#f43f5e','#10b981','#3b82f6','#f59e0b','#8b5cf6','#ffffff'];
+        for(let i=0;i<25;i++){
+          const c = document.createElement('div'); c.className='p-confetti';
+          c.style.left = Math.random()*100+'%'; c.style.top='-10px';
+          c.style.background = cols[Math.floor(Math.random()*cols.length)];
+          c.style.animationDuration = (1+Math.random())+'s';
+          el.confetti.appendChild(c);
+          setTimeout(()=>c.remove(), 2000);
+        }
+      };
+
+      // Board Logic
+      const createTiles = () => {
+        el.board.innerHTML = '';
+        state.tileElements = [];
+        for(let i=1; i<state.size*state.size; i++){
+          const t = document.createElement('div');
+          t.className = 'p-tile';
+          t.textContent = i;
+          t.dataset.val = i;
+          t.addEventListener('click', () => handleMove(i));
+          el.board.appendChild(t);
+          state.tileElements.push(t);
+        }
+      };
+
+      const renderBoard = () => {
+        const cellPct = 100 / state.size;
+        state.board.forEach((val, idx) => {
+          if(val === 0) return;
+          const row = Math.floor(idx / state.size);
+          const col = idx % state.size;
+          const tile = state.tileElements[val-1];
+          tile.style.left = (col * cellPct) + '%';
+          tile.style.top = (row * cellPct) + '%';
+          tile.style.width = (cellPct - 1) + '%';
+          tile.style.height = (cellPct - 1) + '%';
+          // Highlight correctly placed tiles
+          tile.classList.toggle('correct', val === idx + 1);
+        });
+      };
+
+      const shuffleBoard = () => {
+        // Start solved
+        state.board = Array.from({length: state.size*state.size}, (_,i) => (i+1) % (state.size*state.size));
+        let empty = state.size*state.size - 1;
+        const shuffleMoves = state.size * 150;
+        for(let i=0; i<shuffleMoves; i++){
+          const r = Math.floor(empty/state.size), c = empty%state.size;
+          const neighbors = [];
+          if(r>0) neighbors.push(empty-state.size);
+          if(r<state.size-1) neighbors.push(empty+state.size);
+          if(c>0) neighbors.push(empty-1);
+          if(c<state.size-1) neighbors.push(empty+1);
+          const pick = neighbors[Math.floor(Math.random()*neighbors.length)];
+          [state.board[empty], state.board[pick]] = [state.board[pick], state.board[empty]];
+          empty = pick;
+        }
+        renderBoard();
+      };
+
+      const handleMove = (val) => {
+        if(state.solved || !state.playing) return;
+        const idx = state.board.indexOf(val);
+        const empty = state.board.indexOf(0);
+        const r = Math.floor(idx/state.size), c = idx%state.size;
+        const er = Math.floor(empty/state.size), ec = empty%state.size;
+        
+        if(Math.abs(r-er) + Math.abs(c-ec) === 1) {
+          state.board[empty] = val;
+          state.board[idx] = 0;
+          state.moves++;
+          if(!state.timerStarted) { state.timerStarted = true; startTimer(); }
+          sfx('slide');
+          renderBoard();
+          checkWin();
+        }
+      };
+
+      const handleKey = (e) => {
+        if(!state.playing || state.solved) return;
+        const empty = state.board.indexOf(0);
+        const r = Math.floor(empty/state.size), c = empty%state.size;
+        let target = -1;
+        if(e.key==='ArrowUp' && r < state.size-1) target = empty + state.size;
+        else if(e.key==='ArrowDown' && r > 0) target = empty - state.size;
+        else if(e.key==='ArrowLeft' && c < state.size-1) target = empty + 1;
+        else if(e.key==='ArrowRight' && c > 0) target = empty - 1;
+        
+        if(target !== -1) { e.preventDefault(); handleMove(state.board[target]); }
+      };
+
+      // Timer & Game Flow
+      const startTimer = () => {
+        clearInterval(state.timer);
+        state.time = 0;
+        state.timer = setInterval(() => { state.time++; updateUI(); }, 1000);
+      };
+
+      const checkWin = () => {
+        const win = state.board.every((v,i) => v === (i+1) % (state.size*state.size));
+        if(win) winGame();
+      };
+
+      const winGame = () => {
+        state.solved = true; state.playing = false;
+        clearInterval(state.timer);
+        sfx('win'); confetti(); saveBest();
+        el.wMoves.textContent = state.moves;
+        el.wTime.textContent = fmtTime(state.time);
+        el.win.classList.add('active');
+      };
+
+      const updateUI = () => {
+        el.moves.textContent = state.moves;
+        el.time.textContent = fmtTime(state.time);
+      };
+
+      const initGame = () => {
+        initAudio();
+        clearInterval(state.timer);
+        state.size = parseInt(el.diff.value);
+        state.moves = 0; state.time = 0; state.timerStarted = false;
+        state.playing = true; state.solved = false;
+        loadBest(); updateUI();
+        el.start.classList.remove('active');
+        el.win.classList.remove('active');
+        createTiles();
+        shuffleBoard();
+      };
+
+      // Events
+      el.diff.addEventListener('change', initGame);
+      el.sound.addEventListener('click', function(){ state.sound=!state.sound; this.textContent=state.sound?'🔊':'🔇'; });
+      el.playBtn.addEventListener('click', initGame);
+      el.replayBtn.addEventListener('click', initGame);
+      document.addEventListener('keydown', handleKey);
+
+      // Init
+      updateUI();
+    })();
+  </script>
+</div>

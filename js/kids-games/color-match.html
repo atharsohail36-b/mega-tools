@@ -1,0 +1,245 @@
+<div id="cm-app">
+  <style>
+    #cm-app {
+      font-family: system-ui, -apple-system, sans-serif;
+      max-width: 420px; margin: 2rem auto; padding: 1.5rem;
+      background: #0f172a; border-radius: 16px; color: #fff;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.4); border: 1px solid #1e293b;
+      text-align: center; position: relative; overflow: hidden;
+    }
+    .cm-hidden { display: none !important; }
+    
+    .cm-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; padding: 0.5rem; background: rgba(255,255,255,0.05); border-radius: 10px; }
+    .cm-stat { font-size: 0.9rem; }
+    .cm-stat b { color: #8b5cf6; font-size: 1.1rem; }
+    
+    .cm-timer-bar { height: 6px; background: #334155; border-radius: 10px; overflow: hidden; margin-bottom: 1.5rem; }
+    .cm-timer-fill { height: 100%; width: 100%; background: #10b981; transition: width 0.1s linear, background 0.3s; border-radius: 10px; }
+    .cm-timer-fill.critical { background: #ef4444; }
+
+    .cm-target-box { margin: 0.5rem 0 1.5rem; }
+    .cm-target { width: 80px; height: 80px; margin: 0 auto; border-radius: 50%; border: 3px solid #334155; box-shadow: 0 0 15px rgba(99,102,241,0.3); }
+    .cm-label { margin-top: 0.5rem; color: #94a3b8; font-size: 0.9rem; }
+
+    .cm-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 1.5rem; }
+    .cm-opt { aspect-ratio: 1; border-radius: 12px; cursor: pointer; border: 3px solid transparent; transition: 0.2s; box-shadow: 0 4px 8px rgba(0,0,0,0.3); }
+    .cm-opt:hover { transform: scale(1.05); }
+    .cm-opt.correct { border-color: #10b981; animation: cmPop 0.3s; }
+    .cm-opt.wrong { border-color: #ef4444; opacity: 0.6; animation: cmShake 0.3s; }
+    @keyframes cmPop { 50% { transform: scale(1.1); } }
+    @keyframes cmShake { 25%,75% { transform: translateX(-4px); } }
+
+    .cm-btn { padding: 0.8rem 1.8rem; background: linear-gradient(135deg, #6366f1, #8b5cf6); border: none; border-radius: 10px; color: #fff; font-weight: 600; cursor: pointer; font-size: 1rem; box-shadow: 0 4px 12px rgba(99,102,241,0.4); transition: 0.2s; }
+    .cm-btn:hover { transform: translateY(-2px); }
+
+    .cm-screen { padding: 1rem 0; }
+    .cm-screen h2 { margin: 0 0 0.5rem; font-size: 1.5rem; }
+    .cm-screen p { color: #94a3b8; margin: 0 0 1.5rem; }
+    
+    .cm-level-badge { position: absolute; top: 10px; right: 10px; background: #f59e0b; color: #000; padding: 2px 8px; border-radius: 8px; font-size: 0.75rem; font-weight: bold; }
+  </style>
+
+  <div class="cm-level-badge" id="cm-badge">Level 1</div>
+
+  <!-- Start Screen -->
+  <div id="cm-start" class="cm-screen">
+    <h2>🎨 Color Match</h2>
+    
+    <button class="cm-btn" onclick="CMGame.start()">Start Game</button>
+  </div>
+
+  <!-- Game Screen -->
+  <div id="cm-game" class="cm-screen cm-hidden">
+    <div class="cm-header">
+      <div class="cm-stat">Level: <b id="cm-lvl">1</b></div>
+      <div class="cm-stat">Score: <b id="cm-sc">0</b></div>
+      <div class="cm-stat">Lives: <b id="cm-hp">❤️❤️❤️</b></div>
+    </div>
+    <div class="cm-timer-bar"><div class="cm-timer-fill" id="cm-tm"></div></div>
+    
+    <div class="cm-target-box">
+      <div class="cm-target" id="cm-tgt"></div>
+      <div class="cm-label">Match this exact color 👇</div>
+    </div>
+    <div class="cm-grid" id="cm-grid"></div>
+  </div>
+
+  <!-- Level Up Screen -->
+  <div id="cm-level" class="cm-screen cm-hidden">
+    <h2>🎉 Level Complete!</h2>
+    <p>Agla level zyada tez hoga. Ready?</p>
+    <button class="cm-btn" onclick="CMGame.nextLevel()">Continue</button>
+  </div>
+
+  <!-- Game Over Screen -->
+  <div id="cm-end" class="cm-screen cm-hidden">
+    <h2>💔 Game Over</h2>
+    <p>Final Score: <b id="cm-fsc">0</b><br>High Score: <b id="cm-hsc">0</b></p>
+    <button class="cm-btn" onclick="CMGame.restart()">Play Again</button>
+  </div>
+
+  <script>
+    const CMGame = (function() {
+      const state = {
+        level: 1, score: 0, lives: 3, round: 0, maxRound: 3,
+        time: 0, timeMax: 10, timer: null, target: null, playing: false,
+        audioCtx: null
+      };
+
+      const $ = id => document.getElementById(id);
+      const el = {
+        start: $('cm-start'), game: $('cm-game'), level: $('cm-level'), end: $('cm-end'),
+        lvl: $('cm-lvl'), sc: $('cm-sc'), hp: $('cm-hp'), tm: $('cm-tm'),
+        tgt: $('cm-tgt'), grid: $('cm-grid'), badge: $('cm-badge'),
+        fsc: $('cm-fsc'), hsc: $('cm-hsc')
+      };
+
+      // Audio
+      const initAudio = () => {
+        if (!state.audioCtx) state.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if (state.audioCtx.state === 'suspended') state.audioCtx.resume();
+      };
+      const beep = (f, t, d, del=0) => {
+        if (!state.audioCtx) return;
+        const o = state.audioCtx.createOscillator(), g = state.audioCtx.createGain();
+        o.type = t; o.frequency.value = f;
+        g.gain.setValueAtTime(0.08, state.audioCtx.currentTime + del);
+        g.gain.exponentialRampToValueAtTime(0.01, state.audioCtx.currentTime + del + d);
+        o.connect(g).connect(state.audioCtx.destination);
+        o.start(state.audioCtx.currentTime + del); o.stop(state.audioCtx.currentTime + del + d);
+      };
+      const sfx = type => {
+        if(type==='ok') { beep(600,'sine',0.1); beep(900,'sine',0.1,0.08); }
+        if(type==='no') beep(200,'sawtooth',0.2);
+        if(type==='up') [400,500,600,800].forEach((f,i)=>beep(f,'sine',0.1,i*0.07));
+        if(type==='die') [600,500,400,300].forEach((f,i)=>beep(f,'triangle',0.15,i*0.09));
+      };
+
+      // Color Utils
+      const randHex = () => '#' + Math.floor(Math.random()*0xFFFFFF).toString(16).padStart(6,'0');
+      const similarHex = (hex, diff) => {
+        let r=parseInt(hex.slice(1,3),16), g=parseInt(hex.slice(3,5),16), b=parseInt(hex.slice(5,7),16);
+        let dr=Math.floor(Math.random()*diff)-diff/2, dg=Math.floor(Math.random()*diff)-diff/2, db=Math.floor(Math.random()*diff)-diff/2;
+        r=Math.max(0,Math.min(255,r+dr)); g=Math.max(0,Math.min(255,g+dg)); b=Math.max(0,Math.min(255,b+db));
+        return '#'+[r,g,b].map(c=>c.toString(16).padStart(2,'0')).join('');
+      };
+
+      // UI Updates
+      const ui = () => {
+        el.lvl.textContent = state.level;
+        el.sc.textContent = state.score;
+        el.hp.textContent = '❤️'.repeat(state.lives) + '🤍'.repeat(Math.max(0, 5-state.lives));
+        el.badge.textContent = `Level ${state.level}`;
+      };
+
+      const showScreen = (screen) => {
+        [el.start, el.game, el.level, el.end].forEach(s => s.classList.add('cm-hidden'));
+        screen.classList.remove('cm-hidden');
+      };
+
+      // Timer
+      const startTimer = () => {
+        clearInterval(state.timer);
+        state.time = state.timeMax;
+        el.tm.style.width = '100%'; el.tm.classList.remove('critical');
+        state.timer = setInterval(() => {
+          state.time -= 0.1;
+          el.tm.style.width = (state.time/state.timeMax*100)+'%';
+          if(state.time <= 2) el.tm.classList.add('critical');
+          if(state.time <= 0) { clearInterval(state.timer); timeOut(); }
+        }, 100);
+      };
+
+      const timeOut = () => {
+        state.lives--; sfx('no');
+        document.querySelectorAll('.cm-opt').forEach(o => {
+          o.dataset.c === state.target ? o.classList.add('correct') : o.classList.add('wrong');
+        });
+        ui(); setTimeout(nextStep, 800);
+      };
+
+      // Game Flow
+      const loadRound = () => {
+        if(!state.playing) return;
+        state.target = randHex();
+        el.tgt.style.background = state.target;
+        
+        const diff = Math.max(50 - state.level*4, 12); // Similarity shrinks as level increases
+        const opts = new Set([state.target]);
+        while(opts.size < 4) opts.add(similarHex(state.target, diff));
+        
+        el.grid.innerHTML = '';
+        Array.from(opts).sort(()=>Math.random()-0.5).forEach(c => {
+          const d = document.createElement('div');
+          d.className = 'cm-opt'; d.style.background = c; d.dataset.c = c;
+          d.onclick = () => check(c, d);
+          el.grid.appendChild(d);
+        });
+        startTimer();
+      };
+
+      const check = (chosen, d) => {
+        if(!state.playing) return;
+        clearInterval(state.timer);
+        document.querySelectorAll('.cm-opt').forEach(o=>o.style.pointerEvents='none');
+        
+        if(chosen === state.target){
+          d.classList.add('correct');
+          state.score += 50 + (state.level*10);
+          sfx('ok');
+        } else {
+          d.classList.add('wrong');
+          document.querySelectorAll('.cm-opt').forEach(o=>o.dataset.c===state.target && o.classList.add('correct'));
+          state.lives--;
+          sfx('no');
+        }
+        state.round++;
+        ui();
+        setTimeout(nextStep, 800);
+      };
+
+      const nextStep = () => {
+        if(state.lives <= 0) return gameOver();
+        if(state.round >= state.maxRound) return levelUp();
+        loadRound();
+      };
+
+      const levelUp = () => {
+        state.playing = false;
+        sfx('up');
+        state.level++;
+        state.timeMax = Math.max(4, 10 - state.level*0.5); // Less time per level
+        state.round = 0;
+        ui();
+        showScreen(el.level);
+      };
+
+      const gameOver = () => {
+        state.playing = false;
+        sfx('die');
+        const hs = Math.max(state.score, parseInt(localStorage.getItem('cm_hs')||'0'));
+        try { localStorage.setItem('cm_hs', hs); } catch {}
+        el.fsc.textContent = state.score;
+        el.hsc.textContent = hs;
+        showScreen(el.end);
+      };
+
+      // Public Methods
+      return {
+        start: () => {
+          initAudio();
+          Object.assign(state, {level:1, score:0, lives:3, round:0, timeMax:10, playing:true});
+          ui(); showScreen(el.game); loadRound();
+        },
+        nextLevel: () => {
+          showScreen(el.game);
+          state.playing = true;
+          loadRound();
+        },
+        restart: () => {
+          showScreen(el.start);
+        }
+      };
+    })();
+  </script>
+</div>

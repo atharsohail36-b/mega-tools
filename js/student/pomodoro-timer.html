@@ -1,0 +1,342 @@
+<div class="student-tool">
+  <style>
+    .student-tool {
+      --glass-border: rgba(255,255,255,0.15);
+      --bg-card: #1e1e2e;
+      --bg-hover: #2a2a3c;
+      --text-primary: #e2e2e2;
+      --text-secondary: #a0a0b0;
+      --accent: #6366f1;
+      --accent-glow: rgba(99,102,241,0.3);
+      --gradient-main: linear-gradient(135deg, #8b5cf6, #6366f1);
+      --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      max-width: 500px;
+      margin: 0 auto;
+      padding: 1.5rem;
+      font-family: system-ui, -apple-system, sans-serif;
+      color: var(--text-primary);
+      position: relative;
+    }
+    .pom-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+    .pom-header h2 { margin: 0; font-size: 1.4rem; background: var(--gradient-main); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .pom-stats { display: flex; gap: 0.8rem; font-size: 0.85rem; color: var(--text-secondary); background: var(--bg-card); padding: 0.3rem 0.8rem; border-radius: 20px; border: 1px solid var(--glass-border); }
+    .pom-task { width: 100%; padding: 0.7rem; margin-bottom: 1rem; border-radius: 10px; border: 1px solid var(--glass-border); background: var(--bg-card); color: var(--text-primary); outline: none; text-align: center; font-size: 0.95rem; }
+    .pom-task:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow); }
+    .pom-modes { display: flex; gap: 0.5rem; justify-content: center; margin-bottom: 1.5rem; }
+    .pom-tab { padding: 0.5rem 1rem; border-radius: 20px; border: 1px solid var(--glass-border); background: transparent; color: var(--text-secondary); cursor: pointer; transition: var(--transition); font-size: 0.9rem; }
+    .pom-tab.active { background: var(--accent); color: #fff; border-color: transparent; }
+    .pom-circle { width: 240px; height: 240px; margin: 0 auto 1.5rem; position: relative; display: flex; align-items: center; justify-content: center; border-radius: 50%; background: conic-gradient(var(--accent) 0%, var(--bg-card) 0%); box-shadow: 0 0 30px rgba(99,102,241,0.15); }
+    .pom-inner { width: 216px; height: 216px; background: var(--bg-card); border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; }
+    .pom-time { font-size: 3rem; font-weight: 800; color: var(--text-primary); font-variant-numeric: tabular-nums; letter-spacing: -1px; }
+    .pom-status { font-size: 0.85rem; color: var(--text-secondary); margin-top: 0.3rem; }
+    .pom-controls { display: flex; gap: 1rem; justify-content: center; margin-bottom: 1.5rem; }
+    .pom-btn { padding: 0.8rem 1.5rem; border: 1px solid var(--glass-border); border-radius: 12px; background: var(--bg-card); color: var(--text-primary); cursor: pointer; transition: var(--transition); font-weight: 500; font-size: 0.95rem; }
+    .pom-btn:hover { background: var(--bg-hover); transform: translateY(-2px); }
+    .pom-btn.primary { background: var(--gradient-main); color: #fff; border: none; }
+    .pom-btn.primary:hover { box-shadow: 0 4px 15px var(--accent-glow); }
+    .pom-history { margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--glass-border); }
+    .pom-history h3 { font-size: 0.95rem; color: var(--text-secondary); margin: 0 0 0.5rem; display: flex; justify-content: space-between; }
+    .pom-list { max-height: 120px; overflow-y: auto; display: flex; flex-direction: column; gap: 0.4rem; }
+    .pom-item { display: flex; justify-content: space-between; align-items: center; padding: 0.5rem; background: var(--bg-hover); border-radius: 8px; font-size: 0.85rem; }
+    .pom-item span:first-child { color: var(--text-secondary); }
+    .pom-settings-btn { position: absolute; top: 0.5rem; right: 0.5rem; background: var(--bg-card); border: 1px solid var(--glass-border); border-radius: 8px; padding: 0.4rem; cursor: pointer; color: var(--text-secondary); font-size: 1.1rem; transition: var(--transition); }
+    .pom-settings-btn:hover { color: var(--accent); border-color: var(--accent); }
+    .pom-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: var(--transition); z-index: 1000; }
+    .pom-modal.open { opacity: 1; pointer-events: auto; }
+    .pom-modal-content { background: var(--bg-card); border: 1px solid var(--glass-border); border-radius: 16px; padding: 1.5rem; width: 90%; max-width: 400px; transform: translateY(20px); transition: var(--transition); }
+    .pom-modal.open .pom-modal-content { transform: translateY(0); }
+    .pom-modal h3 { margin: 0 0 1rem; color: var(--text-primary); }
+    .pom-setting { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.8rem; font-size: 0.9rem; }
+    .pom-setting input[type="number"] { width: 60px; padding: 0.4rem; background: var(--bg-hover); border: 1px solid var(--glass-border); color: var(--text-primary); border-radius: 6px; text-align: center; }
+    .pom-setting label { display: flex; align-items: center; gap: 0.5rem; cursor: pointer; }
+    .pom-modal-btns { display: flex; justify-content: flex-end; gap: 0.8rem; margin-top: 1rem; }
+    .pom-modal-btn { padding: 0.6rem 1rem; border-radius: 8px; border: none; cursor: pointer; font-weight: 600; transition: var(--transition); }
+    .pom-modal-btn.cancel { background: var(--bg-hover); color: var(--text-primary); }
+    .pom-modal-btn.save { background: var(--gradient-main); color: #fff; }
+    .pom-toast { position: fixed; bottom: 20px; right: 20px; background: var(--bg-card); border: 1px solid var(--glass-border); padding: 0.8rem 1.2rem; border-radius: 8px; color: var(--text-primary); box-shadow: 0 4px 12px rgba(0,0,0,0.3); transform: translateY(100px); opacity: 0; transition: all 0.3s ease; z-index: 1000; font-size: 0.9rem; }
+    .pom-toast.show { transform: translateY(0); opacity: 1; }
+    @media (max-width: 500px) {
+      .pom-circle { width: 200px; height: 200px; }
+      .pom-inner { width: 176px; height: 176px; }
+      .pom-time { font-size: 2.5rem; }
+    }
+  </style>
+
+  <div class="pom-header">
+    <h2>🍅 Pomodoro Focus</h2>
+    <div class="pom-stats">🔥 <span id="pom-streak">0</span> Today • 📦 <span id="pom-sessions">0</span> Done</div>
+  </div>
+
+  <input class="pom-task" id="pom-task" placeholder="What are you working on? (Optional)">
+
+  <div class="pom-modes">
+    <button class="pom-tab active" data-mode="work">📝 Work</button>
+    <button class="pom-tab" data-mode="short">☕ Short Break</button>
+    <button class="pom-tab" data-mode="long">🌿 Long Break</button>
+  </div>
+
+  <div class="pom-circle" id="pom-circle">
+    <div class="pom-inner">
+      <div class="pom-time" id="pom-time">25:00</div>
+      <div class="pom-status" id="pom-status">Ready to Focus</div>
+    </div>
+  </div>
+
+  <div class="pom-controls">
+    <button class="pom-btn primary" id="pom-start">▶ Start</button>
+    <button class="pom-btn" id="pom-reset">↻ Reset</button>
+    <button class="pom-btn" id="pom-skip">⏭ Skip</button>
+  </div>
+
+  <div class="pom-history">
+    <h3>📜 Today's Sessions <span style="font-size:0.8rem; cursor:pointer; color:var(--accent);" id="pom-clear-hist">Clear</span></h3>
+    <div class="pom-list" id="pom-list"></div>
+  </div>
+
+  <button class="pom-settings-btn" id="pom-settings-btn">⚙️</button>
+
+  <div class="pom-modal" id="pom-modal">
+    <div class="pom-modal-content">
+      <h3>⚙️ Settings</h3>
+      <div class="pom-setting">
+        <span>Work Duration (min)</span>
+        <input type="number" id="s-work" min="1" max="90" value="25">
+      </div>
+      <div class="pom-setting">
+        <span>Short Break (min)</span>
+        <input type="number" id="s-short" min="1" max="30" value="5">
+      </div>
+      <div class="pom-setting">
+        <span>Long Break (min)</span>
+        <input type="number" id="s-long" min="1" max="60" value="15">
+      </div>
+      <div class="pom-setting">
+        <label><input type="checkbox" id="s-auto" checked> Auto-Cycle Work/Break</label>
+      </div>
+      <div class="pom-setting">
+        <label><input type="checkbox" id="s-sound" checked> Play Sound Alert</label>
+      </div>
+      <div class="pom-modal-btns">
+        <button class="pom-modal-btn cancel" id="pom-modal-cancel">Cancel</button>
+        <button class="pom-modal-btn save" id="pom-modal-save">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="pom-toast" id="pom-toast"></div>
+
+  <script>
+    (function() {
+      const STORAGE_KEY = 'pomodoro_v2';
+      let state = {
+        mode: 'work',
+        duration: 25 * 60,
+        elapsed: 0,
+        running: false,
+        interval: null,
+        sessionsToday: 0,
+        history: [],
+        lastDate: new Date().toDateString(),
+        settings: { work: 25, short: 5, long: 15, auto: true, sound: true }
+      };
+
+      const els = {
+        time: document.getElementById('pom-time'),
+        status: document.getElementById('pom-status'),
+        circle: document.getElementById('pom-circle'),
+        start: document.getElementById('pom-start'),
+        reset: document.getElementById('pom-reset'),
+        skip: document.getElementById('pom-skip'),
+        task: document.getElementById('pom-task'),
+        tabs: document.querySelectorAll('.pom-tab'),
+        streak: document.getElementById('pom-streak'),
+        sessions: document.getElementById('pom-sessions'),
+        list: document.getElementById('pom-list'),
+        settingsBtn: document.getElementById('pom-settings-btn'),
+        modal: document.getElementById('pom-modal'),
+        toast: document.getElementById('pom-toast')
+      };
+
+      const init = () => {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (saved) {
+          try {
+            const parsed = JSON.parse(saved);
+            if (parsed.lastDate !== new Date().toDateString()) parsed.sessionsToday = 0;
+            state = { ...state, ...parsed };
+          } catch {}
+        }
+        applySettings();
+        renderHistory();
+        updateUI();
+        setupEvents();
+        requestNotificationPermission();
+      };
+
+      const save = () => localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      const showToast = (msg) => {
+        els.toast.textContent = msg;
+        els.toast.classList.add('show');
+        setTimeout(() => els.toast.classList.remove('show'), 2000);
+      };
+
+      const playSound = () => {
+        if (!state.settings.sound) return;
+        try {
+          const ctx = new (window.AudioContext || window.webkitAudioContext)();
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.connect(gain); gain.connect(ctx.destination);
+          osc.type = 'sine'; osc.frequency.setValueAtTime(440, ctx.currentTime);
+          osc.frequency.exponentialRampToValueAtTime(880, ctx.currentTime + 0.5);
+          gain.gain.setValueAtTime(0.3, ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.5);
+          osc.start(); osc.stop(ctx.currentTime + 0.5);
+        } catch {}
+      };
+
+      const requestNotificationPermission = () => {
+        if ('Notification' in window && Notification.permission === 'default') Notification.requestPermission();
+      };
+
+      const notify = (title, body) => {
+        if ('Notification' in window && Notification.permission === 'granted') {
+          new Notification(title, { body, icon: '🍅' });
+        }
+      };
+
+      const applySettings = () => {
+        const s = state.settings;
+        document.getElementById('s-work').value = s.work;
+        document.getElementById('s-short').value = s.short;
+        document.getElementById('s-long').value = s.long;
+        document.getElementById('s-auto').checked = s.auto;
+        document.getElementById('s-sound').checked = s.sound;
+        if (!state.running) {
+          state.duration = s[state.mode] * 60;
+          state.elapsed = 0;
+          updateUI();
+        }
+      };
+
+      const switchMode = (mode) => {
+        state.mode = mode;
+        state.duration = state.settings[mode] * 60;
+        state.elapsed = 0;
+        state.running = false;
+        clearInterval(state.interval);
+        els.tabs.forEach(t => t.classList.toggle('active', t.dataset.mode === mode));
+        updateUI();
+      };
+
+      const updateUI = () => {
+        const rem = state.duration - state.elapsed;
+        const m = Math.floor(rem / 60), s = rem % 60;
+        els.time.textContent = `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+        const pct = (state.elapsed / state.duration) * 100;
+        els.circle.style.background = `conic-gradient(var(--accent) ${pct}%, var(--bg-card) 0%)`;
+        els.status.textContent = state.running ? (state.mode === 'work' ? '🎯 Focusing...' : '😌 Resting...') : (state.elapsed > 0 ? 'Paused' : 'Ready');
+        els.start.textContent = state.running ? '⏸ Pause' : '▶ Start';
+        els.sessions.textContent = state.sessionsToday;
+        els.streak.textContent = state.sessionsToday > 0 ? '🔥' : '0';
+      };
+
+      const complete = () => {
+        clearInterval(state.interval);
+        state.running = false;
+        playSound();
+        
+        if (state.mode === 'work') {
+          state.sessionsToday++;
+          const task = els.task.value.trim() || 'Untitled Session';
+          state.history.unshift({ task, time: new Date().toLocaleTimeString(), mode: 'work' });
+          if (state.history.length > 10) state.history.pop();
+          renderHistory();
+          notify('Pomodoro Complete!', `Great job on "${task}". Take a break!`);
+          showToast('🎉 Session Complete! +1 Pomodoro');
+          if (state.settings.auto) {
+            setTimeout(() => {
+              const next = state.sessionsToday % 4 === 0 ? 'long' : 'short';
+              switchMode(next);
+            }, 1500);
+          }
+        } else {
+          notify('Break Over!', 'Ready to focus again?');
+          showToast('⏰ Break is over. Time to focus!');
+          if (state.settings.auto) switchMode('work');
+        }
+        save(); updateUI();
+      };
+
+      const toggleTimer = () => {
+        if (state.running) {
+          clearInterval(state.interval);
+          state.running = false;
+        } else {
+          state.running = true;
+          const startTime = Date.now() - (state.elapsed * 1000);
+          state.interval = setInterval(() => {
+            state.elapsed = Math.floor((Date.now() - startTime) / 1000);
+            if (state.elapsed >= state.duration) complete();
+            else updateUI();
+          }, 250);
+        }
+        updateUI();
+      };
+
+      const resetTimer = () => {
+        clearInterval(state.interval);
+        state.running = false;
+        state.elapsed = 0;
+        updateUI();
+        showToast('🔄 Timer reset');
+      };
+
+      const renderHistory = () => {
+        els.list.innerHTML = '';
+        if (state.history.length === 0) {
+          els.list.innerHTML = '<div style="text-align:center; color:var(--text-secondary); padding:0.5rem; font-size:0.85rem;">No sessions today.</div>';
+          return;
+        }
+        state.history.forEach(h => {
+          const div = document.createElement('div');
+          div.className = 'pom-item';
+          div.innerHTML = `<span>${h.task}</span><span style="color:var(--text-secondary); font-size:0.8rem;">${h.time}</span>`;
+          els.list.appendChild(div);
+        });
+      };
+
+      const setupEvents = () => {
+        els.tabs.forEach(t => t.addEventListener('click', () => switchMode(t.dataset.mode)));
+        els.start.addEventListener('click', toggleTimer);
+        els.reset.addEventListener('click', resetTimer);
+        els.skip.addEventListener('click', () => { if(state.settings.auto) complete(); else resetTimer(); });
+        els.settingsBtn.addEventListener('click', () => els.modal.classList.add('open'));
+        document.getElementById('pom-modal-cancel').addEventListener('click', () => els.modal.classList.remove('open'));
+        document.getElementById('pom-modal-save').addEventListener('click', () => {
+          state.settings.work = Math.max(1, parseInt(document.getElementById('s-work').value) || 25);
+          state.settings.short = Math.max(1, parseInt(document.getElementById('s-short').value) || 5);
+          state.settings.long = Math.max(1, parseInt(document.getElementById('s-long').value) || 15);
+          state.settings.auto = document.getElementById('s-auto').checked;
+          state.settings.sound = document.getElementById('s-sound').checked;
+          save(); applySettings(); els.modal.classList.remove('open');
+          showToast('⚙️ Settings saved');
+        });
+        document.getElementById('pom-clear-hist').addEventListener('click', () => { state.history = []; save(); renderHistory(); showToast('🗑️ History cleared'); });
+        els.modal.addEventListener('click', e => { if (e.target === els.modal) els.modal.classList.remove('open'); });
+
+        document.addEventListener('keydown', e => {
+          if (['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName)) return;
+          if (e.code === 'Space') { e.preventDefault(); toggleTimer(); }
+          else if (e.key === 'r' || e.key === 'R') resetTimer();
+          else if (e.key === 's' || e.key === 'S') els.modal.classList.add('open');
+          else if (e.key === '1') switchMode('work');
+          else if (e.key === '2') switchMode('short');
+          else if (e.key === '3') switchMode('long');
+        });
+      };
+
+      init();
+    })();
+  </script>
+</div>

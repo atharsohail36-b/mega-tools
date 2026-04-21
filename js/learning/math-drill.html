@@ -1,0 +1,624 @@
+<div class="math-drill-pro">
+  <style>
+    .math-drill-pro {
+      --md-bg: #0f172a;
+      --md-card: #1e293b;
+      --md-input: #334155;
+      --md-text: #f1f5f9;
+      --md-text-secondary: #94a3b8;
+      --md-accent: #3b82f6;
+      --md-success: #10b981;
+      --md-error: #ef4444;
+      --md-warning: #f59e0b;
+      --md-info: #06b6d4;
+      --md-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      --md-transition: all 0.25s ease;
+      
+      max-width: 550px;
+      margin: 0 auto;
+      padding: 1.2rem;
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      color: var(--md-text);
+      background: var(--md-bg);
+      border-radius: 20px;
+      box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .math-drill-pro::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; height: 3px;
+      background: var(--md-gradient);
+      animation: md-shimmer 3s infinite linear;
+    }
+    @keyframes md-shimmer { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
+    
+    /* Header */
+    .md-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+      padding: 0.8rem;
+      background: var(--md-card);
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+    .md-title { font-size: 1.3rem; font-weight: 700; background: var(--md-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .md-stats-row { display: flex; gap: 1rem; font-size: 0.9rem; }
+    .md-stat { background: rgba(255,255,255,0.1); padding: 0.3rem 0.7rem; border-radius: 8px; display: flex; align-items: center; gap: 0.3rem; }
+    .md-stat-val { font-weight: 700; color: var(--md-accent); }
+    
+    /* Controls */
+    .md-controls {
+      display: flex;
+      gap: 0.4rem;
+      justify-content: center;
+      margin-bottom: 1rem;
+      flex-wrap: wrap;
+    }
+    .md-btn {
+      padding: 0.5rem 0.9rem;
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 8px;
+      color: var(--md-text);
+      cursor: pointer;
+      transition: var(--md-transition);
+      font-size: 0.85rem;
+      font-weight: 500;
+    }
+    .md-btn:hover, .md-btn.active { background: var(--md-accent); border-color: var(--md-accent); color: white; transform: translateY(-2px); }
+    .md-btn.secondary:hover { background: rgba(255,255,255,0.15); transform: none; }
+    
+    /* Timer & Progress */
+    .md-timer-bar {
+      height: 6px;
+      background: var(--md-input);
+      border-radius: 3px;
+      margin-bottom: 1rem;
+      overflow: hidden;
+      position: relative;
+    }
+    .md-timer-fill {
+      height: 100%;
+      background: var(--md-gradient);
+      border-radius: 3px;
+      transition: width 0.5s linear;
+      width: 100%;
+    }
+    .md-timer-fill.warning { background: var(--md-warning); }
+    .md-timer-fill.critical { background: var(--md-error); animation: md-pulse 0.8s infinite; }
+    @keyframes md-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
+    
+    /* Problem Display */
+    .md-problem-box {
+      background: var(--md-card);
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 16px;
+      padding: 1.5rem;
+      text-align: center;
+      margin-bottom: 1rem;
+      position: relative;
+      overflow: hidden;
+    }
+    .md-problem {
+      font-size: 2.5rem;
+      font-weight: 800;
+      margin: 0.5rem 0;
+      font-family: 'Courier New', monospace;
+      letter-spacing: 2px;
+    }
+    .md-mode-badge {
+      display: inline-block;
+      padding: 0.3rem 0.8rem;
+      background: rgba(6, 182, 212, 0.2);
+      color: var(--md-info);
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+    
+    /* Input Area */
+    .md-input-wrap {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 0.8rem;
+    }
+    .md-input {
+      flex: 1;
+      padding: 0.8rem 1rem;
+      border-radius: 10px;
+      border: 2px solid rgba(255,255,255,0.15);
+      background: var(--md-input);
+      color: var(--md-text);
+      font-size: 1.3rem;
+      font-weight: 600;
+      text-align: center;
+      outline: none;
+      transition: var(--md-transition);
+    }
+    .md-input:focus { border-color: var(--md-accent); box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3); }
+    .md-submit {
+      padding: 0 1.5rem;
+      background: var(--md-gradient);
+      border: none;
+      border-radius: 10px;
+      color: white;
+      font-weight: 700;
+      cursor: pointer;
+      transition: var(--md-transition);
+      font-size: 1rem;
+    }
+    .md-submit:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 10px 20px -5px rgba(0,0,0,0.4); }
+    .md-submit:disabled { opacity: 0.6; cursor: not-allowed; }
+    
+    /* Feedback */
+    .md-feedback {
+      min-height: 1.5rem;
+      margin-bottom: 0.5rem;
+      font-weight: 600;
+      text-align: center;
+      transition: var(--md-transition);
+    }
+    .md-feedback.correct { color: var(--md-success); }
+    .md-feedback.wrong { color: var(--md-error); }
+    .md-feedback.streak { color: var(--md-warning); }
+    
+    /* History */
+    .md-history {
+      margin-top: 1rem;
+      padding-top: 0.8rem;
+      border-top: 1px dashed rgba(255,255,255,0.1);
+      max-height: 150px;
+      overflow-y: auto;
+    }
+    .md-history-title { font-size: 0.9rem; color: var(--md-text-secondary); margin-bottom: 0.5rem; }
+    .md-history-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 0.4rem 0;
+      font-size: 0.9rem;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+    .md-history-item:last-child { border: none; }
+    .md-history-item .md-correct { color: var(--md-success); }
+    .md-history-item .md-wrong { color: var(--md-error); }
+    
+    /* Achievements */
+    .md-achievements {
+      display: flex;
+      gap: 0.5rem;
+      justify-content: center;
+      margin: 1rem 0 0;
+      flex-wrap: wrap;
+    }
+    .md-achievement {
+      padding: 0.3rem 0.7rem;
+      background: rgba(255,255,255,0.05);
+      border-radius: 20px;
+      font-size: 0.75rem;
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+      border: 1px dashed rgba(255,255,255,0.2);
+      opacity: 0.5;
+      transition: var(--md-transition);
+    }
+    .md-achievement.unlocked {
+      background: rgba(245, 158, 11, 0.2);
+      border-color: var(--md-warning);
+      opacity: 1;
+      animation: md-bounce 0.4s ease;
+    }
+    @keyframes md-bounce { 0% { transform: scale(1); } 50% { transform: scale(1.2); } 100% { transform: scale(1); } }
+    
+    /* Modal/Overlay */
+    .md-overlay {
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(15, 23, 42, 0.95);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      padding: 1.5rem;
+      animation: md-fadeIn 0.3s ease;
+    }
+    .md-overlay.show { display: flex; }
+    @keyframes md-fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    
+    .md-modal {
+      background: var(--md-card);
+      border-radius: 16px;
+      padding: 1.5rem;
+      width: 100%;
+      max-width: 400px;
+      text-align: center;
+      border: 1px solid rgba(255,255,255,0.2);
+      box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+    }
+    .md-modal h2 { margin: 0 0 1rem; background: var(--md-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .md-modal-stats { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.8rem; margin: 1rem 0; text-align: left; }
+    .md-modal-stat { background: rgba(255,255,255,0.05); padding: 0.8rem; border-radius: 10px; }
+    .md-modal-stat-label { font-size: 0.8rem; color: var(--md-text-secondary); }
+    .md-modal-stat-value { font-size: 1.2rem; font-weight: 700; color: var(--md-accent); }
+    .md-modal-actions { display: flex; gap: 0.5rem; margin-top: 1rem; }
+    .md-modal-actions .md-btn { flex: 1; }
+    
+    /* Confetti */
+    .md-confetti { position: fixed; width: 8px; height: 8px; pointer-events: none; z-index: 999; animation: md-fall 3s ease-out forwards; }
+    @keyframes md-fall { 0% { transform: translateY(-100vh) rotate(0deg); opacity: 1; } 100% { transform: translateY(100vh) rotate(720deg); opacity: 0; } }
+    
+    /* Responsive */
+    @media (max-width: 450px) {
+      .math-drill-pro { padding: 0.8rem; border-radius: 16px; }
+      .md-problem { font-size: 2rem; }
+      .md-input { font-size: 1.1rem; }
+    }
+    
+    /* Scrollbar */
+    .md-history::-webkit-scrollbar { width: 4px; }
+    .md-history::-webkit-scrollbar-track { background: transparent; }
+    .md-history::-webkit-scrollbar-thumb { background: var(--md-accent); border-radius: 2px; }
+  </style>
+
+  <!-- Header -->
+  <div class="md-header">
+    <div class="md-title">🧮 Math Drill Pro</div>
+    <div class="md-stats-row">
+      <div class="md-stat">🔥 <span class="md-stat-val" id="md-streak">0</span></div>
+      <div class="md-stat">🏆 <span class="md-stat-val" id="md-score">0</span></div>
+      <div class="md-stat">📊 <span class="md-stat-val" id="md-accuracy">100%</span></div>
+    </div>
+  </div>
+
+  <!-- Controls -->
+  <div class="md-controls">
+    <button class="md-btn active" data-mode="practice">🎯 Practice</button>
+    <button class="md-btn" data-mode="timed">⏱️ 60s Challenge</button>
+    <button class="md-btn secondary" id="md-settings-btn">⚙️ Settings</button>
+    <button class="md-btn secondary" id="md-reset-btn">🔄 Reset</button>
+  </div>
+
+  <!-- Timer Bar -->
+  <div class="md-timer-bar">
+    <div class="md-timer-fill" id="md-timer-fill"></div>
+  </div>
+
+  <!-- Problem -->
+  <div class="md-problem-box">
+    <div class="md-mode-badge" id="md-mode-badge">🎯 Practice Mode</div>
+    <div class="md-problem" id="md-problem">Loading...</div>
+  </div>
+
+  <!-- Input -->
+  <div class="md-input-wrap">
+    <input type="number" class="md-input" id="md-input" placeholder="?" autocomplete="off" inputmode="decimal">
+    <button class="md-submit" id="md-submit">Check</button>
+  </div>
+
+  <!-- Feedback -->
+  <div class="md-feedback" id="md-feedback"></div>
+
+  <!-- History -->
+  <div class="md-history" id="md-history" style="display:none;">
+    <div class="md-history-title">📝 Recent Problems</div>
+    <div id="md-history-list"></div>
+  </div>
+
+  <!-- Achievements -->
+  <div class="md-achievements" id="md-achievements">
+    <div class="md-achievement" data-id="first" title="Solve your first problem">🥉 First Step</div>
+    <div class="md-achievement" data-id="streak5" title="5 correct in a row">🔥 Hot Streak</div>
+    <div class="md-achievement" data-id="streak10" title="10 correct in a row">⚡ Unstoppable</div>
+    <div class="md-achievement" data-id="score100" title="Reach 100 points">💯 Century</div>
+    <div class="md-achievement" data-id="timed20" title="Score 20+ in timed mode">🏆 Time Master</div>
+  </div>
+
+  <!-- Overlay/Modal -->
+  <div class="md-overlay" id="md-overlay">
+    <div class="md-modal">
+      <h2 id="md-modal-title">🎉 Challenge Complete!</h2>
+      <div class="md-modal-stats">
+        <div class="md-modal-stat"><div class="md-modal-stat-label">Score</div><div class="md-modal-stat-value" id="md-final-score">0</div></div>
+        <div class="md-modal-stat"><div class="md-modal-stat-label">Accuracy</div><div class="md-modal-stat-value" id="md-final-accuracy">0%</div></div>
+        <div class="md-modal-stat"><div class="md-modal-stat-label">Best Streak</div><div class="md-modal-stat-value" id="md-final-streak">0</div></div>
+        <div class="md-modal-stat"><div class="md-modal-stat-label">Problems</div><div class="md-modal-stat-value" id="md-final-count">0</div></div>
+      </div>
+      <div class="md-modal-actions">
+        <button class="md-btn" id="md-modal-replay">🔄 Play Again</button>
+        <button class="md-btn secondary" id="md-modal-close">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function(){
+      // ====== STATE ======
+      const state = {
+        mode: 'practice', // 'practice' | 'timed'
+        difficulty: 'medium',
+        ops: ['+', '-', '×', '÷'],
+        score: 0,
+        streak: 0,
+        bestStreak: 0,
+        correct: 0,
+        total: 0,
+        currentAns: 0,
+        timeLeft: 60,
+        timerInterval: null,
+        history: [],
+        achievements: JSON.parse(localStorage.getItem('md-achievements') || '{}'),
+        highScore: parseInt(localStorage.getItem('md-highscore') || '0')
+      };
+
+      // ====== DOM ======
+      const els = {
+        problem: document.getElementById('md-problem'),
+        input: document.getElementById('md-input'),
+        submit: document.getElementById('md-submit'),
+        feedback: document.getElementById('md-feedback'),
+        streak: document.getElementById('md-streak'),
+        score: document.getElementById('md-score'),
+        accuracy: document.getElementById('md-accuracy'),
+        timerFill: document.getElementById('md-timer-fill'),
+        modeBadge: document.getElementById('md-mode-badge'),
+        history: document.getElementById('md-history'),
+        historyList: document.getElementById('md-history-list'),
+        achievements: document.querySelectorAll('.md-achievement'),
+        overlay: document.getElementById('md-overlay'),
+        modalTitle: document.getElementById('md-modal-title'),
+        finalScore: document.getElementById('md-final-score'),
+        finalAccuracy: document.getElementById('md-final-accuracy'),
+        finalStreak: document.getElementById('md-final-streak'),
+        finalCount: document.getElementById('md-final-count'),
+        btns: document.querySelectorAll('.md-btn[data-mode]'),
+        settingsBtn: document.getElementById('md-settings-btn'),
+        resetBtn: document.getElementById('md-reset-btn'),
+        modalReplay: document.getElementById('md-modal-replay'),
+        modalClose: document.getElementById('md-modal-close')
+      };
+
+      // ====== UTILS ======
+      const rand = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
+      const save = () => {
+        try {
+          localStorage.setItem('md-achievements', JSON.stringify(state.achievements));
+          localStorage.setItem('md-highscore', state.highScore.toString());
+        } catch(e) {}
+      };
+
+      const updateStats = () => {
+        els.streak.textContent = state.streak;
+        els.score.textContent = state.score;
+        els.accuracy.textContent = state.total === 0 ? '100%' : Math.round((state.correct / state.total) * 100) + '%';
+        if(state.score > state.highScore) {
+          state.highScore = state.score;
+          save();
+        }
+      };
+
+      const addHistory = (prob, userAns, isCorrect) => {
+        state.history.unshift({ prob, userAns, isCorrect });
+        if(state.history.length > 8) state.history.pop();
+        renderHistory();
+      };
+
+      const renderHistory = () => {
+        els.historyList.innerHTML = state.history.map(h => `
+          <div class="md-history-item">
+            <span>${h.prob} = ${h.userAns}</span>
+            <span class="${h.isCorrect ? 'md-correct' : 'md-wrong'}">${h.isCorrect ? '✅' : '❌'}</span>
+          </div>
+        `).join('');
+        els.history.style.display = state.history.length > 0 ? 'block' : 'none';
+      };
+
+      const checkAchievements = () => {
+        const checks = {
+          first: state.total >= 1,
+          streak5: state.streak >= 5,
+          streak10: state.streak >= 10,
+          score100: state.score >= 100,
+          timed20: state.mode === 'timed' && state.score >= 20
+        };
+        
+        let newUnlock = false;
+        Object.entries(checks).forEach(([id, met]) => {
+          if(met && !state.achievements[id]) {
+            state.achievements[id] = true;
+            newUnlock = true;
+            const el = document.querySelector(`.md-achievement[data-id="${id}"]`);
+            if(el) el.classList.add('unlocked');
+          }
+        });
+        
+        if(newUnlock) { save(); triggerConfetti(); }
+      };
+
+      const triggerConfetti = () => {
+        const colors = ['#10b981','#3b82f6','#f59e0b','#ef4444','#8b5cf6'];
+        for(let i=0;i<25;i++){
+          const c = document.createElement('div'); c.className = 'md-confetti';
+          c.style.left = Math.random()*100 + 'vw';
+          c.style.backgroundColor = colors[Math.floor(Math.random()*colors.length)];
+          c.style.animationDelay = Math.random()*1.5 + 's';
+          document.body.appendChild(c);
+          setTimeout(()=>c.remove(), 3000);
+        }
+      };
+
+      // ====== MATH GENERATOR ======
+      const generateProblem = () => {
+        let a, b, op, ans;
+        const allowedOps = state.ops;
+        op = allowedOps[rand(0, allowedOps.length - 1)];
+        
+        const diff = state.difficulty;
+        const range = diff === 'easy' ? 10 : diff === 'medium' ? 15 : 25;
+        
+        switch(op) {
+          case '+':
+            a = rand(1, range); b = rand(1, range);
+            ans = a + b;
+            break;
+          case '-':
+            a = rand(1, range); b = rand(1, a); // Ensure positive result
+            ans = a - b;
+            break;
+          case '×':
+            const mulRange = diff === 'easy' ? 5 : diff === 'medium' ? 10 : 12;
+            a = rand(2, mulRange); b = rand(2, mulRange);
+            ans = a * b;
+            break;
+          case '÷':
+            const divRange = diff === 'easy' ? 5 : diff === 'medium' ? 10 : 12;
+            b = rand(2, divRange); ans = rand(2, divRange);
+            a = b * ans; // Guarantee integer result
+            break;
+          case '^':
+            a = rand(2, diff === 'easy' ? 4 : diff === 'medium' ? 6 : 9);
+            b = rand(2, diff === 'easy' ? 2 : 3);
+            ans = Math.pow(a, b);
+            break;
+          case '%':
+            a = rand(10, 100); b = rand(2, 12);
+            ans = a % b;
+            break;
+        }
+        
+        state.currentAns = ans;
+        els.problem.textContent = `${a} ${op} ${b} = ?`;
+        els.input.value = '';
+        els.input.focus();
+        els.feedback.textContent = '';
+        els.feedback.className = 'md-feedback';
+      };
+
+      // ====== TIMER ======
+      const startTimer = () => {
+        clearInterval(state.timerInterval);
+        if(state.mode !== 'timed') {
+          els.timerFill.style.width = '0%';
+          return;
+        }
+        state.timeLeft = 60;
+        els.timerFill.style.width = '100%';
+        els.timerFill.className = 'md-timer-fill';
+        
+        state.timerInterval = setInterval(() => {
+          state.timeLeft--;
+          const pct = (state.timeLeft / 60) * 100;
+          els.timerFill.style.width = pct + '%';
+          
+          if(state.timeLeft <= 15) els.timerFill.classList.add('warning');
+          if(state.timeLeft <= 5) els.timerFill.classList.add('critical');
+          
+          if(state.timeLeft <= 0) {
+            clearInterval(state.timerInterval);
+            endTimedGame();
+          }
+        }, 1000);
+      };
+
+      const endTimedGame = () => {
+        els.overlay.classList.add('show');
+        els.modalTitle.textContent = '⏱️ Time\'s Up!';
+        els.finalScore.textContent = state.score;
+        els.finalAccuracy.textContent = els.accuracy.textContent;
+        els.finalStreak.textContent = state.bestStreak;
+        els.finalCount.textContent = state.total;
+      };
+
+      // ====== CHECK ANSWER ======
+      const checkAnswer = () => {
+        const val = parseFloat(els.input.value);
+        if(isNaN(val) || els.input.value === '') return;
+        
+        els.submit.disabled = true;
+        state.total++;
+        
+        if(val === state.currentAns) {
+          state.correct++;
+          state.streak++;
+          const points = 10 + (state.streak * 2) + (state.difficulty === 'hard' ? 5 : state.difficulty === 'medium' ? 2 : 0);
+          state.score += points;
+          
+          els.feedback.textContent = state.streak >= 3 ? `🔥 ${state.streak} Streak! +${points}` : `✅ Correct! +${points}`;
+          els.feedback.className = state.streak >= 3 ? 'md-feedback streak' : 'md-feedback correct';
+        } else {
+          state.streak = 0;
+          els.feedback.textContent = `❌ Answer: ${state.currentAns}`;
+          els.feedback.className = 'md-feedback wrong';
+        }
+        
+        state.bestStreak = Math.max(state.bestStreak, state.streak);
+        addHistory(els.problem.textContent.replace(' = ?', ''), val, val === state.currentAns);
+        updateStats();
+        checkAchievements();
+        
+        setTimeout(() => {
+          els.submit.disabled = false;
+          generateProblem();
+        }, val === state.currentAns ? 600 : 1000);
+      };
+
+      // ====== MODE & DIFFICULTY ======
+      const setMode = (mode) => {
+        state.mode = mode;
+        els.btns.forEach(b => b.classList.toggle('active', b.dataset.mode === mode));
+        els.modeBadge.textContent = mode === 'practice' ? '🎯 Practice Mode' : '⏱️ 60s Challenge';
+        
+        // Reset session
+        state.score = 0; state.streak = 0; state.correct = 0; state.total = 0;
+        updateStats();
+        clearInterval(state.timerInterval);
+        startTimer();
+        generateProblem();
+      };
+
+      const setDifficulty = (diff) => {
+        state.difficulty = diff;
+        generateProblem();
+      };
+
+      // ====== EVENTS ======
+      els.submit.onclick = checkAnswer;
+      els.input.onkeypress = (e) => { if(e.key === 'Enter') checkAnswer(); };
+      
+      els.btns.forEach(b => b.onclick = () => setMode(b.dataset.mode));
+      
+      // Quick difficulty toggle via number keys
+      document.addEventListener('keydown', (e) => {
+        if(document.activeElement === els.input) return;
+        if(e.key === '1') setDifficulty('easy');
+        if(e.key === '2') setDifficulty('medium');
+        if(e.key === '3') setDifficulty('hard');
+      });
+
+      // Settings/Reset
+      els.resetBtn.onclick = () => {
+        if(confirm('Reset all progress and high score?')) {
+          state.score = 0; state.streak = 0; state.correct = 0; state.total = 0;
+          state.bestStreak = 0; state.history = []; state.achievements = {};
+          localStorage.clear();
+          updateStats(); renderHistory();
+          els.achievements.forEach(a => a.classList.remove('unlocked'));
+          generateProblem();
+        }
+      };
+
+      els.modalReplay.onclick = () => { els.overlay.classList.remove('show'); setMode('timed'); };
+      els.modalClose.onclick = () => { els.overlay.classList.remove('show'); setMode('practice'); };
+
+      // Init
+      updateStats();
+      startTimer();
+      generateProblem();
+    })();
+  </script>
+</div>

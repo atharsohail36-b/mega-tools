@@ -1,0 +1,393 @@
+<div class="inf-tool">
+  <style>
+    .inf-tool {
+      --bg: #0f172a; --card: #1e293b; --card-hover: #253347;
+      --text: #f8fafc; --text-muted: #94a3b8; --border: #334155;
+      --accent: #f59e0b; --success: #10b981; --danger: #ef4444; --info: #3b82f6;
+      --glow: rgba(245,158,11,0.2);
+      font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+      max-width: 480px; margin: 2rem auto; background: var(--bg);
+      border-radius: 20px; box-shadow: 0 8px 30px rgba(0,0,0,0.35);
+      overflow: hidden; color: var(--text); line-height: 1.4;
+    }
+    .inf-tool * { box-sizing: border-box; }
+    .it-header { padding: 1.2rem; text-align: center; border-bottom: 1px solid var(--border); background: linear-gradient(180deg, rgba(245,158,11,0.08), transparent); }
+    .it-header h2 { margin: 0; font-size: 1.3rem; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 0.5rem; }
+    .it-modes { display: flex; gap: 0.4rem; padding: 0.8rem 1.5rem; background: var(--card); border-bottom: 1px solid var(--border); overflow-x: auto; }
+    .it-mode-btn { flex: 1; min-width: 80px; padding: 0.5rem; border: none; border-radius: 8px; background: transparent; color: var(--text-muted); font-size: 0.75rem; font-weight: 500; cursor: pointer; transition: all 0.2s; white-space: nowrap; }
+    .it-mode-btn.active { background: var(--accent); color: #0f172a; }
+    .it-mode-btn:hover:not(.active) { background: var(--card-hover); color: var(--text); }
+    .it-section { padding: 1rem 1.5rem; background: var(--card); border-bottom: 1px solid var(--border); }
+    .it-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; }
+    .it-full { grid-column: span 2; }
+    .it-input, .it-select { width: 100%; padding: 0.85rem; border-radius: 10px; border: 1px solid var(--border); background: #0b1120; color: var(--text); font-size: 1rem; outline: none; transition: all 0.2s; }
+    .it-input:focus, .it-select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--glow); }
+    .it-label { display: block; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.3rem; }
+    .it-hint { font-size: 0.7rem; color: var(--text-muted); margin-top: 0.2rem; }
+    .it-results { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.8rem; }
+    .it-card { background: #0b1120; border: 1px solid var(--border); border-radius: 12px; padding: 0.9rem; text-align: center; transition: all 0.2s; }
+    .it-card:hover { border-color: var(--accent); transform: translateY(-2px); }
+    .it-val { font-size: 1.15rem; font-weight: 700; margin-bottom: 0.2rem; }
+    .it-lbl { font-size: 0.75rem; color: var(--text-muted); }
+    .it-impact { padding: 0.6rem; border-radius: 8px; font-size: 0.8rem; margin-top: 0.4rem; }
+    .it-impact.high { background: rgba(239,68,68,0.15); color: var(--danger); }
+    .it-impact.med { background: rgba(245,158,11,0.15); color: var(--warning); }
+    .it-impact.low { background: rgba(16,185,129,0.15); color: var(--success); }
+    .it-compare { padding: 1rem 1.5rem; background: var(--card); border-bottom: 1px solid var(--border); }
+    .it-compare-title { font-size: 0.9rem; margin-bottom: 0.8rem; display: flex; justify-content: space-between; align-items: center; }
+    .it-compare-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; }
+    .it-compare-card { padding: 0.8rem; background: #0b1120; border-radius: 10px; border: 1px solid var(--border); }
+    .it-compare-card h4 { margin: 0 0 0.4rem; font-size: 0.8rem; color: var(--text-muted); }
+    .it-compare-card .val { font-weight: 700; font-size: 1.1rem; }
+    .it-compare-card .diff { font-size: 0.75rem; margin-top: 0.3rem; }
+    .it-compare-card .diff.pos { color: var(--success); } .it-compare-card .diff.neg { color: var(--danger); }
+    .it-chart { padding: 1.2rem; background: var(--card); border-bottom: 1px solid var(--border); }
+    .it-chart-title { font-size: 0.9rem; margin-bottom: 0.8rem; display: flex; justify-content: space-between; }
+    .it-chart-wrap { display: flex; align-items: flex-end; gap: 3px; height: 60px; }
+    .it-chart-bar { flex: 1; background: var(--border); border-radius: 3px 3px 0 0; position: relative; transition: height 0.4s ease; min-width: 6px; }
+    .it-chart-bar::after { content: attr(data-val); position: absolute; bottom: -18px; left: 50%; transform: translateX(-50%); font-size: 0.65rem; color: var(--text-muted); white-space: nowrap; }
+    .it-chart-bar.infl { background: linear-gradient(180deg, var(--danger), #f97316); }
+    .it-chart-bar.real { background: linear-gradient(180deg, var(--success), #059669); }
+    .it-legend { display: flex; justify-content: center; gap: 1rem; margin-top: 1rem; font-size: 0.75rem; color: var(--text-muted); }
+    .it-legend span::before { content: ''; display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 4px; vertical-align: middle; }
+    .it-legend span:nth-child(1)::before { background: var(--danger); }
+    .it-legend span:nth-child(2)::before { background: var(--success); }
+    .it-table-wrap { background: var(--card); max-height: 240px; overflow-y: auto; border-bottom: 1px solid var(--border); }
+    .it-table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
+    .it-table th { position: sticky; top: 0; background: #0b1120; padding: 0.6rem; text-align: right; color: var(--text-muted); font-weight: 500; border-bottom: 1px solid var(--border); }
+    .it-table th:first-child { text-align: left; }
+    .it-table td { padding: 0.5rem 0.6rem; text-align: right; border-bottom: 1px solid var(--border); }
+    .it-table td:first-child { text-align: left; color: var(--text-muted); }
+    .it-table tr:hover td { background: rgba(245,158,11,0.05); }
+    .it-actions { padding: 1rem 1.5rem; background: var(--card); display: flex; gap: 0.8rem; }
+    .it-btn { flex: 1; padding: 0.75rem; border: none; border-radius: 10px; font-weight: 500; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 0.4rem; }
+    .it-btn-primary { background: var(--accent); color: #0f172a; }
+    .it-btn-primary:hover { background: #d97706; transform: translateY(-1px); }
+    .it-btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text-muted); }
+    .it-btn-outline:hover { background: var(--card-hover); color: var(--text); border-color: var(--accent); }
+    .it-footer { padding: 0.8rem 1.5rem; text-align: center; font-size: 0.75rem; color: var(--text-muted); background: rgba(0,0,0,0.2); }
+    .it-tip { margin-top: 0.4rem; font-style: italic; color: var(--warning); }
+    .it-save-ind { position: fixed; bottom: 1rem; right: 1rem; background: var(--accent); color: #0f172a; padding: 0.4rem 0.8rem; border-radius: 20px; font-size: 0.8rem; opacity: 0; transition: opacity 0.3s; pointer-events: none; z-index: 100; }
+    .it-save-ind.show { opacity: 1; }
+    @media (max-width: 480px) {
+      .it-results { grid-template-columns: 1fr; }
+      .it-compare-grid { grid-template-columns: 1fr; }
+      .inf-tool { margin: 1rem; }
+    }
+  </style>
+
+  <div class="it-header">
+    <h2>📉 Inflation Impact Planner</h2>
+    <p style="color:var(--text-muted); margin:0.3rem 0 0; font-size:0.85rem;">Purchasing power • Salary adjustment • Investment comparison</p>
+  </div>
+
+  <div class="it-modes">
+    <button class="it-mode-btn active" data-mode="future">🔮 Future Cost</button>
+    <button class="it-mode-btn" data-mode="present">💰 Present Value</button>
+    <button class="it-mode-btn" data-mode="salary">💼 Salary Adjust</button>
+    <button class="it-mode-btn" data-mode="goal">🎯 Beat Inflation</button>
+  </div>
+
+  <div class="it-section" id="it-inputs">
+    <div class="it-grid">
+      <div><label class="it-label">Current Amount (₹)</label><input type="number" class="it-input" id="it-amount" placeholder="10000" min="0"></div>
+      <div><label class="it-label">Inflation Rate (%)</label><input type="number" class="it-input" id="it-infl" placeholder="6" min="0" max="50" step="0.1"></div>
+      <div><label class="it-label">Time Period (Years)</label><input type="number" class="it-input" id="it-years" placeholder="10" min="1" max="50"></div>
+      <div class="mode-only" data-modes="salary,goal"><label class="it-label">Expected Return (%)</label><input type="number" class="it-input" id="it-return" placeholder="12" min="0" max="50" step="0.1"></div>
+    </div>
+    <div class="it-hint" id="it-hint">Calculates how much ₹10,000 will cost in 10 years at 6% inflation</div>
+  </div>
+
+  <div class="it-results">
+    <div class="it-card">
+      <div class="it-val" id="it-main">₹0</div>
+      <div class="it-lbl" id="it-main-lbl">Future Cost</div>
+      <div class="it-impact low" id="it-impact">Low impact</div>
+    </div>
+    <div class="it-card">
+      <div class="it-val" id="it-loss">0%</div>
+      <div class="it-lbl">Purchasing Power Loss</div>
+    </div>
+    <div class="it-card">
+      <div class="it-val" id="it-real">₹0</div>
+      <div class="it-lbl">Real Value Today</div>
+    </div>
+  </div>
+
+  <div class="it-compare" id="it-compare-section">
+    <div class="it-compare-title"><span>📊 Inflation vs Investment</span><span id="it-net-gain">Net: --</span></div>
+    <div class="it-compare-grid">
+      <div class="it-compare-card">
+        <h4>With Inflation Only</h4>
+        <div class="val" id="it-comp-infl">₹0</div>
+        <div class="diff neg" id="it-diff-infl">-₹0 real value</div>
+      </div>
+      <div class="it-compare-card">
+        <h4>With Investment Return</h4>
+        <div class="val" id="it-comp-invest">₹0</div>
+        <div class="diff pos" id="it-diff-invest">+₹0 real gain</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="it-chart">
+    <div class="it-chart-title"><span>Value Erosion Over Time</span><span id="it-chart-end">Year 10: ₹0</span></div>
+    <div class="it-chart-wrap" id="it-chart"></div>
+    <div class="it-legend"><span>With Inflation</span><span>Real Purchasing Power</span></div>
+  </div>
+
+  <div class="it-table-wrap">
+    <table class="it-table">
+      <thead><tr><th>Year</th><th>Nominal Value</th><th>Inflation Adj.</th><th>Real Value</th><th>Cumulative Loss</th></tr></thead>
+      <tbody id="it-tbody"></tbody>
+    </table>
+  </div>
+
+  <div class="it-actions">
+    <button class="it-btn it-btn-outline" id="it-export">📥 Export CSV</button>
+    <button class="it-btn it-btn-primary" id="it-reset">🔄 Reset</button>
+  </div>
+
+  <div class="it-footer">
+    📊 Based on compound inflation formula • India avg. inflation (2014-2024): ~5.8% • Data auto-saved
+    <div class="it-tip" id="it-tip">💡 To maintain purchasing power, aim for returns > inflation + taxes</div>
+  </div>
+  <div class="it-save-ind" id="it-save-ind">✓ Saved</div>
+
+  <script>
+    (function() {
+      const STORAGE_KEY = 'inf_calc_v2';
+      const INR = v => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(v || 0);
+      const PCT = v => v.toFixed(1) + '%';
+
+      const els = {
+        amount: document.getElementById('it-amount'),
+        infl: document.getElementById('it-infl'),
+        years: document.getElementById('it-years'),
+        return: document.getElementById('it-return'),
+        hint: document.getElementById('it-hint'),
+        main: document.getElementById('it-main'),
+        mainLbl: document.getElementById('it-main-lbl'),
+        loss: document.getElementById('it-loss'),
+        real: document.getElementById('it-real'),
+        impact: document.getElementById('it-impact'),
+        compInfl: document.getElementById('it-comp-infl'),
+        compInvest: document.getElementById('it-comp-invest'),
+        diffInfl: document.getElementById('it-diff-infl'),
+        diffInvest: document.getElementById('it-diff-invest'),
+        netGain: document.getElementById('it-net-gain'),
+        chart: document.getElementById('it-chart'),
+        chartEnd: document.getElementById('it-chart-end'),
+        tbody: document.getElementById('it-tbody'),
+        exportBtn: document.getElementById('it-export'),
+        resetBtn: document.getElementById('it-reset'),
+        tip: document.getElementById('it-tip'),
+        saveInd: document.getElementById('it-save-ind'),
+        modeBtns: document.querySelectorAll('.it-mode-btn'),
+        modeOnly: document.querySelectorAll('.mode-only')
+      };
+
+      let state = { mode: 'future', amount: 10000, infl: 6, years: 10, ret: 12 };
+      let yearlyData = [], saveTimeout;
+
+      const load = () => {
+        try {
+          const s = localStorage.getItem(STORAGE_KEY);
+          if(s) Object.assign(state, JSON.parse(s));
+        } catch(e) {}
+        els.amount.value = state.amount; els.infl.value = state.infl; els.years.value = state.years; els.return.value = state.ret;
+        setMode(state.mode);
+        calculate();
+      };
+
+      const save = () => {
+        try {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+          els.saveInd.classList.add('show');
+          setTimeout(() => els.saveInd.classList.remove('show'), 1500);
+        } catch(e) {}
+      };
+
+      const setMode = (mode) => {
+        state.mode = mode;
+        els.modeBtns.forEach(b => b.classList.toggle('active', b.dataset.mode === mode));
+        els.modeOnly.forEach(el => {
+          const modes = el.dataset.modes.split(',');
+          el.style.display = modes.includes(mode) ? '' : 'none';
+        });
+        // Update hints & labels
+        const hints = {
+          future: `Calculates how much ₹${els.amount.value||0} will cost in ${els.years.value||0} years at ${els.infl.value||0}% inflation`,
+          present: `Calculates today's value of ₹${els.amount.value||0} expected in ${els.years.value||0} years at ${els.infl.value||0}% inflation`,
+          salary: `Calculates salary needed in ${els.years.value||0} years to maintain today's purchasing power of ₹${els.amount.value||0}`,
+          goal: `Calculates required return to grow ₹${els.amount.value||0} to beat ${els.infl.value||0}% inflation over ${els.years.value||0} years`
+        };
+        const labels = {
+          future: 'Future Cost', present: 'Present Value', salary: 'Adjusted Salary', goal: 'Required Corpus'
+        };
+        els.hint.textContent = hints[mode] || hints.future;
+        els.mainLbl.textContent = labels[mode] || labels.future;
+      };
+
+      const calculate = () => {
+        const amt = parseFloat(els.amount.value) || 0;
+        const infl = parseFloat(els.infl.value) || 0;
+        const yrs = parseInt(els.years.value) || 1;
+        const ret = parseFloat(els.return.value) || 0;
+        const mode = state.mode;
+
+        if(amt <= 0 || infl < 0 || yrs <= 0) { clearUI(); return; }
+        state = { mode, amount: amt, infl, years: yrs, ret };
+        save();
+
+        yearlyData = [];
+        let nominal = amt, real = amt, cumLoss = 0;
+
+        for(let y=0; y<=yrs; y++) {
+          const inflFactor = Math.pow(1 + infl/100, y);
+          nominal = amt * inflFactor;
+          real = amt; // constant in today's rupees
+          cumLoss = ((nominal - amt) / nominal) * 100;
+          yearlyData.push({ year: y, nominal, real, loss: cumLoss, inflFactor });
+        }
+
+        const finalNominal = yearlyData[yrs].nominal;
+        const finalReal = amt;
+        const totalLoss = ((finalNominal - finalReal) / finalNominal) * 100;
+
+        // Update main results based on mode
+        if(mode === 'future') {
+          els.main.textContent = INR(finalNominal);
+          els.real.textContent = INR(finalReal);
+        } else if(mode === 'present') {
+          const pv = amt / Math.pow(1 + infl/100, yrs);
+          els.main.textContent = INR(pv);
+          els.real.textContent = INR(amt);
+        } else if(mode === 'salary') {
+          const adj = amt * Math.pow(1 + infl/100, yrs);
+          els.main.textContent = INR(adj);
+          els.real.textContent = INR(amt);
+        } else if(mode === 'goal') {
+          const required = amt * Math.pow(1 + (infl+2)/100, yrs); // +2% buffer
+          els.main.textContent = INR(required);
+          els.real.textContent = `Need >${PCT(infl)} return`;
+        }
+
+        els.loss.textContent = PCT(totalLoss);
+        
+        // Impact badge
+        let impactClass = 'low', impactText = '✅ Low erosion';
+        if(totalLoss >= 30 && totalLoss < 50) { impactClass = 'med'; impactText = '⚠️ Moderate erosion'; }
+        if(totalLoss >= 50) { impactClass = 'high'; impactText = '🔴 High erosion'; }
+        els.impact.className = 'it-impact ' + impactClass;
+        els.impact.textContent = impactText;
+
+        // Comparison section
+        const withInfl = amt * Math.pow(1 + infl/100, yrs);
+        const withInvest = amt * Math.pow(1 + ret/100, yrs);
+        const realGain = withInvest - withInfl;
+        
+        els.compInfl.textContent = INR(withInfl);
+        els.compInvest.textContent = INR(withInvest);
+        els.diffInfl.textContent = `-${INR(withInfl - amt)} real value`;
+        els.diffInvest.textContent = realGain >= 0 ? `+${INR(realGain)} real gain` : `-${INR(Math.abs(realGain))} shortfall`;
+        els.diffInfl.className = 'diff neg';
+        els.diffInvest.className = 'diff ' + (realGain >= 0 ? 'pos' : 'neg');
+        els.netGain.textContent = `Net: ${realGain >= 0 ? '+' : ''}${INR(realGain)}`;
+
+        // Chart
+        renderChart(yearlyData, yrs);
+
+        // Table
+        renderTable(yearlyData);
+
+        // Smart tips
+        updateTips(mode, infl, ret, totalLoss);
+      };
+
+      const renderChart = (data, yrs) => {
+        els.chart.innerHTML = '';
+        const step = yrs <= 10 ? 1 : Math.ceil(yrs / 10);
+        for(let i=0; i<=yrs; i+=step) {
+          const d = data[i];
+          const barInfl = document.createElement('div');
+          barInfl.className = 'it-chart-bar infl';
+          barInfl.style.height = `${Math.min(100, (d.nominal / data[yrs].nominal) * 100)}%`;
+          barInfl.dataset.val = i;
+          
+          const barReal = document.createElement('div');
+          barReal.className = 'it-chart-bar real';
+          barReal.style.height = `${Math.min(100, (d.real / data[yrs].nominal) * 100)}%`;
+          
+          els.chart.appendChild(barInfl);
+          els.chart.appendChild(barReal);
+        }
+        els.chartEnd.textContent = `Year ${yrs}: ${INR(data[yrs].nominal)}`;
+      };
+
+      const renderTable = (data) => {
+        els.tbody.innerHTML = '';
+        const frag = document.createDocumentFragment();
+        const show = data.length <= 12 ? data : [...data.slice(0, 5), {year:'...', nominal:'...', real:'...', loss:'...', inflFactor:'...'}, data.slice(-3)];
+        show.forEach(d => {
+          const tr = document.createElement('tr');
+          if(typeof d.year === 'string') tr.innerHTML = `<td>...</td><td>...</td><td>...</td><td>...</td><td>...</td>`;
+          else tr.innerHTML = `<td>${d.year}</td><td>${INR(d.nominal)}</td><td>${PCT((d.inflFactor-1)*100)}</td><td>${INR(d.real)}</td><td class="${d.loss>=30?'neg':''}">${PCT(d.loss)}</td>`;
+          frag.appendChild(tr);
+        });
+        els.tbody.appendChild(frag);
+      };
+
+      const updateTips = (mode, infl, ret, loss) => {
+        const tips = {
+          future: loss >= 50 ? '🔴 Over 50% value loss! Consider equity investments for long-term wealth preservation.' :
+                  loss >= 30 ? '⚠️ Significant erosion. Diversify into assets that historically beat inflation.' :
+                  '✅ Manageable impact. Still, review investment strategy annually.',
+          present: '💡 This shows what future money is worth today. Always discount future cash flows for inflation.',
+          salary: ret > infl ? `✅ Your ${PCT(ret)} return beats ${PCT(infl)} inflation by ${PCT(ret-infl)}.` :
+                  `🔴 Your ${PCT(ret)} return lags ${PCT(infl)} inflation. Seek higher-yield instruments.`,
+          goal: `🎯 To beat ${PCT(infl)} inflation, aim for ${PCT(Math.max(infl+2, 10))}+ annual returns via diversified portfolio.`
+        };
+        els.tip.textContent = tips[mode] || tips.future;
+      };
+
+      const clearUI = () => {
+        els.main.textContent = '₹0'; els.loss.textContent = '0%'; els.real.textContent = '₹0';
+        els.impact.textContent = 'Enter valid inputs';
+        els.chart.innerHTML = ''; els.tbody.innerHTML = '';
+      };
+
+      // Events
+      [els.amount, els.infl, els.years, els.return].forEach(el => {
+        el.addEventListener('input', () => { clearTimeout(saveTimeout); saveTimeout = setTimeout(calculate, 300); });
+      });
+
+      els.modeBtns.forEach(btn => {
+        btn.addEventListener('click', () => { setMode(btn.dataset.mode); calculate(); });
+      });
+
+      els.exportBtn.addEventListener('click', () => {
+        if(yearlyData.length === 0) return;
+        let csv = 'Year,Nominal Value,Inflation Factor,Real Value,Cumulative Loss %\n';
+        yearlyData.forEach(d => {
+          csv += `${d.year},${d.nominal.toFixed(2)},${((d.inflFactor-1)*100).toFixed(2)}%,${d.real.toFixed(2)},${d.loss.toFixed(2)}%\n`;
+        });
+        const blob = new Blob([csv], { type: 'text/csv' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a'); a.href = url; a.download = `inflation_analysis_${new Date().toISOString().slice(0,10)}.csv`; a.click(); URL.revokeObjectURL(url);
+      });
+
+      els.resetBtn.addEventListener('click', () => {
+        if(confirm('Reset all values to default?')) {
+          localStorage.removeItem(STORAGE_KEY);
+          state = { mode: 'future', amount: 10000, infl: 6, years: 10, ret: 12 };
+          els.amount.value = 10000; els.infl.value = 6; els.years.value = 10; els.return.value = 12;
+          setMode('future');
+          calculate();
+        }
+      });
+
+      load();
+    })();
+  </script>
+</div>

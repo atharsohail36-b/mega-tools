@@ -1,0 +1,195 @@
+<div class="lifestyle-tool sleep-cycle-pro">
+  <style>
+    .sleep-cycle-pro {
+      --sc-bg: #0b1120; --sc-card: #161e31; --sc-border: #2a3654;
+      --sc-text: #e2e8f0; --sc-sec: #94a3b8; --sc-accent: #8b5cf6;
+      --sc-green: #22c55e; --sc-yellow: #f59e0b; --sc-red: #ef4444;
+      --sc-radius: 16px; font-family: system-ui, -apple-system, sans-serif;
+      max-width: 680px; margin: 0 auto; padding: 1.5rem;
+      background: var(--sc-bg); color: var(--sc-text); border-radius: var(--sc-radius);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.4); position: relative;
+    }
+    .sc-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem; }
+    .sc-header h2 { margin: 0; font-size: 1.4rem; background: linear-gradient(90deg, var(--sc-accent), #38bdf8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .sc-mode { display: flex; background: var(--sc-card); border-radius: 10px; overflow: hidden; border: 1px solid var(--sc-border); }
+    .sc-mode-btn { padding: 0.5rem 1rem; background: none; border: none; color: var(--sc-sec); cursor: pointer; font-size: 0.85rem; transition: 0.2s; flex: 1; }
+    .sc-mode-btn.active { background: var(--sc-accent); color: #0b1120; font-weight: 600; }
+    .sc-controls { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 0.8rem; margin: 1rem 0; }
+    .sc-field { display: flex; flex-direction: column; gap: 0.4rem; }
+    .sc-field label { font-size: 0.85rem; color: var(--sc-sec); }
+    .sc-input, .sc-range-wrap { display: flex; align-items: center; gap: 0.5rem; }
+    .sc-input { padding: 0.7rem; border-radius: 10px; border: 1px solid var(--sc-border); background: var(--sc-card); color: var(--sc-text); outline: none; width: 100%; }
+    .sc-input:focus { border-color: var(--sc-accent); box-shadow: 0 0 0 2px rgba(139,92,246,0.15); }
+    .sc-range { flex: 1; height: 6px; -webkit-appearance: none; appearance: none; background: var(--sc-border); border-radius: 3px; outline: none; }
+    .sc-range::-webkit-slider-thumb { -webkit-appearance: none; width: 16px; height: 16px; background: var(--sc-accent); border-radius: 50%; cursor: pointer; }
+    .sc-range-val { min-width: 40px; text-align: center; font-weight: 600; color: var(--sc-accent); }
+    .sc-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 0.8rem; margin-bottom: 1rem; }
+    .sc-card { background: var(--sc-card); border: 1px solid var(--sc-border); border-radius: 12px; padding: 1rem; text-align: center; transition: 0.25s; cursor: default; }
+    .sc-card:hover { transform: translateY(-3px); box-shadow: 0 6px 16px rgba(0,0,0,0.3); }
+    .sc-card.opt { border-color: var(--sc-green); background: rgba(34,197,94,0.08); }
+    .sc-card.warn { border-color: var(--sc-yellow); background: rgba(245,158,11,0.08); }
+    .sc-card.bad { border-color: var(--sc-red); background: rgba(239,68,68,0.08); }
+    .sc-time { font-size: 1.5rem; font-weight: 700; margin: 0.3rem 0; }
+    .sc-meta { font-size: 0.8rem; color: var(--sc-sec); margin-top: 0.2rem; }
+    .sc-tip { background: rgba(139,92,246,0.08); border-left: 3px solid var(--sc-accent); padding: 0.8rem; border-radius: 8px; margin: 1rem 0; font-size: 0.9rem; line-height: 1.4; min-height: 2.5em; }
+    .sc-actions { display: flex; gap: 0.6rem; flex-wrap: wrap; margin-bottom: 1rem; }
+    .sc-btn { flex: 1; min-width: 110px; padding: 0.8rem; border-radius: 10px; border: 1px solid var(--sc-border); background: var(--sc-card); color: var(--sc-sec); cursor: pointer; font-weight: 500; transition: 0.2s; }
+    .sc-btn:hover { background: var(--sc-border); color: var(--sc-text); }
+    .sc-btn.primary { background: var(--sc-accent); color: #0b1120; font-weight: 600; border: none; }
+    .sc-btn.primary:hover { background: #7c3aed; transform: translateY(-1px); }
+    .sc-hist { max-height: 140px; overflow-y: auto; background: var(--sc-card); border: 1px solid var(--sc-border); border-radius: 10px; padding: 0.5rem; }
+    .sc-hist-item { display: flex; justify-content: space-between; align-items: center; padding: 0.5rem; font-size: 0.85rem; border-bottom: 1px solid var(--sc-border); }
+    .sc-hist-item:last-child { border: none; }
+    .sc-empty { text-align: center; color: var(--sc-sec); font-style: italic; padding: 0.5rem; }
+    .sc-toast { position: fixed; bottom: 20px; right: 20px; padding: 0.8rem 1.2rem; border-radius: 10px; background: var(--sc-card); border: 1px solid var(--sc-border); color: var(--sc-text); font-size: 0.9rem; opacity: 0; transform: translateY(20px); transition: 0.3s; pointer-events: none; z-index: 999; box-shadow: 0 8px 24px rgba(0,0,0,0.5); }
+    .sc-toast.show { opacity: 1; transform: translateY(0); }
+    .sc-toast.success { border-color: var(--sc-green); color: var(--sc-green); }
+    @media (max-width: 500px) {
+      .sc-controls { grid-template-columns: 1fr; }
+      .sc-header { flex-direction: column; align-items: flex-start; }
+      .sc-grid { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+
+  <div class="sc-header">
+    <h2>😴 Smart Sleep Calculator</h2>
+    <div class="sc-mode">
+      <button class="sc-mode-btn active" data-mode="sleepToWake">🌙 I sleep at...</button>
+      <button class="sc-mode-btn" data-mode="wakeToSleep">☀️ I wake at...</button>
+    </div>
+  </div>
+
+  <div class="sc-controls">
+    <div class="sc-field">
+      <label>⏰ Target Time</label>
+      <input type="time" id="sc-time" class="sc-input" value="23:00">
+    </div>
+    <div class="sc-field">
+      <label>🛌 Fall-Asleep Time (mins)</label>
+      <div class="sc-range-wrap">
+        <input type="range" id="sc-latency" class="sc-range" min="5" max="30" value="15">
+        <span class="sc-range-val" id="sc-lat-val">15</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="sc-grid" id="sc-grid"></div>
+
+  <div class="sc-tip" id="sc-tip">💡 Adjust time or latency to see personalized sleep windows & hygiene tips.</div>
+
+  <div class="sc-actions">
+    <button class="sc-btn primary" id="sc-copy">📋 Copy Alarms</button>
+    <button class="sc-btn" id="sc-save">💾 Save Plan</button>
+    <button class="sc-btn" id="sc-reset">🔄 Reset</button>
+  </div>
+
+  <div class="sc-hist" id="sc-hist">
+    <div class="sc-empty">💾 Recent sleep plans will appear here</div>
+  </div>
+
+  <div class="sc-toast" id="sc-toast"></div>
+
+  <script>
+  (function(){
+    const KEY = 'sc-data-v2';
+    const CYCLE = 90; // minutes
+    let history = JSON.parse(localStorage.getItem(KEY) || '[]');
+    const toast = (m, t='success') => {
+      const el = document.getElementById('sc-toast'); el.textContent = m; el.className = `sc-toast show ${t}`;
+      setTimeout(() => el.className = 'sc-toast', 2500);
+    };
+    const fmtTime = (d) => d.toLocaleTimeString('en-IN', { hour:'2-digit', minute:'2-digit', hour12: false });
+    const fmtDur = (m) => `${Math.floor(m/60)}h ${m%60}m`;
+    const getTip = (mode, times) => {
+      const avg = times.reduce((a,b)=>a+b,0)/times.length;
+      if(mode==='sleepToWake') {
+        if(avg<360) return "⚠️ Less than 6 hours. Chronic sleep debt affects focus & immunity. Aim for 4-6 cycles.";
+        if(avg<450) return "✅ Acceptable for occasional use. Add 15-min wind-down (no screens, light stretch).";
+        if(avg<540) return "🌟 Optimal zone (7-9h). Consistency > perfection. Keep same sleep/wake times daily.";
+        return "😴 Deep rest mode. Great for recovery, travel jet-lag, or post-illness. Hydrate well upon waking.";
+      } else {
+        if(avg>480) return "☀️ Late bedtime detected. Try melatonin-rich foods (cherries, almonds) & dim lights 1h before.";
+        if(avg>360) return "💡 Balanced window. Place phone away from bed, use blue-light filter after 9 PM.";
+        return "🌅 Early wake planned. Expose to morning sunlight within 30 mins to reset circadian rhythm.";
+      }
+    };
+
+    const els = {
+      modeBtns: document.querySelectorAll('.sc-mode-btn'),
+      time: document.getElementById('sc-time'),
+      latency: document.getElementById('sc-latency'),
+      latVal: document.getElementById('sc-lat-val'),
+      grid: document.getElementById('sc-grid'),
+      tip: document.getElementById('sc-tip'),
+      copy: document.getElementById('sc-copy'),
+      save: document.getElementById('sc-save'),
+      reset: document.getElementById('sc-reset'),
+      hist: document.getElementById('sc-hist')
+    };
+
+    let mode = 'sleepToWake';
+
+    const calc = () => {
+      const [h,m] = els.time.value.split(':').map(Number);
+      const base = new Date(); base.setHours(h, m, 0, 0);
+      const lat = parseInt(els.latency.value);
+      const cycles = [4, 5, 6];
+      
+      const results = cycles.map(c => {
+        const mins = mode === 'sleepToWake' ? (lat + c*CYCLE) : -(c*CYCLE + lat);
+        const d = new Date(base.getTime() + mins*60000);
+        if(d < base && mode==='wakeToSleep') d.setDate(d.getDate()+1); // handle day rollover
+        return { date: d, cycles: c, duration: Math.abs(mins) };
+      });
+
+      const durMins = results.map(r => r.duration);
+      els.tip.textContent = getTip(mode, durMins);
+
+      els.grid.innerHTML = results.map(r => {
+        const quality = r.cycles===5?'opt':r.cycles===4||r.cycles===6?'warn':'bad';
+        const badge = r.cycles===5?'🌟 Optimal':r.cycles===4?'✅ Good':r.cycles===6?'😴 Deep':'⚠️ Not Ideal';
+        return `<div class="sc-card ${quality}">
+          <div class="sc-time">${fmtTime(r.date)}</div>
+          <div class="sc-meta">${r.cycles} cycles • ${fmtDur(r.duration)}</div>
+          <div class="sc-meta" style="color:var(--sc-accent)">${badge}</div>
+        </div>`;
+      }).join('');
+    };
+
+    els.latency.oninput = () => { els.latVal.textContent = els.latency.value; calc(); };
+    els.time.onchange = calc;
+    els.modeBtns.forEach(b => b.onclick = () => {
+      mode = b.dataset.mode;
+      els.modeBtns.forEach(x => x.classList.toggle('active', x===b));
+      calc();
+    });
+
+    els.copy.onclick = () => {
+      const txt = Array.from(els.grid.querySelectorAll('.sc-time')).map(t => t.textContent).join('\n');
+      navigator.clipboard.writeText(`🛌 Set Alarms:\n${txt}`).then(() => toast('📋 Alarm times copied!'));
+    };
+
+    els.save.onclick = () => {
+      const plan = { mode, time: els.time.value, latency: els.latency.value, date: new Date().toLocaleDateString('en-IN') };
+      history.unshift(plan); if(history.length>5) history.pop();
+      localStorage.setItem(KEY, JSON.stringify(history)); renderHist(); toast('💾 Sleep plan saved!');
+    };
+
+    els.reset.onclick = () => {
+      els.time.value = '23:00'; els.latency.value = 15; els.latVal.textContent = '15';
+      mode = 'sleepToWake'; els.modeBtns[0].classList.add('active'); els.modeBtns[1].classList.remove('active');
+      calc(); toast('🔄 Reset to defaults');
+    };
+
+    const renderHist = () => {
+      if(history.length===0) { els.hist.innerHTML = '<div class="sc-empty">💾 Recent sleep plans will appear here</div>'; return; }
+      els.hist.innerHTML = history.map(h => 
+        `<div class="sc-hist-item"><span>📅 ${h.date} • ${h.mode==='sleepToWake'?'🌙':'☀️'} ${h.time}</span><span>${h.latency}m latency</span></div>`
+      ).join('');
+    };
+
+    // Init
+    calc(); renderHist();
+  })();
+  </script>
+</div>

@@ -1,0 +1,393 @@
+<div class="nw-tool">
+  <style>
+    .nw-tool {
+      --bg: #0f172a; --card: #1e293b; --card-hover: #253347;
+      --text: #f8fafc; --text-muted: #94a3b8; --border: #334155;
+      --asset: #10b981; --liab: #ef4444; --accent: #3b82f6; --warning: #f59e0b;
+      --glow-asset: rgba(16,185,129,0.2); --glow-liab: rgba(239,68,68,0.2);
+      font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+      max-width: 520px; margin: 2rem auto; background: var(--bg);
+      border-radius: 20px; box-shadow: 0 8px 30px rgba(0,0,0,0.35);
+      overflow: hidden; color: var(--text); line-height: 1.4;
+    }
+    .nw-tool * { box-sizing: border-box; }
+    .nw-header { padding: 1.2rem; text-align: center; border-bottom: 1px solid var(--border); background: linear-gradient(180deg, rgba(59,130,246,0.08), transparent); }
+    .nw-header h2 { margin: 0; font-size: 1.3rem; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 0.5rem; }
+    .nw-subtitle { color: var(--text-muted); font-size: 0.85rem; margin: 0.3rem 0 0; }
+    .nw-goal { padding: 0.8rem 1.5rem; background: var(--card); border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 0.8rem; }
+    .nw-goal input { flex: 1; padding: 0.6rem; border-radius: 8px; border: 1px solid var(--border); background: #0b1120; color: var(--text); outline: none; }
+    .nw-goal input:focus { border-color: var(--accent); }
+    .nw-goal-btn { padding: 0.5rem 0.9rem; border-radius: 8px; border: none; background: var(--accent); color: #fff; font-weight: 500; cursor: pointer; }
+    .nw-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; padding: 1rem 1.5rem; }
+    .nw-col { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 1rem; }
+    .nw-col-title { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.8rem; font-weight: 600; font-size: 0.95rem; }
+    .nw-col-title.asset { color: var(--asset); } .nw-col-title.liab { color: var(--liab); }
+    .nw-category { margin-bottom: 0.8rem; }
+    .nw-cat-header { display: flex; justify-content: space-between; align-items: center; padding: 0.4rem 0; font-size: 0.8rem; color: var(--text-muted); cursor: pointer; }
+    .nw-cat-items { display: none; margin-top: 0.4rem; }
+    .nw-cat-items.show { display: block; }
+    .nw-item { display: grid; grid-template-columns: 1fr 100px 32px; gap: 0.4rem; align-items: center; padding: 0.4rem 0; border-bottom: 1px dashed var(--border); }
+    .nw-item input { padding: 0.5rem; border-radius: 6px; border: 1px solid var(--border); background: #0b1120; color: var(--text); font-size: 0.9rem; outline: none; }
+    .nw-item input:focus { border-color: var(--accent); }
+    .nw-item input[type="number"] { text-align: right; }
+    .nw-del { width: 24px; height: 24px; border-radius: 50%; border: none; background: rgba(239,68,68,0.15); color: var(--liab); cursor: pointer; font-weight: bold; transition: 0.2s; }
+    .nw-del:hover { background: var(--liab); color: #fff; }
+    .nw-add { width: 100%; padding: 0.5rem; border: 1px dashed var(--border); border-radius: 8px; background: transparent; color: var(--text-muted); font-size: 0.8rem; cursor: pointer; transition: 0.2s; }
+    .nw-add:hover { border-style: solid; border-color: var(--accent); color: var(--accent); background: var(--card-hover); }
+    .nw-quick-add { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.6rem; }
+    .nw-quick-btn { padding: 0.3rem 0.6rem; border-radius: 6px; border: 1px solid var(--border); background: transparent; color: var(--text-muted); font-size: 0.7rem; cursor: pointer; }
+    .nw-quick-btn:hover { background: var(--card-hover); color: var(--text); border-color: var(--accent); }
+    .nw-summary { padding: 1.2rem 1.5rem; background: var(--card); border-top: 1px solid var(--border); text-align: center; }
+    .nw-total-label { font-size: 0.9rem; color: var(--text-muted); }
+    .nw-total-val { font-size: 2rem; font-weight: 800; margin: 0.4rem 0; }
+    .nw-total-val.pos { color: var(--asset); } .nw-total-val.neg { color: var(--liab); }
+    .nw-breakdown { display: flex; justify-content: center; gap: 2rem; margin-top: 0.8rem; font-size: 0.85rem; }
+    .nw-breakdown span { display: flex; align-items: center; gap: 0.4rem; }
+    .nw-breakdown span::before { content: ''; width: 10px; height: 10px; border-radius: 3px; }
+    .nw-breakdown span.asset::before { background: var(--asset); }
+    .nw-breakdown span.liab::before { background: var(--liab); }
+    .nw-chart { padding: 1rem 1.5rem; background: var(--card); border-top: 1px solid var(--border); }
+    .nw-chart-title { font-size: 0.9rem; margin-bottom: 0.8rem; display: flex; justify-content: space-between; }
+    .nw-pie { width: 120px; height: 120px; border-radius: 50%; margin: 0 auto; position: relative; background: conic-gradient(var(--asset) 0%, var(--liab) 0%); transition: background 0.5s ease; }
+    .nw-pie::after { content: ''; position: absolute; inset: 20px; background: var(--card); border-radius: 50%; }
+    .nw-pie-center { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.85rem; z-index: 1; }
+    .nw-progress { margin-top: 1rem; }
+    .nw-progress-label { display: flex; justify-content: space-between; font-size: 0.8rem; margin-bottom: 0.4rem; }
+    .nw-progress-bar { height: 8px; background: var(--border); border-radius: 4px; overflow: hidden; }
+    .nw-progress-fill { height: 100%; background: linear-gradient(90deg, var(--liab), var(--warning), var(--asset)); transition: width 0.6s ease; }
+    .nw-actions { padding: 1rem 1.5rem; background: var(--card); display: flex; gap: 0.8rem; }
+    .nw-btn { flex: 1; padding: 0.7rem; border: none; border-radius: 10px; font-weight: 500; cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 0.4rem; }
+    .nw-btn-primary { background: var(--accent); color: #fff; }
+    .nw-btn-primary:hover { background: #2563eb; transform: translateY(-1px); }
+    .nw-btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text-muted); }
+    .nw-btn-outline:hover { background: var(--card-hover); color: var(--text); border-color: var(--accent); }
+    .nw-footer { padding: 0.8rem 1.5rem; text-align: center; font-size: 0.75rem; color: var(--text-muted); background: rgba(0,0,0,0.2); }
+    .nw-save-ind { position: fixed; bottom: 1rem; right: 1rem; background: var(--asset); color: #0f172a; padding: 0.4rem 0.8rem; border-radius: 20px; font-size: 0.8rem; opacity: 0; transition: opacity 0.3s; pointer-events: none; z-index: 100; }
+    .nw-save-ind.show { opacity: 1; }
+    @media (max-width: 520px) {
+      .nw-grid { grid-template-columns: 1fr; }
+      .nw-tool { margin: 1rem; }
+    }
+  </style>
+
+  <div class="nw-header">
+    <h2>💰 Net Worth Tracker</h2>
+    <p class="nw-subtitle">Assets - Liabilities = Your True Wealth</p>
+  </div>
+
+  <div class="nw-goal">
+    <span style="font-size:0.85rem;color:var(--text-muted)">🎯 Target Net Worth:</span>
+    <input type="number" id="nw-target" placeholder="₹1,00,00,000" min="0">
+    <button class="nw-goal-btn" id="nw-set-goal">Set</button>
+  </div>
+
+  <div class="nw-grid">
+    <!-- Assets Column -->
+    <div class="nw-col">
+      <div class="nw-col-title asset">✅ Assets <button class="nw-add" data-type="asset">+ Add</button></div>
+      <div id="nw-assets"></div>
+    </div>
+    <!-- Liabilities Column -->
+    <div class="nw-col">
+      <div class="nw-col-title liab">❌ Liabilities <button class="nw-add" data-type="liability">+ Add</button></div>
+      <div id="nw-liab"></div>
+    </div>
+  </div>
+
+  <div class="nw-summary">
+    <div class="nw-total-label">Current Net Worth</div>
+    <div class="nw-total-val" id="nw-total">₹0</div>
+    <div class="nw-breakdown">
+      <span class="asset" id="nw-assets-sum">Assets: ₹0</span>
+      <span class="liab" id="nw-liab-sum">Liabilities: ₹0</span>
+    </div>
+  </div>
+
+  <div class="nw-chart">
+    <div class="nw-chart-title">
+      <span>Asset/Liability Ratio</span>
+      <span id="nw-ratio">100% Assets</span>
+    </div>
+    <div class="nw-pie" id="nw-pie"><div class="nw-pie-center" id="nw-pie-text">--</div></div>
+    <div class="nw-progress">
+      <div class="nw-progress-label"><span>Progress to Goal</span><span id="nw-progress-pct">0%</span></div>
+      <div class="nw-progress-bar"><div class="nw-progress-fill" id="nw-progress-fill" style="width:0%"></div></div>
+    </div>
+  </div>
+
+  <div class="nw-actions">
+    <button class="nw-btn nw-btn-outline" id="nw-export">📥 Export CSV</button>
+    <button class="nw-btn nw-btn-outline" id="nw-snapshot">📸 Save Snapshot</button>
+    <button class="nw-btn nw-btn-primary" id="nw-reset">🔄 Reset All</button>
+  </div>
+
+  <div class="nw-footer">
+    💡 Update regularly to track wealth growth • Data saved locally • Last updated: <span id="nw-updated">--</span>
+  </div>
+  <div class="nw-save-ind" id="nw-save-ind">✓ Saved</div>
+
+  <script>
+    (function() {
+      const STORAGE_KEY = 'nw_tracker_v2';
+      const SNAPSHOT_KEY = 'nw_snapshots_v2';
+      const INR = v => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(v || 0);
+      const PCT = v => Math.round(v) + '%';
+
+      const CATEGORIES = {
+        asset: [
+          { id: 'cash', name: '💵 Cash & Savings', icon: '💵' },
+          { id: 'bank', name: '🏦 Bank Accounts', icon: '🏦' },
+          { id: 'invest', name: '📈 Investments (MF/Stocks)', icon: '📈' },
+          { id: 'ppf', name: '🔐 PPF/EPF/NPS', icon: '🔐' },
+          { id: 'property', name: '🏠 Real Estate', icon: '🏠' },
+          { id: 'vehicle', name: '🚗 Vehicles', icon: '🚗' },
+          { id: 'gold', name: '🪙 Gold/Jewellery', icon: '🪙' },
+          { id: 'other_asset', name: '📦 Other Assets', icon: '📦' }
+        ],
+        liability: [
+          { id: 'home_loan', name: '🏠 Home Loan', icon: '🏠' },
+          { id: 'personal_loan', name: '👤 Personal Loan', icon: '👤' },
+          { id: 'car_loan', name: '🚗 Car Loan', icon: '🚗' },
+          { id: 'credit_card', name: '💳 Credit Card Debt', icon: '💳' },
+          { id: 'education_loan', name: '🎓 Education Loan', icon: '🎓' },
+          { id: 'other_liab', name: '📋 Other Liabilities', icon: '📋' }
+        ]
+      };
+
+      const QUICK_ADD = {
+        asset: [
+          { cat: 'cash', name: 'Emergency Fund', val: 50000 },
+          { cat: 'bank', name: 'Savings Account', val: 100000 },
+          { cat: 'invest', name: 'Mutual Funds', val: 200000 },
+          { cat: 'ppf', name: 'PPF Account', val: 150000 }
+        ],
+        liability: [
+          { cat: 'home_loan', name: 'Home Loan', val: 2000000 },
+          { cat: 'car_loan', name: 'Car Loan', val: 500000 },
+          { cat: 'credit_card', name: 'Credit Card', val: 50000 }
+        ]
+      };
+
+      let state = {
+        assets: [], liabilities: [], target: 10000000,
+        lastUpdated: null
+      };
+      let saveTimeout;
+
+      const els = {
+        assets: document.getElementById('nw-assets'),
+        liab: document.getElementById('nw-liab'),
+        total: document.getElementById('nw-total'),
+        assetsSum: document.getElementById('nw-assets-sum'),
+        liabSum: document.getElementById('nw-liab-sum'),
+        pie: document.getElementById('nw-pie'),
+        pieText: document.getElementById('nw-pie-text'),
+        ratio: document.getElementById('nw-ratio'),
+        progressFill: document.getElementById('nw-progress-fill'),
+        progressPct: document.getElementById('nw-progress-pct'),
+        target: document.getElementById('nw-target'),
+        setGoal: document.getElementById('nw-set-goal'),
+        exportBtn: document.getElementById('nw-export'),
+        snapshotBtn: document.getElementById('nw-snapshot'),
+        resetBtn: document.getElementById('nw-reset'),
+        updated: document.getElementById('nw-updated'),
+        saveInd: document.getElementById('nw-save-ind'),
+        addBtns: document.querySelectorAll('.nw-add[data-type]')
+      };
+
+      const uid = () => 'id_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8);
+
+      const load = () => {
+        try {
+          const s = localStorage.getItem(STORAGE_KEY);
+          if(s) {
+            const parsed = JSON.parse(s);
+            state = { ...state, ...parsed };
+          }
+        } catch(e) { console.warn('Load error', e); }
+        els.target.value = state.target || '';
+        renderAll();
+        calculate();
+      };
+
+      const save = () => {
+        try {
+          state.lastUpdated = new Date().toISOString();
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+          els.updated.textContent = new Date(state.lastUpdated).toLocaleDateString('en-IN');
+          els.saveInd.classList.add('show');
+          setTimeout(() => els.saveInd.classList.remove('show'), 1500);
+        } catch(e) { console.warn('Save error', e); }
+      };
+
+      const renderCategory = (type, catId, items) => {
+        const cat = CATEGORIES[type].find(c => c.id === catId);
+        if(!cat) return '';
+        const catItems = items.filter(i => i.catId === catId);
+        const total = catItems.reduce((s, i) => s + (parseFloat(i.value) || 0), 0);
+        return `
+          <div class="nw-category">
+            <div class="nw-cat-header" onclick="document.getElementById('cat-${catId}').classList.toggle('show')">
+              <span>${cat.icon} ${cat.name}</span>
+              <span>${INR(total)}</span>
+            </div>
+            <div class="nw-cat-items" id="cat-${catId}">
+              ${catItems.map(item => renderItem(type, item)).join('')}
+              <button class="nw-add" onclick="addItem('${type}', '${catId}')">+ Add ${cat.name.split(' ')[0]}</button>
+            </div>
+          </div>
+        `;
+      };
+
+      const renderItem = (type, item) => `
+        <div class="nw-item" data-id="${item.id}">
+          <input type="text" placeholder="Description" value="${item.name}" oninput="updateItem('${type}', '${item.id}', 'name', this.value)">
+          <input type="number" placeholder="₹" value="${item.value}" min="0" oninput="updateItem('${type}', '${item.id}', 'value', this.value)">
+          <button class="nw-del" onclick="deleteItem('${type}', '${item.id}')">×</button>
+        </div>
+      `;
+
+      const renderAll = () => {
+        // Render Assets
+        els.assets.innerHTML = CATEGORIES.asset.map(cat => renderCategory('asset', cat.id, state.assets)).join('');
+        // Render Liabilities
+        els.liab.innerHTML = CATEGORIES.liability.map(cat => renderCategory('liability', cat.id, state.liabilities)).join('');
+        // Expand first category by default
+        document.querySelectorAll('.nw-cat-items').forEach((el, i) => { if(i === 0 || i === CATEGORIES.asset.length) el.classList.add('show'); });
+      };
+
+      const addItem = (type, catId) => {
+        const collection = type === 'asset' ? state.assets : state.liabilities;
+        collection.push({ id: uid(), catId, name: 'New Item', value: 0 });
+        renderAll();
+        calculate();
+        save();
+      };
+
+      const updateItem = (type, id, field, value) => {
+        const collection = type === 'asset' ? state.assets : state.liabilities;
+        const item = collection.find(i => i.id === id);
+        if(item) {
+          item[field] = field === 'value' ? (parseFloat(value) || 0) : value;
+          calculate();
+          clearTimeout(saveTimeout);
+          saveTimeout = setTimeout(save, 500);
+        }
+      };
+
+      const deleteItem = (type, id) => {
+        if(!confirm('Delete this item?')) return;
+        const key = type === 'asset' ? 'assets' : 'liabilities';
+        state[key] = state[key].filter(i => i.id !== id);
+        renderAll();
+        calculate();
+        save();
+      };
+
+      const calculate = () => {
+        const totalAssets = state.assets.reduce((s, i) => s + (parseFloat(i.value) || 0), 0);
+        const totalLiab = state.liabilities.reduce((s, i) => s + (parseFloat(i.value) || 0), 0);
+        const netWorth = totalAssets - totalLiab;
+
+        // Update summary
+        els.total.textContent = INR(netWorth);
+        els.total.className = 'nw-total-val ' + (netWorth >= 0 ? 'pos' : 'neg');
+        els.assetsSum.textContent = `Assets: ${INR(totalAssets)}`;
+        els.liabSum.textContent = `Liabilities: ${INR(totalLiab)}`;
+
+        // Pie chart
+        const total = totalAssets + totalLiab;
+        const assetPct = total > 0 ? (totalAssets / total) * 100 : 100;
+        els.pie.style.background = `conic-gradient(var(--asset) ${assetPct}%, var(--liab) ${assetPct}%)`;
+        els.pieText.textContent = PCT(assetPct);
+        els.ratio.textContent = `${PCT(assetPct)} Assets / ${PCT(100-assetPct)} Liabilities`;
+
+        // Progress to goal
+        const target = parseFloat(els.target.value) || state.target || 1;
+        const progress = Math.min(100, Math.max(0, (netWorth / target) * 100));
+        els.progressFill.style.width = `${progress}%`;
+        els.progressPct.textContent = PCT(progress);
+
+        // Update state
+        state.totalAssets = totalAssets;
+        state.totalLiab = totalLiab;
+        state.netWorth = netWorth;
+      };
+
+      const exportCSV = () => {
+        let csv = 'Type,Category,Item,Value (INR)\n';
+        state.assets.forEach(i => {
+          const cat = CATEGORIES.asset.find(c => c.id === i.catId)?.name || i.catId;
+          csv += `Asset,${cat},${i.name},${i.value}\n`;
+        });
+        state.liabilities.forEach(i => {
+          const cat = CATEGORIES.liability.find(c => c.id === i.catId)?.name || i.catId;
+          csv += `Liability,${cat},${i.name},${i.value}\n`;
+        });
+        const blob = new Blob([csv], { type: 'text/csv' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a'); a.href = url; a.download = `networth_${new Date().toISOString().slice(0,10)}.csv`; a.click(); URL.revokeObjectURL(url);
+      };
+
+      const saveSnapshot = () => {
+        const snapshots = JSON.parse(localStorage.getItem(SNAPSHOT_KEY) || '[]');
+        snapshots.unshift({
+          date: new Date().toISOString(),
+          netWorth: state.netWorth,
+          assets: state.totalAssets,
+          liabilities: state.totalLiab
+        });
+        localStorage.setItem(SNAPSHOT_KEY, JSON.stringify(snapshots.slice(0, 20))); // Keep last 20
+        alert('📸 Snapshot saved! View history in browser console or export for tracking.');
+        console.log('📊 Net Worth History:', snapshots.slice(0, 5));
+      };
+
+      const resetAll = () => {
+        if(!confirm('⚠️ Reset ALL data? This cannot be undone.')) return;
+        localStorage.removeItem(STORAGE_KEY);
+        state = { assets: [], liabilities: [], target: 10000000, lastUpdated: null };
+        els.target.value = 10000000;
+        renderAll();
+        calculate();
+      };
+
+      // Event Listeners
+      els.addBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+          const type = btn.dataset.type;
+          const firstCat = CATEGORIES[type][0].id;
+          addItem(type, firstCat);
+        });
+      });
+
+      els.setGoal.addEventListener('click', () => {
+        const val = parseFloat(els.target.value);
+        if(val && val > 0) { state.target = val; save(); calculate(); }
+      });
+
+      els.exportBtn.addEventListener('click', exportCSV);
+      els.snapshotBtn.addEventListener('click', saveSnapshot);
+      els.resetBtn.addEventListener('click', resetAll);
+
+      // Quick add handlers (global)
+      window.quickAdd = (type, preset) => {
+        addItem(type, preset.cat);
+        const collection = type === 'asset' ? state.assets : state.liabilities;
+        const newItem = collection[collection.length - 1];
+        newItem.name = preset.name;
+        newItem.value = preset.val;
+        renderAll();
+        calculate();
+        save();
+      };
+
+      // Expose functions for inline handlers
+      window.addItem = addItem;
+      window.updateItem = updateItem;
+      window.deleteItem = deleteItem;
+
+      // Init
+      load();
+    })();
+  </script>
+</div>

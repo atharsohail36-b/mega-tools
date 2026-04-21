@@ -1,0 +1,167 @@
+<div class="professional-tool">
+  <style>
+    .professional-tool {
+      --bg: #f8fafc; --card: #ffffff; --border: #e2e8f0;
+      --text: #0f172a; --text-sec: #64748b; --accent: #3b82f6;
+      --success: #10b981; --warning: #f59e0b; --danger: #ef4444;
+      --shadow: 0 4px 14px rgba(0,0,0,0.06);
+      font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+      max-width: 620px; margin: 0 auto; padding: 1.8rem;
+      background: var(--bg); border-radius: 16px; box-shadow: var(--shadow);
+      box-sizing: border-box;
+    }
+    .professional-tool * { box-sizing: border-box; }
+    .pt-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.2rem; }
+    .pt-header h3 { margin: 0; font-size: 1.4rem; color: var(--text); }
+    .pt-header small { color: var(--text-sec); font-size: 0.8rem; }
+    .be-inputs { display: grid; gap: 0.9rem; margin-bottom: 1.4rem; }
+    .be-inputs label { display: flex; flex-direction: column; gap: 0.35rem; font-size: 0.85rem; color: var(--text-sec); font-weight: 500; }
+    .be-inputs input { padding: 0.85rem; border: 1px solid var(--border); border-radius: 10px; background: var(--card); color: var(--text); font-size: 1rem; outline: none; transition: all 0.2s; }
+    .be-inputs input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(59,130,246,0.15); }
+    .be-actions { display: flex; gap: 0.6rem; margin-bottom: 1.5rem; }
+    .be-btn { flex: 1; padding: 0.85rem; border: none; border-radius: 10px; font-weight: 600; cursor: pointer; transition: all 0.2s; font-size: 0.95rem; }
+    .be-btn-primary { background: var(--accent); color: #fff; }
+    .be-btn-primary:hover { background: #2563eb; transform: translateY(-1px); }
+    .be-btn-secondary { background: var(--card); border: 1px solid var(--border); color: var(--text-sec); }
+    .be-btn-secondary:hover { background: #f1f5f9; }
+    .be-results { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; }
+    .be-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1rem; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.03); transition: transform 0.2s; }
+    .be-card:hover { transform: translateY(-2px); }
+    .be-val { display: block; font-size: 1.45rem; font-weight: 700; color: var(--text); }
+    .be-lbl { display: block; font-size: 0.75rem; color: var(--text-sec); margin-top: 0.25rem; }
+    .be-visual { margin-top: 1rem; }
+    .be-bar-bg { height: 26px; background: var(--border); border-radius: 13px; position: relative; overflow: hidden; }
+    .be-bar-fill { height: 100%; width: 0%; border-radius: 13px; transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1), background 0.3s; }
+    .be-bar-marker { position: absolute; top: 50%; transform: translate(-50%, -50%); width: 4px; height: 130%; background: var(--danger); border-radius: 2px; box-shadow: 0 0 6px rgba(239,68,68,0.5); }
+    .be-chart-labels { display: flex; justify-content: space-between; margin-top: 0.5rem; font-size: 0.78rem; color: var(--text-sec); font-weight: 500; }
+    .be-note { margin-top: 1rem; padding: 0.8rem; background: rgba(59,130,246,0.06); border-left: 3px solid var(--accent); border-radius: 6px; font-size: 0.82rem; color: var(--text-sec); line-height: 1.4; }
+    @media (max-width: 480px) {
+      .professional-tool { padding: 1.2rem; }
+      .be-results { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+
+  <div class="pt-header">
+    <h3>📊 Break-Even Analysis</h3>
+    <small>Auto-calculates on input</small>
+  </div>
+
+  <div class="be-inputs">
+    <label>Fixed Costs ($) <input type="number" id="be-fixed" value="5000" min="0"></label>
+    <label>Price per Unit ($) <input type="number" id="be-price" value="50" min="0"></label>
+    <label>Variable Cost per Unit ($) <input type="number" id="be-var" value="25" min="0"></label>
+    <label>Target Sales Units (Optional) <input type="number" id="be-target" placeholder="e.g., 300" min="0"></label>
+  </div>
+
+  <div class="be-actions">
+    <button class="be-btn be-btn-primary">Calculate</button>
+    <button class="be-btn be-btn-secondary">Reset</button>
+  </div>
+
+  <div class="be-results">
+    <div class="be-card"><span class="be-val" id="be-units">0</span><span class="be-lbl">Break-Even Units</span></div>
+    <div class="be-card"><span class="be-val" id="be-rev">$0</span><span class="be-lbl">Break-Even Revenue</span></div>
+    <div class="be-card"><span class="be-val" id="be-cm">$0</span><span class="be-lbl">Contribution Margin</span></div>
+    <div class="be-card"><span class="be-val" id="be-cmpct">0%</span><span class="be-lbl">CM Ratio</span></div>
+    <div class="be-card" id="card-mos" style="display:none;"><span class="be-val" id="be-mos">0%</span><span class="be-lbl">Margin of Safety</span></div>
+    <div class="be-card" id="card-profit" style="display:none;"><span class="be-val" id="be-profit">$0</span><span class="be-lbl">Profit/Loss at Target</span></div>
+  </div>
+
+  <div class="be-visual">
+    <div class="be-bar-bg">
+      <div class="be-bar-fill" id="be-bar"></div>
+      <div class="be-bar-marker" id="be-marker"></div>
+    </div>
+    <div class="be-chart-labels">
+      <span>0</span>
+      <span id="lbl-be">BE Point</span>
+      <span id="lbl-target">Target</span>
+    </div>
+  </div>
+
+  <div class="be-note">💡 <strong>Tip:</strong> Margin of Safety shows how much sales can drop before you start losing money. Aim for >20% for a healthy business.</div>
+
+  <script>
+    (function(){
+      const ids = ['be-fixed','be-price','be-var','be-target'];
+      const els = {}; ids.forEach(id => els[id] = document.getElementById(id));
+      const btnCalc = document.querySelector('.be-btn-primary');
+      const btnReset = document.querySelector('.be-btn-secondary');
+
+      function formatNum(n) { return n.toLocaleString(undefined, {maximumFractionDigits: 2}); }
+
+      function calculate() {
+        const fc = parseFloat(els['be-fixed'].value) || 0;
+        const p  = parseFloat(els['be-price'].value) || 0;
+        const v  = parseFloat(els['be-var'].value) || 0;
+        const t  = parseFloat(els['be-target'].value) || null;
+
+        if(p <= v) { alert('⚠️ Price must be strictly greater than Variable Cost!'); return; }
+        if(fc < 0 || p < 0 || v < 0 || (t !== null && t < 0)) { alert('⚠️ Values cannot be negative.'); return; }
+
+        const beUnits = Math.ceil(fc / (p - v));
+        const beRev   = beUnits * p;
+        const cm      = p - v;
+        const cmRatio = (cm / p) * 100;
+
+        document.getElementById('be-units').textContent = formatNum(beUnits);
+        document.getElementById('be-rev').textContent   = '$' + formatNum(beRev);
+        document.getElementById('be-cm').textContent    = '$' + formatNum(cm);
+        document.getElementById('be-cmpct').textContent = cmRatio.toFixed(1) + '%';
+
+        const mosCard    = document.getElementById('card-mos');
+        const profitCard = document.getElementById('card-profit');
+        const bar        = document.getElementById('be-bar');
+        const marker     = document.getElementById('be-marker');
+        const lblBe      = document.getElementById('lbl-be');
+        const lblTarget  = document.getElementById('lbl-target');
+
+        if(t && t > 0) {
+          mosCard.style.display = 'block';
+          profitCard.style.display = 'block';
+
+          const mosUnits = t - beUnits;
+          const mosPct   = (mosUnits / t) * 100;
+          const profit   = (t * cm) - fc;
+
+          document.getElementById('be-mos').textContent = mosPct.toFixed(1) + '%';
+          const profitEl = document.getElementById('be-profit');
+          profitEl.textContent = '$' + formatNum(profit);
+          profitEl.style.color = profit >= 0 ? 'var(--success)' : 'var(--danger)';
+
+          // Visual scaling
+          const maxScale = Math.max(t, beUnits * 1.3);
+          const bePos = (beUnits / maxScale) * 100;
+          const tPos  = Math.min((t / maxScale) * 100, 100);
+
+          bar.style.width = tPos + '%';
+          bar.style.background = t >= beUnits 
+            ? 'linear-gradient(90deg, var(--success), var(--accent))' 
+            : 'linear-gradient(90deg, var(--danger), var(--warning))';
+          marker.style.left = bePos + '%';
+          lblBe.textContent = 'BE: ' + formatNum(beUnits);
+          lblTarget.textContent = 'Target: ' + formatNum(t);
+        } else {
+          mosCard.style.display = 'none';
+          profitCard.style.display = 'none';
+          bar.style.width = '45%';
+          bar.style.background = 'linear-gradient(90deg, var(--warning), var(--accent))';
+          marker.style.left = '45%';
+          lblBe.textContent = 'BE: ' + formatNum(beUnits);
+          lblTarget.textContent = '';
+        }
+      }
+
+      btnCalc.addEventListener('click', calculate);
+      btnReset.addEventListener('click', () => {
+        els['be-fixed'].value = 5000; els['be-price'].value = 50;
+        els['be-var'].value = 25; els['be-target'].value = '';
+        calculate();
+      });
+
+      // Real-time calculation
+      ids.forEach(id => els[id].addEventListener('input', calculate));
+      calculate(); // Initial load
+    })();
+  </script>
+</div>

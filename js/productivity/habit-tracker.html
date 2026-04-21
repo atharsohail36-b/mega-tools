@@ -1,0 +1,468 @@
+<div class="habit-tracker-pro">
+  <style>
+    .habit-tracker-pro{
+      --ht-bg: #0f1115; --ht-card: #1a1d24; --ht-border: #2a2d36;
+      --ht-text: #e4e7ec; --ht-muted: #8b949e; --ht-accent: #6366f1;
+      --ht-success: #10b981; --ht-warn: #f59e0b; --ht-danger: #ef4444;
+      --ht-cat-health: #10b981; --ht-cat-work: #3b82f6; --ht-cat-learn: #8b5cf6;
+      --ht-cat-fitness: #f59e0b; --ht-cat-mind: #ec4899;
+      font-family: system-ui, -apple-system, sans-serif;
+      background: var(--ht-bg); color: var(--ht-text);
+      max-width: 720px; margin: 2rem auto; padding: 1.8rem;
+      border-radius: 24px; border: 1px solid var(--ht-border);
+      box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+    }
+    .ht-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:1.2rem;flex-wrap:wrap;gap:0.8rem;}
+    .ht-header h2{margin:0;font-size:1.5rem;background:linear-gradient(135deg,#6366f1,#10b981);-webkit-background-clip:text;background-clip:text;color:transparent;}
+    .ht-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:0.6rem;margin-bottom:1.2rem;}
+    .ht-stat{background:var(--ht-card);border:1px solid var(--ht-border);border-radius:12px;padding:0.8rem;text-align:center;}
+    .ht-stat-val{font-size:1.5rem;font-weight:700;color:var(--ht-accent);}
+    .ht-stat-lbl{font-size:0.75rem;color:var(--ht-muted);text-transform:uppercase;}
+    
+    .ht-quote{background:linear-gradient(135deg,rgba(99,102,241,0.1),rgba(16,185,129,0.1));border:1px solid var(--ht-border);border-radius:12px;padding:0.8rem 1rem;margin-bottom:1.2rem;font-style:italic;font-size:0.9rem;text-align:center;color:var(--ht-muted);}
+    
+    .ht-controls{display:flex;gap:0.5rem;margin-bottom:1rem;flex-wrap:wrap;}
+    .ht-select{padding:0.5rem 0.8rem;background:var(--ht-card);border:1px solid var(--ht-border);border-radius:8px;color:var(--ht-text);font-size:0.85rem;}
+    .ht-btn{padding:0.5rem 1rem;background:var(--ht-card);border:1px solid var(--ht-border);border-radius:8px;color:var(--ht-text);cursor:pointer;font-size:0.85rem;transition:0.2s;display:flex;align-items:center;gap:0.3rem;}
+    .ht-btn:hover{border-color:var(--ht-accent);}
+    .ht-btn.primary{background:linear-gradient(135deg,#6366f1,#8b5cf6);border:none;color:#fff;font-weight:600;}
+    .ht-btn.primary:hover{transform:translateY(-2px);box-shadow:0 4px 12px rgba(99,102,241,0.4);}
+    
+    .ht-grid{display:flex;flex-direction:column;gap:0.8rem;max-height:400px;overflow-y:auto;padding-right:0.3rem;}
+    .ht-grid::-webkit-scrollbar{width:6px;}
+    .ht-grid::-webkit-scrollbar-track{background:var(--ht-bg);border-radius:3px;}
+    .ht-grid::-webkit-scrollbar-thumb{background:var(--ht-border);border-radius:3px;}
+    
+    .ht-item{background:var(--ht-card);border:1px solid var(--ht-border);border-radius:14px;padding:1rem;transition:0.2s;position:relative;}
+    .ht-item:hover{border-color:var(--ht-accent);}
+    .ht-item-header{display:flex;justify-content:space-between;align-items:start;margin-bottom:0.6rem;flex-wrap:wrap;gap:0.4rem;}
+    .ht-item-title{display:flex;align-items:center;gap:0.5rem;font-weight:600;}
+    .ht-item-cat{font-size:0.7rem;padding:0.2rem 0.5rem;border-radius:4px;color:#000;font-weight:600;}
+    .ht-item-cat.health{background:var(--ht-cat-health);}
+    .ht-item-cat.work{background:var(--ht-cat-work);}
+    .ht-item-cat.learn{background:var(--ht-cat-learn);}
+    .ht-item-cat.fitness{background:var(--ht-cat-fitness);}
+    .ht-item-cat.mind{background:var(--ht-cat-mind);}
+    .ht-item-actions{display:flex;gap:0.3rem;}
+    .ht-item-actions button{background:none;border:none;font-size:1rem;cursor:pointer;opacity:0.7;transition:0.2s;}
+    .ht-item-actions button:hover{opacity:1;transform:scale(1.1);}
+    
+    .ht-item-streak{font-size:0.8rem;color:var(--ht-muted);display:flex;align-items:center;gap:0.3rem;}
+    .ht-item-streak.fire{color:var(--ht-warn);}
+    
+    .ht-week{display:flex;gap:4px;margin-top:0.6rem;flex-wrap:wrap;}
+    .ht-day{width:28px;height:28px;border-radius:6px;background:var(--ht-bg);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:0.65rem;color:var(--ht-muted);transition:0.2s;border:1px solid var(--ht-border);}
+    .ht-day:hover{border-color:var(--ht-accent);}
+    .ht-day.active{background:var(--ht-success);color:#000;border-color:var(--ht-success);}
+    .ht-day.today{box-shadow:0 0 0 2px var(--ht-accent);}
+    .ht-day.missed{background:var(--ht-danger);color:#fff;border-color:var(--ht-danger);}
+    
+    .ht-progress{height:4px;background:var(--ht-bg);border-radius:2px;margin-top:0.6rem;overflow:hidden;}
+    .ht-progress-bar{height:100%;background:linear-gradient(90deg,var(--ht-accent),var(--ht-success));border-radius:2px;transition:width 0.3s;}
+    
+    .ht-add-form{background:var(--ht-card);border:1px solid var(--ht-border);border-radius:14px;padding:1rem;margin-bottom:1rem;display:none;}
+    .ht-add-form.show{display:block;animation:slideIn 0.2s ease;}
+    @keyframes slideIn{from{opacity:0;transform:translateY(-10px);}to{opacity:1;transform:translateY(0);}}
+    .ht-form-row{display:grid;grid-template-columns:1fr 1fr;gap:0.6rem;margin-bottom:0.6rem;}
+    .ht-form-row input,.ht-form-row select{padding:0.6rem;background:var(--ht-bg);border:1px solid var(--ht-border);border-radius:8px;color:var(--ht-text);font-size:0.9rem;}
+    .ht-form-actions{display:flex;gap:0.5rem;justify-content:flex-end;}
+    
+    .ht-modal{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.7);display:none;align-items:center;justify-content:center;z-index:1000;}
+    .ht-modal.open{display:flex;}
+    .ht-modal-content{background:var(--ht-card);padding:1.5rem;border-radius:16px;border:1px solid var(--ht-border);width:90%;max-width:400px;animation:popIn 0.2s ease;}
+    @keyframes popIn{from{opacity:0;transform:scale(0.95);}to{opacity:1;transform:scale(1);}}
+    .ht-modal input,.ht-modal select{width:100%;padding:0.7rem;margin:0.5rem 0;background:var(--ht-bg);border:1px solid var(--ht-border);border-radius:8px;color:var(--ht-text);}
+    .ht-modal .ht-form-actions{margin-top:1rem;}
+    
+    .ht-toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--ht-card);border:1px solid var(--ht-border);color:var(--ht-text);padding:0.8rem 1.2rem;border-radius:12px;font-size:0.9rem;opacity:0;pointer-events:none;transition:0.3s;z-index:1001;box-shadow:0 4px 12px rgba(0,0,0,0.5);}
+    .ht-toast.show{transform:translateX(-50%) translateY(0);opacity:1;}
+    
+    .ht-empty{text-align:center;padding:2rem;color:var(--ht-muted);}
+    .ht-empty button{margin-top:1rem;}
+    
+    @media(max-width:600px){
+      .ht-stats{grid-template-columns:1fr 1fr;}
+      .ht-form-row{grid-template-columns:1fr;}
+      .ht-item-header{flex-direction:column;align-items:flex-start;}
+    }
+  </style>
+
+  <div class="ht-header">
+    <h2>🌱 Habit Tracker Pro</h2>
+    <span style="font-size:0.8rem;color:var(--ht-muted);" id="ht-date"></span>
+  </div>
+
+  <div class="ht-stats">
+    <div class="ht-stat"><div class="ht-stat-val" id="ht-total">0</div><div class="ht-stat-lbl">Total Habits</div></div>
+    <div class="ht-stat"><div class="ht-stat-val" id="ht-done">0</div><div class="ht-stat-lbl">Done Today</div></div>
+    <div class="ht-stat"><div class="ht-stat-val" id="ht-best">0</div><div class="ht-stat-lbl">Best Streak</div></div>
+  </div>
+
+  <div class="ht-quote" id="ht-quote">"Small daily improvements lead to stunning results."</div>
+
+  <div class="ht-controls">
+    <select class="ht-select" id="ht-filter-cat">
+      <option value="all">All Categories</option>
+      <option value="health">🌿 Health</option>
+      <option value="work">💼 Work</option>
+      <option value="learn">📚 Learn</option>
+      <option value="fitness">💪 Fitness</option>
+      <option value="mind">🧘 Mind</option>
+    </select>
+    <select class="ht-select" id="ht-sort">
+      <option value="streak">Sort: Streak 🔥</option>
+      <option value="name">Sort: Name A-Z</option>
+      <option value="progress">Sort: Progress %</option>
+    </select>
+    <button class="ht-btn primary" id="ht-add-toggle">+ Add Habit</button>
+    <button class="ht-btn" id="ht-export">📤 Export</button>
+    <button class="ht-btn" id="ht-notify">🔔 Reminders</button>
+  </div>
+
+  <div class="ht-add-form" id="ht-add-form">
+    <div class="ht-form-row">
+      <input type="text" id="ht-new-name" placeholder="Habit name (e.g., Drink Water)">
+      <select id="ht-new-cat">
+        <option value="health">🌿 Health</option>
+        <option value="work">💼 Work</option>
+        <option value="learn">📚 Learn</option>
+        <option value="fitness">💪 Fitness</option>
+        <option value="mind">🧘 Mind</option>
+      </select>
+    </div>
+    <div class="ht-form-row">
+      <select id="ht-new-freq">
+        <option value="daily">Daily</option>
+        <option value="weekdays">Weekdays</option>
+        <option value="3x">3x per week</option>
+        <option value="weekly">Weekly</option>
+      </select>
+      <input type="number" id="ht-new-goal" placeholder="Target (optional)" min="1" max="365">
+    </div>
+    <div class="ht-form-actions">
+      <button class="ht-btn" id="ht-add-cancel">Cancel</button>
+      <button class="ht-btn primary" id="ht-add-save">💾 Save Habit</button>
+    </div>
+  </div>
+
+  <div class="ht-grid" id="ht-grid"></div>
+
+  <div class="ht-modal" id="ht-modal">
+    <div class="ht-modal-content">
+      <h3 style="margin:0 0 1rem">✏️ Edit Habit</h3>
+      <input type="hidden" id="ht-edit-id">
+      <input type="text" id="ht-edit-name" placeholder="Habit name">
+      <select id="ht-edit-cat">
+        <option value="health">🌿 Health</option>
+        <option value="work">💼 Work</option>
+        <option value="learn">📚 Learn</option>
+        <option value="fitness">💪 Fitness</option>
+        <option value="mind">🧘 Mind</option>
+      </select>
+      <select id="ht-edit-freq">
+        <option value="daily">Daily</option>
+        <option value="weekdays">Weekdays</option>
+        <option value="3x">3x per week</option>
+        <option value="weekly">Weekly</option>
+      </select>
+      <div class="ht-form-actions">
+        <button class="ht-btn" id="ht-modal-close">Cancel</button>
+        <button class="ht-btn primary" id="ht-modal-save">💾 Update</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="ht-toast" id="ht-toast"></div>
+
+  <script>
+    (function(){
+      const $ = id => document.getElementById(id);
+      const days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+      const categories = {health:'🌿',work:'💼',learn:'📚',fitness:'💪',mind:'🧘'};
+      const quotes = [
+        "Small daily improvements lead to stunning results.",
+        "You don't have to be great to start, but you have to start to be great.",
+        "Consistency is what transforms average into excellence.",
+        "Every day is a chance to get 1% better.",
+        "The secret of your success is found in your daily routine."
+      ];
+
+      let habits = JSON.parse(localStorage.getItem('ab-habits-pro') || '[]');
+      let notifyEnabled = JSON.parse(localStorage.getItem('ab-habits-notify') || 'false');
+      let currentEditId = null;
+
+      // Date Utils
+      const todayStr = () => new Date().toISOString().split('T')[0];
+      const getLast7 = () => {
+        const arr = [];
+        for(let i=6;i>=0;i--){
+          const d = new Date(); d.setDate(d.getDate()-i);
+          arr.push({ date: d.toISOString().split('T')[0], day: days[d.getDay()], isToday: i===0 });
+        }
+        return arr;
+      };
+
+      // Streak Calculator
+      const calcStreak = (dates, freq) => {
+        let current = 0, longest = 0, temp = 0;
+        const sorted = [...dates].sort().reverse();
+        const today = new Date();
+        
+        // Current streak
+        for(let i=0;i<365;i++){
+          const check = new Date(today); check.setDate(check.getDate()-i);
+          const checkStr = check.toISOString().split('T')[0];
+          if(sorted.includes(checkStr)) temp++;
+          else if(i===0) continue; // Skip today if not done yet
+          else break;
+        }
+        current = temp;
+        
+        // Longest streak
+        temp = 0;
+        for(let i=0;i<sorted.length-1;i++){
+          const d1 = new Date(sorted[i]), d2 = new Date(sorted[i+1]);
+          const diff = Math.round((d1-d2)/(1000*60*60*24));
+          if(diff <= 2){ temp++; longest = Math.max(longest, temp); }
+          else temp = 0;
+        }
+        return { current, longest: Math.max(longest, current) };
+      };
+
+      // Progress %
+      const getProgress = (habit) => {
+        const last30 = getLast7().map(d=>d.date).concat(Array(23).fill(0).map((_,i)=>{
+          const d=new Date(); d.setDate(d.getDate()-7-i); return d.toISOString().split('T')[0];
+        }));
+        const done = last30.filter(d=>habit.dates.includes(d)).length;
+        return Math.round((done/30)*100);
+      };
+
+      // Save/Load
+      const save = () => {
+        localStorage.setItem('ab-habits-pro', JSON.stringify(habits));
+        renderStats();
+      };
+
+      // Render Stats
+      const renderStats = () => {
+        $('ht-total').textContent = habits.length;
+        const today = todayStr();
+        $('ht-done').textContent = habits.filter(h=>h.dates.includes(today)).length;
+        const best = Math.max(0, ...habits.map(h=>calcStreak(h.dates, h.freq).longest));
+        $('ht-best').textContent = best;
+      };
+
+      // Render Habits
+      const render = () => {
+        const grid = $('ht-grid');
+        const filter = $('ht-filter-cat').value;
+        const sort = $('ht-sort').value;
+        const last7 = getLast7();
+        const today = todayStr();
+
+        let filtered = habits.filter(h => filter==='all' || h.category===filter);
+        
+        // Sort
+        if(sort==='streak') filtered.sort((a,b)=>calcStreak(b.dates).current - calcStreak(a.dates).current);
+        else if(sort==='name') filtered.sort((a,b)=>a.name.localeCompare(b.name));
+        else if(sort==='progress') filtered.sort((a,b)=>getProgress(b)-getProgress(a));
+
+        if(filtered.length===0){
+          grid.innerHTML = `<div class="ht-empty">
+            <p>No habits yet. Start building your routine! 🚀</p>
+            <button class="ht-btn primary" onclick="document.getElementById('ht-add-toggle').click()">+ Add Your First Habit</button>
+          </div>`;
+          return;
+        }
+
+        grid.innerHTML = filtered.map(h => {
+          const {current, longest} = calcStreak(h.dates, h.freq);
+          const progress = getProgress(h);
+          const isDoneToday = h.dates.includes(today);
+          
+          return `
+            <div class="ht-item" data-id="${h.id}">
+              <div class="ht-item-header">
+                <div class="ht-item-title">
+                  <span class="ht-item-cat ${h.category}">${categories[h.category]}</span>
+                  <span>${h.name}</span>
+                </div>
+                <div class="ht-item-actions">
+                  <button title="Edit" onclick="editHabit('${h.id}')">✏️</button>
+                  <button title="Delete" onclick="deleteHabit('${h.id}')">🗑️</button>
+                </div>
+              </div>
+              <div class="ht-item-streak ${current>3?'fire':''}">
+                🔥 ${current} day streak • Best: ${longest}
+              </div>
+              <div class="ht-week">
+                ${last7.map(d => {
+                  const done = h.dates.includes(d.date);
+                  const missed = !done && !d.isToday && new Date(d.date) < new Date(today);
+                  return `<div class="ht-day ${done?'active':''} ${missed?'missed':''} ${d.isToday?'today':''}" 
+                           onclick="toggleHabit('${h.id}','${d.date}')" title="${d.day}">${d.day.charAt(0)}</div>`;
+                }).join('')}
+              </div>
+              <div class="ht-progress"><div class="ht-progress-bar" style="width:${progress}%"></div></div>
+            </div>
+          `;
+        }).join('');
+        
+        renderStats();
+      };
+
+      // Toggle Habit
+      window.toggleHabit = (id, date) => {
+        const h = habits.find(x=>x.id===id);
+        if(!h) return;
+        const idx = h.dates.indexOf(date);
+        if(idx>-1) h.dates.splice(idx,1);
+        else h.dates.push(date);
+        save(); render();
+        
+        // Notification
+        if(date===todayStr() && notifyEnabled && idx===-1){
+          showToast(`✅ "${h.name}" completed! Keep it up! 🎉`);
+          if('Notification' in window && Notification.permission==='granted'){
+            new Notification('Habit Done! 🌱', { body: h.name, icon: '🌱' });
+          }
+        }
+      };
+
+      // Add Habit
+      const addHabit = () => {
+        const name = $('ht-new-name').value.trim();
+        if(!name) return showToast('⚠️ Enter a habit name');
+        
+        habits.push({
+          id: 'h_'+Date.now(),
+          name,
+          category: $('ht-new-cat').value,
+          freq: $('ht-new-freq').value,
+          goal: parseInt($('ht-new-goal').value) || null,
+          dates: [],
+          created: todayStr()
+        });
+        
+        $('ht-new-name').value = ''; $('ht-new-goal').value = '';
+        $('ht-add-form').classList.remove('show');
+        save(); render();
+        showToast(`🌱 "${name}" added!`);
+      };
+
+      // Edit Habit
+      window.editHabit = (id) => {
+        const h = habits.find(x=>x.id===id);
+        if(!h) return;
+        currentEditId = id;
+        $('ht-edit-id').value = id;
+        $('ht-edit-name').value = h.name;
+        $('ht-edit-cat').value = h.category;
+        $('ht-edit-freq').value = h.freq;
+        $('ht-modal').classList.add('open');
+      };
+
+      const saveEdit = () => {
+        if(!currentEditId) return;
+        const h = habits.find(x=>x.id===currentEditId);
+        if(h){
+          h.name = $('ht-edit-name').value.trim() || h.name;
+          h.category = $('ht-edit-cat').value;
+          h.freq = $('ht-edit-freq').value;
+          save(); render();
+          showToast('✏️ Habit updated');
+        }
+        $('ht-modal').classList.remove('open');
+        currentEditId = null;
+      };
+
+      // Delete Habit
+      window.deleteHabit = (id) => {
+        if(!confirm('Delete this habit? This cannot be undone.')) return;
+        habits = habits.filter(h=>h.id!==id);
+        save(); render();
+        showToast('🗑️ Habit deleted');
+      };
+
+      // Export
+      const exportData = () => {
+        const data = { habits, exported: new Date().toISOString() };
+        const blob = new Blob([JSON.stringify(data,null,2)], {type:'application/json'});
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a'); a.href=url; a.download='habits-backup.json'; a.click();
+        URL.revokeObjectURL(url);
+        showToast('📤 Exported to habits-backup.json');
+      };
+
+      // Notifications
+      const toggleNotify = () => {
+        if(!('Notification' in window)) return showToast('❌ Notifications not supported');
+        if(notifyEnabled){
+          notifyEnabled = false;
+          showToast('🔕 Reminders disabled');
+        } else {
+          Notification.requestPermission().then(perm=>{
+            if(perm==='granted'){
+              notifyEnabled = true;
+              showToast('🔔 Reminders enabled');
+            } else showToast('❌ Permission denied');
+          });
+        }
+        localStorage.setItem('ab-habits-notify', JSON.stringify(notifyEnabled));
+      };
+
+      // Toast
+      const showToast = msg => {
+        const t = $('ht-toast'); t.textContent = msg; t.classList.add('show');
+        setTimeout(()=>t.classList.remove('show'), 2500);
+      };
+
+      // Quote Rotation
+      const rotateQuote = () => {
+        $('ht-quote').textContent = `"${quotes[Math.floor(Math.random()*quotes.length)]}"`;
+      };
+
+      // Event Listeners
+      $('ht-add-toggle').onclick = () => {
+        $('ht-add-form').classList.toggle('show');
+        if($('ht-add-form').classList.contains('show')) $('ht-new-name').focus();
+      };
+      $('ht-add-cancel').onclick = () => $('ht-add-form').classList.remove('show');
+      $('ht-add-save').onclick = addHabit;
+      $('ht-export').onclick = exportData;
+      $('ht-notify').onclick = toggleNotify;
+      $('ht-filter-cat').onchange = render;
+      $('ht-sort').onchange = render;
+      $('ht-modal-close').onclick = () => $('ht-modal').classList.remove('open');
+      $('ht-modal-save').onclick = saveEdit;
+      
+      // Keyboard: Enter to add
+      $('ht-new-name').onkeydown = e => { if(e.key==='Enter') addHabit(); };
+      
+      // Date Display
+      $('ht-date').textContent = new Date().toLocaleDateString('en-US', { weekday:'long', month:'short', day:'numeric' });
+      
+      // Init
+      rotateQuote();
+      setInterval(rotateQuote, 30000); // New quote every 30s
+      render();
+
+      // Daily reminder check (if enabled)
+      if(notifyEnabled && 'Notification' in window && Notification.permission==='granted'){
+        const lastRemind = localStorage.getItem('ab-habits-last-remind');
+        const today = todayStr();
+        if(lastRemind !== today){
+          const pending = habits.filter(h=>!h.dates.includes(today));
+          if(pending.length>0 && new Date().getHours()>=20){ // 8PM reminder
+            new Notification('🌱 Habit Reminder', { 
+              body: `${pending.length} habit(s) pending today!`,
+              icon: '⏰'
+            });
+            localStorage.setItem('ab-habits-last-remind', today);
+          }
+        }
+      }
+    })();
+  </script>
+</div>

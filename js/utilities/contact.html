@@ -1,0 +1,693 @@
+<div class="utility-tool">
+  <style>
+    .utility-tool {
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 2rem;
+      text-align: center;
+      font-family: var(--font-family, 'Segoe UI', sans-serif);
+    }
+    
+    /* Animated Eyes Container */
+    .eyes-container {
+      display: flex;
+      justify-content: center;
+      gap: 2rem;
+      margin: 1.5rem 0;
+      pointer-events: none;
+    }
+    
+    .eye {
+      width: 50px;
+      height: 50px;
+      background: var(--bg-card, #fff);
+      border: 3px solid var(--accent, #6366f1);
+      border-radius: 50%;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+      transition: transform 0.2s ease;
+    }
+    
+    .pupil {
+      width: 24px;
+      height: 24px;
+      background: var(--accent, #6366f1);
+      border-radius: 50%;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      transition: transform 0.1s ease-out;
+    }
+    
+    .pupil::after {
+      content: '';
+      position: absolute;
+      width: 8px;
+      height: 8px;
+      background: #fff;
+      border-radius: 50%;
+      top: 6px;
+      right: 6px;
+    }
+    
+    /* Section Title */
+    .contact-title {
+      font-size: 1.8rem;
+      font-weight: 700;
+      margin: 1rem 0;
+      background: var(--gradient-main, linear-gradient(135deg, #6366f1, #8b5cf6));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: pulse 2s infinite;
+    }
+    
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.8; }
+    }
+    
+    /* Contact Cards Grid */
+    .ct-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 1rem;
+      margin: 1.5rem 0;
+    }
+    
+    .ct-card {
+      background: var(--bg-card, #f8fafc);
+      border: 2px solid var(--glass-border, #e2e8f0);
+      border-radius: 16px;
+      padding: 1.2rem 1rem;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .ct-card:hover {
+      border-color: var(--accent, #6366f1);
+      transform: translateY(-5px) scale(1.02);
+      box-shadow: 0 10px 30px rgba(99, 102, 241, 0.2);
+    }
+    
+    .ct-card:active {
+      transform: translateY(-2px) scale(1.01);
+    }
+    
+    .ct-icon {
+      font-size: 2rem;
+      transition: transform 0.3s ease;
+    }
+    
+    .ct-card:hover .ct-icon {
+      transform: scale(1.2) rotate(5deg);
+    }
+    
+    .ct-label {
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--text-primary, #1e293b);
+    }
+    
+    .ct-sublabel {
+      font-size: 0.75rem;
+      color: var(--text-secondary, #64748b);
+    }
+    
+    /* Social Links */
+    .social-links {
+      display: flex;
+      justify-content: center;
+      gap: 0.8rem;
+      margin: 1.5rem 0;
+      flex-wrap: wrap;
+    }
+    
+    .social-btn {
+      width: 45px;
+      height: 45px;
+      border-radius: 50%;
+      border: 2px solid var(--glass-border, #e2e8f0);
+      background: var(--bg-card, #f8fafc);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.3rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      color: var(--text-primary, #1e293b);
+    }
+    
+    .social-btn:hover {
+      border-color: var(--accent, #6366f1);
+      transform: translateY(-3px) scale(1.1);
+      box-shadow: 0 8px 20px rgba(99, 102, 241, 0.3);
+    }
+    
+    .social-btn.whatsapp:hover { background: #25D366; color: #fff; border-color: #25D366; }
+    .social-btn.telegram:hover { background: #0088cc; color: #fff; border-color: #0088cc; }
+    .social-btn.twitter:hover { background: #1DA1F2; color: #fff; border-color: #1DA1F2; }
+    .social-btn.github:hover { background: #333; color: #fff; border-color: #333; }
+    
+    /* Contact Form */
+    .ct-form {
+      background: var(--bg-card, #f8fafc);
+      border: 2px solid var(--glass-border, #e2e8f0);
+      border-radius: 20px;
+      padding: 1.5rem;
+      text-align: left;
+      margin: 1.5rem 0;
+      transition: border-color 0.3s ease;
+    }
+    
+    .ct-form:focus-within {
+      border-color: var(--accent, #6366f1);
+      box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+    }
+    
+    .form-group {
+      margin-bottom: 1rem;
+    }
+    
+    .form-label {
+      display: block;
+      font-size: 0.9rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      color: var(--text-primary, #1e293b);
+    }
+    
+    .ct-input {
+      width: 100%;
+      padding: 0.9rem 1rem;
+      border-radius: 12px;
+      border: 2px solid var(--glass-border, #e2e8f0);
+      background: var(--bg-primary, #fff);
+      color: var(--text-primary, #1e293b);
+      outline: none;
+      font-size: 1rem;
+      transition: all 0.3s ease;
+      box-sizing: border-box;
+    }
+    
+    .ct-input:focus {
+      border-color: var(--accent, #6366f1);
+      box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.15);
+    }
+    
+    .ct-input.error {
+      border-color: #ef4444;
+      animation: shake 0.3s ease;
+    }
+    
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-5px); }
+      75% { transform: translateX(5px); }
+    }
+    
+    .error-msg {
+      color: #ef4444;
+      font-size: 0.8rem;
+      margin-top: 0.3rem;
+      display: none;
+    }
+    
+    .error-msg.show {
+      display: block;
+      animation: fadeIn 0.2s ease;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-5px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .ct-btn {
+      width: 100%;
+      padding: 1rem;
+      background: var(--gradient-main, linear-gradient(135deg, #6366f1, #8b5cf6));
+      border: none;
+      border-radius: 12px;
+      color: #fff;
+      font-weight: 600;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .ct-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 25px rgba(99, 102, 241, 0.4);
+    }
+    
+    .ct-btn:active {
+      transform: translateY(0);
+    }
+    
+    .ct-btn:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+      transform: none;
+    }
+    
+    .ct-btn .spinner {
+      display: none;
+      width: 20px;
+      height: 20px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin-right: 0.5rem;
+      vertical-align: middle;
+    }
+    
+    .ct-btn.loading .spinner {
+      display: inline-block;
+    }
+    
+    .ct-btn.loading .btn-text {
+      opacity: 0.8;
+    }
+    
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    
+    /* Status Message */
+    .status-msg {
+      margin-top: 1rem;
+      padding: 0.8rem 1rem;
+      border-radius: 10px;
+      font-size: 0.9rem;
+      display: none;
+      animation: slideIn 0.3s ease;
+    }
+    
+    .status-msg.success {
+      background: #dcfce7;
+      color: #166534;
+      border: 1px solid #86efac;
+      display: block;
+    }
+    
+    .status-msg.error {
+      background: #fee2e2;
+      color: #991b1b;
+      border: 1px solid #fca5a5;
+      display: block;
+    }
+    
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    /* FAQ Accordion */
+    .faq-section {
+      margin-top: 2rem;
+      text-align: left;
+    }
+    
+    .faq-title {
+      font-size: 1.2rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      color: var(--text-primary, #1e293b);
+    }
+    
+    .faq-item {
+      border: 1px solid var(--glass-border, #e2e8f0);
+      border-radius: 12px;
+      margin-bottom: 0.5rem;
+      overflow: hidden;
+      background: var(--bg-card, #f8fafc);
+    }
+    
+    .faq-question {
+      padding: 1rem;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-weight: 500;
+      transition: background 0.2s ease;
+    }
+    
+    .faq-question:hover {
+      background: rgba(99, 102, 241, 0.05);
+    }
+    
+    .faq-question::after {
+      content: '+';
+      font-size: 1.3rem;
+      font-weight: 300;
+      transition: transform 0.3s ease;
+    }
+    
+    .faq-item.active .faq-question::after {
+      transform: rotate(45deg);
+    }
+    
+    .faq-answer {
+      max-height: 0;
+      overflow: hidden;
+      padding: 0 1rem;
+      font-size: 0.9rem;
+      color: var(--text-secondary, #64748b);
+      transition: all 0.3s ease;
+    }
+    
+    .faq-item.active .faq-answer {
+      padding: 0 1rem 1rem;
+      max-height: 200px;
+    }
+    
+    /* Copy Email Button */
+    .email-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      justify-content: center;
+      margin: 0.5rem 0;
+    }
+    
+    .copy-btn {
+      background: var(--accent, #6366f1);
+      border: none;
+      border-radius: 8px;
+      color: #fff;
+      padding: 0.4rem 0.8rem;
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    
+    .copy-btn:hover {
+      transform: scale(1.05);
+    }
+    
+    .copy-btn.copied {
+      background: #22c55e;
+    }
+    
+    /* Responsive */
+    @media (max-width: 480px) {
+      .utility-tool {
+        padding: 1.5rem 1rem;
+      }
+      .ct-cards {
+        grid-template-columns: 1fr;
+      }
+      .eyes-container {
+        gap: 1rem;
+      }
+      .eye {
+        width: 40px;
+        height: 40px;
+      }
+    }
+  </style>
+
+  <!-- Animated Cartoon Eyes -->
+  <div class="eyes-container" id="eyesContainer">
+    <div class="eye"><div class="pupil" id="pupil1"></div></div>
+    <div class="eye"><div class="pupil" id="pupil2"></div></div>
+  </div>
+
+  <h3 class="contact-title">📞 Get in Touch</h3>
+  <p style="color:var(--text-secondary);margin-bottom:1.5rem;">We're here to help! Reach out anytime.</p>
+
+  <!-- Quick Contact Cards -->
+  <div class="ct-cards">
+    <div class="ct-card" onclick="copyEmail()">
+      <div class="ct-icon">📧</div>
+      <div class="ct-label">Email Us</div>
+      <div class="ct-sublabel" id="emailDisplay">support@abomnitools.dev</div>
+    </div>
+    <div class="ct-card" onclick="openMailto()">
+      <div class="ct-icon">✉️</div>
+      <div class="ct-label">Direct Mail</div>
+      <div class="ct-sublabel">Open email app</div>
+    </div>
+    <div class="ct-card" onclick="reportBug()">
+      <div class="ct-icon">🐛</div>
+      <div class="ct-label">Report Bug</div>
+      <div class="ct-sublabel">GitHub Issues</div>
+    </div>
+    <div class="ct-card" onclick="showStatus('💡 Tip: Check our FAQ below!', 'success')">
+      <div class="ct-icon">💡</div>
+      <div class="ct-label">Quick Help</div>
+      <div class="ct-sublabel">FAQ Section</div>
+    </div>
+  </div>
+
+  <!-- Social Media Links -->
+  <div class="social-links">
+    <a href="https://wa.me/919876543210" class="social-btn whatsapp" target="_blank" title="WhatsApp" aria-label="WhatsApp">💬</a>
+    <a href="https://t.me/abomnitools" class="social-btn telegram" target="_blank" title="Telegram" aria-label="Telegram">📱</a>
+    <a href="https://twitter.com/abomnitools" class="social-btn twitter" target="_blank" title="Twitter" aria-label="Twitter">🐦</a>
+    <a href="https://github.com/abomnitools" class="social-btn github" target="_blank" title="GitHub" aria-label="GitHub">🐙</a>
+  </div>
+
+  <!-- Contact Form -->
+  <form class="ct-form" id="contactForm" onsubmit="handleSubmit(event)">
+    <div class="form-group">
+      <label class="form-label" for="name">👤 Your Name</label>
+      <input type="text" id="name" class="ct-input" placeholder="Enter your name" required>
+      <div class="error-msg" id="nameError">Please enter your name</div>
+    </div>
+    
+    <div class="form-group">
+      <label class="form-label" for="email">📧 Email Address</label>
+      <input type="email" id="email" class="ct-input" placeholder="your@email.com" required>
+      <div class="error-msg" id="emailError">Please enter a valid email</div>
+    </div>
+    
+    <div class="form-group">
+      <label class="form-label" for="subject">📋 Subject</label>
+      <select id="subject" class="ct-input" required>
+        <option value="">Select a subject</option>
+        <option value="general">💬 General Inquiry</option>
+        <option value="support">🔧 Technical Support</option>
+        <option value="bug">🐛 Bug Report</option>
+        <option value="feature">✨ Feature Request</option>
+        <option value="other">📦 Other</option>
+      </select>
+    </div>
+    
+    <div class="form-group">
+      <label class="form-label" for="message">💬 Message</label>
+      <textarea id="message" class="ct-input" placeholder="Write your message here..." rows="4" required></textarea>
+      <div class="error-msg" id="messageError">Message cannot be empty</div>
+    </div>
+    
+    <button type="submit" class="ct-btn" id="submitBtn">
+      <span class="spinner"></span>
+      <span class="btn-text">Send Message 🚀</span>
+    </button>
+    
+    <div class="status-msg" id="statusMsg"></div>
+  </form>
+
+  <!-- FAQ Section -->
+  <div class="faq-section">
+    <div class="faq-title">❓ Frequently Asked Questions</div>
+    
+    <div class="faq-item">
+      <div class="faq-question" onclick="toggleFaq(this)">How quickly will I get a response?</div>
+      <div class="faq-answer">We aim to respond to all inquiries within 24-48 hours during business days. For urgent issues, try our WhatsApp support!</div>
+    </div>
+    
+    <div class="faq-item">
+      <div class="faq-question" onclick="toggleFaq(this)">Is my information secure?</div>
+      <div class="faq-answer">Absolutely! We never share your personal data. All messages are encrypted and stored securely.</div>
+    </div>
+    
+    <div class="faq-item">
+      <div class="faq-question" onclick="toggleFaq(this)">Can I suggest a new tool?</div>
+      <div class="faq-answer">Yes! We love user suggestions. Use the "Feature Request" option or message us directly on GitHub.</div>
+    </div>
+  </div>
+
+  <script>
+    // ===== Animated Eyes Following Mouse =====
+    document.addEventListener('mousemove', (e) => {
+      const pupils = document.querySelectorAll('.pupil');
+      const eyesContainer = document.getElementById('eyesContainer');
+      const rect = eyesContainer.getBoundingClientRect();
+      const centerX = rect.left + rect.width / 2;
+      const centerY = rect.top + rect.height / 2;
+      
+      const angle = Math.atan2(e.clientY - centerY, e.clientX - centerX);
+      const distance = Math.min(10, Math.hypot(e.clientX - centerX, e.clientY - centerY) / 20);
+      
+      const x = Math.cos(angle) * distance;
+      const y = Math.sin(angle) * distance;
+      
+      pupils.forEach(pupil => {
+        pupil.style.transform = `translate(calc(-50% + ${x}px), calc(-50% + ${y}px))`;
+      });
+    });
+
+    // ===== Copy Email Functionality =====
+    function copyEmail() {
+      const email = 'support@abomnitools.dev';
+      navigator.clipboard.writeText(email).then(() => {
+        const btn = event.currentTarget.querySelector('.copy-btn') || event.currentTarget;
+        const originalText = document.getElementById('emailDisplay').textContent;
+        showStatus('📋 Email copied to clipboard!', 'success');
+        
+        // Visual feedback
+        const card = event.currentTarget;
+        card.style.borderColor = '#22c55e';
+        card.style.transform = 'scale(1.03)';
+        setTimeout(() => {
+          card.style.borderColor = '';
+          card.style.transform = '';
+        }, 300);
+      });
+    }
+
+    function openMailto() {
+      window.location.href = 'mailto:support@abomnitools.dev?subject=Hello%20AB%20OmniTools&body=Hi%20there!%20I%20need%20help%20with...';
+    }
+
+    function reportBug() {
+      window.open('https://github.com/abomnitools/issues/new', '_blank');
+      showStatus('🐛 Opening GitHub Issues...', 'success');
+    }
+
+    // ===== Form Validation & Submission =====
+    function validateField(id, errorId, validationFn) {
+      const field = document.getElementById(id);
+      const error = document.getElementById(errorId);
+      const isValid = validationFn(field.value);
+      
+      if (!isValid) {
+        field.classList.add('error');
+        error.classList.add('show');
+        return false;
+      } else {
+        field.classList.remove('error');
+        error.classList.remove('show');
+        return true;
+      }
+    }
+
+    function handleSubmit(e) {
+      e.preventDefault();
+      
+      // Validate fields
+      const nameValid = validateField('name', 'nameError', v => v.trim().length >= 2);
+      const emailValid = validateField('email', 'emailError', v => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v));
+      const messageValid = validateField('message', 'messageError', v => v.trim().length >= 10);
+      
+      if (!nameValid || !emailValid || !messageValid) {
+        showStatus('❌ Please fix the errors above', 'error');
+        return;
+      }
+      
+      // Show loading state
+      const btn = document.getElementById('submitBtn');
+      btn.classList.add('loading');
+      btn.disabled = true;
+      
+      // Simulate API call (Replace with actual fetch)
+      setTimeout(() => {
+        // Success handling
+        showStatus('✅ Message sent successfully! We\'ll get back to you soon.', 'success');
+        
+        // Reset form
+        document.getElementById('contactForm').reset();
+        
+        // Reset button
+        btn.classList.remove('loading');
+        btn.disabled = false;
+        btn.querySelector('.btn-text').textContent = 'Send Message 🚀';
+        
+        // Auto-hide success message after 5 seconds
+        setTimeout(() => {
+          const status = document.getElementById('statusMsg');
+          status.style.display = 'none';
+        }, 5000);
+        
+      }, 2000);
+    }
+
+    function showStatus(message, type) {
+      const status = document.getElementById('statusMsg');
+      status.textContent = message;
+      status.className = `status-msg ${type}`;
+      
+      // Auto-hide after 4 seconds for non-form messages
+      if (type === 'success' && !message.includes('Message sent')) {
+        setTimeout(() => {
+          status.style.display = 'none';
+        }, 4000);
+      }
+    }
+
+    // ===== FAQ Accordion =====
+    function toggleFaq(element) {
+      const item = element.parentElement;
+      const wasActive = item.classList.contains('active');
+      
+      // Close all
+      document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('active'));
+      
+      // Toggle current if it wasn't active
+      if (!wasActive) {
+        item.classList.add('active');
+      }
+    }
+
+    // ===== Initialize =====
+    document.addEventListener('DOMContentLoaded', () => {
+      // Add copy button next to email
+      const emailDisplay = document.getElementById('emailDisplay');
+      const wrapper = document.createElement('div');
+      wrapper.className = 'email-wrapper';
+      wrapper.innerHTML = `
+        <span id="emailDisplay">${emailDisplay.textContent}</span>
+        <button class="copy-btn" onclick="copyEmailDirect(event)">📋 Copy</button>
+      `;
+      emailDisplay.parentElement.replaceWith(wrapper);
+    });
+
+    function copyEmailDirect(e) {
+      e.stopPropagation();
+      const email = 'support@abomnitools.dev';
+      navigator.clipboard.writeText(email).then(() => {
+        const btn = e.target;
+        btn.textContent = '✓ Copied!';
+        btn.classList.add('copied');
+        showStatus('📋 Email copied!', 'success');
+        setTimeout(() => {
+          btn.textContent = '📋 Copy';
+          btn.classList.remove('copied');
+        }, 2000);
+      });
+    }
+
+    // ===== Keyboard Accessibility =====
+    document.querySelectorAll('.ct-card, .faq-question').forEach(el => {
+      el.setAttribute('tabindex', '0');
+      el.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          el.click();
+        }
+      });
+    });
+  </script>
+</div>

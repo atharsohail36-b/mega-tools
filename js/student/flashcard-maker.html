@@ -1,0 +1,343 @@
+<div class="student-tool">
+  <style>
+    .student-tool {
+      --glass-border: rgba(255,255,255,0.15);
+      --bg-card: #1e1e2e;
+      --bg-hover: #2a2a3c;
+      --text-primary: #e2e2e2;
+      --text-secondary: #a0a0b0;
+      --accent: #6366f1;
+      --accent-glow: rgba(99,102,241,0.3);
+      --gradient-main: linear-gradient(135deg, #8b5cf6, #6366f1);
+      --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      max-width: 700px;
+      margin: 0 auto;
+      padding: 1.5rem;
+      font-family: system-ui, -apple-system, sans-serif;
+      color: var(--text-primary);
+    }
+    .fc-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem; }
+    .fc-header h2 { margin: 0; font-size: 1.4rem; background: var(--gradient-main); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .fc-deck-ctrl { display: flex; gap: 0.5rem; align-items: center; }
+    .fc-select, .fc-input { padding: 0.7rem; border-radius: 8px; border: 1px solid var(--glass-border); background: var(--bg-card); color: var(--text-primary); outline: none; transition: var(--transition); }
+    .fc-select:focus, .fc-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow); }
+    .fc-form { display: grid; gap: 0.8rem; margin-bottom: 1.2rem; background: var(--bg-card); padding: 1rem; border-radius: 12px; border: 1px solid var(--glass-border); }
+    .fc-add { padding: 0.8rem; background: var(--gradient-main); border: none; border-radius: 8px; color: #fff; font-weight: 600; cursor: pointer; transition: var(--transition); }
+    .fc-add:hover { transform: translateY(-2px); box-shadow: 0 4px 12px var(--accent-glow); }
+    .fc-stats { display: flex; justify-content: space-around; margin-bottom: 0.8rem; background: var(--bg-card); padding: 0.6rem; border-radius: 10px; border: 1px solid var(--glass-border); font-size: 0.85rem; color: var(--text-secondary); }
+    .fc-stats span { font-weight: 600; color: var(--text-primary); }
+    .fc-deck { perspective: 1000px; height: 220px; margin-bottom: 1rem; cursor: pointer; position: relative; }
+    .fc-card { width: 100%; height: 100%; position: relative; transform-style: preserve-3d; transition: transform 0.6s cubic-bezier(0.4, 0.2, 0.2, 1); }
+    .fc-card.flipped { transform: rotateY(180deg); }
+    .fc-face { position: absolute; inset: 0; backface-visibility: hidden; background: var(--bg-card); border: 1px solid var(--glass-border); border-radius: 16px; display: flex; align-items: center; justify-content: center; padding: 1.5rem; font-size: 1.2rem; text-align: center; box-shadow: 0 8px 20px rgba(0,0,0,0.2); line-height: 1.4; word-break: break-word; }
+    .fc-back { transform: rotateY(180deg); background: linear-gradient(135deg, rgba(56,189,248,0.08), rgba(139,92,246,0.08)); }
+    .fc-rating { display: flex; justify-content: center; gap: 0.6rem; margin-bottom: 1rem; opacity: 0; transform: translateY(-10px); transition: var(--transition); pointer-events: none; }
+    .fc-rating.show { opacity: 1; transform: translateY(0); pointer-events: auto; }
+    .fc-rate-btn { padding: 0.5rem 0.9rem; background: var(--bg-card); border: 1px solid var(--glass-border); border-radius: 8px; color: var(--text-primary); cursor: pointer; transition: var(--transition); font-size: 0.85rem; }
+    .fc-rate-btn:hover { background: var(--accent); color: #fff; border-color: var(--accent); }
+    .fc-rate-btn.hard:hover { background: #ef4444; } .fc-rate-btn.med:hover { background: #f59e0b; } .fc-rate-btn.easy:hover { background: #10b981; }
+    .fc-nav { display: flex; justify-content: center; gap: 1rem; align-items: center; margin-top: 0.5rem; }
+    .fc-btn { padding: 0.6rem 1rem; background: var(--bg-card); border: 1px solid var(--glass-border); border-radius: 8px; color: var(--text-primary); cursor: pointer; transition: var(--transition); font-size: 0.9rem; }
+    .fc-btn:hover:not(:disabled) { border-color: var(--accent); background: var(--bg-hover); }
+    .fc-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+    .fc-actions { display: flex; justify-content: space-between; margin-top: 1rem; flex-wrap: wrap; gap: 0.5rem; }
+    .fc-toast { position: fixed; bottom: 20px; right: 20px; background: var(--bg-card); border: 1px solid var(--glass-border); padding: 0.8rem 1.2rem; border-radius: 8px; color: var(--text-primary); box-shadow: 0 4px 12px rgba(0,0,0,0.3); transform: translateY(100px); opacity: 0; transition: all 0.3s ease; z-index: 1000; font-size: 0.9rem; }
+    .fc-toast.show { transform: translateY(0); opacity: 1; }
+    .fc-empty { text-align: center; padding: 2rem; color: var(--text-secondary); font-style: italic; grid-column: 1/-1; }
+    .fc-kbd { font-size: 0.75rem; color: var(--text-secondary); margin-top: 0.5rem; text-align: center; }
+    @media (max-width: 600px) {
+      .fc-header { flex-direction: column; align-items: flex-start; }
+      .fc-deck-ctrl { width: 100%; }
+      .fc-select { flex: 1; }
+      .fc-face { font-size: 1.1rem; padding: 1rem; }
+    }
+  </style>
+
+  <div class="fc-header">
+    <h2>🃏 Flashcard Maker</h2>
+    <div class="fc-deck-ctrl">
+      <select class="fc-select" id="fc-deck-select"></select>
+      <button class="fc-btn" id="fc-new-deck" title="New Deck">➕</button>
+      <button class="fc-btn" id="fc-del-deck" title="Delete Deck" style="color:#ef4444">🗑️</button>
+    </div>
+  </div>
+
+  <div class="fc-stats" id="fc-stats">
+    <div>Cards: <span id="fc-total">0</span></div>
+    <div>Reviewed: <span id="fc-reviewed">0</span></div>
+    <div>Accuracy: <span id="fc-accuracy">0%</span></div>
+  </div>
+
+  <div class="fc-form">
+    <input class="fc-input" id="fc-front" placeholder="Front (Question/Term)">
+    <input class="fc-input" id="fc-back" placeholder="Back (Answer/Definition)">
+    <button class="fc-add" id="fc-add-btn">+ Add Card</button>
+  </div>
+
+  <div class="fc-deck" id="fc-deck">
+    <div class="fc-card" id="fc-card">
+      <div class="fc-face fc-front" id="fc-f">Add a card to start</div>
+      <div class="fc-face fc-back" id="fc-b">Flip to see answer</div>
+    </div>
+  </div>
+
+  <div class="fc-rating" id="fc-rating">
+    <button class="fc-rate-btn hard" data-rate="hard">😕 Hard</button>
+    <button class="fc-rate-btn med" data-rate="med">🤔 Medium</button>
+    <button class="fc-rate-btn easy" data-rate="easy">😎 Easy</button>
+  </div>
+
+  <div class="fc-nav">
+    <button class="fc-btn" id="fc-shuffle" title="Shuffle (S)">🔀</button>
+    <button class="fc-btn" id="fc-prev" disabled>← Prev</button>
+    <span class="fc-btn" id="fc-count" style="background:transparent; border:none; cursor:default">0 / 0</span>
+    <button class="fc-btn" id="fc-next" disabled>Next →</button>
+    <button class="fc-btn" id="fc-del-card" title="Delete Card (D)" style="color:#ef4444">🗑️</button>
+  </div>
+
+  <div class="fc-actions">
+    <button class="fc-btn" id="fc-export">📤 Export JSON</button>
+    <label class="fc-btn" style="margin:0; cursor:pointer;">📥 Import JSON <input type="file" id="fc-import" accept=".json" style="display:none"></label>
+  </div>
+  <div class="fc-kbd">⌨️ Space/Enter: Flip | ←/→: Navigate | 1/2/3: Rate | S: Shuffle</div>
+  <div class="fc-toast" id="fc-toast"></div>
+
+  <script>
+    (function() {
+      const STORAGE_KEY = 'flashcard_decks_v2';
+      let state = {
+        decks: {},
+        activeId: 'default',
+        index: 0,
+        flipped: false,
+        shuffledOrder: []
+      };
+
+      const els = {
+        deckSelect: document.getElementById('fc-deck-select'),
+        newDeck: document.getElementById('fc-new-deck'),
+        delDeck: document.getElementById('fc-del-deck'),
+        front: document.getElementById('fc-front'),
+        back: document.getElementById('fc-back'),
+        addBtn: document.getElementById('fc-add-btn'),
+        card: document.getElementById('fc-card'),
+        f: document.getElementById('fc-f'),
+        b: document.getElementById('fc-b'),
+        rating: document.getElementById('fc-rating'),
+        prev: document.getElementById('fc-prev'),
+        next: document.getElementById('fc-next'),
+        shuffle: document.getElementById('fc-shuffle'),
+        count: document.getElementById('fc-count'),
+        delCard: document.getElementById('fc-del-card'),
+        exportBtn: document.getElementById('fc-export'),
+        importBtn: document.getElementById('fc-import'),
+        total: document.getElementById('fc-total'),
+        reviewed: document.getElementById('fc-reviewed'),
+        accuracy: document.getElementById('fc-accuracy'),
+        toast: document.getElementById('fc-toast')
+      };
+
+      const init = () => {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (saved) {
+          try {
+            const parsed = JSON.parse(saved);
+            state = { ...state, ...parsed };
+          } catch { createDeck('General'); }
+        } else { createDeck('General'); }
+        setupDeckSelector();
+        loadActiveDeck();
+        setupEvents();
+      };
+
+      const save = () => localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      const showToast = (msg) => {
+        els.toast.textContent = msg;
+        els.toast.classList.add('show');
+        setTimeout(() => els.toast.classList.remove('show'), 2000);
+      };
+
+      const createDeck = (name) => {
+        const id = 'deck_' + Date.now().toString(36);
+        state.decks[id] = {
+          id, name: name || 'Untitled',
+          cards: [],
+          stats: { reviewed: 0, correct: 0 }
+        };
+        state.activeId = id;
+        state.shuffledOrder = [];
+        save();
+      };
+
+      const getActive = () => state.decks[state.activeId];
+      const getCards = () => {
+        const deck = getActive();
+        return state.shuffledOrder.length ? state.shuffledOrder.map(i => deck.cards[i]) : deck.cards;
+      };
+      const getCurrent = () => getCards()[state.index];
+
+      const updateStats = () => {
+        const cards = getCards();
+        const deck = getActive();
+        els.total.textContent = cards.length;
+        els.reviewed.textContent = deck.stats.reviewed;
+        els.accuracy.textContent = deck.stats.reviewed ? Math.round((deck.stats.correct / deck.stats.reviewed) * 100) + '%' : '0%';
+      };
+
+      const render = () => {
+        const cards = getCards();
+        els.count.textContent = cards.length ? `${state.index + 1} / ${cards.length}` : '0 / 0';
+        els.prev.disabled = state.index === 0;
+        els.next.disabled = state.index >= cards.length - 1;
+        updateStats();
+
+        if (cards.length === 0) {
+          els.f.innerHTML = '<div class="fc-empty">No cards yet. Add one above!</div>';
+          els.b.innerHTML = '<div class="fc-empty">Answer will appear here</div>';
+          els.card.classList.remove('flipped');
+          els.rating.classList.remove('show');
+          return;
+        }
+
+        const c = cards[state.index];
+        els.f.textContent = c.front;
+        els.b.textContent = c.back;
+        if (state.flipped) {
+          els.card.classList.add('flipped');
+          els.rating.classList.add('show');
+        } else {
+          els.card.classList.remove('flipped');
+          els.rating.classList.remove('show');
+        }
+      };
+
+      const flip = () => { state.flipped = !state.flipped; render(); };
+      const next = () => { if (state.index < getCards().length - 1) { state.index++; state.flipped = false; render(); } };
+      const prev = () => { if (state.index > 0) { state.index--; state.flipped = false; render(); } };
+
+      const addCard = () => {
+        const front = els.front.value.trim();
+        const back = els.back.value.trim();
+        if (!front || !back) return showToast('⚠️ Both sides required');
+        getActive().cards.push({ id: Date.now().toString(), front, back, rating: 0 });
+        els.front.value = ''; els.back.value = '';
+        state.shuffledOrder = [];
+        state.index = getActive().cards.length - 1;
+        save(); render(); showToast('✅ Card added');
+      };
+
+      const deleteCard = () => {
+        const deck = getActive();
+        if (deck.cards.length === 0) return;
+        if (state.shuffledOrder.length) {
+          const origIdx = state.shuffledOrder[state.index];
+          deck.cards.splice(origIdx, 1);
+          state.shuffledOrder = state.shuffledOrder.map(i => i > origIdx ? i - 1 : i).filter(i => i < deck.cards.length);
+        } else {
+          deck.cards.splice(state.index, 1);
+        }
+        if (state.index >= getCards().length) state.index = Math.max(0, state.index - 1);
+        save(); render(); showToast('🗑️ Card deleted');
+      };
+
+      const rate = (level) => {
+        const deck = getActive();
+        deck.stats.reviewed++;
+        if (level !== 'hard') deck.stats.correct++;
+        const cards = getCards();
+        if (cards[state.index]) cards[state.index].rating = level === 'easy' ? 2 : level === 'med' ? 1 : 0;
+        save(); render();
+        showToast(level === 'easy' ? '🟢 Easy! +Accuracy' : level === 'med' ? '🟡 Medium' : '🔴 Hard! Review soon');
+        setTimeout(() => { if (state.index < getCards().length - 1) next(); else render(); }, 400);
+      };
+
+      const shuffle = () => {
+        const deck = getActive();
+        if (deck.cards.length <= 1) return showToast('⚠️ Need 2+ cards to shuffle');
+        state.shuffledOrder = deck.cards.map((_, i) => i);
+        for (let i = state.shuffledOrder.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [state.shuffledOrder[i], state.shuffledOrder[j]] = [state.shuffledOrder[j], state.shuffledOrder[i]];
+        }
+        state.index = 0; state.flipped = false;
+        save(); render(); showToast('🔀 Shuffled!');
+      };
+
+      const setupDeckSelector = () => {
+        els.deckSelect.innerHTML = Object.values(state.decks).map(d => `<option value="${d.id}" ${d.id === state.activeId ? 'selected' : ''}>${d.name}</option>`).join('');
+      };
+
+      const loadActiveDeck = () => {
+        const deck = getActive();
+        if (!deck) { state.activeId = Object.keys(state.decks)[0]; loadActiveDeck(); return; }
+        setupDeckSelector();
+        state.index = 0; state.flipped = false; state.shuffledOrder = [];
+        render();
+      };
+
+      const exportData = () => {
+        const blob = new Blob([JSON.stringify(state.decks, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url; a.download = `flashcards_backup_${new Date().toISOString().slice(0,10)}.json`;
+        a.click(); URL.revokeObjectURL(url);
+        showToast('📤 Exported successfully');
+      };
+
+      const importData = (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+          try {
+            const imported = JSON.parse(ev.target.result);
+            if (typeof imported === 'object' && !Array.isArray(imported)) {
+              state.decks = imported;
+              state.activeId = Object.keys(imported)[0];
+              state.shuffledOrder = []; state.index = 0; state.flipped = false;
+              save(); setupDeckSelector(); loadActiveDeck(); showToast('📥 Imported successfully');
+            } else showToast('⚠️ Invalid file format');
+          } catch { showToast('❌ Failed to parse JSON'); }
+        };
+        reader.readAsText(file);
+      };
+
+      const setupEvents = () => {
+        els.addBtn.addEventListener('click', addCard);
+        document.getElementById('fc-deck').addEventListener('click', flip);
+        els.prev.addEventListener('click', prev);
+        els.next.addEventListener('click', next);
+        els.shuffle.addEventListener('click', shuffle);
+        els.delCard.addEventListener('click', deleteCard);
+        els.exportBtn.addEventListener('click', exportData);
+        els.importBtn.addEventListener('change', importData);
+        els.deckSelect.addEventListener('change', (e) => { state.activeId = e.target.value; loadActiveDeck(); });
+        els.newDeck.addEventListener('click', () => {
+          const name = prompt('Deck name:', `Deck ${Object.keys(state.decks).length + 1}`);
+          if (name?.trim()) { createDeck(name.trim()); loadActiveDeck(); }
+        });
+        els.delDeck.addEventListener('click', () => {
+          if (Object.keys(state.decks).length <= 1) return showToast('⚠️ Cannot delete last deck');
+          if (confirm(`Delete "${getActive().name}"?`)) {
+            delete state.decks[state.activeId];
+            state.activeId = Object.keys(state.decks)[0];
+            save(); loadActiveDeck(); showToast('🗑️ Deck deleted');
+          }
+        });
+        els.rating.querySelectorAll('.fc-rate-btn').forEach(btn => btn.addEventListener('click', (e) => rate(e.target.dataset.rate)));
+
+        document.addEventListener('keydown', (e) => {
+          if (e.target.tagName === 'INPUT') return;
+          if (['Space', 'Enter'].includes(e.code)) { e.preventDefault(); flip(); }
+          else if (e.key === 'ArrowLeft') prev();
+          else if (e.key === 'ArrowRight') next();
+          else if (e.key === 's' || e.key === 'S') shuffle();
+          else if (e.key === 'd' || e.key === 'D') deleteCard();
+          else if (['1','2','3'].includes(e.key) && state.flipped) rate(['hard','med','easy'][parseInt(e.key)-1]);
+        });
+      };
+
+      init();
+    })();
+  </script>
+</div>

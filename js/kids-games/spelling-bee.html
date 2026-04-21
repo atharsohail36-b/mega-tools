@@ -1,0 +1,296 @@
+<div class="sp-app">
+  <style>
+    .sp-app {
+      --sp-bg: #0f172a;
+      --sp-panel: #1e293b;
+      --sp-border: #334155;
+      --sp-accent: #3b82f6;
+      --sp-success: #10b981;
+      --sp-danger: #ef4444;
+      --sp-warning: #f59e0b;
+      --sp-text: #f8fafc;
+      --sp-muted: #94a3b8;
+      max-width: 460px; margin: 2rem auto; padding: 1.5rem;
+      background: var(--sp-panel); border-radius: 16px;
+      box-shadow: 0 12px 30px rgba(0,0,0,0.3); border: 1px solid var(--sp-border);
+      font-family: system-ui, -apple-system, sans-serif; color: var(--sp-text);
+      position: relative; overflow: hidden; text-align: center;
+    }
+    .sp-header { font-size: 1.4rem; font-weight: 800; margin: 0 0 1rem; background: linear-gradient(90deg, var(--sp-accent), #8b5cf6); -webkit-background-clip: text; background-clip: text; color: transparent; }
+    
+    .sp-controls { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; gap: 0.5rem; }
+    .sp-select { padding: 0.5rem 0.8rem; border-radius: 8px; background: #334155; color: #fff; border: 1px solid var(--sp-border); cursor: pointer; font-size: 0.85rem; outline: none; }
+    .sp-select:focus { border-color: var(--sp-accent); }
+    .sp-btn-sm { background: none; border: none; color: #fff; font-size: 1.2rem; cursor: pointer; padding: 0.2rem; transition: 0.2s; }
+    .sp-btn-sm:hover { transform: scale(1.1); }
+    
+    .sp-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.5rem; margin-bottom: 1rem; }
+    .sp-stat { background: rgba(255,255,255,0.05); padding: 0.5rem; border-radius: 10px; border: 1px solid var(--sp-border); }
+    .sp-stat span { display: block; font-size: 0.7rem; color: var(--sp-muted); text-transform: uppercase; }
+    .sp-stat b { font-size: 1rem; display: block; margin-top: 2px; }
+    
+    .sp-progress { height: 6px; background: rgba(255,255,255,0.1); border-radius: 10px; overflow: hidden; margin-bottom: 1.2rem; }
+    .sp-bar { height: 100%; width: 0%; background: linear-gradient(90deg, var(--sp-accent), var(--sp-success)); transition: width 0.4s cubic-bezier(0.4,0,0.2,1); }
+    
+    .sp-emoji { font-size: 4rem; margin: 0.5rem 0 1rem; animation: float 3s ease-in-out infinite; }
+    @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-6px)} }
+    
+    .sp-input-wrap { position: relative; margin-bottom: 1rem; }
+    .sp-input { width: 100%; padding: 1rem; font-size: 1.4rem; text-align: center; border: 2px solid var(--sp-border); background: #111827; color: var(--sp-text); border-radius: 12px; outline: none; transition: 0.2s; letter-spacing: 2px; }
+    .sp-input:focus { border-color: var(--sp-accent); box-shadow: 0 0 0 3px rgba(59,130,246,0.2); }
+    
+    .sp-hint-text { font-size: 1.1rem; min-height: 1.8rem; margin-bottom: 0.8rem; color: var(--sp-warning); font-weight: 600; letter-spacing: 3px; opacity: 0; transition: opacity 0.3s; }
+    .sp-hint-text.show { opacity: 1; }
+    
+    .sp-actions { display: flex; gap: 0.8rem; justify-content: center; margin-bottom: 0.5rem; }
+    .sp-btn { padding: 0.8rem 1.5rem; background: linear-gradient(135deg, var(--sp-accent), #8b5cf6); border: none; border-radius: 10px; color: #fff; font-weight: 700; cursor: pointer; box-shadow: 0 4px 12px rgba(59,130,246,0.4); transition: 0.2s; font-size: 1rem; }
+    .sp-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 15px rgba(59,130,246,0.5); }
+    .sp-btn:active { transform: translateY(0); }
+    .sp-btn.secondary { background: #334155; color: #fff; box-shadow: none; }
+    .sp-btn.secondary:hover { background: #475569; }
+    .sp-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+    
+    .sp-overlay { position: absolute; inset: 0; background: rgba(15,23,42,0.94); backdrop-filter: blur(8px); display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 2rem; opacity: 0; pointer-events: none; transition: opacity 0.3s; z-index: 10; border-radius: 16px; }
+    .sp-overlay.active { opacity: 1; pointer-events: auto; }
+    .sp-overlay h2 { font-size: 1.8rem; margin: 0 0 0.5rem; }
+    .sp-overlay p { color: var(--sp-muted); margin: 0 0 1.5rem; line-height: 1.5; max-width: 280px; }
+    
+    .sp-confetti-box { position: absolute; inset: 0; pointer-events: none; overflow: hidden; z-index: 9; }
+    .sp-confetti { position: absolute; width: 8px; height: 8px; border-radius: 2px; animation: spFall linear forwards; }
+    @keyframes spFall { to { transform: translateY(500px) rotate(720deg); opacity: 0; } }
+  </style>
+
+  <div class="sp-header">🐝 Spelling Bee Pro</div>
+  
+  <div class="sp-controls">
+    <select class="sp-select" id="sp-diff">
+      <option value="easy">🟢 Easy (3-4 letters)</option>
+      <option value="medium" selected>🟡 Medium (5-6 letters)</option>
+      <option value="hard">🔴 Hard (7+ letters)</option>
+    </select>
+    <button class="sp-btn-sm" id="sp-sound" title="Toggle Sounds">🔊</button>
+  </div>
+
+  <div class="sp-stats">
+    <div class="sp-stat"><span>Word</span><b id="sp-idx">1/10</b></div>
+    <div class="sp-stat"><span>Score</span><b id="sp-sc">0</b></div>
+    <div class="sp-stat"><span>Streak</span><b id="sp-str">0 🔥</b></div>
+    <div class="sp-stat"><span>Acc</span><b id="sp-acc">100%</b></div>
+  </div>
+
+  <div class="sp-progress"><div class="sp-bar" id="sp-bar"></div></div>
+
+  <div class="sp-emoji" id="sp-emoji">🍎</div>
+  <div class="sp-hint-text" id="sp-hint"></div>
+  
+  <div class="sp-input-wrap">
+    <input class="sp-input" id="sp-input" type="text" placeholder="Type your answer..." autocomplete="off" autocapitalize="off" spellcheck="false">
+  </div>
+
+  <div class="sp-actions">
+    <button class="sp-btn secondary" id="sp-listen" title="Hear Pronunciation">🎙️ Listen</button>
+    <button class="sp-btn secondary" id="sp-hint-btn" title="Use Hint (-3 pts)">💡 Hint</button>
+    <button class="sp-btn" id="sp-check">Check ➜</button>
+  </div>
+
+  <div class="sp-confetti-box" id="sp-confetti"></div>
+
+  <div class="sp-overlay active" id="sp-start">
+    <h2>🌟 Ready to Spell?</h2>
+    <p>Look at the hint emoji, type the correct word. Use hints wisely & build your streak for bonus points!</p>
+    <button class="sp-btn" id="sp-play-btn">▶ Start Game</button>
+  </div>
+
+  <div class="sp-overlay" id="sp-complete">
+    <h2>🏆 Bee Master!</h2>
+    <p>Final Score: <b id="w-sc">0</b> | Accuracy: <b id="w-acc">0%</b><br>Best: <b id="w-best">0</b></p>
+    <button class="sp-btn" id="sp-replay-btn">Play Again</button>
+  </div>
+
+  <script>
+    (function() {
+      'use strict';
+      const WORDS = {
+        easy:   ['cat','dog','sun','hat','cup','bed','pen','map','box','key','fan','log','rat','web','zip'],
+        medium: ['apple','train','chair','green','cloud','bread','fruit','light','music','paper','plant','river','shoes','smile','watch'],
+        hard:   ['elephant','butterfly','chocolate','dinosaur','adventure','calendar','fireworks','gorgeous','kitchen','lemonade','mountain','orange','rainbow','together','vacation']
+      };
+
+      const state = {
+        diff: 'medium', words: [], idx: 0, score: 0, streak: 0, total: 0, correct: 0,
+        hints: 3, playing: false, sound: true, audioCtx: null, highScore: 0,
+        currentWord: '', hintReveal: '', speechSupported: 'speechSynthesis' in window
+      };
+
+      const $ = id => document.getElementById(id);
+      const el = {
+        diff: $('sp-diff'), sound: $('sp-sound'), idx: $('sp-idx'), sc: $('sp-sc'), 
+        str: $('sp-str'), acc: $('sp-acc'), bar: $('sp-bar'), emoji: $('sp-emoji'),
+        hint: $('sp-hint'), input: $('sp-input'), listen: $('sp-listen'), hintBtn: $('sp-hint-btn'),
+        check: $('sp-check'), confetti: $('sp-confetti'),
+        start: $('sp-start'), complete: $('sp-complete'),
+        wSc: $('w-sc'), wAcc: $('w-acc'), wBest: $('w-best'),
+        playBtn: $('sp-play-btn'), replayBtn: $('sp-replay-btn')
+      };
+
+      // Audio
+      const initAudio = () => {
+        if(!state.audioCtx) state.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if(state.audioCtx.state==='suspended') state.audioCtx.resume();
+      };
+      const beep = (f,t,d,del=0) => {
+        if(!state.audioCtx || !state.sound) return;
+        const o = state.audioCtx.createOscillator(), g = state.audioCtx.createGain();
+        o.type=t; o.frequency.value=f;
+        g.gain.setValueAtTime(0.07, state.audioCtx.currentTime+del);
+        g.gain.exponentialRampToValueAtTime(0.01, state.audioCtx.currentTime+del+d);
+        o.connect(g).connect(state.audioCtx.destination);
+        o.start(state.audioCtx.currentTime+del); o.stop(state.audioCtx.currentTime+del+d);
+      };
+      const sfx = t => {
+        if(t==='ok') { beep(600,'sine',0.08); beep(900,'sine',0.08,0.05); }
+        if(t==='no') beep(180,'sawtooth',0.15);
+        if(t==='hint') beep(400,'triangle',0.06);
+        if(t==='win') [400,500,600,800,1000].forEach((f,i)=>beep(f,'sine',0.1,i*0.06));
+      };
+
+      // Storage
+      const loadBest = () => {
+        try { const d = JSON.parse(localStorage.getItem('sp_hs')||'{}'); state.highScore = d[state.diff] || 0; } catch { state.highScore = 0; }
+      };
+      const saveBest = () => {
+        try {
+          const d = JSON.parse(localStorage.getItem('sp_hs')||'{}');
+          d[state.diff] = Math.max(state.score, d[state.diff]||0);
+          localStorage.setItem('sp_hs', JSON.stringify(d));
+        } catch {}
+      };
+
+      // UI
+      const fmtStat = (val) => val.toString();
+      const ui = () => {
+        el.idx.textContent = `${state.idx+1}/10`;
+        el.sc.textContent = state.score;
+        el.str.textContent = `${state.streak} 🔥`;
+        el.acc.textContent = state.total ? `${Math.round((state.correct/state.total)*100)}%` : '100%';
+        el.bar.style.width = `${((state.idx)/10)*100}%`;
+        el.hintBtn.disabled = state.hints <= 0;
+      };
+      const confetti = () => {
+        el.confetti.innerHTML = '';
+        const cols = ['#f43f5e','#10b981','#3b82f6','#f59e0b','#8b5cf6','#ffffff'];
+        for(let i=0;i<25;i++){
+          const c = document.createElement('div'); c.className='sp-confetti';
+          c.style.left = Math.random()*100+'%'; c.style.top='-10px';
+          c.style.background = cols[Math.floor(Math.random()*cols.length)];
+          c.style.animationDuration = (1+Math.random())+'s';
+          el.confetti.appendChild(c);
+          setTimeout(()=>c.remove(), 2000);
+        }
+      };
+
+      // Game Logic
+      const speak = () => {
+        if(!state.speechSupported || !state.currentWord) return;
+        window.speechSynthesis.cancel();
+        const u = new SpeechSynthesisUtterance(state.currentWord);
+        u.lang = 'en-US'; u.rate = 0.85; u.pitch = 1;
+        window.speechSynthesis.speak(u);
+      };
+
+      const useHint = () => {
+        if(state.hints <= 0 || !state.playing) return;
+        state.hints--;
+        sfx('hint');
+        const word = state.currentWord;
+        let reveal = '';
+        if(state.hintReveal.length < word.length - 1) {
+          state.hintReveal += '_';
+          const positions = word.split('').map((c,i)=>({c,i})).filter(x=>x.c!==' ');
+          const nextPos = state.hintReveal.length <= positions.length ? state.hintReveal.length : Math.floor(Math.random()*positions.length);
+          const idx = positions[nextPos].i;
+          state.hintReveal = word.split('').map((c,i)=> i===idx ? c : state.hintReveal[i]||'_').join('');
+          el.hint.textContent = state.hintReveal;
+          el.hint.classList.add('show');
+        }
+        ui();
+      };
+
+      const loadWord = () => {
+        state.currentWord = state.words[state.idx];
+        el.emoji.textContent = WORDS.EMOJIS[state.diff]?.[state.words.indexOf(state.currentWord)] || '📝';
+        state.hintReveal = '';
+        el.hint.textContent = ''; el.hint.classList.remove('show');
+        el.input.value = ''; el.input.focus();
+        ui();
+      };
+
+      const checkAnswer = () => {
+        if(!state.playing) return;
+        const val = el.input.value.trim().toLowerCase();
+        if(!val) return;
+        
+        state.total++;
+        if(val === state.currentWord) {
+          sfx('ok'); state.correct++; state.streak++;
+          state.score += 10 + Math.floor(state.streak/2)*3;
+          el.input.style.borderColor = 'var(--sp-success)';
+          confetti();
+        } else {
+          sfx('no'); state.streak = 0;
+          el.input.style.borderColor = 'var(--sp-danger)';
+          el.hint.textContent = `Answer: ${state.currentWord}`;
+          el.hint.classList.add('show');
+        }
+        ui();
+        setTimeout(nextWord, 1200);
+      };
+
+      const nextWord = () => {
+        el.input.style.borderColor = '';
+        state.idx++;
+        if(state.idx >= 10) return finishGame();
+        loadWord();
+      };
+
+      const finishGame = () => {
+        state.playing = false;
+        sfx('win'); confetti(); saveBest(); loadBest(); ui();
+        el.wSc.textContent = state.score;
+        el.wAcc.textContent = el.acc.textContent;
+        el.wBest.textContent = state.highScore;
+        el.complete.classList.add('active');
+      };
+
+      const startGame = () => {
+        initAudio();
+        state.diff = el.diff.value;
+        state.words = [...WORDS[state.diff]].sort(()=>Math.random()-0.5).slice(0,10);
+        Object.assign(state, {idx:0, score:0, streak:0, correct:0, total:0, hints:3, playing:true});
+        loadBest(); ui();
+        el.start.classList.remove('active');
+        el.complete.classList.remove('active');
+        loadWord();
+      };
+
+      // Events
+      el.check.addEventListener('click', checkAnswer);
+      el.input.addEventListener('keydown', e => { if(e.key==='Enter') checkAnswer(); });
+      el.listen.addEventListener('click', speak);
+      el.hintBtn.addEventListener('click', useHint);
+      el.playBtn.addEventListener('click', startGame);
+      el.replayBtn.addEventListener('click', startGame);
+      el.sound.addEventListener('click', function(){ state.sound=!state.sound; this.textContent=state.sound?'🔊':'🔇'; });
+      el.diff.addEventListener('change', startGame);
+
+      // Init
+      // Map emojis to words for display (simple lookup)
+      WORDS.EMOJIS = {
+        easy: ['🐱','🐶','☀️','🧢','🍶','🛏️','🖊️','🗺️','📦','🔑','🌀','🪵','🐭','🌐','🤫'],
+        medium: ['🍎','🚂','🪑','🟢','☁️','🍞','🍇','💡','🎵','📄','🌱','🌊','👟','😊','⌚'],
+        hard: ['🐘','🦋','🍫','🦖','🧭','📅','🎇','✨','🍳','🍹','🏔️','🍊','🌈','🤝','✈️']
+      };
+      loadBest(); ui();
+    })();
+  </script>
+</div>
